@@ -55,6 +55,7 @@ export default function Login() {
         <View style={styles.inputView}>
             <Icon name='account-circle' size={22} color={'1B233A'} />
             <TextInput style={styles.input} 
+                autoCapitalize={'none'}
                 placeholder={"Username"}
                 placeholderTextColor={"#1B233A"}
                 returnKeyType={"next"}
@@ -76,7 +77,7 @@ export default function Login() {
                 ref={pw_ref} />
             {
                 <Icon 
-                    name= { hidePW ? 'eye' : 'eye-off' }
+                    name= { hidePW ? 'eye-off' : 'eye' }
                     size={22} color={'#a3a096'}
                     onPress={ () => sethidePW(!hidePW) }
                 />
@@ -176,6 +177,7 @@ const styles = StyleSheet.create({
         paddingVertical: 14,
         backgroundColor: '#FF803C',
         borderRadius: 15,
+        elevation: 2
     },
     btnTxt: {
         fontFamily: 'LexendDeca_SemiBold',

@@ -34,7 +34,7 @@ const ModalPicker = (props) => {
         onPress={() => props.changeModalVisibility(false)}
         style={styles.container}
     >
-        <View style={[styles.modal, {width: WIDTH - 20, height: HEIGHT/4}]}>
+        <View style={[styles.modal, {width: WIDTH - 80, maxHeight: HEIGHT/4 }]}>
             <ScrollView>
                 {option}
             </ScrollView>
@@ -48,13 +48,17 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: 'rgba(235, 235, 235, 0.7)',
     },
     modal: {
         backgroundColor: ThemeDefaults.themeWhite,
         borderRadius: 10,
+        elevation: 5,
     },
     option: {
         alignItems: 'flex-start',
+        borderBottomWidth: 1,
+        borderBottomColor: 'lightgray'
     },
     text: {
         margin: 20,
