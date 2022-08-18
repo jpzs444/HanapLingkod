@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import { useFonts } from 'expo-font';
 import { SafeAreaView, View, Text, Image, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
-import { Appbar, Avatar } from 'react-native-paper';
+import Appbar from '../Components/Appbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function RegisterUserAccountType() {
@@ -22,10 +22,8 @@ export default function RegisterUserAccountType() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header style={{height: 30, backgroundColor: 'transparent', alignItems: 'center', alignSelf: 'flex-start'}}>
-        <Appbar.BackAction onPress={() => {}} />
-        <Appbar.Content title={<Image source={require('../assets/logo/logo_icon.png')} style={{width: 60, height: 60}} />} />
-      </Appbar.Header>
+      {/* Appbar */}
+      <Appbar backBtn={true} hasPicture={false} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -85,7 +83,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginTop: 100,
+    marginTop: 70,
     marginBottom: 50,
   },
   headerTitle: {
@@ -127,7 +125,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#FBF9F7',
     padding: 10,
-    marginBottom: 20,
+    marginBottom: 26,
     // borderWidth: 1,
     elevation: 4,
     borderRadius: 15,
