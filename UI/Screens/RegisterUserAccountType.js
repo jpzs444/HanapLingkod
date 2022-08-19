@@ -3,8 +3,12 @@ import { useFonts } from 'expo-font';
 import { SafeAreaView, View, Text, Image, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import Appbar from '../Components/Appbar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function RegisterUserAccountType() {
+
+  const navigation = useNavigation();
 
   const [accType, setAccType] = useState("");
 
@@ -66,8 +70,12 @@ export default function RegisterUserAccountType() {
         <TouchableOpacity
           disabled={accType ? false : true} 
           style={styles.nextBtn}
-          onPress={()=> { console.log(accType) }}
-          >
+          onPress={()=> { 
+            console.log(accType) 
+            if(accType === "recruiter") navigation.navigate("RegisterRecruiter")
+            // else if(accType === "worker") navigation.navigate("")
+          }}
+        >
           <Text style={styles.nextText}>Next</Text>
           <Icon name="arrow-right-thin" size={30} color='white' />
         </TouchableOpacity>

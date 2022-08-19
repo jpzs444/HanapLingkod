@@ -10,7 +10,7 @@ import { SafeAreaView,
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function Login() {
+export default function Login({navigation}) {
 
     const pw_ref = useRef();
 
@@ -93,7 +93,9 @@ export default function Login() {
 
         {/* Sign in button */}
       <View style={styles.sign_in}>
-        <TouchableOpacity style={styles.btn}>
+        <TouchableOpacity style={styles.btn}
+          onPress={() => navigation.navigate("Home")}
+        >
             <Text style={styles.btnTxt}>Sign in</Text>
         </TouchableOpacity>
       </View>
@@ -101,7 +103,9 @@ export default function Login() {
         {/* Create Account */}
       <View style={styles.createAccountView}>
         <Text style={styles.text}>Don't have an account?</Text>
-        <TouchableOpacity style={styles.registerBtn}>
+        <TouchableOpacity style={styles.registerBtn}
+          onPress={() => navigation.navigate('AccountTypeSelect')}
+        >
             <Text style={styles.registerTxt}>Register</Text>
         </TouchableOpacity>
       </View>

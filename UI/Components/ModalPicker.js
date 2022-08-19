@@ -5,18 +5,40 @@ import {
 import ThemeDefaults from './ThemeDefaults';
 import TText from './TText';
 
-const OPTIONS = ['Male', 'Female']
+const SEX = ['Male', 'Female']
+const BARANGAY =[
+    'Alawihao', 'Awitan', 'Bagasbas', 'Barangay I (Hilahod)',
+    'Barangay II (Pasig)', 'Barangay III (Iraya)', 'Barangay IV (Mantagbac)',
+    'Barangay V (Pandan)', 'Barangay VI (Centro)', 'Barangay VII (Diego Liñan)',
+    'Barangay VIII (Salcedo)', 'Bibirao', 'Borabod', 'Calasgasan', 'Camambugan',
+    'Cobangbang', 'Dagongan', 'Gahonon', 'Gubat', 'Lag-on', 'Magang', 'Mambalite', 
+    'Mancruz', 'Pamorangon', 'San Isidro'
+]
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
 const ModalPicker = (props) => {
 
-    const onPressItem = (option) => {
+    const onPressItem = (selected) => {
         props.changeModalVisibility(false)
-        props.setData(option)
+        props.setData(selected)
     }
 
-    const option = OPTIONS.map((item, index) => {
+    const option = SEX.map((item, index) => {
+        return(
+            <TouchableOpacity
+                style={styles.option}
+                key={index}
+                onPress={() => onPressItem(item)}
+            >
+                <TText style={styles.text}>
+                    {item}
+                </TText>
+            </TouchableOpacity>
+        )
+    })
+
+    const optionBarangay = BARANGAY.map((item, index) => {
         return(
             <TouchableOpacity
                 style={styles.option}
@@ -34,9 +56,9 @@ const ModalPicker = (props) => {
         onPress={() => props.changeModalVisibility(false)}
         style={styles.container}
     >
-        <View style={[styles.modal, {width: WIDTH - 80, maxHeight: HEIGHT/4 }]}>
+        <View style={[styles.modal, {width: WIDTH - 80, maxHeight:  props.barangay ? HEIGHT/1.5: HEIGHT/4 }]}>
             <ScrollView>
-                {option}
+                {props.barangay ? optionBarangay : option}
             </ScrollView>
         </View>
     </TouchableOpacity>
