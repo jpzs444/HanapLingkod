@@ -65,6 +65,7 @@ function ifWorkerExist(req, res, next) {
 
 //Login
 app.post("/login", async (req, res) => {
+  console.log(req.body);
   try {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -76,7 +77,6 @@ app.post("/login", async (req, res) => {
     let user;
     if (ifWorkerExist) {
       user = await Worker.findOne({ username: username });
-      console.log("qq");
     } else {
       user = await Recuiter.findOne({ username: username });
     }
@@ -121,6 +121,7 @@ app.post(
         profilePic: "pic",
         GovId: req.files.govId[0].filename,
         licenseCertificate: req.files.certificate[0].filename,
+        role: "worker",
         verification: false,
         accountStatus: "active",
       });
@@ -146,6 +147,7 @@ app.post(
   async (req, res) => {
     try {
       const salt = await bcrypt.genSalt(10);
+      console.log(req.body.password);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
       const recuiter = new Recuiter({
