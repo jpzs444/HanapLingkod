@@ -36,29 +36,36 @@ const multipleFile = upload.fields([
 ]);
 
 //middleware check if username already exist
-function ifUserExist(req, res, next) {
+function ifRecruiterExist(req, res, next) {
   Recuiter.findOne({ username: req.query.username })
     .select("username")
     .lean()
+    // .count()
     .then((result) => {
       if (result) {
-        res.status(408).json({ error: "timeout 408" });
+        res.status(408).json({ error: "timeou11t 408" });
+      } else {
+        next();
       }
     });
+}
+function ifWorkerExist(req, res, next) {
   Worker.findOne({ username: req.query.username })
     .select("username")
     .lean()
+    // .count()
     .then((result) => {
       if (result) {
-        res.status(408).json({ error: "timeout 408" });
+        res.status(408).json({ error: "timeou11t 408" });
+      } else {
+        next();
       }
     });
-  next();
-  return;
 }
 
 //Login
 app.post("/login", async (req, res) => {
+  console.log(req.body);
   try {
     const { username, password } = req.body;
     if (!username || !password) {
@@ -70,7 +77,6 @@ app.post("/login", async (req, res) => {
     let user;
     if (ifWorkerExist) {
       user = await Worker.findOne({ username: username });
-      console.log("qq");
     } else {
       user = await Recuiter.findOne({ username: username });
     }
@@ -87,82 +93,96 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post("/signup/worker", multipleFile, async (req, res) => {
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    const worker = new Worker({
-      username: "String",
-      password: "String",
-      firstname: "String",
-      lastname: "String",
-      middlename: "String",
-      birthday: 12 / 12 / 2002,
-      age: 12,
-      sex: "String",
-      street: "String",
-      purok: "String",
-      barangay: "String",
-      city: "String",
-      province: "String",
-      phoneNumber: "String",
-      emailAddress: "String",
-      profilePic: "String",
-      GovId: "string",
-      verification: false,
-      accountStatus: "active",
-    });
-    worker.save((err) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.send("Worker account created");
-      }
-    });
-  } catch {
-    res.status(500).send();
+app.post(
+  "/signup/worker",
+  ifRecruiterExist,
+  ifWorkerExist,
+  multipleFile,
+  async (req, res) => {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      const worker = new Worker({
+        username: req.body.username,
+        password: hashedPassword,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        middlename: req.body.middlename,
+        birthday: req.body.birthday,
+        age: req.body.age,
+        sex: req.body.sex,
+        street: req.body.street,
+        purok: req.body.purok,
+        barangay: req.body.barangay,
+        city: req.body.city,
+        province: req.body.province,
+        phoneNumber: req.body.phoneNumber,
+        emailAddress: req.body.emailAddress,
+        profilePic: "pic",
+        GovId: req.files.govId[0].filename,
+        licenseCertificate: req.files.certificate[0].filename,
+        role: "worker",
+        verification: false,
+        accountStatus: "active",
+      });
+      worker.save((err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          res.send("Worker account created");
+        }
+      });
+    } catch {
+      res.status(500).send();
+    }
   }
-});
+);
 
 //signup worker
 app.post(
   "/signup/recruiter",
-  ifUserExist,
+  ifRecruiterExist,
+  ifWorkerExist,
   upload.single("govId"),
   async (req, res) => {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    try {
+      const salt = await bcrypt.genSalt(10);
+      console.log(req.body.password);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-    const recuiter = new Recuiter({
-      username: req.body.username,
-      password: hashedPassword,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      middlename: req.body.middlename,
-      birthday: req.body.birthday,
-      age: req.body.age,
-      sex: req.body.sex,
-      street: req.body.street,
-      purok: req.body.purok,
-      barangay: req.body.barangay,
-      city: req.body.city,
-      province: req.body.province,
-      phoneNumber: req.body.phoneNumber,
-      emailAddress: req.body.emailAddress,
-      profilePic: "",
-      GovId: req.body.path,
-      verification: false,
-      accountStatus: "active",
-      role: "recuiter",
-    });
-    recuiter.save((err) => {
-      if (err) {
-        res.json({ message: err.message, type: "danger" });
-      } else {
-        console.log();
-        res.send("Recuiter account created");
-      }
-    });
+      const recuiter = new Recuiter({
+        username: req.body.username,
+        password: hashedPassword,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        middlename: req.body.middlename,
+        birthday: req.body.birthday,
+        age: req.body.age,
+        sex: req.body.sex,
+        street: req.body.street,
+        purok: req.body.purok,
+        barangay: req.body.barangay,
+        city: req.body.city,
+        province: req.body.province,
+        phoneNumber: req.body.phoneNumber,
+        emailAddress: req.body.emailAddress,
+        profilePic: "",
+        GovId: req.body.path,
+        verification: false,
+        accountStatus: "active",
+        role: "recuiter",
+      });
+      recuiter.save((err) => {
+        if (err) {
+          res.json({ message: err.message, type: "danger" });
+        } else {
+          console.log();
+          res.send("Recuiter account created");
+        }
+      });
+    } catch {
+      res.status(500).send();
+    }
   }
 );
 
