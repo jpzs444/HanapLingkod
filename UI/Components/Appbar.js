@@ -2,23 +2,27 @@ import React from 'react'
 import {
     StatusBar, StyleSheet, View, Image, TouchableOpacity
 } from 'react-native'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Appbar(props) {
+
+    const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
         {/* left */}
         {
             props.backBtn ? 
                 <TouchableOpacity 
-                    onPress={() => console.log("back")}
+                    onPress={() => navigation.goBack()}
                     style={styles.left}
                 >
                     <Icon name="arrow-left" size={30} />
                 </TouchableOpacity> 
                 :
                 <TouchableOpacity 
-                    onPress={() => console.log("home")}
+                    onPress={() => navigation.popToTop()}
                     style={styles.left}
                 >
                     <Icon name="menu" size={30} />

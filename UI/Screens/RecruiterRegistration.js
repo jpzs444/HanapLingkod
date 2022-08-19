@@ -2,63 +2,45 @@ import React, {useRef, useState, useEffect} from 'react';
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, 
-  Image, Button, StyleSheet, StatusBar, ScrollView, Modal, Platform } from 'react-native';
+  Image, Button, StyleSheet, StatusBar, ScrollView, Modal, Platform, Dimensions } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-import DateTimePicker from '@react-native-community/datetimepicker';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
-import DropDownPicker from 'react-native-dropdown-picker';
-import ModalDropdown from 'react-native-modal-dropdown';
 import { ModalPicker } from '../Components/ModalPicker';
 
-import ImagePickerButton from '../Components/ImagePickerButton';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 
 import dayjs from 'dayjs';
-import TText from '../Components/TText';
-import ThemeDefaults from '../Components/ThemeDefaults';
 import Appbar from '../Components/Appbar';
+import TText from '../Components/TText';
+import ConfirmDialog from '../Components/ConfirmDialog';
+
+import ThemeDefaults from '../Components/ThemeDefaults';
+import ModalDialog from '../Components/ModalDialog';
+
+const WIDTH = Dimensions.get('window').width
+const HEIGHT = Dimensions.get('window').height
 
 export default function RecruiterRegistration() {
 
+    const navigation = useNavigation();
+
      const [user, setUser] = useState({
-      username: "",
-      password: "",
-      firstname: "",
-      middlename: "",
-      lastname: "",
-      birthday: "",
-      age: "",
-      gender: "",
-      street: "",
-      purok: "",
-      barangay: "",
-      city: "",
-      province: "",
-      phonenumber: "",
-      image: ''
+      username: "", password: "", firstname: "", middlename: "",
+      lastname: "", birthday: "", age: "", gender: "", street: "",
+      purok: "", barangay: "", city: "", province: "", phonenumber: "", image: ''
     })
 
-    const [idImage, setIdImage] = useState(null)
-    
-    const [ddopen, setDDOpen] = useState(false);
-    const [value, setValue] = useState(null);
-    const [items, setItems] = useState([
-      {label: 'Male', value: 'M'},
-      {label: 'Female', value: 'F'}
-    ]);
-
+    const [isConfirm, setisConfirm] = useState(false)
     const [chooseData, setchooseData] = useState("")
+    const [chooseBarangay, setchooseBarangay] = useState("")
+
     const [isModalVisible, setModalVisible] = useState(false)
-
-    const setData = (option) => {
-      setchooseData(option)
-    }
-
-    const changeModalVisibility = (bool) => {
-      setModalVisible(bool)
-    }
+    
+    const [showDialog, setShowDialog] = useState(false)
+    const [isConfirmed, setisConfirmed] = useState(false)
 
     const [next, setNext] = useState(false)
     const [formatedDate, setFormatedDate] = useState(new Date())
@@ -66,10 +48,30 @@ export default function RecruiterRegistration() {
     const [dateSelected, setSelected] = useState(false)
 
     const [datePickerVisible, setDatePickerVisibility] = useState(false);
-    const [timePickerVisible, setTimePickerVisibility] = useState(false);
+
+    const setData = (option) => {
+      setchooseData(option)
+    }
+
+    const setBarangay = (option) => {
+      setchooseBarangay(option)
+    }
+
+    const didConfirm = (isConfirmed) => {
+      setisConfirmed(true)
+      console.log("didConfirm")
+    }
+   
+
+    const changeModalVisibility = (bool) => {
+      setModalVisible(bool)
+    }
+
+    const changeModalDialogVisibility = (bool) => {
+      setShowDialog(bool)
+    }
 
     const handleConfirm = (date) => {
-      // console.warn("A date has been picked: ", date);
       setFormatedDate(dayjs(date).format("YYYY-MM-DD"));
       setDisplayDate(dayjs(date).format("MMM D, YYYY"));
       setDatePickerVisibility(false);
@@ -143,130 +145,204 @@ export default function RecruiterRegistration() {
               {/* <TText style={styles.headerDesc}>The details will be needed for verification.</TText> */}
           </View>
 
+          {isConfirm ?
+              <View style={styles.confirmModal}>
+                <View style={styles.confirmBox}>
+                  <TText style={styles.confirmModalText}>By clicking confirm, your account will be registered and no further changes can be made upon registration.</TText>
+                  <View style={styles.confirmModalBtnContainer}>
+                    <TouchableOpacity 
+                      style={[styles.confirmModalBtn, styles.confirmModalCancel]}
+                      onPress={()=> setisConfirm(false)}
+                    >
+                      <TText style={styles.confirmModalBtnText}>Cancel</TText>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                      style={[styles.confirmModalBtn, styles.confirmModalConfirm]}
+                      onPress={()=> setisConfirm(false)}
+                    >
+                      <TText style={[styles.confirmModalBtnText, {color: ThemeDefaults.themeOrange}]}>Confirm</TText>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+              : null
+            }
+
           {next ? 
           <View>
-          <View style={styles.inputGrp}>
-            <View style={[styles.inputContainer]}>
-              <Icon name='road' size={23} color={"#D0CCCB"} />
-              <TextInput style={styles.input} 
-                placeholder={"Street"}
-                placeholderTextColor={"#A1A1A1"}
-                returnKeyType={"next"}
-                textContentType={'street'}
-                onChangeText={ (val) => setUser((prev) => ({...prev, street: val})) }
-                onSubmitEditing={ () => ref_pw.current.focus() } />
-            </View>
-
-            <View style={styles.inputInRow}>  
-              <View style={[styles.inputContainer, {width: '48%'}]}>
-                <Icon name='home-city' size={23} color={"#D0CCCB"} />
+            <View style={styles.inputGrp}>
+              <View style={[styles.inputContainer]}>
+                <Icon name='road' size={23} color={"#D0CCCB"} />
                 <TextInput style={styles.input} 
-                  placeholder={"Purok"}
+                  placeholder={"Street"}
                   placeholderTextColor={"#A1A1A1"}
                   returnKeyType={"next"}
-                  textContentType={'purok'}
-                  onChangeText={ (val) => setUser((prev) => ({...prev, purok: val})) }
-                  onSubmitEditing={ () => ref_cpw.current.focus() }
-                  ref={ref_pw} />
+                  textContentType={'street'}
+                  onChangeText={ (val) => setUser((prev) => ({...prev, street: val})) }
+                  onSubmitEditing={ () => ref_pw.current.focus() } />
               </View>
+
+              <View style={styles.inputInRow}>  
+                <View style={[styles.inputContainer, {width: '48%'}]}>
+                  <Icon name='home-city' size={23} color={"#D0CCCB"} />
+                  <TextInput style={styles.input} 
+                    placeholder={"Purok"}
+                    placeholderTextColor={"#A1A1A1"}
+                    returnKeyType={"next"}
+                    textContentType={'purok'}
+                    onChangeText={ (val) => setUser((prev) => ({...prev, purok: val})) }
+                    onSubmitEditing={ () => ref_cpw.current.focus() }
+                    ref={ref_pw} />
+                </View>
+              
+                <View style={[styles.inputContainer, {width: '48%'}]}>
+                  <Icon name='domain' size={23}color={"#D0CCCB"} />
+                  {/* <TextInput style={styles.input} 
+                    placeholder={"Barangay"}
+                    placeholderTextColor={"#A1A1A1"}
+                    returnKeyType={"next"}
+                    textContentType={'confirmpw'}
+                    // onChangeText={ (val) => setUser((prev) => ({...prev, username: val})) }
+                    onSubmitEditing={ () => ref_fn.current.focus() }
+                    ref={ref_cpw} /> */}
+                    <TouchableOpacity 
+                      onPress={() => changeModalVisibility(true)}
+                      style={{
+                        width: '85%', 
+                        flexDirection: 'row', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        paddingTop: 8,
+                        paddingBottom: 5,
+                      }}>
+                      <TouchableOpacity 
+                        styles={styles.dropdownBtn}
+                      >
+                      {
+                        chooseBarangay ?
+                        <TText style={styles.ddText} >{chooseBarangay}</TText>
+                        : <TText style={[styles.ddText, {color:"#A1A1A1"}]}>Barangay</TText>
+                      }
+                      </TouchableOpacity>
+                      <Modal
+                        transparent={true}
+                        animationType='fade'
+                        visible={isModalVisible}
+                        onRequestClose={() => changeModalVisibility(false)}
+                      >
+                        <ModalPicker 
+                          changeModalVisibility={changeModalVisibility}
+                          setData={setBarangay}
+                          barangay={true}
+                        />
+                      </Modal>
+                      <Icon name="arrow-down-drop-circle" size={20} color={"#D0CCCB"} style={{paddingRight: 6}} />
+                    </TouchableOpacity>
+                </View>
+              </View>
+
+
+              <View style={styles.inputInRow}>
+                <View style={[styles.inputContainer, {width: '48%'}]}>
+                  <Icon name='city' size={23} color={"#D0CCCB"} />
+                  <TextInput style={styles.input} 
+                    placeholder={"Municipality"}
+                    placeholderTextColor={"#000"}
+                    value={"Daet"}
+                    editable={false}
+                    returnKeyType={"next"}
+                    textContentType={'firstname'}
+                    onChangeText={ (val) => setUser((prev) => ({...prev, city: val})) }
+                    onSubmitEditing={ () => ref_mn.current.focus() }
+                    ref={ref_fn} />
+                </View>
+
+                <View style={[styles.inputContainer, {width: '48%'}]}>
+                  <Icon name='town-hall' size={23} color={"#D0CCCB"} />
+                  <TextInput style={styles.input} 
+                    placeholder={"Province"}
+                    placeholderTextColor={"#000"}
+                    value={"Camarines Norte"}
+                    editable={false}
+                    returnKeyType={"next"}
+                    textContentType={'middlename'}
+                    onChangeText={ (val) => setUser((prev) => ({...prev, province: val})) }
+                    onSubmitEditing={ () => ref_ln.current.focus() }
+                    ref={ref_mn} />
+                </View>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Icon name='phone-classic' size={23} color={"#D0CCCB"} />
+                <TextInput style={styles.input} 
+                  placeholder={"Phone Number"}
+                  placeholderTextColor={"#A1A1A1"}
+                  value={user.phonenumber}
+                  keyboardType={'phone-pad'}
+                  returnKeyType={"next"}
+                  textContentType={'lastname'}
+                  onChangeText={ (val) => setUser((prev) => ({...prev, phonenumber: val})) }
+                  onSubmitEditing={ () => ref_bd.current.focus() }
+                  ref={ref_ln} />
+              </View>
+
+              <View style={{width: '80%', marginTop: 10}}>
+                <TText style={{fontSize: 18}}>Government Issued ID(s):</TText>
+                <TouchableOpacity 
+                  onPress={pickImage}
+                  style={{alignItems: 'center', marginTop: 20, backgroundColor: '#F4F4F4', paddingVertical: 30, borderRadius: 15, elevation: 2}}
+                  >
+                  <Icon name="camera-plus" size={40} color={"#E7745D"} style={{marginBottom: 10}} />
+                  <TText>Attach photo(s) here</TText>
+                </TouchableOpacity>
+              </View>
+
+              <View>
+                {image && <Image source={{uri: image}} style={{marginTop: 30, width: imageW / 4, height: imageH / 4}} />}
+              </View>
+
             
-              <View style={[styles.inputContainer, {width: '48%'}]}>
-                <Icon name='domain' size={23}color={"#D0CCCB"} />
-                <TextInput style={styles.input} 
-                  placeholder={"Barangay"}
-                  placeholderTextColor={"#A1A1A1"}
-                  returnKeyType={"next"}
-                  textContentType={'confirmpw'}
-                  // onChangeText={ (val) => setUser((prev) => ({...prev, username: val})) }
-                  onSubmitEditing={ () => ref_fn.current.focus() }
-                  ref={ref_cpw} />
-              </View>
+              {/* <View>
+                <TText>{user.username} {user.password} {user.firstname} {user.lastname}</TText>
+              </View> */}
+
             </View>
-
-
-            <View style={styles.inputInRow}>
-              <View style={[styles.inputContainer, {width: '48%'}]}>
-                <Icon name='city' size={23} color={"#D0CCCB"} />
-                <TextInput style={styles.input} 
-                  placeholder={"Municipality"}
-                  placeholderTextColor={"#000"}
-                  value={"Daet"}
-                  editable={false}
-                  returnKeyType={"next"}
-                  textContentType={'firstname'}
-                  onChangeText={ (val) => setUser((prev) => ({...prev, city: val})) }
-                  onSubmitEditing={ () => ref_mn.current.focus() }
-                  ref={ref_fn} />
-              </View>
-
-              <View style={[styles.inputContainer, {width: '48%'}]}>
-                <Icon name='town-hall' size={23} color={"#D0CCCB"} />
-                <TextInput style={styles.input} 
-                  placeholder={"Province"}
-                  placeholderTextColor={"#000"}
-                  value={"Camarines Norte"}
-                  editable={false}
-                  returnKeyType={"next"}
-                  textContentType={'middlename'}
-                  onChangeText={ (val) => setUser((prev) => ({...prev, province: val})) }
-                  onSubmitEditing={ () => ref_ln.current.focus() }
-                  ref={ref_mn} />
-              </View>
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Icon name='phone-classic' size={23} color={"#D0CCCB"} />
-              <TextInput style={styles.input} 
-                placeholder={"Phone Number"}
-                placeholderTextColor={"#A1A1A1"}
-                value={user.phonenumber}
-                keyboardType={'phone-pad'}
-                returnKeyType={"next"}
-                textContentType={'lastname'}
-                onChangeText={ (val) => setUser((prev) => ({...prev, phonenumber: val})) }
-                onSubmitEditing={ () => ref_bd.current.focus() }
-                ref={ref_ln} />
-            </View>
-
-            <View style={{width: '80%', marginTop: 10}}>
-              <TText style={{fontSize: 18}}>Government Issued ID(s):</TText>
-              <TouchableOpacity 
-                onPress={pickImage}
-                style={{alignItems: 'center', marginTop: 20, backgroundColor: '#F4F4F4', paddingVertical: 30, borderRadius: 15, elevation: 2}}
-                >
-                <Icon name="camera-plus" size={40} color={"#E7745D"} style={{marginBottom: 10}} />
-                <TText>Attach photo(s) here</TText>
-              </TouchableOpacity>
-              {/* <ImagePickerButton changeWord={(image) => { setUser((prev) => ({...prev, image: image})) }} /> */}
-            </View>
-
-            <View>
-              {image && <Image source={{uri: image}} style={{marginTop: 30, width: imageW / 4, height: imageH / 4}} />}
-            </View>
-
-          
-            {/* <View>
-              <TText>{user.username} {user.password} {user.firstname} {user.lastname}</TText>
-            </View> */}
-
-          </View>
-            {/* Back Button | to be removed later after implementation of appbar */}
-          <View style={styles.btnContainer}>
-            <TouchableOpacity
-              style={styles.nextBtn}
-              onPress={()=> { setNext(false)}}
-              >
-              <TText style={styles.nextText}>Back</TText>
-              <Icon name="arrow-left-thin" size={30} color='white' />
-            </TouchableOpacity>
-          </View>
 
             {/* Create Account Button */}
-          <View style={styles.confirm}>
-              <TouchableOpacity style={styles.confirmBtn}>
-                <TText style={{fontFamily: 'LexendDeca_SemiBold', fontSize: 18, color: ThemeDefaults.themeWhite}}>Create Account</TText>
-              </TouchableOpacity>
+            <View style={styles.confirm}>
+                <TouchableOpacity style={styles.confirmBtn} 
+                  onPress={() => setShowDialog(true)}
+                  // onPress={() => setisConfirm(true)}
+                >
+                  <TText 
+                    style={{fontFamily: 'LexendDeca_SemiBold', fontSize: 18, color: ThemeDefaults.themeWhite}}
+                    >Create Account</TText>
+                </TouchableOpacity>
             </View>
+
+            {
+              isConfirmed ? navigation.navigate("OTPVerification") : null
+            }
+
+            {/* show confirm create account dialog */}
+            { showDialog ?
+              <Modal
+                transparent={true}
+                animationType='fade'
+                visible={showDialog}
+                onRequestClose={() => changeModalDialogVisibility(false)}
+              >
+                <ModalDialog
+                  changeModalVisibility={changeModalDialogVisibility}
+                  setData={didConfirm}
+                  numBtn={2}
+                  confirmText={'Confirm'}
+                  cancelText={'Cancel'}
+                  message={"By clicking confirm, your account will be registered and no further changes can be made upon registration."}
+                />
+              </Modal> : null
+            }
           </View> 
           : 
           <View>
@@ -280,7 +356,9 @@ export default function RecruiterRegistration() {
                 placeholderTextColor={"#A1A1A1"}
                 returnKeyType={"next"}
                 textContentType={'username'}
-                onChangeText={ (val) => setUser((prev) => ({...prev, username: val})) }
+                onChangeText={ (val) => {
+                  setUser((prev) => ({...prev, username: val}))
+                  } }
                 onSubmitEditing={ () => ref_pw.current.focus() } />
             </View>
             
@@ -436,7 +514,6 @@ export default function RecruiterRegistration() {
 
           </View>
 
-            {/* <View><Text>{birthday}</Text></View> */}
           <View style={styles.btnContainer}>
             <TouchableOpacity
               style={styles.nextBtn}
@@ -446,7 +523,6 @@ export default function RecruiterRegistration() {
               <Icon name="arrow-right-thin" size={30} color='white' />
             </TouchableOpacity>
           </View>
-          {/* <View><Text>{displayDate.toString()}</Text></View> */}
           </View>
           }
 
@@ -459,6 +535,7 @@ const styles = StyleSheet.create({
     container: {
         marginTop: StatusBar.currentHeight,
         alignItems: 'center',
+        backgroundColor: '#fff'
     },
     header: {
       alignItems: 'center',
@@ -573,13 +650,14 @@ const styles = StyleSheet.create({
     },
     inputInRow: {
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'flex-end',
       justifyContent: 'space-between',
       width: '80%'
     },
     confirm: {
       alignItems: 'center',
-      elevation: 4
+      marginTop: 100,
+      marginBottom: 50,
     },
     confirmBtn: {
       width: '80%',
@@ -587,5 +665,53 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderRadius: 20,
       paddingVertical: 15,
+      elevation: 3,
+    },
+    confirmModal: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'rgba(235, 235, 235, 0.7)',
+      position: 'absolute',
+      height: HEIGHT,
+      width: WIDTH,
+      zIndex: 5,
+    },
+    confirmBox: {
+      width: '70%',
+      borderRadius: 15,
+      overflow: 'hidden',
+      borderWidth: 1,
+      backgroundColor: ThemeDefaults.themeOrange,
+      borderColor: ThemeDefaults.themeOrange,
+      elevation: 2 
+    },
+    confirmModalText: {
+      fontFamily: 'LexendDeca_SemiBold',
+      fontSize: 20,
+      color: ThemeDefaults.themeWhite,
+      textAlign: 'center',
+      paddingHorizontal: 30,
+      paddingVertical: 40,
+    },
+    confirmModalBtnContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-around',
+      backgroundColor: ThemeDefaults.themeWhite
+    },
+    confirmModalBtn: {
+      alignItems: 'center',
+      paddingVertical: 20
+    },
+    confirmModalCancel: {
+
+    },
+    confirmModalBtnText: {
+      fontFamily: 'LexendDeca_SemiBold',
+      fontSize: 20
+    },
+    confirmModalConfirm: {
+
     },
 })

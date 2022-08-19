@@ -6,7 +6,10 @@ import Appbar from '../Components/Appbar';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import TText from '../Components/TText';
 
+import { useNavigation } from '@react-navigation/native';
+
 export default function OTPVerification() {
+    const navigation = useNavigation();
 
     // const [otp, setOTP] = useState(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
     const [otpNum, setotpNum] = useState({
@@ -187,6 +190,7 @@ export default function OTPVerification() {
             <TouchableOpacity 
                 onPress={()=> {
                     console.log(num1.value)
+                    navigation.navigate("Home")
                 }}
                 style={styles.submitBtn}
             >
