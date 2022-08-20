@@ -8,6 +8,9 @@ const bcrypt = require("bcrypt");
 const Worker = require("./Models/Workers");
 const Recuiter = require("./Models/Recuiters");
 
+//helper
+const Check = require("./Helpers/ifUserExist");
+
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -34,34 +37,6 @@ const multipleFile = upload.fields([
   { name: "govId" },
   { name: "certificate" },
 ]);
-
-//middleware check if username already exist
-function ifRecruiterExist(req, res, next) {
-  Recuiter.findOne({ username: req.query.username })
-    .select("username")
-    .lean()
-    // .count()
-    .then((result) => {
-      if (result) {
-        res.status(408).json({ error: "timeou11t 408" });
-      } else {
-        next();
-      }
-    });
-}
-function ifWorkerExist(req, res, next) {
-  Worker.findOne({ username: req.query.username })
-    .select("username")
-    .lean()
-    // .count()
-    .then((result) => {
-      if (result) {
-        res.status(408).json({ error: "timeou11t 408" });
-      } else {
-        next();
-      }
-    });
-}
 
 //Login
 app.post("/login", async (req, res) => {
@@ -95,8 +70,8 @@ app.post("/login", async (req, res) => {
 
 app.post(
   "/signup/worker",
-  ifRecruiterExist,
-  ifWorkerExist,
+  Check.ifRecruiterExist,
+  Check.ifWorkerExist,
   multipleFile,
   async (req, res) => {
     try {
@@ -141,13 +116,12 @@ app.post(
 //signup worker
 app.post(
   "/signup/recruiter",
-  ifRecruiterExist,
-  ifWorkerExist,
+  Check.ifRecruiterExist,
+  Check.ifWorkerExist,
   upload.single("govId"),
   async (req, res) => {
     try {
       const salt = await bcrypt.genSalt(10);
-      console.log(req.body.password);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
       const recuiter = new Recuiter({
@@ -166,7 +140,7 @@ app.post(
         province: req.body.province,
         phoneNumber: req.body.phoneNumber,
         emailAddress: req.body.emailAddress,
-        profilePic: "",
+        profilePic: "pic",
         GovId: req.body.path,
         verification: false,
         accountStatus: "active",
@@ -176,7 +150,6 @@ app.post(
         if (err) {
           res.json({ message: err.message, type: "danger" });
         } else {
-          console.log();
           res.send("Recuiter account created");
         }
       });
