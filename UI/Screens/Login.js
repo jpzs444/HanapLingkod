@@ -45,70 +45,74 @@ export default function Login({navigation}) {
       </View>
 
         {/* Username or Password error */}
+     <View style={{flex: 1}}>
       <View style={styles.inputErrorView}>
-        <Text style={styles.inputErrorText}>The username or password you entered is incorrect</Text>
-      </View>
-
-    {/* Inputs */}
-      <View style={styles.inputContainer}>
-        {/* Username */}
-        <View style={styles.inputView}>
-            <Icon name='account-circle' size={22} color={'1B233A'} />
-            <TextInput style={styles.input} 
-                autoCapitalize={'none'}
-                placeholder={"Username"}
-                placeholderTextColor={"#1B233A"}
-                returnKeyType={"next"}
-                textContentType={'username'}
-                onChangeText={ (val) => setUser((prev) => ({...prev, username: val})) }
-                onSubmitEditing={ () => pw_ref.current.focus() } />
+          <Text style={styles.inputErrorText}>The username or password you entered is incorrect</Text>
         </View>
 
-        {/* Password */}
-        <View style={styles.inputView}>
-            <Icon name='lock' size={22} color={'#1B233A'} />
-            <TextInput style={[styles.input, styles.inputPW]} 
-                placeholder={"Password"}
-                placeholderTextColor={"#1B233A"}
-                returnKeyType={"go"}
-                secureTextEntry={hidePW}
-                textContentType={'password'}
-                onChangeText={ (val) => setUser((prev) => ({...prev, password: val})) }
-                ref={pw_ref} />
-            {
-                <Icon 
-                    name= { hidePW ? 'eye-off' : 'eye' }
-                    size={22} color={'#a3a096'}
-                    onPress={ () => sethidePW(!hidePW) }
-                />
-            }
+      {/* Inputs */}
+        <View style={styles.inputContainer}>
+          {/* Username */}
+          <View style={styles.inputView}>
+              <Icon name='account-circle' size={22} color={'1B233A'} />
+              <TextInput style={styles.input} 
+                  autoCapitalize={'none'}
+                  placeholder={"Username"}
+                  placeholderTextColor={"#1B233A"}
+                  returnKeyType={"next"}
+                  textContentType={'username'}
+                  onChangeText={ (val) => setUser((prev) => ({...prev, username: val})) }
+                  onSubmitEditing={ () => pw_ref.current.focus() } />
+          </View>
+
+          {/* Password */}
+          <View style={styles.inputView}>
+              <Icon name='lock' size={22} color={'#1B233A'} />
+              <TextInput style={[styles.input, styles.inputPW]} 
+                  placeholder={"Password"}
+                  placeholderTextColor={"#1B233A"}
+                  returnKeyType={"go"}
+                  secureTextEntry={hidePW}
+                  textContentType={'password'}
+                  onChangeText={ (val) => setUser((prev) => ({...prev, password: val})) }
+                  ref={pw_ref} />
+              {
+                  <Icon 
+                      name= { hidePW ? 'eye-off' : 'eye' }
+                      size={22} color={'#a3a096'}
+                      onPress={ () => sethidePW(!hidePW) }
+                  />
+              }
+          </View>
+
+          {/* Forgot password button */}
+          <TouchableOpacity style={styles.fp_btn}>
+              <Text style={styles.forgotPw}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+        </View>
+     </View>
+
+     <View style={{flex: 1, width: '80%', alignContent: 'center'}}>
+                 {/* Sign in button */}
+        <View style={styles.sign_in}>
+          <TouchableOpacity style={styles.btn}
+            onPress={() => navigation.navigate("Home")}
+          >
+              <Text style={styles.btnTxt}>Sign in</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Forgot password button */}
-        <TouchableOpacity style={styles.fp_btn}>
-            <Text style={styles.forgotPw}>Forgot Password?</Text>
-        </TouchableOpacity>
-
-      </View>
-
-        {/* Sign in button */}
-      <View style={styles.sign_in}>
-        <TouchableOpacity style={styles.btn}
-          onPress={() => navigation.navigate("Home")}
-        >
-            <Text style={styles.btnTxt}>Sign in</Text>
-        </TouchableOpacity>
-      </View>
-
-        {/* Create Account */}
-      <View style={styles.createAccountView}>
-        <Text style={styles.text}>Don't have an account?</Text>
-        <TouchableOpacity style={styles.registerBtn}
-          onPress={() => navigation.navigate('AccountTypeSelect')}
-        >
-            <Text style={styles.registerTxt}>Register</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Create Account */}
+        <View style={styles.createAccountView}>
+          <Text style={styles.text}>Don't have an account?</Text>
+          <TouchableOpacity style={styles.registerBtn}
+            onPress={() => navigation.navigate('AccountTypeSelect')}
+          >
+              <Text style={styles.registerTxt}>Register</Text>
+          </TouchableOpacity>
+        </View>
+     </View>
 
     </SafeAreaView>
   );
@@ -129,10 +133,10 @@ const styles = StyleSheet.create({
     inputErrorView: {
         opacity: 0,
         width: '80%',
-        paddingVertical: 10,
+        // paddingVertical: 10,
         alignItems: 'center',
         backgroundColor: 'red',
-        marginTop: 50,
+        marginTop: '10%',
         marginBottom: 10
     },
     inputErrorText: {
@@ -140,13 +144,13 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         width: '100%',
-        // marginTop: 80,
         alignItems: 'center',
         justifyContent: 'center',
     },
     inputView: {
         flexDirection: 'row',
         width: '80%',
+        marginHorizontal: '10%',
         alignItems: 'center',
         marginBottom: 20,
         padding: 6,
@@ -161,7 +165,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     inputPW: {
-        width: '85%'
+        width: '94%'
     },
     fp_btn: {
         alignSelf: 'flex-end',
@@ -172,12 +176,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     sign_in: {
-        width: '80%',
+        // width: '80%',
+        marginTop: '25%',
     },
     btn: {
         width: '100%',
         alignItems: 'center',
-        marginTop: 130,
         paddingVertical: 14,
         backgroundColor: '#FF803C',
         borderRadius: 15,
@@ -189,8 +193,12 @@ const styles = StyleSheet.create({
         color: '#fff'
     },
     createAccountView: {
+        width: '100%',
         flexDirection: 'row',
-        marginTop: 25
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: '5%',
+        textAlign: 'center',
     },
     registerTxt: {
         marginLeft: 3,
@@ -203,15 +211,16 @@ const styles = StyleSheet.create({
       height: 180,
     },
     orangebg: {
+      flex: 1.15,
       backgroundColor: '#FF803C',
       width: '100%',
-      height: 420,
+      height: "42%",
       borderBottomRightRadius: 70,
     },
     darkbluebg: {
       backgroundColor: '#1B233A',
       width: '100%',
-      height: 370,
+      height: "88%",
       borderBottomRightRadius: 70,
     },
     whitebg: {
@@ -219,7 +228,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       backgroundColor: '#fff',
       width: '100%',
-      height: 320,
+      height: '86%',
       borderBottomRightRadius: 70,
     },
   });

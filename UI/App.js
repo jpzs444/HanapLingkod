@@ -9,6 +9,8 @@ import Home from './Screens/Home';
 import Welcome from './Screens/Welcome';
 import OTPVerification from './Screens/OTPVerification';
 
+import OTPModule from './Components/OTPModule';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -20,12 +22,14 @@ export default function App() {
       {/* <RegisterUserAccountType /> */}
       {/* <RecruiterRegistration /> */}
       {/* <OTPVerification /> */}
+      {/* <OTPModule /> */}
 
       <Stack.Navigator initialRouteName='Login' screenOptions={{headerShown: false}}>
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="AccountTypeSelect" component={RegisterUserAccountType} />
         <Stack.Screen name="RegisterRecruiter" component={RecruiterRegistration} />
         <Stack.Screen name="OTPVerification" component={OTPVerification} />
+        <Stack.Screen name="OTP" component={OTPModule} />
         <Stack.Screen name="WelcomeScreen" component={Welcome} />
         <Stack.Screen name="Home" component={Home} />
       </Stack.Navigator>

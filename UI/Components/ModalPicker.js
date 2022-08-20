@@ -13,7 +13,13 @@ const BARANGAY =[
     'Barangay VIII (Salcedo)', 'Bibirao', 'Borabod', 'Calasgasan', 'Camambugan',
     'Cobangbang', 'Dagongan', 'Gahonon', 'Gubat', 'Lag-on', 'Magang', 'Mambalite', 
     'Mancruz', 'Pamorangon', 'San Isidro'
+];
+
+const SERVICES = [
+    'Deep Cleaning Services', 'Bathroom Cleaning', 'Plumbing', 'Installation', 'Electrical',
+    'Painting Services', 'Manicure', 'Pedicure', 'Extra', 'Unlisted (Add new subcategory)'
 ]
+
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
@@ -51,14 +57,31 @@ const ModalPicker = (props) => {
             </TouchableOpacity>
         )
     })
+
+    const optionServices = SERVICES.map((item, index) => {
+        return(
+            <TouchableOpacity
+                style={styles.option}
+                key={index}
+                onPress={() => onPressItem(item)}
+            >
+                <TText style={styles.text}>
+                    {item}
+                </TText>
+            </TouchableOpacity>
+        )
+    })
+
   return (
     <TouchableOpacity
         onPress={() => props.changeModalVisibility(false)}
         style={styles.container}
     >
-        <View style={[styles.modal, {width: WIDTH - 80, maxHeight:  props.barangay ? HEIGHT/1.5: HEIGHT/4 }]}>
+        <View style={[styles.modal, {width: WIDTH - 80, maxHeight:  !props.sex ? HEIGHT/1.5: HEIGHT/4 }]}>
             <ScrollView>
-                {props.barangay ? optionBarangay : option}
+                {props.barangay ? optionBarangay : null}
+                {props.services ? optionServices : null}
+                {props.sex ? option : null}
             </ScrollView>
         </View>
     </TouchableOpacity>

@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <SafeAreaView style={{flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: StatusBar.currentHeight, backgroundColor: '#fff'}}>
         <ScrollView style={{flex: 1, width: '100%'}}>
-            <Appbar hasPicture={true} />
+            <Appbar hasPicture={true} menuBtn={true} />
             <View style={{alignItems: 'center', justifyContent: 'center'}}>
                 <TText>Home</TText>
             </View>
