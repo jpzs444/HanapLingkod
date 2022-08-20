@@ -20,7 +20,6 @@ const workerSchema = new mongoose.Schema({
   GovId: String,
   verification: Boolean,
   accountStatus: String,
-
   role: String,
 
   establishment: String,

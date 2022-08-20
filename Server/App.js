@@ -7,6 +7,8 @@ const bcrypt = require("bcrypt");
 //models
 const Worker = require("./Models/Workers");
 const Recuiter = require("./Models/Recuiters");
+const Work = require("./Models/Work");
+const ServiceCategory = require("./Models/ServiceCategory");
 
 //helper
 const Check = require("./Helpers/ifUserExist");
@@ -100,7 +102,27 @@ app.post(
         verification: false,
         accountStatus: "active",
       });
+
       worker.save((err) => {
+        if (err) {
+          console.log(err);
+          res.status(500);
+        } else {
+          console.log("c");
+        }
+      });
+
+      // const serviceCategory = new ServiceCategory({
+      //   ServiceCategory: Unlisted,
+      // });
+
+      const work = new Work({
+        // ServiceSubCode: ,
+        workerId: worker.id,
+        minPrice: req.body.minPrice,
+        maxPrice: req.body.maxPrice,
+      });
+      work.save((err) => {
         if (err) {
           console.log(err);
         } else {
@@ -113,7 +135,7 @@ app.post(
   }
 );
 
-//signup worker
+//signup recruiter
 app.post(
   "/signup/recruiter",
   Check.ifRecruiterExist,
