@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 
 export default function OTPVerification({route}) {
     const navigation = useNavigation();
-    const {phoneNum} = route.params;
+    const {phoneNum, role, user} = route.params;
 
     // Firebase OTP Verification Code
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -46,7 +46,7 @@ export default function OTPVerification({route}) {
                 'Login Successful. Welcome to HanapLingkod',
             );
             console.log('auth successful.. going to home screen');
-            navigation.navigate("Home");
+            navigation.navigate("WelcomeScreen", {role: role});
             setCode('');
         })
         .catch((error) => {
@@ -109,7 +109,8 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n1: val}))
+                        // setotpNum((prev) => ({...prev, n1: val}))
+                        setCode((prev) => prev + val)
                     }}
                     onKeyPress={({nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -129,7 +130,8 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n2: val}))
+                        // setotpNum((prev) => ({...prev, n2: val}))
+                        setCode((prev) => prev + val)
                     }}
                     onKeyPress={( {nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -150,7 +152,8 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n3: val}))
+                        // setotpNum((prev) => ({...prev, n3: val}))
+                        setCode((prev) => prev + val)
                     }}
                     onKeyPress={( {nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -171,7 +174,8 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n4: val}))
+                        // setotpNum((prev) => ({...prev, n4: val}))
+                        setCode((prev) => prev + val)
                     }}
                     onKeyPress={( {nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -192,7 +196,8 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n5: val}))
+                        // setotpNum((prev) => ({...prev, n5: val}))
+                        setCode((prev) => prev + val)
                     }}
                     onKeyPress={({nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -213,7 +218,8 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n6: val}))
+                        // setotpNum((prev) => ({...prev, n6: val}))
+                        setCode((prev) => prev + val)
                     }}
                     onKeyPress={({nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -251,7 +257,7 @@ export default function OTPVerification({route}) {
                 onPress={()=> {
                     console.log(num1.value)
                     // navigation.navigate("WelcomeScreen")
-                    setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+                    // setCode((prev) => `${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
                     confirmCode()
                 }}
                 style={styles.submitBtn}

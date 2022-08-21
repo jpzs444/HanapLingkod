@@ -33,7 +33,7 @@ export default function RecruiterRegistration({route}) {
       username: "", password: "", firstname: "", middlename: "",
       lastname: "", birthday: "", age: "", gender: "", street: "",
       purok: "", barangay: "", city: "", province: "", phonenumber: "", image: '',
-      workDescription: "", lowestPrice: "", highestPrice: "",
+      role: userType, workDescription: "", lowestPrice: "", highestPrice: "",
     })
 
     const [next, setNext] = useState(1)
@@ -49,13 +49,13 @@ export default function RecruiterRegistration({route}) {
     const [services, setServices] = useState([
       {
         service:"",
-        lowestPrice: "",
-        highestPrice: ""
       },
     ])
 
     const [isModalVisible, setModalVisible] = useState(false)
-    const [isModalServiceVisible, setModalServiceVisible] = useState(false)
+    const [isUnlistedModalVisible, setUnlistedModalVisible] = useState(false)
+    const [showAddUnlistedServiceModal, setshowAddUnlistedServiceModal] = useState(true)
+    const [hasBlanks, sethasBlanks] = useState(false)
     
     const [showDialog, setShowDialog] = useState(false)
     const [isConfirmed, setisConfirmed] = useState(false)
@@ -70,10 +70,20 @@ export default function RecruiterRegistration({route}) {
       setServices([...services, {service: ""}])
     }
 
-    const handleServiceChange = (val, index, field) => {
+    const handleServiceChange = (val, index) => {
       // const {value} = val.value;
       const list = [...services];
-      list[index]['service'] = val;
+      if (val === "Unlisted (Add new subcategory)"){
+        list[index]['status'] = "unlisted";
+        list[index]['service'] = ""
+        setUnlistedModalVisible(true)
+      } else {
+        if (list[index]['status'] === "unlisted"){
+          list[index]['service'] = val;
+          list[index]['status'] = "";
+        }
+        list[index]['service'] = val;
+      }
       setServices(list)
       console.log(services)
     }
@@ -94,9 +104,9 @@ export default function RecruiterRegistration({route}) {
       console.log(services)
     }
 
-    const handleServiceUnlisted = (index) => {
+    const handleServiceUnlisted = (val, index) => {
       const list = [...services];
-      list[index]['status'] = "unlisted"
+      list[index]['service'] = val
       setServices(list)
       console.log(services)
     }
@@ -105,6 +115,15 @@ export default function RecruiterRegistration({route}) {
       const list = [...services];
       list.splice(index, 1);
       setServices(list)
+      console.log(services)
+
+      haveBlanks()
+    }
+
+    const haveBlanks = () => {
+      if(services.some(item => item.service === "" || item.lowestPrice === "" || item.highestPrice === "")){
+        sethasBlanks(true)
+      } else {sethasBlanks(false)}
     }
 
     const setData = (option) => {
@@ -130,6 +149,7 @@ export default function RecruiterRegistration({route}) {
 
     const changeModalDialogVisibility = (bool) => {
       setShowDialog(bool)
+      // setUnlistedModalVisible(bool)
     }
 
     // const changeModalServiceVisibility = (bool) => {
@@ -200,7 +220,7 @@ export default function RecruiterRegistration({route}) {
       
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView style={{height: '100%', width: '100%'}}>
+        <ScrollView scrollEnabled={isUnlistedModalVisible ? false:true} style={{ width: '100%', minHeight: HEIGHT, }}>
 
           <Appbar 
             stateChangerNext={setNext} 
@@ -242,11 +262,33 @@ export default function RecruiterRegistration({route}) {
                 </View>
               </View>
               : null
-            }
+          }
+
+          {/* modal is shown when user has chosen unlisted category */}
+          {
+            isUnlistedModalVisible ? 
+            <View style={[styles.confirmModal]}>
+                <View style={styles.confirmBox}>
+                <View style={{padding: 20}}>
+                  <TText style={styles.confirmModalText}>By clicking confirm, your account will be registered and no further changes can be made upon registration.</TText>
+                  <TText style={[styles.confirmModalText]}>Once approved, your specified service in Custom Service Offered, as well as its price range, will be automatically posted in the application.</TText>
+                </View>
+                  <View style={styles.confirmModalBtnContainer}>
+                    <TouchableOpacity 
+                      style={[styles.confirmModalBtn, styles.confirmModalConfirm]}
+                      onPress={()=> setUnlistedModalVisible(false)}
+                    >
+                      <TText style={[styles.confirmModalBtnText, {color: ThemeDefaults.themeOrange}]}>Confirm</TText>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+              : null
+          }
 
           {
             next == 4 ?
-              <View style={{alignItems: 'center', justifyContent: 'center', width: '100%'}}>
+              <View style={{alignItems: 'center', justifyContent: 'center', width: '100%', }}>
                 {
                   services.map((serviceOffered, index) => (
                     <View key={index} style={{width: '100%', alignItems: 'center', marginBottom: 30,}}>
@@ -256,7 +298,7 @@ export default function RecruiterRegistration({route}) {
                             <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: ThemeDefaults.appIcon, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3}}
                               onPress={() => handleServiceRemove(index)}
                             >
-                              <TText style={{color: '#a1a1a1'}}>Remove Category</TText>
+                              <TText style={{color: '#a1a1a1'}}>Remove Service</TText>
                               <Icon name="close-circle" size={18} color={'#a1a1a1'} style={{marginLeft: 10}} />
                             </TouchableOpacity>
                           </View> 
@@ -278,10 +320,9 @@ export default function RecruiterRegistration({route}) {
                             styles={styles.dropdownBtn}
                           >
                           {
-                            serviceOffered.service ?
-                              <TText style={[styles.ddText, {color:"#000"}]}>{serviceOffered.service}</TText>
+                            serviceOffered.service || serviceOffered.status ?
+                              <TText style={[styles.ddText, {color:"#000"}]}>{serviceOffered.status ? "Unlisted" : serviceOffered.service}</TText>
                               : <TText style={[styles.ddText, {color:"#A1A1A1"}]}>Specific Service Offered</TText>
-
                           }
                           </TouchableOpacity>
                             <Modal
@@ -292,27 +333,29 @@ export default function RecruiterRegistration({route}) {
                             >
                               <ModalPicker 
                                 changeModalVisibility={changeModalVisibility}
-                                setData={() => handleServiceUnlisted(index)}
+                                setData={(val) => handleServiceChange(val, index)}
                                 services={true}
                               />
                             </Modal>
                             <Icon name="arrow-down-drop-circle" size={20} color={"#D0CCCB"} />
                           </TouchableOpacity>
                       </View>
+                          
                       {
-                        serviceOffered.service === "Unlisted (Add new subcategory)" ? 
+                        serviceOffered.status === "unlisted" && 
                           <View style={[styles.inputContainer, {width: '80%'}]}>
-                            <Icon name='briefcase-outline' size={20} color={"#D0CCCB"} />
-                            <TextInput style={styles.input} 
-                              placeholder={"Custom Service Offered"}
-                              placeholderTextColor={"#A1A1A1"}
-                              keyboardType={'default'}
-                              returnKeyType={"next"}
-                              textContentType={'purok'}
-                              onChangeText={ (val) => handleServiceChange(val, index) }
-                              onSubmitEditing={ () => ref_cpw.current.focus() }
-                              ref={ref_pw} />
-                          </View> : null
+                              {/* {setUnlistedModalVisible(true)} */}
+                              <Icon name='briefcase-outline' size={20} color={"#D0CCCB"} />
+                              <TextInput style={styles.input} 
+                                placeholder={"Custom Service Offered"}
+                                placeholderTextColor={"#A1A1A1"}
+                                keyboardType={'default'}
+                                returnKeyType={"next"}
+                                textContentType={'purok'}
+                                onChangeText={ (val) => handleServiceUnlisted(val, index) }
+                                onSubmitEditing={ () => ref_cpw.current.focus() }
+                                ref={ref_pw} />
+                            </View> 
                       }
                       <View style={{flexDirection: 'row', width: '80%', justifyContent: 'space-between', alignItems: 'center'}}>
                         <View style={[styles.inputContainer, {width: '48%'}]}>
@@ -342,9 +385,11 @@ export default function RecruiterRegistration({route}) {
                   
                       {
                         services.length - 1 === index &&
-                          <View style={{alignItems: 'center', marginTop: 40}}>
+                          <View style={{alignItems: 'center', marginTop: 150}}>
                           <TouchableOpacity style={{width: 60, height: 60, borderRadius: 30, backgroundColor: '#595959', alignItems: 'center', justifyContent: 'center' ,marginBottom: 15}}
-                            onPress={handleServiceAdd}
+                            onPress={() => {
+                              handleServiceAdd()
+                            }}
                           >
                             <Icon name='plus' size={30} color={'white'} />
                           </TouchableOpacity>
@@ -355,19 +400,23 @@ export default function RecruiterRegistration({route}) {
                   ))
                 }
                 
-
-                {/* {
-                  workSpecifics ? 
-                  <View style={{marginTop: '18%', marginBottom: '5%'}}>
+                {
+                  hasBlanks ? 
+                  <View style={{marginTop: '8%', marginBottom: '0%'}}>
                     <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>* Please fill in the required fields.</TText>
                   </View> : null
-                } */}
+                }
 
                 <View style={[styles.confirm, {width: '90%'}]}>
                   {/* Create Account Button */}
                     <TouchableOpacity style={styles.confirmBtn} 
-                      onPress={() => {console.log("confirm from worker information work description")
-                        setShowDialog(true)
+                      onPress={() => {
+                        console.log("confirm from worker information work description")
+                        haveBlanks()
+                        if(!hasBlanks){
+                          setShowDialog(true)
+                        }
+                        
                       }}
                     >
                       <TText style={{fontFamily: 'LexendDeca_SemiBold', fontSize: 18, color: ThemeDefaults.themeWhite}}
@@ -394,7 +443,7 @@ export default function RecruiterRegistration({route}) {
                 }
 
                 {
-                  isConfirmed ? navigation.navigate("OTPVerification", {phoneNum: user.phonenumber}) : null
+                  isConfirmed ? navigation.navigate("OTPVerification", {phoneNum: user.phonenumber, role: user.role, user: user}) : null
                 }
 
               </View>
@@ -832,9 +881,12 @@ export default function RecruiterRegistration({route}) {
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         marginTop: StatusBar.currentHeight,
         alignItems: 'center',
-        backgroundColor: '#fff'
+        justifyContent: 'center',
+        backgroundColor: '#blue',
+        height: HEIGHT,
     },
     header: {
       alignItems: 'center',
@@ -956,8 +1008,8 @@ const styles = StyleSheet.create({
     },
     confirm: {
       alignItems: 'center',
-      marginTop: 50,
-      marginBottom: 50,
+      marginTop: 30,
+      marginBottom: 130,
     },
     confirmBtn: {
       width: '80%',
@@ -991,8 +1043,9 @@ const styles = StyleSheet.create({
       fontSize: 20,
       color: ThemeDefaults.themeWhite,
       textAlign: 'center',
-      paddingHorizontal: 30,
-      paddingVertical: 40,
+      paddingHorizontal: 25,
+      // paddingVertical: 15,
+      marginVertical: 15
     },
     confirmModalBtnContainer: {
       flexDirection: 'row',
@@ -1002,7 +1055,8 @@ const styles = StyleSheet.create({
     },
     confirmModalBtn: {
       alignItems: 'center',
-      paddingVertical: 20
+      paddingVertical: 20,
+      width: '100%',
     },
     confirmModalCancel: {
 
