@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const serviceCategorySchema = mongoose.Schema({
-  serviceCategory: String,
+  Category: String,
 });
 
 module.exports = mongoose.model("ServiceCategory", serviceCategorySchema);
