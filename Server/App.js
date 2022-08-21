@@ -16,6 +16,7 @@ const Check = require("./Helpers/ifUserExist");
 
 //routes
 const ServiceCategoryRoutes = require("./Routes/ServiceCategoryRoutes");
+const ServiceSubCategoryRoutes = require("./Routes/ServiceSubCategory");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -73,37 +74,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ err: error.message });
   }
 });
-
-// app.post("/try", async (req, res) => {
-//   let serviceSubCategoryID;
-//   if (req.body.Category == "unlisted") {
-//     let query = await ServiceCategory.findOne(
-//       { Category: "unlisted" },
-//       { Category: 0 }
-//     );
-//     const serviceSubCategory = new ServiceSubCategory({
-//       ServiceID: query._id,
-//       ServiceSubCategory: req.body.ServiceSubCategory,
-//     });
-//     serviceSubCategory.save((err) => {
-//       if (err) {
-//         console.log(err);
-//         res.status(500);
-//       } else {
-//         console.log("SubCategory Created");
-//       }
-//     });
-//     serviceSubCategoryID = serviceSubCategory.id;
-//   } else {
-//     console.log("asd");
-//     let result = await ServiceSubCategory.findOne(
-//       { ServiceSubCategory: req.body.ServiceSubCategory },
-//       { ServiceSubCategory: 0, ServiceID: 0 }
-//     );
-//     serviceSubCategoryID = result._id;
-//   }
-//   console.log(serviceSubCategoryID);
-// });
 
 app.post(
   "/signup/worker",
@@ -241,5 +211,6 @@ app.post(
 );
 
 app.use(ServiceCategoryRoutes);
+app.use(ServiceSubCategoryRoutes);
 
 app.listen(3000, () => console.log("listening on port 3000."));
