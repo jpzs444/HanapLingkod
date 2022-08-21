@@ -4,7 +4,9 @@ import TText from '../Components/TText';
 import { useNavigation } from '@react-navigation/native';
 import ThemeDefaults from '../Components/ThemeDefaults';
 
-export default function Welcome() {
+export default function Welcome({route}) {
+
+    const {role} = route.params;
 
     const navigation = useNavigation();
 
@@ -17,7 +19,7 @@ export default function Welcome() {
                 <TText style={styles.message}>HanapLingkod is on the process of verifying your account and personal information. It usually takes 1-3 business days</TText>
                 <TText style={styles.message}>For the mean time, you may explore the application and set up your profile</TText>
 
-                <Image style={styles.image} source={require('../assets/images/bg-welcome.png')} />
+                <Image style={styles.image} source={role === 'recruiter' ? require('../assets/images/bg-welcome.png'): require('../assets/images/bg-welcome-worker.png')} />
 
                 <View style={styles.btnContainer}>
                     <TouchableOpacity
