@@ -6,9 +6,7 @@ import TText from './TText';
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
-export default function ModalDialog({route}, props) {
-
-    const {phoneNum} = route.params;
+export default function ModalDialog(props) {
 
     const onPressCancel = () => {
         props.changeModalVisibility(false)
@@ -58,7 +56,7 @@ export default function ModalDialog({route}, props) {
                         <TouchableOpacity
                         style={styles.btn}
                         onPress={() => {
-                            // props.changeModalDialogVisibility(false)
+                            props.changeModalDialogVisibility(false)
                             console.log("confirm")
                         }}>
                             <TText style={[styles.btnText, {color: ThemeDefaults.themeOrange}]}>Confirm</TText>
