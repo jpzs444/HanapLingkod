@@ -35,4 +35,26 @@ router
     });
   });
 
+///// specific /////
+router
+  .route("/service-category/:id")
+  .get(function (req, res) {
+    ServiceCategory.find({ _id: req.params.id }, function (err, services) {
+      if (services) {
+        res.send(services);
+      } else {
+        res.send("No such data found");
+      }
+    });
+  })
+  .delete(function (req, res) {
+    ServiceCategory.findOneAndDelete({ _id: req.params.id }, function (err) {
+      if (!err) {
+        res.send("Deleted Successfully ");
+      } else {
+        res.send(err);
+      }
+    });
+  });
+
 module.exports = router;

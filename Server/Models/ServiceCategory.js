@@ -5,12 +5,12 @@ const serviceCategorySchema = mongoose.Schema({
   Category: String,
 });
 
-serviceCategorySchema.post("save", function (next) {
-  console.log("asd");
-});
 serviceCategorySchema.pre(/Many$/, function (next) {
   ServiceSubCategory.deleteMany({}).exec();
   next();
+});
+serviceCategorySchema.post("findOneAndDelete", function (doc) {
+  console.log(doc._id);
 });
 
 module.exports = mongoose.model("ServiceCategory", serviceCategorySchema);
