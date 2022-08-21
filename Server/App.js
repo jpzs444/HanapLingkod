@@ -9,9 +9,13 @@ const Worker = require("./Models/Workers");
 const Recuiter = require("./Models/Recuiters");
 const Work = require("./Models/Work");
 const ServiceCategory = require("./Models/ServiceCategory");
+const ServiceSubCategory = require("./Models/SubCategory");
 
 //helper
 const Check = require("./Helpers/ifUserExist");
+
+//routes
+const ServiceCategoryRoutes = require("./Routes/ServiceCategoryRoutes");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -70,6 +74,37 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// app.post("/try", async (req, res) => {
+//   let serviceSubCategoryID;
+//   if (req.body.Category == "unlisted") {
+//     let query = await ServiceCategory.findOne(
+//       { Category: "unlisted" },
+//       { Category: 0 }
+//     );
+//     const serviceSubCategory = new ServiceSubCategory({
+//       ServiceID: query._id,
+//       ServiceSubCategory: req.body.ServiceSubCategory,
+//     });
+//     serviceSubCategory.save((err) => {
+//       if (err) {
+//         console.log(err);
+//         res.status(500);
+//       } else {
+//         console.log("SubCategory Created");
+//       }
+//     });
+//     serviceSubCategoryID = serviceSubCategory.id;
+//   } else {
+//     console.log("asd");
+//     let result = await ServiceSubCategory.findOne(
+//       { ServiceSubCategory: req.body.ServiceSubCategory },
+//       { ServiceSubCategory: 0, ServiceID: 0 }
+//     );
+//     serviceSubCategoryID = result._id;
+//   }
+//   console.log(serviceSubCategoryID);
+// });
+
 app.post(
   "/signup/worker",
   Check.ifRecruiterExist,
@@ -112,12 +147,36 @@ app.post(
         }
       });
 
-      // const serviceCategory = new ServiceCategory({
-      //   ServiceCategory: Unlisted,
-      // });
+      let serviceSubCategoryID;
+      if (req.body.Category == "unlisted") {
+        let query = await ServiceCategory.findOne(
+          { Category: "unlisted" },
+          { Category: 0 }
+        );
+        const serviceSubCategory = new ServiceSubCategory({
+          ServiceID: query._id,
+          ServiceSubCategory: req.body.ServiceSubCategory,
+        });
+        serviceSubCategory.save((err) => {
+          if (err) {
+            console.log(err);
+            res.status(500);
+          } else {
+            console.log("SubCategory Created");
+          }
+        });
+        serviceSubCategoryID = serviceSubCategory.id;
+      } else {
+        console.log("asd");
+        let result = await ServiceSubCategory.findOne(
+          { ServiceSubCategory: req.body.ServiceSubCategory },
+          { ServiceSubCategory: 0, ServiceID: 0 }
+        );
+        serviceSubCategoryID = result._id;
+      }
 
       const work = new Work({
-        // ServiceSubCode: ,
+        ServiceSubCode: serviceSubCategoryID,
         workerId: worker.id,
         minPrice: req.body.minPrice,
         maxPrice: req.body.maxPrice,
@@ -180,5 +239,7 @@ app.post(
     }
   }
 );
+
+app.use(ServiceCategoryRoutes);
 
 app.listen(3000, () => console.log("listening on port 3000."));

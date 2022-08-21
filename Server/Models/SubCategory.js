@@ -6,4 +6,4 @@ const serviceSubCategorySchema = mongoose.Schema({
   ServiceSubCategory: String,
 });
 
-module.exports = mongoose.model("serviceSubCategory", serviceSubCategorySchema);
+module.exports = mongoose.model("ServiceSubCategory", serviceSubCategorySchema);
