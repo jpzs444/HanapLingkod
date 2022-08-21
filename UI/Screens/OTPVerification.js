@@ -1,15 +1,65 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
-    SafeAreaView, View, TouchableOpacity, TextInput, StatusBar, StyleSheet
+    SafeAreaView, View, TouchableOpacity, TextInput, StatusBar, StyleSheet, Alert
 } from 'react-native'
+
+import {FirebaseRecaptchaVerifierModal} from 'expo-firebase-recaptcha';
+import { firebaseConfig } from '../config';
+import firebase from 'firebase/compat/app';
+
 import Appbar from '../Components/Appbar';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import TText from '../Components/TText';
 
 import { useNavigation } from '@react-navigation/native';
 
-export default function OTPVerification() {
+export default function OTPVerification({route}) {
     const navigation = useNavigation();
+    const {phoneNum} = route.params;
+
+    // Firebase OTP Verification Code
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [code, setCode] = useState('');
+    const [verificationId, setVerificationId] = useState('');
+    const recaptchaVerifier = useRef(null);
+
+    const [isInvalidOTP, setInvalidOTP] = useState('false')
+
+    const sendVerification = () => {
+        const phoneProvider = new firebase.auth.PhoneAuthProvider();
+        phoneProvider
+            .verifyPhoneNumber(phoneNum, recaptchaVerifier.current)
+            .then(setVerificationId);
+            // setPhoneNumber('');
+    }
+
+    const confirmCode = () => {
+        const credential = firebase.auth.PhoneAuthProvider.credential(
+            verificationId,
+            code
+        );
+        console.log(`otp code is ${code}`)
+        console.log(typeof code)
+        firebase.auth().signInWithCredential(credential)
+        .then(() => {
+            Alert.alert(
+                'Login Successful. Welcome to HanapLingkod',
+            );
+            console.log('auth successful.. going to home screen');
+            navigation.navigate("Home");
+            setCode('');
+        })
+        .catch((error) => {
+            alert(error);
+            setInvalidOTP(true)
+        })
+    }
+
+    // Send Verification with given number on the registration
+    useEffect(() => {
+        sendVerification();
+    },[])
+
 
     // const [otp, setOTP] = useState(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
     const [otpNum, setotpNum] = useState({
@@ -31,6 +81,12 @@ export default function OTPVerification() {
   return (
     <SafeAreaView style={styles.container}>
         {/* Appbar */}
+        
+        <FirebaseRecaptchaVerifierModal 
+                ref={recaptchaVerifier}
+                firebaseConfig={firebaseConfig}
+        />
+
         <Appbar backBtn={true} hasPicture={false} />
 
         {/* header */}
@@ -173,24 +229,30 @@ export default function OTPVerification() {
         </View>
 
         {/* If OTP is incorrect */}
-        <View style={{marginBottom: 30}}>
-            { isotpMatch == 0 ? null : 
-                <TText style={{
-                    color: ThemeDefaults.appIcon,
-                    fontFamily: 'LexendDeca_Medium',
-                    fontSize: 18
-                }}>
-                    Login failed. Please re-enter the OTP
-                </TText>
-            }
-        </View>
+        {
+            isInvalidOTP ? 
+            <View style={{marginBottom: 30}}>
+                { isotpMatch == 0 ? null : 
+                    <TText style={{
+                        color: ThemeDefaults.appIcon,
+                        fontFamily: 'LexendDeca_Medium',
+                        fontSize: 18
+                    }}>
+                        Login failed. Please re-enter the OTP
+                    </TText>
+                }
+            </View> 
+        : null
+        }
 
         {/* button | countdown/resend */}
         <View style={styles.submitContainer}>
             <TouchableOpacity 
                 onPress={()=> {
                     console.log(num1.value)
-                    navigation.navigate("Home")
+                    // navigation.navigate("WelcomeScreen")
+                    setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+                    confirmCode()
                 }}
                 style={styles.submitBtn}
             >

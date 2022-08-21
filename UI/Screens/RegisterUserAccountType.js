@@ -27,13 +27,13 @@ export default function RegisterUserAccountType() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Appbar */}
-      <Appbar backBtn={true} hasPicture={false} />
+      <Appbar backBtn={true} hasPicture={false} accTypeSelect={true} />
 
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Type of Account</Text>
-        <Text style={styles.headerDesc}>To seek or to render on-demand home services?</Text>
-        <Text style={styles.headerDesc}>Choose an account that best suits your needs.</Text>
+        <Text style={styles.headerDesc}>To seek or to render on-demand home services? Choose an account that best suits your needs.</Text>
+        {/* <Text style={styles.headerDesc}>Choose an account that best suits your needs.</Text> */}
       </View>
 
       {/* Account Type Button */}
@@ -72,7 +72,7 @@ export default function RegisterUserAccountType() {
           style={styles.nextBtn}
           onPress={()=> { 
             console.log(accType) 
-            if(accType === "recruiter") navigation.navigate("RegisterRecruiter")
+            navigation.navigate("RegisterRecruiter", {userType: accType})
             // else if(accType === "worker") navigation.navigate("")
           }}
         >
@@ -91,8 +91,9 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginTop: 70,
+    marginTop: '15%',
     marginBottom: 50,
+    width: '80%'
   },
   headerTitle: {
     fontSize: 28,
@@ -102,22 +103,24 @@ const styles = StyleSheet.create({
   headerDesc: {
     fontFamily: 'LexendDeca',
     fontSize: 18,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    textAlign: 'center',
+    // width: 
   },
   iconView: {
     justifyContent: 'center',
     justifyContent: 'center', 
-    padding: 12, 
+    padding: 10, 
   },
   btnContainer: {
-    width: '80%',
+    width: '85%',
   },
   btnDesc: {
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
-    padding: 10,
-    paddingLeft: 10,
+    padding: 0,
+    paddingLeft: 8,
   },
   userType: {
     fontFamily: 'LexendDeca_SemiBold',

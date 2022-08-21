@@ -6,7 +6,9 @@ import TText from './TText';
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
-export default function ModalDialog(props) {
+export default function ModalDialog({route}, props) {
+
+    const {phoneNum} = route.params;
 
     const onPressCancel = () => {
         props.changeModalVisibility(false)
@@ -21,7 +23,7 @@ export default function ModalDialog(props) {
     <View
         style={styles.container}
     >
-        <View style={[styles.modal, {width: WIDTH - 130, maxHeight: HEIGHT/4 }]}>
+        <View style={[styles.modal, {width: WIDTH - 100, maxHeight: HEIGHT/2 }]}>
             {/* Message */}
             <TText style={styles.text}>
                 {props.message}
@@ -79,9 +81,9 @@ const styles = StyleSheet.create({
     },
     modal: {
         alignItems: 'center',
-        backgroundColor: ThemeDefaults.themeOrange,
+        backgroundColor: '#D9672B',
         borderWidth: 2,
-        borderColor: ThemeDefaults.themeOrange,
+        borderColor: '#D9672B',
         borderRadius: 15,
         overflow: 'hidden',
     },
@@ -98,6 +100,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: ThemeDefaults.themeWhite,
         width: '100%',
+        // padding: 10,
         justifyContent: 'space-evenly',
         alignItems: 'center',
     },
