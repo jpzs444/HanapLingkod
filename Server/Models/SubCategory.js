@@ -7,4 +7,9 @@ const serviceSubCategorySchema = mongoose.Schema({
   ServiceSubCategory: { type: String, required: true },
 });
 
+serviceSubCategorySchema.pre("find", function (next) {
+  this.populate("ServiceID");
+  next();
+});
+
 module.exports = mongoose.model("ServiceSubCategory", serviceSubCategorySchema);
