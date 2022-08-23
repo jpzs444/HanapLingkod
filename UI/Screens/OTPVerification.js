@@ -48,6 +48,7 @@ export default function OTPVerification({route}) {
             console.log('auth successful.. going to home screen');
             navigation.navigate("WelcomeScreen", {role: role});
             setCode('');
+            setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
         })
         .catch((error) => {
             alert(error);
@@ -110,7 +111,7 @@ export default function OTPVerification({route}) {
                     maxLength={1}
                     onChangeText={(val) => {
                         // setotpNum((prev) => ({...prev, n1: val}))
-                        setCode((prev) => prev + val)
+                        setCode((prev) => `${prev}${val}`)
                     }}
                     onKeyPress={({nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -131,7 +132,8 @@ export default function OTPVerification({route}) {
                     maxLength={1}
                     onChangeText={(val) => {
                         // setotpNum((prev) => ({...prev, n2: val}))
-                        setCode((prev) => prev + val)
+                        setCode((prev) => `${prev}${val}`)
+
                     }}
                     onKeyPress={( {nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -153,7 +155,7 @@ export default function OTPVerification({route}) {
                     maxLength={1}
                     onChangeText={(val) => {
                         // setotpNum((prev) => ({...prev, n3: val}))
-                        setCode((prev) => prev + val)
+                        setCode((prev) => `${prev}${val}`)
                     }}
                     onKeyPress={( {nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -175,7 +177,8 @@ export default function OTPVerification({route}) {
                     maxLength={1}
                     onChangeText={(val) => {
                         // setotpNum((prev) => ({...prev, n4: val}))
-                        setCode((prev) => prev + val)
+                        setCode((prev) => `${prev}${val}`)
+
                     }}
                     onKeyPress={( {nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -197,7 +200,8 @@ export default function OTPVerification({route}) {
                     maxLength={1}
                     onChangeText={(val) => {
                         // setotpNum((prev) => ({...prev, n5: val}))
-                        setCode((prev) => prev + val)
+                        setCode((prev) => `${prev}${val}`)
+
                     }}
                     onKeyPress={({nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -219,7 +223,8 @@ export default function OTPVerification({route}) {
                     maxLength={1}
                     onChangeText={(val) => {
                         // setotpNum((prev) => ({...prev, n6: val}))
-                        setCode((prev) => prev + val)
+                        setCode((prev) => `${prev}${val}`)
+
                     }}
                     onKeyPress={({nativeEvent: {key: keyValue}}) => {
                         if(keyValue === 'Backspace'){
@@ -269,8 +274,8 @@ export default function OTPVerification({route}) {
             </View>
         </View>
 
-        <View>
-            <TText>{otpNum.n1} {otpNum.n2} {otpNum.n3} {otpNum.n4} {otpNum.n5} {otpNum.n6}</TText>
+        <View style={{marginBottom: 100}}>
+            <TText>{code}</TText>
         </View>
 
     </SafeAreaView>
