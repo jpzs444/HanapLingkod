@@ -10,6 +10,9 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { ModalPicker } from '../Components/ModalPicker';
 
 import * as ImagePicker from 'expo-image-picker';
+import { AssetsSelector } from 'expo-images-picker';
+// import ImagePicker from 'react-native-image-crop-picker';
+import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 
 import dayjs from 'dayjs';
@@ -19,22 +22,24 @@ import ConfirmDialog from '../Components/ConfirmDialog';
 
 import ThemeDefaults from '../Components/ThemeDefaults';
 import ModalDialog from '../Components/ModalDialog';
+import ImagesPicker from '../Components/ImagesPicker';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
-export default function RecruiterRegistration({route}) {
+export default function Registration({route}) {
 
     const {userType} = route.params;
 
     const navigation = useNavigation();
     
     const [user, setUser] = useState({
-      username: "", password: "", firstname: "", middlename: "",
+      username: "", password: "", firstname: "",
       lastname: "", birthday: "", age: "", gender: "", street: "",
-      purok: "", barangay: "", city: "", province: "", phonenumber: "", image: '',
-      role: userType, workDescription: "", lowestPrice: "", highestPrice: "",
+      purok: "", barangay: "", city: "Daet", province: "Camarines Norte", phonenumber: "",
+      role: userType,
     })
+
 
     const [next, setNext] = useState(1)
     const [nextNum, setNextNum] = useState(1)
@@ -67,7 +72,8 @@ export default function RecruiterRegistration({route}) {
     const [datePickerVisible, setDatePickerVisibility] = useState(false);
 
     const handleServiceAdd = () => {
-      setServices([...services, {service: ""}])
+      setServices([...services, {service: "", lowestPrice: "", highestPrice: ""}])
+      haveBlanks()
     }
 
     const handleServiceChange = (val, index) => {
@@ -85,6 +91,8 @@ export default function RecruiterRegistration({route}) {
         list[index]['service'] = val;
       }
       setServices(list)
+      haveBlanks()
+
       console.log(services)
     }
 
@@ -93,7 +101,8 @@ export default function RecruiterRegistration({route}) {
       const list = [...services];
       list[index]['lowestPrice'] = val;
       setServices(list)
-      console.log(services)
+      console.log("lowPrice: ", services)
+      haveBlanks()
     }
 
     const handleServiceHighPrice = (val, index) => {
@@ -101,37 +110,68 @@ export default function RecruiterRegistration({route}) {
       const list = [...services];
       list[index]['highestPrice'] = val;
       setServices(list)
-      console.log(services)
+      console.log("highPrice: ", services)
+      haveBlanks()
     }
 
     const handleServiceUnlisted = (val, index) => {
       const list = [...services];
       list[index]['service'] = val
       setServices(list)
-      console.log(services)
+      console.log("unlisted: ", services)
+      haveBlanks()
     }
 
     const handleServiceRemove = (index) => {
       const list = [...services];
+      console.log(list)
       list.splice(index, 1);
       setServices(list)
-      console.log(services)
+      console.log(list)
 
       haveBlanks()
     }
 
+    const handleRemoveImage = (index) => {
+      const list = [...image]
+
+      list.splice(index, 1)
+      console.log(list)
+      
+      setImage(list)
+    }
+
     const haveBlanks = () => {
-      if(services.some(item => item.service === "" || item.lowestPrice === "" || item.highestPrice === "")){
-        sethasBlanks(true)
-      } else {sethasBlanks(false)}
+      let arr = Object.values(services)      
+      let arrUser = Object.values(user)
+      let arrUser2 = Object.values(arrUser)
+      let userJ, job;
+      console.log("arr: ", arr)
+      console.log("arrUser: ", Object.values(arrUser2))
+      for(let el of arr){
+        job = Object.values(el).includes("") ? 0 : 1
+      }
+      for(let el of arrUser2){
+        userJ = arrUser2.includes("") ? 0 : 1
+      }
+
+      if(user.role == "recruiter"){
+        userJ ? sethasBlanks(false) : sethasBlanks(true)
+        // console.log("userJ: ", r)
+      } else (job+userJ) === 2 ? sethasBlanks(true) : sethasBlanks(false)
+      console.log(job + " " + userJ)
     }
 
     const setData = (option) => {
       setchooseData(option)
+      setUser((prev) => ({...prev, gender: option}))
+      haveBlanks()
     }
 
     const setBarangay = (option) => {
       setchooseBarangay(option)
+      setUser((prev) => ({...prev, barangay: option}))
+      haveBlanks()
     }
 
     const setServiceOffered = (option) => {
@@ -161,19 +201,26 @@ export default function RecruiterRegistration({route}) {
       setDisplayDate(dayjs(date).format("MMM D, YYYY"));
       setDatePickerVisibility(false);
       setSelected(true)
+
+      setUser((prev) => ({...prev, birthday: formatedDate}))
+
+      haveBlanks()
       console.log(displayDate)
     };
 
     // OPEN IMAGE PICKER
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState([]);
+    const [imagelicense, setLicenseImage] = useState([]);
     const [imageW, setImageW] = useState(Number);
     const [imageH, setImageH] = useState(Number);
+    let imageList = [];
 
     useEffect(() => {
       (async () => {
         if (Platform.OS !== "web") {
           const { status } =
             await ImagePicker.requestMediaLibraryPermissionsAsync();
+            // await ImagePicker.requestCameraPermissionsAsync();
           if (status !== "granted") {
             alert("Sorry, we need camera roll permissions to make this work!");
           }
@@ -182,19 +229,22 @@ export default function RecruiterRegistration({route}) {
     }, []);
 
     const pickImage = async () => {
+
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        quality: 1,
+        // mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        // selectionLimit: 1, // ios only
+        aspect: [4,3],
+        quality: 0.5,
       });
 
-      console.log(result);
+      console.log("selected", result.selected);
 
       if (!result.cancelled) {
-        setImage(result.uri);
-        setImageW(result.width);
-        setImageH(result.height);
+        if(next === 3) setLicenseImage([...result.selected])
+        else setImage([...result.selected])
       }
+      console.log("Image state: ", image)
     };
 
     // references for textinput onSubmit
@@ -352,7 +402,9 @@ export default function RecruiterRegistration({route}) {
                                 keyboardType={'default'}
                                 returnKeyType={"next"}
                                 textContentType={'purok'}
-                                onChangeText={ (val) => handleServiceUnlisted(val, index) }
+                                onChangeText={ (val) => {handleServiceUnlisted(val, index)
+                                  haveBlanks()
+                                } }
                                 onSubmitEditing={ () => ref_cpw.current.focus() }
                                 ref={ref_pw} />
                             </View> 
@@ -363,10 +415,13 @@ export default function RecruiterRegistration({route}) {
                             <TextInput style={styles.input} 
                               placeholder={"Lowest Price"}
                               placeholderTextColor={"#A1A1A1"}
+                              value={serviceOffered.lowestPrice ? serviceOffered.lowestPrice : ""}
                               keyboardType={'numeric'}
                               returnKeyType={"next"}
                               textContentType={'price'}
-                              onChangeText={ (val) => handleServiceLowPrice(val, index) }
+                              onChangeText={ (val) => {handleServiceLowPrice(val, index)
+                                haveBlanks()
+                              } }
                               ref={ref_pw} />
                         </View>
 
@@ -375,10 +430,14 @@ export default function RecruiterRegistration({route}) {
                           <TextInput style={styles.input} 
                             placeholder={"Highest Price"}
                             placeholderTextColor={"#A1A1A1"}
+                            value={serviceOffered.highestPrice ? serviceOffered.highestPrice : ""}
                             keyboardType={'numeric'}
                             returnKeyType={"next"}
                             textContentType={'price'}
-                            onChangeText={ (val) => handleServiceHighPrice(val, index) }
+                            onChangeText={ (val) => {
+                              handleServiceHighPrice(val, index);
+                              haveBlanks()
+                            } }
                             ref={ref_cpw} />
                         </View>
                       </View>
@@ -389,6 +448,7 @@ export default function RecruiterRegistration({route}) {
                           <TouchableOpacity style={{width: 60, height: 60, borderRadius: 30, backgroundColor: '#595959', alignItems: 'center', justifyContent: 'center' ,marginBottom: 15}}
                             onPress={() => {
                               handleServiceAdd()
+                              haveBlanks()
                             }}
                           >
                             <Icon name='plus' size={30} color={'white'} />
@@ -401,7 +461,7 @@ export default function RecruiterRegistration({route}) {
                 }
                 
                 {
-                  hasBlanks ? 
+                  !hasBlanks ? 
                   <View style={{marginTop: '8%', marginBottom: '0%'}}>
                     <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>* Please fill in the required fields.</TText>
                   </View> : null
@@ -409,11 +469,12 @@ export default function RecruiterRegistration({route}) {
 
                 <View style={[styles.confirm, {width: '90%'}]}>
                   {/* Create Account Button */}
-                    <TouchableOpacity style={styles.confirmBtn} 
+                    <TouchableOpacity style={[styles.confirmBtn, {backgroundColor: hasBlanks ? ThemeDefaults.themeOrange : 'rgba(140, 130, 126, 0.2)', elevation: hasBlanks ? 3 : 0}]} 
+                      disabled={!hasBlanks ? true : false}
                       onPress={() => {
                         console.log("confirm from worker information work description")
                         haveBlanks()
-                        if(!hasBlanks){
+                        if(hasBlanks){
                           setShowDialog(true)
                         }
                         
@@ -475,7 +536,10 @@ export default function RecruiterRegistration({route}) {
                       textAlignVertical: 'top',
                     }]}
                     defaultValue={user.workDescription}
-                    onChangeText={ (val) => setUser((prev) => ({...prev, workDescription: val})) }
+                    onChangeText={ (val) => {
+                      setUser((prev) => ({...prev, workDescription: val}))
+                      haveBlanks()
+                    } }
                   />
                   </View>
                 </View>
@@ -493,6 +557,29 @@ export default function RecruiterRegistration({route}) {
                     </TouchableOpacity>
                   </View>
                 </View>
+                </View>
+
+                <View style={{width: '100%', alignItems: 'center', pading: 15, marginTop: 30,}}>
+                    <TText style={{alignSelf: 'flex-start', marginLeft: '12%'}}>Uploaded License Images:</TText>
+                {
+                  imagelicense.map(function(item, index) {
+                      console.log("item: ", item)
+                      {/* console.log("image length: ", item.length) */}
+                      console.log("index: ", index)
+                      console.log("image uri: ", item.uri)
+                      return (
+                        <View key={index} style={{borderWidth: 1, borderColor: 'lightgray', padding: 3, marginTop: 15}}>
+                            <TouchableOpacity 
+                              onPress={()=> handleRemoveImage(index)}
+                              style={{justifyContent: 'flex-end', position: 'absolute', top: 10, right: 10, zIndex: 5, borderWidth: 2, borderColor: ThemeDefaults.themeOrange, borderRadius: 30, backgroundColor: ThemeDefaults.themeOrange }}>
+                              <Icon name="close-circle" size={25} color={'white'} style={{paddingHorizontal: 10, paddingVertical: 2}} />
+                            </TouchableOpacity>
+                          <Image source={{uri: item.uri}} style={{width: 400, height: item.height > 3800 ? item.height / 4 : 300, marginBottom: 20}} />
+                        </View>
+                      )
+                        return <Image key={index} source={{uri: item.uri}} style={{width: 300, height: 250, padding: 15, marginTop: 15}} />                      
+                    })
+                  }
                 </View>
 
                 {/* Next Button */}
@@ -522,9 +609,13 @@ export default function RecruiterRegistration({route}) {
                     <TextInput style={styles.input} 
                       placeholder={"Street"}
                       placeholderTextColor={"#A1A1A1"}
+                      value={user.street}
                       returnKeyType={"next"}
                       textContentType={'street'}
-                      onChangeText={ (val) => setUser((prev) => ({...prev, street: val})) }
+                      onChangeText={ (val) => {
+                        setUser((prev) => ({...prev, street: val}))
+                        haveBlanks()
+                      } }
                       onSubmitEditing={ () => ref_pw.current.focus() } />
                 </View>
 
@@ -535,9 +626,13 @@ export default function RecruiterRegistration({route}) {
                     <TextInput style={styles.input} 
                       placeholder={"Purok"}
                       placeholderTextColor={"#A1A1A1"}
+                      value={user.purok}
                       returnKeyType={"next"}
                       textContentType={'purok'}
-                      onChangeText={ (val) => setUser((prev) => ({...prev, purok: val})) }
+                      onChangeText={ (val) => {
+                        setUser((prev) => ({...prev, purok: val}))
+                        haveBlanks()
+                      } }
                       onSubmitEditing={ () => ref_cpw.current.focus() }
                       ref={ref_pw} />
                   </View>
@@ -592,7 +687,10 @@ export default function RecruiterRegistration({route}) {
                       editable={false}
                       returnKeyType={"next"}
                       textContentType={'firstname'}
-                      onChangeText={ (val) => setUser((prev) => ({...prev, city: val})) }
+                      onChangeText={ (val) => {
+                        setUser((prev) => ({...prev, city: val}))
+                        haveBlanks()
+                      } }
                       onSubmitEditing={ () => ref_mn.current.focus() }
                       ref={ref_fn} />
                   </View>
@@ -607,7 +705,10 @@ export default function RecruiterRegistration({route}) {
                       editable={false}
                       returnKeyType={"next"}
                       textContentType={'middlename'}
-                      onChangeText={ (val) => setUser((prev) => ({...prev, province: val})) }
+                      onChangeText={ (val) => {
+                        setUser((prev) => ({...prev, province: val}))
+                        haveBlanks()
+                      } }
                       onSubmitEditing={ () => ref_ln.current.focus() }
                       ref={ref_mn} />
                   </View>
@@ -623,7 +724,10 @@ export default function RecruiterRegistration({route}) {
                     keyboardType={'phone-pad'}
                     returnKeyType={"next"}
                     textContentType={'lastname'}
-                    onChangeText={ (val) => setUser((prev) => ({...prev, phonenumber: val})) }
+                    onChangeText={ (val) => {
+                      setUser((prev) => ({...prev, phonenumber: val}))
+                      haveBlanks()
+                    } }
                     onSubmitEditing={ () => ref_bd.current.focus() }
                     ref={ref_ln} />
                 </View>
@@ -631,17 +735,42 @@ export default function RecruiterRegistration({route}) {
                 <View style={{width: '80%', marginTop: 10}}>
                   <TText style={{fontSize: 18}}>Government Issued ID(s):</TText>
                   <TouchableOpacity 
-                    onPress={pickImage}
+                    onPress={
+                      pickImage
+                    }
                     style={{alignItems: 'center', marginTop: 20, backgroundColor: '#F4F4F4', paddingVertical: 30, borderRadius: 15, elevation: 2}}
                     >
                     <Icon name="camera-plus" size={40} color={"#E7745D"} style={{marginBottom: 10}} />
                     <TText>Attach photo(s) here</TText>
                   </TouchableOpacity>
+                
                 </View>
 
-                <View>
-                  {image && <Image source={{uri: image}} style={{marginTop: 30, width: imageW / 4, height: imageH / 4}} />}
+                <View style={{width: '100%', alignItems: 'center', pading: 15, marginTop: 30,}}>
+                {
+                    image.map(function(item, index) {
+                      console.log("item: ", item)
+                      {/* console.log("image length: ", item.length) */}
+                      console.log("index: ", index)
+                      console.log("image uri: ", item.uri)
+                      return (
+                        <View key={index}>
+                            <TouchableOpacity 
+                              onPress={()=> handleRemoveImage(index)}
+                              style={{justifyContent: 'flex-end', position: 'absolute', top: 10, right: 10, zIndex: 2, borderWidth: 2, borderColor: ThemeDefaults.themeOrange, borderRadius: 30, backgroundColor: ThemeDefaults.themeOrange }}>
+                              <Icon name="close-circle" size={25} color={'white'} style={{paddingHorizontal: 10, paddingVertical: 2}} />
+                            </TouchableOpacity>
+                          <Image source={{uri: item.uri}} style={{width: 400, height: item.height > 3800 ? item.height / 4 : 300, marginBottom: 20}} />
+                        </View>
+                      )
+                        return <Image key={index} source={{uri: item.uri}} style={{width: 300, height: 250, padding: 15, marginTop: 15}} />                      
+                    })
+                  }
                 </View>
+                {/* <View>
+                  {image && <Image source={{uri: image}} style={{marginTop: 30, width: imageW / 4, height: imageH / 4}} />}
+                </View> */}
+
               </View>
 
               {
@@ -662,8 +791,12 @@ export default function RecruiterRegistration({route}) {
                   :
                   <View style={styles.confirm}>
                   {/* Create Account Button */}
-                    <TouchableOpacity style={styles.confirmBtn} 
-                      onPress={() => setShowDialog(true)}
+                    <TouchableOpacity style={[styles.confirmBtn, {backgroundColor: !hasBlanks ? ThemeDefaults.themeOrange : 'rgba(140, 130, 126, 0.2)', elevation: !hasBlanks ? 3 : 0}]}  
+                      disabled={!hasBlanks ? false : true}
+                      onPress={() => {
+                        // haveBlanks()
+                        haveBlanks ? setShowDialog(true) : null
+                      }}
                     >
                       <TText style={{fontFamily: 'LexendDeca_SemiBold', fontSize: 18, color: ThemeDefaults.themeWhite}}
                         >Create Account</TText>
@@ -674,7 +807,7 @@ export default function RecruiterRegistration({route}) {
               
               {/* Checks if the user confirms the creation of his/her account  */}
               {
-                isConfirmed ? navigation.navigate("OTPVerification", {phoneNum: user.phonenumber}) : null
+                isConfirmed ? navigation.navigate("OTPVerification", {phoneNum: user.phonenumber, role: user.role}) : null
               }
 
               {/* show confirm create account dialog */}
@@ -714,6 +847,7 @@ export default function RecruiterRegistration({route}) {
                   textContentType={'username'}
                   onChangeText={ (val) => {
                     setUser((prev) => ({...prev, username: val}))
+                    haveBlanks()
                     } }
                   onSubmitEditing={ () => ref_pw.current.focus() } />
               </View>
@@ -729,7 +863,10 @@ export default function RecruiterRegistration({route}) {
                   returnKeyType={"next"}
                   secureTextEntry={true}
                   textContentType={'password'}
-                  onChangeText={ (val) => setUser((prev) => ({...prev, password: val})) }
+                  onChangeText={ (val) => {
+                    setUser((prev) => ({...prev, password: val}))
+                    haveBlanks()
+                  } }
                   onSubmitEditing={ () => ref_cpw.current.focus() }
                   ref={ref_pw} />
               </View>
@@ -756,7 +893,10 @@ export default function RecruiterRegistration({route}) {
                   value={user.firstname ? user.firstname : null}
                   returnKeyType={"next"}
                   textContentType={'firstname'}
-                  onChangeText={ (val) => setUser((prev) => ({...prev, firstname: val})) }
+                  onChangeText={ (val) => {
+                    setUser((prev) => ({...prev, firstname: val}))
+                    haveBlanks()
+                  } }
                   onSubmitEditing={ () => ref_mn.current.focus() }
                   ref={ref_fn} />
               </View>
@@ -770,7 +910,10 @@ export default function RecruiterRegistration({route}) {
                   value={user.middlename ? user.middlename : null}
                   returnKeyType={"next"}
                   textContentType={'middlename'}
-                  onChangeText={ (val) => setUser((prev) => ({...prev, middlename: val})) }
+                  onChangeText={ (val) => {
+                    setUser((prev) => ({...prev, middlename: val}))
+                    haveBlanks()
+                  }}
                   onSubmitEditing={ () => ref_ln.current.focus() }
                   ref={ref_mn} />
               </View>
@@ -784,7 +927,10 @@ export default function RecruiterRegistration({route}) {
                   value={user.lastname ? user.lastname : null}
                   returnKeyType={"next"}
                   textContentType={'lastname'}
-                  onChangeText={ (val) => setUser((prev) => ({...prev, lastname: val})) }
+                  onChangeText={ (val) => {
+                      setUser((prev) => ({...prev, lastname: val}))
+                      haveBlanks()
+                  }}
                   ref={ref_ln} />
               </View>
               
@@ -818,7 +964,10 @@ export default function RecruiterRegistration({route}) {
                     keyboardType={'numeric'}
                     returnKeyType={"next"}
                     textContentType={'age'}
-                    onChangeText={ (val) => setUser((prev) => ({...prev, age: val})) }
+                    onChangeText={ (val) => {
+                      setUser((prev) => ({...prev, age: val}))
+                      haveBlanks()
+                    } }
                     ref={ref_age} />
                 </View>
                 <View style={styles.sexView}>

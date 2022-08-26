@@ -72,7 +72,7 @@ export default function RegisterUserAccountType() {
           style={styles.nextBtn}
           onPress={()=> { 
             console.log(accType) 
-            navigation.navigate("RegisterRecruiter", {userType: accType})
+            navigation.navigate("Register", {userType: accType})
             // else if(accType === "worker") navigation.navigate("")
           }}
         >
