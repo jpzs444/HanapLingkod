@@ -21,7 +21,17 @@ const ServiceSubCategoryRoutes = require("./Routes/ServiceSubCategory");
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-mongoose.connect("mongodb://localhost:27017/hanapLingkod");
+mongoose.connect(
+  "mongodb+srv://<username>:<password>@cluster0.2anjoo0.mongodb.net/?retryWrites=true&w=majority"
+);
+
+const conn = mongoose.connection;
+
+conn.on("error", () => console.error.bind(console, "connection error"));
+
+conn.once("open", () => console.info("Connection to Database is successful"));
+
+module.exports = conn;
 
 //store photos
 const storage = multer.diskStorage({
@@ -81,41 +91,41 @@ app.post(
   Check.ifWorkerExist,
   multipleFile,
   async (req, res) => {
+    const session = await conn.startSession();
+
     try {
+      session.startTransaction();
+
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
-      const worker = new Worker({
-        username: req.body.username,
-        password: hashedPassword,
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        middlename: req.body.middlename,
-        birthday: req.body.birthday,
-        age: req.body.age,
-        sex: req.body.sex,
-        street: req.body.street,
-        purok: req.body.purok,
-        barangay: req.body.barangay,
-        city: req.body.city,
-        province: req.body.province,
-        phoneNumber: req.body.phoneNumber,
-        emailAddress: req.body.emailAddress,
-        profilePic: "pic",
-        GovId: req.files.govId[0].filename,
-        licenseCertificate: req.files.certificate[0].filename,
-        role: "worker",
-        verification: false,
-        accountStatus: "active",
-      });
-
-      worker.save((err) => {
-        if (err) {
-          console.log(err);
-          res.status(500);
-        } else {
-          console.log("c");
-        }
-      });
+      const worker = await Worker.create(
+        [
+          {
+            username: req.body.username,
+            password: hashedPassword,
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            middlename: req.body.middlename,
+            birthday: req.body.birthday,
+            age: req.body.age,
+            sex: req.body.sex,
+            street: req.body.street,
+            purok: req.body.purok,
+            barangay: req.body.barangay,
+            city: req.body.city,
+            province: req.body.province,
+            phoneNumber: req.body.phoneNumber,
+            emailAddress: req.body.emailAddress,
+            profilePic: "pic",
+            GovId: req.files.govId[0].filename,
+            licenseCertificate: req.files.certificate[0].filename,
+            role: "worker",
+            verification: false,
+            accountStatus: "active",
+          },
+        ],
+        { session }
+      );
 
       let serviceSubCategoryID;
       if (req.body.Category == "unlisted") {
@@ -123,42 +133,47 @@ app.post(
           { Category: "unlisted" },
           { Category: 0 }
         );
-        const serviceSubCategory = new ServiceSubCategory({
-          ServiceID: query._id,
-          ServiceSubCategory: req.body.ServiceSubCategory,
-        });
-        serviceSubCategory.save((err) => {
-          if (err) {
-            console.log(err);
-            res.status(500);
-          } else {
-            console.log("SubCategory Created");
-          }
-        });
-        serviceSubCategoryID = serviceSubCategory.id;
+        const serviceSubCategory = await ServiceSubCategory.create(
+          [
+            {
+              ServiceID: query._id,
+              ServiceSubCategory: req.body.ServiceSubCategory,
+            },
+          ],
+          { session }
+        );
+
+        serviceSubCategoryID = serviceSubCategory[0].id;
       } else {
         console.log("asd");
         let result = await ServiceSubCategory.findOne(
           { ServiceSubCategory: req.body.ServiceSubCategory },
-          { ServiceSubCategory: 0, ServiceID: 0 }
+          { ServiceSubCategory: 0, ServiceID: 0 },
+          { session }
         );
         serviceSubCategoryID = result._id;
       }
+      console.log(serviceSubCategoryID);
+      const work = await Work.create(
+        [
+          {
+            ServiceSubCode: serviceSubCategoryID,
+            workerId: worker.id,
+            minPrice: req.body.minPrice,
+            maxPrice: req.body.maxPrice,
+          },
+        ],
+        { session }
+      );
 
-      const work = new Work({
-        ServiceSubCode: serviceSubCategoryID,
-        workerId: worker.id,
-        minPrice: req.body.minPrice,
-        maxPrice: req.body.maxPrice,
-      });
-      work.save((err) => {
-        if (err) {
-          console.log(err);
-        } else {
-          res.send("Worker account created");
-        }
-      });
-    } catch {
+      await session.commitTransaction();
+      console.log("success");
+      res.send("Succesfully Created");
+    } catch (err) {
+      console.log(err);
+
+      await session.abortTransaction();
+
       res.status(500).send();
     }
   }
