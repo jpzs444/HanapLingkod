@@ -18,6 +18,7 @@ router
     console.time();
     result.map(async (id) => {
       await ServiceSubCategory.deleteMany({ _id: id });
+      console.log("asd");
     });
     console.timeEnd();
 
@@ -28,7 +29,7 @@ router
   .post(function (req, res) {
     const SubCategory = new ServiceSubCategory({
       ServiceID: req.body.ServiceID,
-      ServiceSubCategory: req.body.try1,
+      ServiceSubCategory: req.body.subCategory,
     });
     SubCategory.save(function (err) {
       if (!err) {
