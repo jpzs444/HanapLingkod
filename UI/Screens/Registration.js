@@ -23,6 +23,8 @@ import ConfirmDialog from '../Components/ConfirmDialog';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import ModalDialog from '../Components/ModalDialog';
 import ImagesPicker from '../Components/ImagesPicker';
+import { IPAddress } from '../global/global';
+import OTPVerification from './OTPVerification';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -34,12 +36,25 @@ export default function Registration({route}) {
     const navigation = useNavigation();
     
     const [user, setUser] = useState({
-      username: "", password: "", firstname: "",
+      username: "", password: "", email: "", firstname: "",
       lastname: "", birthday: "", age: "", gender: "", street: "",
-      purok: "", barangay: "", city: "Daet", province: "Camarines Norte", phonenumber: "",
+      purok: "", barangay: "", city: "Daet", province: "Camarines Norte", phonenumber: "+63",
       role: userType,
     })
 
+    const [confirmPW, setConfirmPW] = useState("")
+    const [pwMatch, setPWMatch] = useState(true);
+
+    useEffect(() => {
+      user.password === confirmPW ? setPWMatch(true) : setPWMatch(false)
+    }, [confirmPW, user.password])
+
+    const [placeholderPhoneNum, setPlaceholderPhoneNum] = useState("Phone Number")
+    const [phoneVerified, setPhoneVerified] = useState(false);
+
+    const handlePhoneVerification = (isverified) => {
+      setPhoneVerified(isverified)
+    }
 
     const [next, setNext] = useState(1)
     const [nextNum, setNextNum] = useState(1)
@@ -76,19 +91,41 @@ export default function Registration({route}) {
       haveBlanks()
     }
 
+    const handleServiceSelect = (val, index) => {
+      // const {value} = val.value;
+      const list = [...services];
+      console.log("val handle service: ", val)
+
+      if(val.sub_category === "unlisted"){
+        list[index]['category'] = 'unlisted'
+      } else {
+        console.log("val: ", val.Category)
+  
+        list[index]['service'] = val.ServiceSubCategory;
+        list[index]['category'] = val.ServiceID.Category;
+        setServices(list)
+      }
+      haveBlanks()
+
+      console.log(services)
+    }
+
     const handleServiceChange = (val, index) => {
       // const {value} = val.value;
       const list = [...services];
-      if (val === "Unlisted (Add new subcategory)"){
+      if (val.sub_category === "Unlisted (Add new subcategory)"){
         list[index]['status'] = "unlisted";
-        list[index]['service'] = ""
+        list[index]['service'] = "";
+        list[index]['category'] = "";
         setUnlistedModalVisible(true)
       } else {
         if (list[index]['status'] === "unlisted"){
-          list[index]['service'] = val;
+          list[index]['service'] = val.sub_category;
           list[index]['status'] = "";
+          list[index]['category'] = "";
         }
-        list[index]['service'] = val;
+        list[index]['service'] = val.sub_category;
+        list[index]['category'] = val.category;
       }
       setServices(list)
       haveBlanks()
@@ -145,18 +182,33 @@ export default function Registration({route}) {
       let arr = Object.values(services)      
       let arrUser = Object.values(user)
       let arrUser2 = Object.values(arrUser)
-      let userJ, job;
+      let userJ = 1, job;
+
       console.log("arr: ", arr)
       console.log("arrUser: ", Object.values(arrUser2))
+
       for(let el of arr){
         job = Object.values(el).includes("") ? 0 : 1
       }
+
       for(let el of arrUser2){
-        userJ = arrUser2.includes("") ? 0 : 1
+        console.log("el of arrUser2: ", el)
+        // userJ = el.includes("") ? 0 : 1
+        if(el.length === 0){
+          userJ = 0
+        } 
       }
 
       if(user.role == "recruiter"){
-        userJ ? sethasBlanks(false) : sethasBlanks(true)
+        if(userJ === 1) {
+          sethasBlanks(false)
+          // setShowDialog(true)
+        } else {
+          sethasBlanks(true)
+          // show modal/error message to not leave any form "unasnswered"
+          // setShowDialog(false)
+        }
+
         // console.log("userJ: ", r)
       } else (job+userJ) === 2 ? sethasBlanks(true) : sethasBlanks(false)
       console.log(job + " " + userJ)
@@ -197,7 +249,8 @@ export default function Registration({route}) {
     // }
 
     const handleConfirm = (date) => {
-      setFormatedDate(dayjs(date).format("YYYY-MM-DD"));
+      let dateString = dayjs(date).format("YYYY-MM-DD").toString()
+      setFormatedDate(...dateString);
       setDisplayDate(dayjs(date).format("MMM D, YYYY"));
       setDatePickerVisibility(false);
       setSelected(true)
@@ -209,11 +262,28 @@ export default function Registration({route}) {
     };
 
     // OPEN IMAGE PICKER
+    // multi ID images
     const [image, setImage] = useState([]);
+    //single ID image
+    const [singleImage, setSingleImage] = useState('');
+    // multi license images
     const [imagelicense, setLicenseImage] = useState([]);
-    const [imageW, setImageW] = useState(Number);
-    const [imageH, setImageH] = useState(Number);
-    let imageList = [];
+    //single license image
+    const [imageSingleLicense, setSingleLicenseImage] = useState('');
+
+    // const [imageW, setImageW] = useState(Number);
+    // const [imageH, setImageH] = useState(Number);
+    // let imageList = [];
+
+    const [isPriceGreater, setIsPriceGreater] = useState(true)
+    useEffect(() => {
+      console.log("hp", services[0].highestPrice)
+      if(services[0].highestPrice > services[0].lowestPrice){
+        setIsPriceGreater(true)
+      } else {
+        setIsPriceGreater(false)
+      }
+    }, [services.lowestPrice, services.highestPrice])
 
     useEffect(() => {
       (async () => {
@@ -241,13 +311,30 @@ export default function Registration({route}) {
       console.log("selected", result.selected);
 
       if (!result.cancelled) {
-        if(next === 3) setLicenseImage([...result.selected])
-        else setImage([...result.selected])
+        if(!result.selected && next !== 3) {
+          setSingleImage(result.uri)
+          setImage([])
+        }
+        else if(next === 3) {
+          if(!result.selected) {
+            setSingleLicenseImage(result.uri)
+            setLicenseImage([])
+          }
+          else {
+            setLicenseImage([...result.selected])
+            setSingleLicenseImage("")
+          }
+        }
+        else {
+          setImage([...result.selected])
+          setSingleImage("")
+        }
       }
       console.log("Image state: ", image)
     };
 
     // references for textinput onSubmit
+    const ref_email = useRef();
     const ref_pw = useRef();
     const ref_cpw = useRef();
     const ref_fn = useRef();
@@ -277,7 +364,8 @@ export default function Registration({route}) {
             backBtn={true} hasPicture={false} 
             registration={true} 
             currentRegistrationScreen={nextNum} 
-            userType={userType} screenView={next}  />
+            userType={userType} 
+            screenView={next}  />
 
           {/* Page Header */}
           <View style={styles.header}>
@@ -370,8 +458,8 @@ export default function Registration({route}) {
                             styles={styles.dropdownBtn}
                           >
                           {
-                            serviceOffered.service || serviceOffered.status ?
-                              <TText style={[styles.ddText, {color:"#000"}]}>{serviceOffered.status ? "Unlisted" : serviceOffered.service}</TText>
+                            serviceOffered.service || serviceOffered.status || serviceOffered.category ?
+                              <TText style={[styles.ddText, {color:"#000"}]}>{serviceOffered.category ? "Unlisted" : serviceOffered.service}</TText>
                               : <TText style={[styles.ddText, {color:"#A1A1A1"}]}>Specific Service Offered</TText>
                           }
                           </TouchableOpacity>
@@ -383,7 +471,7 @@ export default function Registration({route}) {
                             >
                               <ModalPicker 
                                 changeModalVisibility={changeModalVisibility}
-                                setData={(val) => handleServiceChange(val, index)}
+                                setData={(val) => handleServiceSelect(val, index)}
                                 services={true}
                               />
                             </Modal>
@@ -392,7 +480,7 @@ export default function Registration({route}) {
                       </View>
                           
                       {
-                        serviceOffered.status === "unlisted" && 
+                        serviceOffered.category === "unlisted" && 
                           <View style={[styles.inputContainer, {width: '80%'}]}>
                               {/* {setUnlistedModalVisible(true)} */}
                               <Icon name='briefcase-outline' size={20} color={"#D0CCCB"} />
@@ -412,22 +500,23 @@ export default function Registration({route}) {
                       <View style={{flexDirection: 'row', width: '80%', justifyContent: 'space-between', alignItems: 'center'}}>
                         <View style={[styles.inputContainer, {width: '48%'}]}>
                             <Icon name='currency-php' size={20} color={"#D0CCCB"} />
-                            <TextInput style={styles.input} 
+                            <TextInput style={[styles.input, {color: isPriceGreater ? 'black' : ThemeDefaults.appIcon}]} 
                               placeholder={"Lowest Price"}
                               placeholderTextColor={"#A1A1A1"}
                               value={serviceOffered.lowestPrice ? serviceOffered.lowestPrice : ""}
                               keyboardType={'numeric'}
                               returnKeyType={"next"}
                               textContentType={'price'}
-                              onChangeText={ (val) => {handleServiceLowPrice(val, index)
+                              onChangeText={ (val) => {
+                                handleServiceLowPrice(val, index)
                                 haveBlanks()
-                              } }
+                              }}
                               ref={ref_pw} />
                         </View>
 
                         <View style={[styles.inputContainer, {width: '48%'}]}>
                           <Icon name='currency-php' size={20} color={"#D0CCCB"} />
-                          <TextInput style={styles.input} 
+                          <TextInput style={[styles.input, {color: isPriceGreater ? 'black' : ThemeDefaults.appIcon}]} 
                             placeholder={"Highest Price"}
                             placeholderTextColor={"#A1A1A1"}
                             value={serviceOffered.highestPrice ? serviceOffered.highestPrice : ""}
@@ -442,7 +531,7 @@ export default function Registration({route}) {
                         </View>
                       </View>
                   
-                      {
+                      {/* {
                         services.length - 1 === index &&
                           <View style={{alignItems: 'center', marginTop: 150}}>
                           <TouchableOpacity style={{width: 60, height: 60, borderRadius: 30, backgroundColor: '#595959', alignItems: 'center', justifyContent: 'center' ,marginBottom: 15}}
@@ -455,7 +544,7 @@ export default function Registration({route}) {
                           </TouchableOpacity>
                           <TText style={{width: 130, textAlign: 'center'}}>Add another service offered</TText>
                         </View>
-                      }
+                      } */}
                     </View>
                   ))
                 }
@@ -463,14 +552,15 @@ export default function Registration({route}) {
                 {
                   !hasBlanks ? 
                   <View style={{marginTop: '8%', marginBottom: '0%'}}>
-                    <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>* Please fill in the required fields.</TText>
+                    <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{ !hasBlanks ? "* Please fill in the required fields." : null}</TText>
+                    <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{ !pwMatch ? "* Passwords does not match" : null}</TText>
                   </View> : null
                 }
 
                 <View style={[styles.confirm, {width: '90%'}]}>
                   {/* Create Account Button */}
-                    <TouchableOpacity style={[styles.confirmBtn, {backgroundColor: hasBlanks ? ThemeDefaults.themeOrange : 'rgba(140, 130, 126, 0.2)', elevation: hasBlanks ? 3 : 0}]} 
-                      disabled={!hasBlanks ? true : false}
+                    <TouchableOpacity style={[styles.confirmBtn, {backgroundColor: hasBlanks && pwMatch ? ThemeDefaults.themeOrange : 'rgba(140, 130, 126, 0.2)', elevation: hasBlanks ? 3 : 0}]} 
+                      disabled={hasBlanks && pwMatch ? false : true}
                       onPress={() => {
                         console.log("confirm from worker information work description")
                         haveBlanks()
@@ -504,7 +594,7 @@ export default function Registration({route}) {
                 }
 
                 {
-                  isConfirmed ? navigation.navigate("OTPVerification", {phoneNum: user.phonenumber, role: user.role, user: user}) : null
+                  isConfirmed ? navigation.navigate("OTPVerification", {phoneNum: user.phonenumber, role: user.role, user: user, work: services, singleImage: singleImage, imagelicense: imageSingleLicense}) : null
                 }
 
               </View>
@@ -526,7 +616,7 @@ export default function Registration({route}) {
                       elevation: 3,
                   }}>
                   <TextInput multiline 
-                    placeholder='Write work description here..'
+                    placeholder='Describe what you do..'
                     style={[styles.inputMultiLine, {
                       fontSize: 18,
                       width: '100%',
@@ -561,25 +651,27 @@ export default function Registration({route}) {
 
                 <View style={{width: '100%', alignItems: 'center', pading: 15, marginTop: 30,}}>
                     <TText style={{alignSelf: 'flex-start', marginLeft: '12%'}}>Uploaded License Images:</TText>
-                {
-                  imagelicense.map(function(item, index) {
-                      console.log("item: ", item)
-                      {/* console.log("image length: ", item.length) */}
-                      console.log("index: ", index)
-                      console.log("image uri: ", item.uri)
-                      return (
-                        <View key={index} style={{borderWidth: 1, borderColor: 'lightgray', padding: 3, marginTop: 15}}>
-                            <TouchableOpacity 
-                              onPress={()=> handleRemoveImage(index)}
-                              style={{justifyContent: 'flex-end', position: 'absolute', top: 10, right: 10, zIndex: 5, borderWidth: 2, borderColor: ThemeDefaults.themeOrange, borderRadius: 30, backgroundColor: ThemeDefaults.themeOrange }}>
-                              <Icon name="close-circle" size={25} color={'white'} style={{paddingHorizontal: 10, paddingVertical: 2}} />
-                            </TouchableOpacity>
-                          <Image source={{uri: item.uri}} style={{width: 400, height: item.height > 3800 ? item.height / 4 : 300, marginBottom: 20}} />
-                        </View>
-                      )
-                        return <Image key={index} source={{uri: item.uri}} style={{width: 300, height: 250, padding: 15, marginTop: 15}} />                      
-                    })
-                  }
+                  {
+                    imageSingleLicense ? 
+                      <Image source={{uri: imageSingleLicense}} style={{width: 400, height: 300, marginVertical: 20}} />
+                    :
+                    imagelicense.map(function(item, index) {
+                        {/* console.log("item: ", item) */}
+                        {/* console.log("image length: ", item.length) */}
+                        {/* console.log("index: ", index) */}
+                        {/* console.log("image uri: ", item.uri) */}
+                        return (
+                          <View key={index} style={{padding: 3, marginTop: 15,}}>
+                              <TouchableOpacity 
+                                onPress={()=> handleRemoveImage(index)}
+                                style={{justifyContent: 'flex-end', position: 'absolute', top: 10, right: 10, zIndex: 5, borderWidth: 2, borderColor: ThemeDefaults.themeOrange, borderRadius: 30, backgroundColor: ThemeDefaults.themeOrange }}>
+                                <Icon name="close-circle" size={25} color={'white'} style={{paddingHorizontal: 10, paddingVertical: 2}} />
+                              </TouchableOpacity>
+                            <Image source={{uri: item.uri}} style={{width: 400, height: item.height > 3800 ? item.height / 4 : 300, marginBottom: 20}} />
+                          </View>
+                        )
+                      })
+                    }
                 </View>
 
                 {/* Next Button */}
@@ -615,7 +707,7 @@ export default function Registration({route}) {
                       onChangeText={ (val) => {
                         setUser((prev) => ({...prev, street: val}))
                         haveBlanks()
-                      } }
+                      }}
                       onSubmitEditing={ () => ref_pw.current.focus() } />
                 </View>
 
@@ -633,7 +725,7 @@ export default function Registration({route}) {
                         setUser((prev) => ({...prev, purok: val}))
                         haveBlanks()
                       } }
-                      onSubmitEditing={ () => ref_cpw.current.focus() }
+                      // onSubmitEditing={ () => ref_cpw.current.focus() }
                       ref={ref_pw} />
                   </View>
 
@@ -716,11 +808,15 @@ export default function Registration({route}) {
                 
                 {/* Phone Number input */}
                 <View style={styles.inputContainer}>
-                  <Icon name='phone-classic' size={23} color={"#D0CCCB"} />
+                  {/* <Icon name='phone-classic' size={23} color={"#D0CCCB"} /> */}
+                  <Image source={require("../assets/images/ph-flag.png")} style={{width: 25, height: 25, marginRight: 10}}/>
+                  <View style={{paddingRight: 12, borderRightWidth: 1}}>
+                    <TText>+63</TText>
+                  </View>
                   <TextInput style={styles.input} 
-                    placeholder={"Phone Number"}
+                    placeholder={placeholderPhoneNum}
                     placeholderTextColor={"#A1A1A1"}
-                    value={user.phonenumber}
+                    value={user.phonenumber.length > 3 ? user.phonenumber : null}
                     keyboardType={'phone-pad'}
                     returnKeyType={"next"}
                     textContentType={'lastname'}
@@ -728,7 +824,10 @@ export default function Registration({route}) {
                       setUser((prev) => ({...prev, phonenumber: val}))
                       haveBlanks()
                     } }
-                    onSubmitEditing={ () => ref_bd.current.focus() }
+                    onFocus={()=> {
+                      setPlaceholderPhoneNum("9123456789")
+                      }}
+                    // onSubmitEditing={ () => ref_bd.current.focus() }
                     ref={ref_ln} />
                 </View>
 
@@ -748,6 +847,9 @@ export default function Registration({route}) {
 
                 <View style={{width: '100%', alignItems: 'center', pading: 15, marginTop: 30,}}>
                 {
+                    singleImage ? 
+                      <Image source={{uri: singleImage}} style={{width: 400, height: 320, marginVertical: 20}} />
+                    :
                     image.map(function(item, index) {
                       console.log("item: ", item)
                       {/* console.log("image length: ", item.length) */}
@@ -763,7 +865,6 @@ export default function Registration({route}) {
                           <Image source={{uri: item.uri}} style={{width: 400, height: item.height > 3800 ? item.height / 4 : 300, marginBottom: 20}} />
                         </View>
                       )
-                        return <Image key={index} source={{uri: item.uri}} style={{width: 300, height: 250, padding: 15, marginTop: 15}} />                      
                     })
                   }
                 </View>
@@ -790,12 +891,23 @@ export default function Registration({route}) {
                   </View>
                   :
                   <View style={styles.confirm}>
+                      {/* Control Message */}
+                      <View style={{marginBottom: 15, opacity: hasBlanks ? 1 : 0}}>
+                        <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{haveBlanks ? "* Please fill in all the blanks" : null}</TText>
+                        <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{!pwMatch ? "* Passwords does not match" : null}</TText>
+                      </View>
                   {/* Create Account Button */}
                     <TouchableOpacity style={[styles.confirmBtn, {backgroundColor: !hasBlanks ? ThemeDefaults.themeOrange : 'rgba(140, 130, 126, 0.2)', elevation: !hasBlanks ? 3 : 0}]}  
-                      disabled={!hasBlanks ? false : true}
+                      disabled={hasBlanks && pwMatch ? true : false}
                       onPress={() => {
-                        // haveBlanks()
-                        haveBlanks ? setShowDialog(true) : null
+                        haveBlanks()
+                        setShowDialog(true);
+                        
+                        // createRecruiterAccount();
+
+                        // isConfirmed ? <OTPVerification verified={phoneVerified} handlePhoneVerification={handlePhoneVerification} /> : null
+                        // isConfirmed ? navigation.navigate("OTPVerification", {user: user, phoneNum: user.phonenumber, singleImage: singleImage, image: image})
+
                       }}
                     >
                       <TText style={{fontFamily: 'LexendDeca_SemiBold', fontSize: 18, color: ThemeDefaults.themeWhite}}
@@ -807,7 +919,7 @@ export default function Registration({route}) {
               
               {/* Checks if the user confirms the creation of his/her account  */}
               {
-                isConfirmed ? navigation.navigate("OTPVerification", {phoneNum: user.phonenumber, role: user.role}) : null
+                isConfirmed ? navigation.navigate("OTPVerification", {user: user, phoneNum: user.phonenumber, singleImage: singleImage, image: image}) : null
               }
 
               {/* show confirm create account dialog */}
@@ -840,7 +952,7 @@ export default function Registration({route}) {
                 <Icon name='account-circle' size={23} color={"#D0CCCB"} />
                 <TextInput style={styles.input} 
                   autoCapitalize={'none'}
-                  placeholder={"Username"}
+                  placeholder={"Username (eg. juan_dcruz, juanDC)"}
                   value={user.username ? user.username : null}
                   placeholderTextColor={"#A1A1A1"}
                   returnKeyType={"next"}
@@ -857,7 +969,7 @@ export default function Registration({route}) {
                 <Icon name='lock' size={23} color={"#D0CCCB"} /> 
                 <TextInput style={styles.input} 
                   autoCapitalize={'none'}
-                  placeholder={"Password"}
+                  placeholder={"Password (use atleast 8 combined letters and numbers..)"}
                   placeholderTextColor={"#A1A1A1"}
                   value={user.password ? user.password : null}
                   returnKeyType={"next"}
@@ -872,7 +984,7 @@ export default function Registration({route}) {
               </View>
               
               {/* Confirm Password input */}
-              <View style={styles.inputContainer}>
+              <View style={[styles.inputContainer, {marginBottom: pwMatch ? 0 : 4}]}>
                 <Icon name='lock' size={23} color={"#D0CCCB"} /> 
                 <TextInput style={styles.input} 
                   placeholder={"Confirm Password"}
@@ -880,8 +992,38 @@ export default function Registration({route}) {
                   returnKeyType={"next"}
                   secureTextEntry={true}
                   textContentType={'confirmpw'}
-                  onSubmitEditing={ () => ref_fn.current.focus() }
+                  onChangeText={(val) => {
+                    setConfirmPW(val)
+                    // setPWMatch([...user.password === confirmPW])
+                    console.log("pwMatch: ", pwMatch)
+                    console.log("confirmpw: ", confirmPW)
+                  }}
+                  onSubmitEditing={ () => ref_email.current.focus() }
                   ref={ref_cpw} />
+              </View>
+                <View style={{marginBottom: 0, width: '100%', paddingHorizontal: '10%' }}>
+                  <TText style={{fontSize: 14, color: ThemeDefaults.appIcon, opacity: pwMatch ? 0 : 1}}>Password does not match</TText>
+                </View>
+
+
+              {/* Email input */}
+              <View style={[styles.inputContainer]}>
+                <Icon name='at' size={23} color={"#D0CCCB"} />
+                <TextInput style={styles.input} 
+                  autoCapitalize={'none'}
+                  placeholder={"Email address"}
+                  keyboardType={"email-address"}
+                  value={user.email ? user.email : null}
+                  placeholderTextColor={"#A1A1A1"}
+                  returnKeyType={"next"}
+                  textContentType={'email'}
+                  onChangeText={ (val) => {
+                    setUser((prev) => ({...prev, email: val}))
+                    haveBlanks()
+                    } }
+                  onSubmitEditing={ () => ref_fn.current.focus() } 
+                  ref={ref_email}
+                  />
               </View>
               
               {/* First Name input */}
@@ -1015,6 +1157,7 @@ export default function Registration({route}) {
                 style={styles.nextBtn}
                 onPress={()=> { 
                   setNext((current) => current + 1)
+                  haveBlanks()
                   }}
                 >
                 <TText style={styles.nextText}>Next</TText>
