@@ -6,7 +6,7 @@ import ThemeDefaults from '../Components/ThemeDefaults';
 
 export default function Welcome({route}) {
 
-    const {role} = route.params;
+    const {role, user} = route.params;
 
     const navigation = useNavigation();
 
@@ -24,7 +24,7 @@ export default function Welcome({route}) {
                 <View style={styles.btnContainer}>
                     <TouchableOpacity
                         style={styles.btn}
-                        onPress={() => navigation.navigate("Home")}
+                        onPress={() => navigation.navigate("HomeStack", {user:user, role: role})}
                     >
                         <TText style={styles.btnText}>Go to Homepage</TText>
                     </TouchableOpacity>

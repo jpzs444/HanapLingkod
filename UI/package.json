@@ -23,7 +23,7 @@
     "expo-status-bar": "~1.4.0",
     "firebase": "^9.9.3",
     "react": "18.0.0",
-    "react-native": "0.69.4",
+    "react-native": "0.69.5",
     "react-native-dropdown-picker": "^5.4.2",
     "react-native-image-crop-picker": "^0.38.0",
     "react-native-modal-datetime-picker": "^13.1.2",

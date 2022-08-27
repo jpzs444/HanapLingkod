@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import { SafeAreaView, 
     View, 
     Text, 
@@ -6,9 +6,14 @@ import { SafeAreaView,
     TextInput, 
     StatusBar, 
     StyleSheet, 
-    TouchableOpacity, } from 'react-native';
+    TouchableOpacity,
+    ActivityIndicator,
+   } from 'react-native';
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import ThemeDefaults from '../Components/ThemeDefaults';
+import TText from '../Components/TText';
+import { IPAddress, role, userID } from '../global/global';
 
 export default function Login({navigation}) {
 
@@ -18,8 +23,10 @@ export default function Login({navigation}) {
         username: '',
         password: ''
     })
-    const [username, setUsername] = useState('')
     const [hidePW, sethidePW] = useState(true);
+    const [isWrongCredentials, setIsWrongCredentials] = useState(false);
+    
+    const [isLoading, setIsLoading] = useState(false);
 
     const [loaded] = useFonts({
         LexendDeca: require('../assets/fonts/LexendDeca-Regular.ttf'),
@@ -27,11 +34,67 @@ export default function Login({navigation}) {
         LexendDeca_SemiBold: require('../assets/fonts/LexendDeca-SemiBold.ttf'),
         LexendDeca_Bold: require('../assets/fonts/LexendDeca-Bold.ttf'),
         LexendDecaVar: require('../assets/fonts/LexendDeca-VariableFont_wght.ttf'),
-      });
+    });
     
-      if (!loaded) {
-        return null;
-      }
+    if (!loaded) {
+      return null;
+    }
+
+    if(isLoading){
+      return(
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.6)'}}>
+          <ActivityIndicator size={'large'} />
+        </View>
+      )
+    }
+
+
+
+    // FETCH DATA FROM SERVER
+    const login = () => {
+      fetch("http://" + IPAddress + ":3000/login?username="+user.username, {
+        method: "POST",
+        body: JSON.stringify({
+          username: user.username,
+          password: user.password,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((user) => {
+          console.log("data: ", user);
+
+          if(user._id){
+            setIsLoading(true)
+            setIsWrongCredentials(false);
+            
+            global.userData = user;
+            
+            setIsLoading(false)
+            setUser({username: "", password: ""});
+            navigation.navigate("OTPVerification", {isLogin: true, phoneNum: user.phoneNumber})
+
+          } else {
+            setIsLoading(false)
+            setIsWrongCredentials(true)
+            setUser({username: "", password: ""});
+
+            // alert("username and password are incorrect. please try again")
+          }
+
+
+          // navigation.navigate("HomeStack");
+        })
+        .catch((error) => {
+          setIsWrongCredentials(true)
+          // alert("Incorrect Credentials. Try again", error);
+          setIsLoading(false)
+          setUser({username: "", password: ""});
+        });
+
+    };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -45,12 +108,12 @@ export default function Login({navigation}) {
       </View>
 
         {/* Username or Password error */}
-     <View style={{flex: 1}}>
-      <View style={styles.inputErrorView}>
+     <View style={{flex: 1, alignItems: 'center'}}>
+        <View style={[styles.inputErrorView, {opacity: isWrongCredentials ? 1 : 0, marginTop: isWrongCredentials ?'10%': 20, marginBottom: isWrongCredentials ? 20 : 0}]}>
           <Text style={styles.inputErrorText}>The username or password you entered is incorrect</Text>
         </View>
 
-      {/* Inputs */}
+        {/* Inputs */}
         <View style={styles.inputContainer}>
           {/* Username */}
           <View style={styles.inputView}>
@@ -59,6 +122,7 @@ export default function Login({navigation}) {
                   autoCapitalize={'none'}
                   placeholder={"Username"}
                   placeholderTextColor={"#1B233A"}
+                  value={user.username && user.username}
                   returnKeyType={"next"}
                   textContentType={'username'}
                   onChangeText={ (val) => setUser((prev) => ({...prev, username: val})) }
@@ -69,8 +133,10 @@ export default function Login({navigation}) {
           <View style={styles.inputView}>
               <Icon name='lock' size={22} color={'#1B233A'} />
               <TextInput style={[styles.input, styles.inputPW]} 
+                  autoCapitalize='none'
                   placeholder={"Password"}
                   placeholderTextColor={"#1B233A"}
+                  value={user.password && user.password}
                   returnKeyType={"go"}
                   secureTextEntry={hidePW}
                   textContentType={'password'}
@@ -93,11 +159,17 @@ export default function Login({navigation}) {
         </View>
      </View>
 
-     <View style={{flex: 1, width: '80%', alignContent: 'center'}}>
-                 {/* Sign in button */}
+     <View style={{flex: 1, width: '80%', alignContent: 'center'}}>      
+        {/* Sign in button */}
         <View style={styles.sign_in}>
           <TouchableOpacity style={styles.btn}
-            onPress={() => navigation.navigate("Home")}
+          disabled={user.username && user.password ? false : true}
+            onPress={() => {
+              // setIsLoading(true)
+              login()
+              // navigation.navigate("HomeStack")
+
+            }}
           >
               <Text style={styles.btnTxt}>Sign in</Text>
           </TouchableOpacity>
@@ -131,16 +203,17 @@ const styles = StyleSheet.create({
       fontSize: 16
     },
     inputErrorView: {
-        opacity: 0,
         width: '80%',
         // paddingVertical: 10,
         alignItems: 'center',
-        backgroundColor: 'red',
-        marginTop: '10%',
-        marginBottom: 10
+        justifyContent: 'center',
+        // marginTop: '10%',
+        // marginBottom: 10
     },
     inputErrorText: {
-        color: '#fff'
+        fontSize: 17,
+        textAlign: "center",
+        color: ThemeDefaults.appIcon
     },
     inputContainer: {
         width: '100%',
@@ -211,7 +284,7 @@ const styles = StyleSheet.create({
       height: 180,
     },
     orangebg: {
-      flex: 1.15,
+      flex: 1.5,
       backgroundColor: '#FF803C',
       width: '100%',
       height: "42%",
