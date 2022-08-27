@@ -22,7 +22,9 @@ const UsernotificationRoutes = require("./Routes/UserNotificationRoutes");
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-mongoose.connect("mongodb://localhost:27017/hanapLingkod");
+mongoose.connect(
+  "mongodb+srv://admin-Patrick:test123@cluster0.2anjoo0.mongodb.net/?retryWrites=true&w=majority"
+);
 
 const conn = mongoose.connection;
 
@@ -159,7 +161,7 @@ app.post(
         [
           {
             ServiceSubCode: serviceSubCategoryID,
-            workerId: worker.id,
+            workerId: worker[0].id,
             minPrice: req.body.minPrice,
             maxPrice: req.body.maxPrice,
           },
