@@ -13,10 +13,11 @@ const ServiceSubCategory = require("./Models/SubCategory");
 
 //helper
 const Check = require("./Helpers/ifUserExist");
-
+const notification = require("./Helpers/PushNotification");
 //routes
 const ServiceCategoryRoutes = require("./Routes/ServiceCategoryRoutes");
 const ServiceSubCategoryRoutes = require("./Routes/ServiceSubCategory");
+const UsernotificationRoutes = require("./Routes/UserNotificationRoutes");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -54,6 +55,8 @@ const multipleFile = upload.fields([
   { name: "govId" },
   { name: "certificate" },
 ]);
+
+// notification(["ExponentPushToken[gGbp3QMm-ufwxCiXde8v7t]"], "666", "message34");
 
 //Login
 app.post("/login", async (req, res) => {
@@ -158,7 +161,7 @@ app.post(
         [
           {
             ServiceSubCode: serviceSubCategoryID,
-            workerId: worker.id,
+            workerId: worker[0].id,
             minPrice: req.body.minPrice,
             maxPrice: req.body.maxPrice,
           },
@@ -227,5 +230,6 @@ app.post(
 
 app.use(ServiceCategoryRoutes);
 app.use(ServiceSubCategoryRoutes);
+app.use(UsernotificationRoutes);
 
 app.listen(3000, () => console.log("listening on port 3000."));

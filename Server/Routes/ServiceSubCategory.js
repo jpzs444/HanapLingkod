@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const ServiceSubCategory = require("../Models/SubCategory");
 
-async function remove1() {}
-
 router
   .route("/service-sub-category")
   .get(async function (req, res) {
@@ -16,10 +14,13 @@ router
     }
 
     console.time();
-    result.map(async (id) => {
-      await ServiceSubCategory.deleteMany({ _id: id });
-      console.log("asd");
-    });
+
+    await Promise.all(
+      result.map(async (id) => {
+        await ServiceSubCategory.deleteOne({ _id: id });
+        console.log("asd");
+      })
+    );
     console.timeEnd();
 
     console.log("lasr");
