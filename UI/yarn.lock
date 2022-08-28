@@ -6198,6 +6198,21 @@ react-native-modalbox@^2.0.2:
   dependencies:
     prop-types "^15.5.10"
 
+react-native-otp-forminput@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-otp-forminput/-/react-native-otp-forminput-1.0.0.tgz#85899ee775d9f2f0c294a6c9971ea24d61e386e5"
+  integrity sha512-i2i/eUe9087kZWX5rwaZyVl0ktfXu2I/rWmcjrebFhlybysQCJmpi52+NI3Y5qehEunSnDSP96c/eXGl9ywAuQ==
+
+react-native-otp-inputs@^7.4.0:
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/react-native-otp-inputs/-/react-native-otp-inputs-7.4.0.tgz#ea1badabdf231faee5bcb5231034911bbba49aed"
+  integrity sha512-+phHrlcQQ63VuOrHaOZze7LP9WmzUGxGMlQx2A/jhPhYkCi/5hXDjxNcWyPXCy/RFRoLX+70HNpGqTgo0mDg7Q==
+
+react-native-otp-timer@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-otp-timer/-/react-native-otp-timer-1.0.1.tgz#3de8f3580b789d3e15657359f3ca6c4941a678fd"
+  integrity sha512-pMRRLW824JFUxtMp4Gg5mAogY3MzcbqeBUvC5vtgUnyZVtLKFYN4y+N8SkCanV2/c72XCRUiPzpOQNXDO9qBXQ==
+
 react-native-paper@^4.12.4:
   version "4.12.4"
   resolved "https://registry.yarnpkg.com/react-native-paper/-/react-native-paper-4.12.4.tgz#c04ce40d225dc267b7ee32be705dd553f44e0c0c"

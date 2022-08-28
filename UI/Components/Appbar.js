@@ -25,7 +25,7 @@ export default function Appbar(props) {
                     : null
             }
             {
-                props.backBtn && !props.accTypeSelect ? 
+                props.backBtn && !props.accTypeSelect && !props.otpverificationpage ? 
                     <TouchableOpacity style={styles.left}
                         onPress={() => {
                             if (props.screenView == 1) navigation.goBack()
@@ -35,6 +35,16 @@ export default function Appbar(props) {
                         <Icon name="arrow-left" size={30} />
                     </TouchableOpacity> : null
             }
+            {
+                props.otpverificationpage ? 
+                    <TouchableOpacity style={styles.left}
+                        onPress={() => { navigation.replace("AccountTypeSelect") }}
+                    >
+                        <Icon name="arrow-left" size={30} />
+                    </TouchableOpacity> 
+                    : null
+            }
+
 
             {/* Menu Button */}
             {
