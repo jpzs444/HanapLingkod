@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {
-    SafeAreaView, View, TouchableOpacity, TextInput, StatusBar, StyleSheet, Alert
+    SafeAreaView, View, TouchableOpacity, TextInput, StatusBar, StyleSheet, ActivityIndicator, Pressable
 } from 'react-native'
 
 import {FirebaseRecaptchaVerifierModal} from 'expo-firebase-recaptcha';
@@ -14,6 +14,8 @@ import TText from '../Components/TText';
 import { useNavigation } from '@react-navigation/native';
 import { IPAddress } from '../global/global';
 
+import RnOtpTimer from 'react-native-otp-timer';
+
 export default function OTPVerification({route}, props) {
     const navigation = useNavigation();
     const {phoneNum, role, user, singleImage, image, isLogin, work, imagelicense} = route.params;
@@ -23,7 +25,22 @@ export default function OTPVerification({route}, props) {
     const [verificationId, setVerificationId] = useState('');
     const recaptchaVerifier = useRef(null);
 
-    const [isInvalidOTP, setInvalidOTP] = useState('false')
+    const [isInvalidOTP, setInvalidOTP] = useState(false)
+    const [showInvalidMsg, setshowInvalidMsg] = useState(false)
+
+    const [timerCountdown, setTimerCountdown] = useState(60);
+    const [timerPressed, setTimerPressed] = useState(false);
+    const timerRef = useRef(timerCountdown)
+
+    const [isLoading, setIsLoading] = useState(false)
+
+    if(isLoading){
+        return (
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <ActivityIndicator size={'large'} />
+            </View>
+        )
+    }
 
     const sendVerification = () => {
         const phoneProvider = new firebase.auth.PhoneAuthProvider();
@@ -33,6 +50,7 @@ export default function OTPVerification({route}, props) {
     }
 
     const confirmCode = () => {
+        setIsLoading(true)
         const credential = firebase.auth.PhoneAuthProvider.credential(
             verificationId,
             code
@@ -41,27 +59,31 @@ export default function OTPVerification({route}, props) {
         console.log(typeof code)
         firebase.auth().signInWithCredential(credential)
         .then(() => {
+            // reset state of inputs
+            setCode('');
+            setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
+            setInvalidOTP(false)
+
             // if authenticated, create the account/login
             console.log('auth successful..');
 
             // if authentication is successful, continue to the welcome screen
             isLogin ? console.log(" going to home screen") : null
             
-            role === 'recruiter' && createRecruiterAccount()
-            role === 'worker' && createWorkerAccount()
+            role === 'recruiter' && !isLogin && createRecruiterAccount()
+            role === 'worker' && !isLogin && createWorkerAccount()
             
-            // reset state of inputs
-            setCode('');
-            setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
-            
+            setIsLoading(false)
             isLogin ? navigation.replace("HomeStack") : navigation.replace("WelcomeScreen", {role: role});
         })
         .catch((error) => {
-            alert(error);
-            console.log("error: ", error)
-            setInvalidOTP(true)
             setCode("")
             setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
+            setIsLoading(false)
+            setInvalidOTP(true)
+
+            // alert(error);
+            console.log("error: ", error.message)
         })
     }
 
@@ -74,7 +96,6 @@ export default function OTPVerification({route}, props) {
     },[])
 
 
-    // const [otp, setOTP] = useState(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
     const [otpNum, setotpNum] = useState({
         n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",
     })
@@ -128,9 +149,8 @@ export default function OTPVerification({route}, props) {
             "content-type": "multipart/form-data",
           },
         }).then(() => {
-          alert("Account created");
-        //   props.navigation.navigate("OTPVerification", {role: user.role});
-            navigation.replace("WelcomeScreen", {role: role, user: user})
+            // alert("Account created");
+            navigation.replace("WelcomeScreen", {role: "recruiter", user: user})
         }).catch((er) => {console.log("error: ", er)})
       }
 
@@ -187,7 +207,8 @@ export default function OTPVerification({route}, props) {
         formData.append("phoneNumber", user.phonenumber);
         formData.append("emailAddress", user.email);
         formData.append("GovId", filename);
-        formData.append("Category", work.Category === "unlisted" ? work.Category : null);
+        formData.append("Category", work.Category === "unlisted" ? work.Category : "");
+        // work.Category === "unlisted" ? formData.append("Category", work.Category) : null;
         formData.append("ServiceSubCategory", work[0].service);
         formData.append("minPrice", work[0].lowestPrice);
         formData.append("maxPrice", work[0].highestPrice);
@@ -199,15 +220,30 @@ export default function OTPVerification({route}, props) {
             "content-type": "multipart/form-data",
           },
         }).then(() => {
-          alert("Account created | worker");
+            // alert("Account created | worker");
         //   props.navigation.navigate("OTPVerification", {role: user.role});
-            navigation.replace("WelcomeScreen", {role: role,})
+            navigation.replace("WelcomeScreen", {role: 'worker',})
         }).catch((er) => {console.log("error: ", er)})
       }
   
 
-
-
+        useEffect(() => {
+            const timerId = setInterval(() => {
+                if (timerRef.current !== 0 && timerPressed) {
+                    timerRef.current -= 1;
+                    setTimerCountdown(timerRef.current);
+                //   sendVerification();
+                } else {
+                    clearInterval(timerId);
+                    setTimerCountdown(60)
+                }
+            }, 1000);
+        }, [timerPressed]);
+      
+          // is invalid otp
+        useEffect(() => {
+            setshowInvalidMsg(!isInvalidOTP)
+        }, [isInvalidOTP]);
 
 
 
@@ -232,7 +268,7 @@ export default function OTPVerification({route}, props) {
                 firebaseConfig={firebaseConfig}
         />
 
-        <Appbar backBtn={true} hasPicture={false} />
+        <Appbar backBtn={true} hasPicture={false} otpverificationpage={true} />
 
         {/* header */}
         <View style={styles.body}>
@@ -244,8 +280,8 @@ export default function OTPVerification({route}, props) {
             </View>
         </View>
 
-        {/* body | input */}
-        <View style={styles.inputContainer}>
+        {/* body | input  */}
+         <View style={styles.inputContainer}>
             <View style={styles.inputBox}>
                 <TextInput 
                     style={styles.input}
@@ -254,16 +290,10 @@ export default function OTPVerification({route}, props) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n1: val}))
-                        setCode((prev) => `${prev}${val}`)
-                    }}
-                    onKeyPress={({nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n1: ""}))
-                            code.slice(1)
-                        } else {
-                            num2.current.focus()
-                        }
+                        setotpNum({...otpNum, n1: val})
+                        val ? num2.current.focus() : null
+
+                        // setCode((prev) => `${prev}${val}`)
                     }}
                     ref={num1}
                 />
@@ -276,18 +306,11 @@ export default function OTPVerification({route}, props) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n2: val}))
-                        setCode((prev) => `${prev}${val}`)
+                        setotpNum({...otpNum, n2: val})
+                        val ? num3.current.focus() : num1.current.focus()
 
-                    }}
-                    onKeyPress={( {nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n2: ""}))
-                            code.slice(2)
-                            num1.current.focus()
-                        } else {
-                            num3.current.focus()
-                        }
+                        // setCode((prev) => `${prev}${val}`)
+
                     }}
                     ref={num2}
                 />
@@ -300,17 +323,10 @@ export default function OTPVerification({route}, props) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n3: val}))
-                        setCode((prev) => `${prev}${val}`)
-                    }}
-                    onKeyPress={( {nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n3: ""}))
-                            code.slice(3)
-                            num2.current.focus()
-                        } else {
-                            num4.current.focus()
-                        }
+                        setotpNum({...otpNum, n3: val})
+                        val ? num4.current.focus() : num2.current.focus()
+                        // setCode((prev) => `${prev}${val}`)
+
                     }}
                     ref={num3}
                 />
@@ -323,18 +339,9 @@ export default function OTPVerification({route}, props) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        // setotpNum((prev) => ({...prev, n4: val}))
-                        setCode((prev) => `${prev}${val}`)
-
-                    }}
-                    onKeyPress={( {nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            // setotpNum((prev) => ({...prev, n4: ""}))
-                            code.slice(4)
-                            num3.current.focus()
-                        } else {
-                            num5.current.focus()
-                        }
+                        setotpNum({...otpNum, n4: val})
+                        val ? num5.current.focus() : num3.current.focus()
+                        // setCode((prev) => `${prev}${val}`)
                     }}
                     ref={num4}
                 />
@@ -347,18 +354,9 @@ export default function OTPVerification({route}, props) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n5: val}))
-                        setCode((prev) => `${prev}${val}`)
-
-                    }}
-                    onKeyPress={({nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n5: ""}))
-                            code.slice(5)
-                            num4.current.focus()
-                        } else {
-                            num6.current.focus()
-                        }
+                        setotpNum({...otpNum, n5: val})
+                        val ? num6.current.focus() : num4.current.focus()
+                        // setCode((prev) => `${prev}${val}`)
                     }}
                     ref={num5}
                 />
@@ -371,17 +369,10 @@ export default function OTPVerification({route}, props) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        setotpNum((prev) => ({...prev, n6: val}))
-                        setCode((prev) => `${prev}${val}`)
-                    }}
-                    onKeyPress={({nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n6: ""}))
-                            code.slice(6)
-                            num5.current.focus()
-                        } else {
-                            console.log("end of line")
-                        }
+                        setotpNum({...otpNum, n6: val})
+                        !val && num5.current.focus()
+
+                        // setCode((prev) => `${prev}${val}`)
                     }}
                     ref={num6}
                 />
@@ -390,17 +381,15 @@ export default function OTPVerification({route}, props) {
 
         {/* If OTP is incorrect */}
         {
-            isInvalidOTP ? 
+            !showInvalidMsg ? 
             <View style={{marginBottom: 30}}>
-                { isotpMatch == 0 ? null : 
-                    <TText style={{
-                        color: ThemeDefaults.appIcon,
-                        fontFamily: 'LexendDeca_Medium',
-                        fontSize: 18
-                    }}>
-                        Login failed. Please re-enter the OTP
-                    </TText>
-                }
+                <TText style={{
+                    color: ThemeDefaults.appIcon,
+                    fontFamily: 'LexendDeca_Medium',
+                    fontSize: 18
+                }}>
+                    Login failed, please re-enter the OTP
+                </TText>
             </View> 
         : null
         }
@@ -409,20 +398,26 @@ export default function OTPVerification({route}, props) {
         <View style={styles.submitContainer}>
             <TouchableOpacity 
                 onPress={()=> {
-                    // navigation.navigate("WelcomeScreen")
+                    // transform number inputs into a string for phone verification
                     setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
                     confirmCode()
                 }}
                 style={styles.submitBtn}
             >
-                <TText style={styles.submitText}>Submit</TText>
+                <TText style={styles.submitText}>Verify</TText>
             </TouchableOpacity>
-            <View style={styles.resendCode}>
-                <TText style={styles.resendCodeText}>Resend OTP in 1:00</TText>
-            </View>
+            <Pressable style={styles.resendCode} onPress={()=> {
+                setTimerCountdown(60);
+                setTimerPressed(true);
+                sendVerification();
+            }}>
+                {timerCountdown === 60 ? 
+                    <TText style={[styles.resendCodeText, {color: ThemeDefaults.appIcon, fontSize: 18}]}>Resend OTP</TText> 
+                    : <TText style={styles.resendCodeText}>{timerCountdown < 60 && timerCountdown > 9 ? `Resend OTP in 0:${timerCountdown}` : `Resend OTP in 0:0${timerCountdown}`}</TText>}
+            </Pressable>
         </View>
 
-        <View style={{marginBottom: 100}}>
+        <View>
             <TText>{code}</TText>
         </View>
 
@@ -483,7 +478,8 @@ const styles = StyleSheet.create({
         color: ThemeDefaults.themeWhite
     },
     resendCode: {
-        marginTop: 20
+        marginTop: 28,
+        flexDirection: 'row'
     },
     resendCodeText: {
         color: '#a1a1a1'

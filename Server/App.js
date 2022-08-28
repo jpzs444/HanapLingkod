@@ -22,7 +22,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 mongoose.connect(
-  "mongodb+srv://<username>:<password>@cluster0.2anjoo0.mongodb.net/?retryWrites=true&w=majority"
+  "mongodb+srv://admin-Patrick:test123@cluster0.2anjoo0.mongodb.net/?retryWrites=true&w=majority"
 );
 
 const conn = mongoose.connection;

@@ -49,6 +49,10 @@ export default function Registration({route}) {
       user.password === confirmPW ? setPWMatch(true) : setPWMatch(false)
     }, [confirmPW, user.password])
 
+    // useEffect(() => {
+
+    // }, [services[0].lowestPrice, services[0].highestPrice])
+
     const [placeholderPhoneNum, setPlaceholderPhoneNum] = useState("Phone Number")
     const [phoneVerified, setPhoneVerified] = useState(false);
 
@@ -102,7 +106,7 @@ export default function Registration({route}) {
         console.log("val: ", val.Category)
   
         list[index]['service'] = val.ServiceSubCategory;
-        list[index]['category'] = val.ServiceID.Category;
+        list[index]['category'] = "";
         setServices(list)
       }
       haveBlanks()
@@ -187,12 +191,12 @@ export default function Registration({route}) {
       console.log("arr: ", arr)
       console.log("arrUser: ", Object.values(arrUser2))
 
-      for(let el of arr){
+      for(let el of arrUser){
         job = Object.values(el).includes("") ? 0 : 1
       }
 
       for(let el of arrUser2){
-        console.log("el of arrUser2: ", el)
+        // console.log("el of arrUser2: ", el)
         // userJ = el.includes("") ? 0 : 1
         if(el.length === 0){
           userJ = 0
@@ -255,10 +259,10 @@ export default function Registration({route}) {
       setDatePickerVisibility(false);
       setSelected(true)
 
-      setUser((prev) => ({...prev, birthday: formatedDate}))
+      setUser((prev) => ({...prev, birthday: dateString}))
 
       haveBlanks()
-      console.log(displayDate)
+      console.log(dateString)
     };
 
     // OPEN IMAGE PICKER
@@ -283,7 +287,7 @@ export default function Registration({route}) {
       } else {
         setIsPriceGreater(false)
       }
-    }, [services.lowestPrice, services.highestPrice])
+    }, [services[0].lowestPrice, services[0].highestPrice])
 
     useEffect(() => {
       (async () => {
@@ -301,10 +305,8 @@ export default function Registration({route}) {
     const pickImage = async () => {
 
       let result = await ImagePicker.launchImageLibraryAsync({
-        // mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
-        // selectionLimit: 1, // ios only
-        aspect: [4,3],
         quality: 0.5,
       });
 
@@ -608,7 +610,7 @@ export default function Registration({route}) {
                   <TText style={{marginBottom: 15, fontFamily: 'LexendDeca_Medium', fontSize: 18}}>Work Description</TText>
                   <View style={{
                       // minHeight: 150, 
-                      backgroundColor: '#F4F4F4',
+                      backgroundColor: '#fff',
                       paddingVertical: 7,
                       paddingHorizontal: 12,
                       alignItems: 'flex-start',
@@ -617,6 +619,7 @@ export default function Registration({route}) {
                   }}>
                   <TextInput multiline 
                     placeholder='Describe what you do..'
+                    placeholderStyle={{}}
                     style={[styles.inputMultiLine, {
                       fontSize: 18,
                       width: '100%',
@@ -640,7 +643,7 @@ export default function Registration({route}) {
                   <View style={{alignItems: 'center'}}>
                     <TouchableOpacity 
                       onPress={pickImage}
-                      style={{alignItems: 'center', marginTop: 20, backgroundColor: '#F4F4F4', paddingVertical: 30, borderRadius: 15, elevation: 2, width: '100%'}}
+                      style={{alignItems: 'center', marginTop: 20, backgroundColor: '#Fafafa', paddingVertical: 30, borderRadius: 15, elevation: 2, width: '90%'}}
                       >
                       <Icon name="camera-plus" size={40} color={"#E7745D"} style={{marginBottom: 10}} />
                       <TText>Attach photo(s) here</TText>
@@ -650,10 +653,10 @@ export default function Registration({route}) {
                 </View>
 
                 <View style={{width: '100%', alignItems: 'center', pading: 15, marginTop: 30,}}>
-                    <TText style={{alignSelf: 'flex-start', marginLeft: '12%'}}>Uploaded License Images:</TText>
+                <TText style={{alignSelf: 'flex-start', marginLeft: '12%'}}>Uploaded License Images:</TText>
                   {
                     imageSingleLicense ? 
-                      <Image source={{uri: imageSingleLicense}} style={{width: 400, height: 300, marginVertical: 20}} />
+                      <Image source={{uri: imageSingleLicense}} style={{width: 500, height: 400, marginVertical: 20}} />
                     :
                     imagelicense.map(function(item, index) {
                         {/* console.log("item: ", item) */}
@@ -837,7 +840,7 @@ export default function Registration({route}) {
                     onPress={
                       pickImage
                     }
-                    style={{alignItems: 'center', marginTop: 20, backgroundColor: '#F4F4F4', paddingVertical: 30, borderRadius: 15, elevation: 2}}
+                    style={{alignItems: 'center', marginTop: 20, marginHorizontal: 20, backgroundColor: '#FAFAFA', paddingVertical: 30, borderRadius: 15, elevation: 2}}
                     >
                     <Icon name="camera-plus" size={40} color={"#E7745D"} style={{marginBottom: 10}} />
                     <TText>Attach photo(s) here</TText>

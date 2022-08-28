@@ -8,12 +8,16 @@ import { SafeAreaView,
     StyleSheet, 
     TouchableOpacity,
     ActivityIndicator,
+    Dimensions
    } from 'react-native';
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import TText from '../Components/TText';
 import { IPAddress, role, userID } from '../global/global';
+
+const WIDTH = Dimensions.get('window').width
+const HEIGHT = Dimensions.get('window').height
 
 export default function Login({navigation}) {
 
@@ -108,10 +112,7 @@ export default function Login({navigation}) {
       </View>
 
         {/* Username or Password error */}
-     <View style={{flex: 1, alignItems: 'center'}}>
-        <View style={[styles.inputErrorView, {opacity: isWrongCredentials ? 1 : 0, marginTop: isWrongCredentials ?'10%': 20, marginBottom: isWrongCredentials ? 20 : 0}]}>
-          <Text style={styles.inputErrorText}>The username or password you entered is incorrect</Text>
-        </View>
+     <View style={{alignItems: 'center'}}>
 
         {/* Inputs */}
         <View style={styles.inputContainer}>
@@ -141,6 +142,7 @@ export default function Login({navigation}) {
                   secureTextEntry={hidePW}
                   textContentType={'password'}
                   onChangeText={ (val) => setUser((prev) => ({...prev, password: val})) }
+                  onSubmitEditing={()=>login()}
                   ref={pw_ref} />
               {
                   <Icon 
@@ -159,7 +161,10 @@ export default function Login({navigation}) {
         </View>
      </View>
 
-     <View style={{flex: 1, width: '80%', alignContent: 'center'}}>      
+     <View style={{ width: '80%', alignContent: 'center', position: 'absolute', bottom: 50}}>  
+        <View style={[styles.inputErrorView, {opacity: isWrongCredentials ? 1 : 0,  marginBottom: isWrongCredentials ? 10 : 0}]}>
+          <Text style={styles.inputErrorText}>The username or password you entered is incorrect</Text>
+        </View>
         {/* Sign in button */}
         <View style={styles.sign_in}>
           <TouchableOpacity style={styles.btn}
@@ -203,7 +208,7 @@ const styles = StyleSheet.create({
       fontSize: 16
     },
     inputErrorView: {
-        width: '80%',
+        width: '100%',
         // paddingVertical: 10,
         alignItems: 'center',
         justifyContent: 'center',
@@ -219,10 +224,11 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
+        marginTop: HEIGHT / 20,        
     },
     inputView: {
         flexDirection: 'row',
-        width: '80%',
+        width: '75%',
         marginHorizontal: '10%',
         alignItems: 'center',
         marginBottom: 20,
@@ -250,7 +256,7 @@ const styles = StyleSheet.create({
     },
     sign_in: {
         // width: '80%',
-        marginTop: '25%',
+        marginTop: '5%',
     },
     btn: {
         width: '100%',
@@ -276,7 +282,7 @@ const styles = StyleSheet.create({
     registerTxt: {
         marginLeft: 3,
         fontFamily: 'LexendDeca_Medium',
-        fontSize: 16,
+        fontSize: 17,
         color: '#FF803C'
     },
     image: {
@@ -284,16 +290,16 @@ const styles = StyleSheet.create({
       height: 180,
     },
     orangebg: {
-      flex: 1.5,
+      // flex: 1.5,
       backgroundColor: '#FF803C',
       width: '100%',
-      height: "42%",
-      borderBottomRightRadius: 70,
+      height: HEIGHT /2.4,
+      borderBottomRightRadius: 50,
     },
     darkbluebg: {
       backgroundColor: '#1B233A',
       width: '100%',
-      height: "88%",
+      height: HEIGHT / 2.7,
       borderBottomRightRadius: 70,
     },
     whitebg: {
@@ -301,8 +307,8 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       backgroundColor: '#fff',
       width: '100%',
-      height: '86%',
-      borderBottomRightRadius: 70,
+      height: HEIGHT / 3.1,
+      borderBottomRightRadius: 80,
     },
   });
   
