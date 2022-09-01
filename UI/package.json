@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@react-native-community/datetimepicker": "6.2.0",
+    "@react-navigation/bottom-tabs": "^6.3.3",
+    "@react-navigation/drawer": "^6.4.4",
     "@react-navigation/native": "^6.0.11",
     "@react-navigation/native-stack": "^6.7.0",
     "expo": "~46.0.7",
@@ -25,6 +27,7 @@
     "react": "18.0.0",
     "react-native": "0.69.5",
     "react-native-dropdown-picker": "^5.4.2",
+    "react-native-gesture-handler": "~2.5.0",
     "react-native-image-crop-picker": "^0.38.0",
     "react-native-modal-datetime-picker": "^13.1.2",
     "react-native-modal-dropdown": "^1.0.2",
