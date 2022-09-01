@@ -11,9 +11,17 @@ serviceCategorySchema.post(/Many$/, function (next) {
 });
 
 serviceCategorySchema.post("findOneAndDelete", async function (doc, next) {
-  ServiceSubCategory.deleteMany({ ServiceID: doc._id }).exec();
-  console.log("ad");
-  next();
+  let array = await ServiceSubCategory.find({})
+    .select({ ServiceID: 1, _id: 1 })
+    .exec();
+  console.log(array);
+  console.time();
+  for (var i = 0; i < array.length; i += 1) {
+    if (array[i].ServiceID === null) {
+      await ServiceSubCategory.deleteOne({ _id: array[i]._id });
+    }
+  }
+  console.timeEnd();
 });
 
 module.exports = mongoose.model("ServiceCategory", serviceCategorySchema);

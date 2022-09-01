@@ -5,18 +5,18 @@ const ServiceSubCategory = require("../Models/SubCategory");
 router
   .route("/service-sub-category")
   .get(async function (req, res) {
-    let array = await ServiceSubCategory.find({})
-      .select({ ServiceID: 1, _id: 1 })
-      .exec();
-    console.log(array);
-    let result = [];
-    console.time();
-    for (var i = 0; i < array.length; i += 1) {
-      if (array[i].ServiceID === null) {
-        await ServiceSubCategory.deleteOne({ _id: array[i]._id });
-      }
-    }
-    console.timeEnd();
+    // let array = await ServiceSubCategory.find({})
+    //   .select({ ServiceID: 1, _id: 1 })
+    //   .exec();
+    // console.log(array);
+    // let result = [];
+    // console.time();
+    // for (var i = 0; i < array.length; i += 1) {
+    //   if (array[i].ServiceID === null) {
+    //     await ServiceSubCategory.deleteOne({ _id: array[i]._id });
+    //   }
+    // }
+    // console.timeEnd();
 
     let queryResult = await ServiceSubCategory.find({}).exec();
     res.send(queryResult);
