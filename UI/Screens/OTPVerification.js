@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {
-    SafeAreaView, View, TouchableOpacity, TextInput, StatusBar, StyleSheet, Alert
+    SafeAreaView, View, TouchableOpacity, TextInput, StatusBar, StyleSheet, ActivityIndicator, Pressable
 } from 'react-native'
 
 import {FirebaseRecaptchaVerifierModal} from 'expo-firebase-recaptcha';
@@ -12,60 +12,240 @@ import ThemeDefaults from '../Components/ThemeDefaults';
 import TText from '../Components/TText';
 
 import { useNavigation } from '@react-navigation/native';
+import { IPAddress } from '../global/global';
 
-export default function OTPVerification({route}) {
+import RnOtpTimer from 'react-native-otp-timer';
+
+export default function OTPVerification({route}, props) {
     const navigation = useNavigation();
-    const {phoneNum, role, user} = route.params;
+    const {phoneNum, role, user, singleImage, image, isLogin, work, imagelicense} = route.params;
 
     // Firebase OTP Verification Code
-    const [phoneNumber, setPhoneNumber] = useState('');
     const [code, setCode] = useState('');
     const [verificationId, setVerificationId] = useState('');
     const recaptchaVerifier = useRef(null);
 
-    const [isInvalidOTP, setInvalidOTP] = useState('false')
+    const [isInvalidOTP, setInvalidOTP] = useState(false)
+    const [showInvalidMsg, setshowInvalidMsg] = useState(false)
+
+    const [timerCountdown, setTimerCountdown] = useState(60);
+    const [timerPressed, setTimerPressed] = useState(false);
+    const timerRef = useRef(timerCountdown)
+
+    const [isLoading, setIsLoading] = useState(false)
+
+    if(isLoading){
+        return (
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <ActivityIndicator size={'large'} />
+            </View>
+        )
+    }
 
     const sendVerification = () => {
         const phoneProvider = new firebase.auth.PhoneAuthProvider();
         phoneProvider
-            .verifyPhoneNumber(phoneNum, recaptchaVerifier.current)
+            .verifyPhoneNumber(isLogin ? `+63${global.userData.phoneNumber}` : `+63${phoneNum}` , recaptchaVerifier.current)
             .then(setVerificationId);
-            // setPhoneNumber('');
     }
 
     const confirmCode = () => {
+        setIsLoading(true)
         const credential = firebase.auth.PhoneAuthProvider.credential(
             verificationId,
             code
         );
-        console.log(`otp code is ${code}`)
+        console.log(`otp code is: ${code}`)
         console.log(typeof code)
         firebase.auth().signInWithCredential(credential)
         .then(() => {
-            Alert.alert(
-                'Login Successful. Welcome to HanapLingkod',
-            );
-            console.log('auth successful.. going to home screen');
-            navigation.navigate("WelcomeScreen", {role: role});
+            // reset state of inputs
             setCode('');
             setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
+            setInvalidOTP(false)
+
+            // if authenticated, create the account/login
+            console.log('auth successful..');
+
+            // if authentication is successful, continue to the welcome screen
+            isLogin ? console.log(" going to home screen") : null
+            
+            role === 'recruiter' && !isLogin && createRecruiterAccount()
+            role === 'worker' && !isLogin && createWorkerAccount()
+            
+            setIsLoading(false)
+            isLogin ? navigation.replace("HomeStack") : navigation.replace("WelcomeScreen", {role: role});
         })
         .catch((error) => {
-            alert(error);
+            setCode("")
+            setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
+            setIsLoading(false)
             setInvalidOTP(true)
+
+            // alert(error);
+            console.log("error: ", error.message)
         })
     }
 
     // Send Verification with given number on the registration
     useEffect(() => {
         sendVerification();
+
+        // navigation.replace("HomeStack")
+        // createWorkerAccount()
     },[])
 
 
-    // const [otp, setOTP] = useState(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
     const [otpNum, setotpNum] = useState({
         n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",
     })
+
+
+
+    // CREATE ACCOUNT
+
+
+    // CREATE RECRUITER ACCOUNT
+
+    const createRecruiterAccount = () => {
+        let localUri = singleImage;
+        let filename = localUri.split("/").pop();
+  
+        // Infer the type of the image
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+  
+        // Upload the image using the fetch and FormData APIs
+        let formData = new FormData();
+  
+        // Assume "photo" is the name of the form field the server expects
+        formData.append("govId", {
+          uri: localUri,
+          name: filename,
+          type,
+        });
+  
+        formData.append("username", user.username);
+        formData.append("password", user.password);
+        formData.append("firstname", user.firstname);
+        formData.append("lastname", user.lastname);
+        formData.append("middlename", user.middlename);
+        formData.append("birthday", user.birthday);
+        formData.append("age", user.age);
+        formData.append("sex", user.gender);
+        formData.append("street", user.street);
+        formData.append("purok", user.purok);
+        formData.append("barangay", user.barangay);
+        formData.append("city", user.city);
+        formData.append("province", user.province);
+        formData.append("phoneNumber", user.phonenumber);
+        formData.append("emailAddress", user.email);
+        formData.append("GovId", filename);
+  
+        fetch("http://"+ IPAddress +":3000/signup/recruiter?username=" + user.username, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "content-type": "multipart/form-data",
+          },
+        }).then(() => {
+            // alert("Account created");
+            navigation.replace("WelcomeScreen", {role: "recruiter", user: user})
+        }).catch((er) => {console.log("error: ", er)})
+      }
+
+
+
+      // CREATE WORKER ACCOUNT
+
+    const createWorkerAccount = () => {
+        // Govt ID
+        let localUri = singleImage;
+        let filename = localUri.split("/").pop();
+
+        // License Pic
+        let uriLicense = imagelicense;
+        let licensefilename = uriLicense.split("/").pop();
+  
+        // Infer the type of the image
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+  
+        // Upload the image using the fetch and FormData APIs
+        let formData = new FormData();
+  
+        // Assume "photo" is the name of the form field the server expects
+        formData.append("govId", {
+          uri: localUri,
+          name: filename,
+          type,
+        });
+
+        match = /\.(\w+)$/.exec(licensefilename);
+        type = match ? `image/${match[1]}` : `image`;
+
+        // pass certificate images
+        formData.append("certificate", {
+            uri: uriLicense,
+            name: licensefilename,
+            type,
+          });
+  
+        formData.append("username", user.username);
+        formData.append("password", user.password);
+        formData.append("firstname", user.firstname);
+        formData.append("lastname", user.lastname);
+        formData.append("middlename", user.middlename);
+        formData.append("birthday", user.birthday);
+        formData.append("age", user.age);
+        formData.append("sex", user.gender);
+        formData.append("street", user.street);
+        formData.append("purok", user.purok);
+        formData.append("barangay", user.barangay);
+        formData.append("city", user.city);
+        formData.append("province", user.province);
+        formData.append("phoneNumber", user.phonenumber);
+        formData.append("emailAddress", user.email);
+        formData.append("GovId", filename);
+        formData.append("Category", work.Category === "unlisted" ? work.Category : "");
+        // work.Category === "unlisted" ? formData.append("Category", work.Category) : null;
+        formData.append("ServiceSubCategory", work[0].service);
+        formData.append("minPrice", work[0].lowestPrice);
+        formData.append("maxPrice", work[0].highestPrice);
+  
+        fetch("http://"+ IPAddress +":3000/signup/worker?username=" + user.username, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "content-type": "multipart/form-data",
+          },
+        }).then(() => {
+            // alert("Account created | worker");
+        //   props.navigation.navigate("OTPVerification", {role: user.role});
+            navigation.replace("WelcomeScreen", {role: 'worker',})
+        }).catch((er) => {console.log("error: ", er)})
+      }
+  
+
+        useEffect(() => {
+            const timerId = setInterval(() => {
+                if (timerRef.current !== 0 && timerPressed) {
+                    timerRef.current -= 1;
+                    setTimerCountdown(timerRef.current);
+                //   sendVerification();
+                } else {
+                    clearInterval(timerId);
+                    setTimerCountdown(60)
+                }
+            }, 1000);
+        }, [timerPressed]);
+      
+          // is invalid otp
+        useEffect(() => {
+            setshowInvalidMsg(!isInvalidOTP)
+        }, [isInvalidOTP]);
+
+
 
     //  isotpMatch == 0 default hidden
     //       "     == 1 not matching
@@ -88,7 +268,7 @@ export default function OTPVerification({route}) {
                 firebaseConfig={firebaseConfig}
         />
 
-        <Appbar backBtn={true} hasPicture={false} />
+        <Appbar backBtn={true} hasPicture={false} otpverificationpage={true} />
 
         {/* header */}
         <View style={styles.body}>
@@ -100,8 +280,8 @@ export default function OTPVerification({route}) {
             </View>
         </View>
 
-        {/* body | input */}
-        <View style={styles.inputContainer}>
+        {/* body | input  */}
+         <View style={styles.inputContainer}>
             <View style={styles.inputBox}>
                 <TextInput 
                     style={styles.input}
@@ -110,15 +290,10 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        // setotpNum((prev) => ({...prev, n1: val}))
-                        setCode((prev) => `${prev}${val}`)
-                    }}
-                    onKeyPress={({nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n1: ""}))
-                        } else {
-                            num2.current.focus()
-                        }
+                        setotpNum({...otpNum, n1: val})
+                        val ? num2.current.focus() : null
+
+                        // setCode((prev) => `${prev}${val}`)
                     }}
                     ref={num1}
                 />
@@ -131,17 +306,11 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        // setotpNum((prev) => ({...prev, n2: val}))
-                        setCode((prev) => `${prev}${val}`)
+                        setotpNum({...otpNum, n2: val})
+                        val ? num3.current.focus() : num1.current.focus()
 
-                    }}
-                    onKeyPress={( {nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n2: ""}))
-                            num1.current.focus()
-                        } else {
-                            num3.current.focus()
-                        }
+                        // setCode((prev) => `${prev}${val}`)
+
                     }}
                     ref={num2}
                 />
@@ -154,16 +323,10 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        // setotpNum((prev) => ({...prev, n3: val}))
-                        setCode((prev) => `${prev}${val}`)
-                    }}
-                    onKeyPress={( {nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n3: ""}))
-                            num2.current.focus()
-                        } else {
-                            num4.current.focus()
-                        }
+                        setotpNum({...otpNum, n3: val})
+                        val ? num4.current.focus() : num2.current.focus()
+                        // setCode((prev) => `${prev}${val}`)
+
                     }}
                     ref={num3}
                 />
@@ -176,17 +339,9 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        // setotpNum((prev) => ({...prev, n4: val}))
-                        setCode((prev) => `${prev}${val}`)
-
-                    }}
-                    onKeyPress={( {nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n4: ""}))
-                            num3.current.focus()
-                        } else {
-                            num5.current.focus()
-                        }
+                        setotpNum({...otpNum, n4: val})
+                        val ? num5.current.focus() : num3.current.focus()
+                        // setCode((prev) => `${prev}${val}`)
                     }}
                     ref={num4}
                 />
@@ -199,17 +354,9 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        // setotpNum((prev) => ({...prev, n5: val}))
-                        setCode((prev) => `${prev}${val}`)
-
-                    }}
-                    onKeyPress={({nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n5: ""}))
-                            num4.current.focus()
-                        } else {
-                            num6.current.focus()
-                        }
+                        setotpNum({...otpNum, n5: val})
+                        val ? num6.current.focus() : num4.current.focus()
+                        // setCode((prev) => `${prev}${val}`)
                     }}
                     ref={num5}
                 />
@@ -222,17 +369,10 @@ export default function OTPVerification({route}) {
                     textContentType={'number'}
                     maxLength={1}
                     onChangeText={(val) => {
-                        // setotpNum((prev) => ({...prev, n6: val}))
-                        setCode((prev) => `${prev}${val}`)
+                        setotpNum({...otpNum, n6: val})
+                        !val && num5.current.focus()
 
-                    }}
-                    onKeyPress={({nativeEvent: {key: keyValue}}) => {
-                        if(keyValue === 'Backspace'){
-                            setotpNum((prev) => ({...prev, n6: ""}))
-                            num5.current.focus()
-                        } else {
-                            console.log("end of line")
-                        }
+                        // setCode((prev) => `${prev}${val}`)
                     }}
                     ref={num6}
                 />
@@ -241,17 +381,15 @@ export default function OTPVerification({route}) {
 
         {/* If OTP is incorrect */}
         {
-            isInvalidOTP ? 
+            !showInvalidMsg ? 
             <View style={{marginBottom: 30}}>
-                { isotpMatch == 0 ? null : 
-                    <TText style={{
-                        color: ThemeDefaults.appIcon,
-                        fontFamily: 'LexendDeca_Medium',
-                        fontSize: 18
-                    }}>
-                        Login failed. Please re-enter the OTP
-                    </TText>
-                }
+                <TText style={{
+                    color: ThemeDefaults.appIcon,
+                    fontFamily: 'LexendDeca_Medium',
+                    fontSize: 18
+                }}>
+                    Login failed, please re-enter the OTP
+                </TText>
             </View> 
         : null
         }
@@ -260,21 +398,26 @@ export default function OTPVerification({route}) {
         <View style={styles.submitContainer}>
             <TouchableOpacity 
                 onPress={()=> {
-                    console.log(num1.value)
-                    // navigation.navigate("WelcomeScreen")
-                    // setCode((prev) => `${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+                    // transform number inputs into a string for phone verification
+                    setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
                     confirmCode()
                 }}
                 style={styles.submitBtn}
             >
-                <TText style={styles.submitText}>Submit</TText>
+                <TText style={styles.submitText}>Verify</TText>
             </TouchableOpacity>
-            <View style={styles.resendCode}>
-                <TText style={styles.resendCodeText}>Resend OTP in 1:00</TText>
-            </View>
+            <Pressable style={styles.resendCode} onPress={()=> {
+                setTimerCountdown(60);
+                setTimerPressed(true);
+                sendVerification();
+            }}>
+                {timerCountdown === 60 ? 
+                    <TText style={[styles.resendCodeText, {color: ThemeDefaults.appIcon, fontSize: 18}]}>Resend OTP</TText> 
+                    : <TText style={styles.resendCodeText}>{timerCountdown < 60 && timerCountdown > 9 ? `Resend OTP in 0:${timerCountdown}` : `Resend OTP in 0:0${timerCountdown}`}</TText>}
+            </Pressable>
         </View>
 
-        <View style={{marginBottom: 100}}>
+        <View>
             <TText>{code}</TText>
         </View>
 
@@ -335,7 +478,8 @@ const styles = StyleSheet.create({
         color: ThemeDefaults.themeWhite
     },
     resendCode: {
-        marginTop: 20
+        marginTop: 28,
+        flexDirection: 'row'
     },
     resendCodeText: {
         color: '#a1a1a1'
