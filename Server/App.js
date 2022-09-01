@@ -23,8 +23,8 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 mongoose.connect(
-  // "mongodb+srv://admin-Patrick:test123@cluster0.2anjoo0.mongodb.net/?retryWrites=true&w=majority"
-  "mongodb://localhost:27017/hanapLingkod"
+  "mongodb+srv://admin-Patrick:test123@cluster0.2anjoo0.mongodb.net/?retryWrites=true&w=majority"
+  // "mongodb://localhost:27017/hanapLingkod"
 );
 
 const conn = mongoose.connection;
@@ -99,7 +99,7 @@ app.post(
 
     try {
       session.startTransaction();
-      console.log(req.body)
+      console.log(req.body);
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
       const worker = await Worker.create(

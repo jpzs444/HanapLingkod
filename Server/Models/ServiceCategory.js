@@ -13,6 +13,7 @@ serviceCategorySchema.post(/Many$/, function (next) {
 serviceCategorySchema.post("findOneAndDelete", async function (doc, next) {
   let array = await ServiceSubCategory.find({})
     .select({ ServiceID: 1, _id: 1 })
+    .lean()
     .exec();
   console.log(array);
   console.time();
