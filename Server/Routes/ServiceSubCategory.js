@@ -5,25 +5,19 @@ const ServiceSubCategory = require("../Models/SubCategory");
 router
   .route("/service-sub-category")
   .get(async function (req, res) {
-    let array = await ServiceSubCategory.find({}).exec();
+    let array = await ServiceSubCategory.find({})
+      .select({ ServiceID: 1, _id: 1 })
+      .exec();
+    console.log(array);
     let result = [];
+    console.time();
     for (var i = 0; i < array.length; i += 1) {
       if (array[i].ServiceID === null) {
-        result.push(array[i]._id);
+        await ServiceSubCategory.deleteOne({ _id: array[i]._id });
       }
     }
-
-    console.time();
-
-    await Promise.all(
-      result.map(async (id) => {
-        await ServiceSubCategory.deleteOne({ _id: id });
-        console.log("asd");
-      })
-    );
     console.timeEnd();
 
-    console.log("lasr");
     let queryResult = await ServiceSubCategory.find({}).exec();
     res.send(queryResult);
   })
@@ -34,7 +28,7 @@ router
     });
     SubCategory.save(function (err) {
       if (!err) {
-        res.send("New Service Category Created");
+        res.send("New Service Sub Category Created");
       } else {
         res.send(err);
       }
