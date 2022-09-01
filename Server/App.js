@@ -24,6 +24,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 mongoose.connect(
   "mongodb+srv://admin-Patrick:test123@cluster0.2anjoo0.mongodb.net/?retryWrites=true&w=majority"
+  // "mongodb://localhost:27017/hanapLingkod"
 );
 
 const conn = mongoose.connection;
@@ -98,7 +99,7 @@ app.post(
 
     try {
       session.startTransaction();
-      console.log(req.body)
+      console.log(req.body);
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
       const worker = await Worker.create(
@@ -131,44 +132,43 @@ app.post(
       );
 
       let serviceSubCategoryID;
-      if (req.body.Category == "unlisted") {
-        let query = await ServiceCategory.findOne(
-          { Category: "unlisted" },
-          { Category: 0 }
-        );
-        const serviceSubCategory = await ServiceSubCategory.create(
+      for (var i = 0; i < req.body.Category.length; i += 1) {
+        if (req.body.Category[i] == "unlisted") {
+          let unlistedID = await ServiceCategory.findOne(
+            { Category: "unlisted" },
+            { Category: 0 }
+          );
+          const serviceSubCategory = await ServiceSubCategory.create(
+            [
+              {
+                ServiceID: unlistedID._id,
+                ServiceSubCategory: req.body.ServiceSubCategory[i],
+              },
+            ],
+            { session }
+          );
+
+          serviceSubCategoryID = serviceSubCategory[0].id;
+        } else {
+          let result = await ServiceSubCategory.findOne(
+            { ServiceSubCategory: req.body.ServiceSubCategory[i] },
+            { ServiceSubCategory: 0, ServiceID: 0 },
+            { session }
+          );
+          serviceSubCategoryID = result._id;
+        }
+        const work = await Work.create(
           [
             {
-              ServiceID: query._id,
-              ServiceSubCategory: req.body.ServiceSubCategory,
+              ServiceSubCode: serviceSubCategoryID,
+              workerId: worker[0].id,
+              minPrice: req.body.minPrice[i],
+              maxPrice: req.body.maxPrice[i],
             },
           ],
           { session }
         );
-
-        serviceSubCategoryID = serviceSubCategory[0].id;
-      } else {
-        console.log("asd");
-        let result = await ServiceSubCategory.findOne(
-          { ServiceSubCategory: req.body.ServiceSubCategory },
-          { ServiceSubCategory: 0, ServiceID: 0 },
-          { session }
-        );
-        serviceSubCategoryID = result._id;
       }
-      console.log(serviceSubCategoryID);
-      const work = await Work.create(
-        [
-          {
-            ServiceSubCode: serviceSubCategoryID,
-            workerId: worker[0].id,
-            minPrice: req.body.minPrice,
-            maxPrice: req.body.maxPrice,
-          },
-        ],
-        { session }
-      );
-
       await session.commitTransaction();
       console.log("success");
       res.send("Succesfully Created");

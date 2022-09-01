@@ -7,9 +7,8 @@ const UserNotificationSchema = new Schema({
   body: { type: String, required: true },
   createdAt: {
     type: Date,
-    expires: "1m",
     default: Date.now(),
-    required: true,
+    index: { expires: "1m" },
   },
   //   readAt: { type: Date, required: true, default: Date.now() },
 });
