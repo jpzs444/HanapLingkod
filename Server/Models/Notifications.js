@@ -5,10 +5,11 @@ const UserNotificationSchema = new Schema({
   to: { type: String, required: true },
   title: { type: String, required: true },
   body: { type: String, required: true },
+  read: { type: Boolean, default: 0 },
   createdAt: {
     type: Date,
     default: Date.now(),
-    index: { expires: "1m" },
+    index: { expires: "43200m" },
   },
   //   readAt: { type: Date, required: true, default: Date.now() },
 });
