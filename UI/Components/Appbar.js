@@ -50,7 +50,7 @@ export default function Appbar(props) {
             {
                 props.menuBtn ? 
                     <TouchableOpacity style={styles.left}
-                        onPress={() => navigation.popToTop()}
+                        onPress={() => navigation.openDrawer()}
                     >
                         <Icon name="menu" size={30} />
                     </TouchableOpacity> : null
