@@ -28,7 +28,7 @@ export default function DrawerNavigation(){
                 drawerContentContainerStyle: {flex: 1, height: '100%', }
             }}
         >
-            <Drawer.Screen name="Home" component={TabNavigation} options={{
+            <Drawer.Screen name="Home_Drawer" component={TabNavigation} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="home" size={25} color={color}  />
                 )

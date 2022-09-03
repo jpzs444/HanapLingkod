@@ -1,5 +1,5 @@
 import React, {useRef, useState, useEffect} from 'react'
-import {SafeAreaView, View, TouchableOpacity, TextInput, StyleSheet, Alert, StatusBar} from 'react-native';
+import {SafeAreaView, View, TouchableOpacity, TextInput, StyleSheet, Alert, StatusBar, BackHandler} from 'react-native';
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'
 import { firebaseConfig } from '../config';
 import firebase from 'firebase/compat/app';
@@ -20,6 +20,7 @@ function OTPModule({route}) {
     useEffect(() => {
         sendVerification(phoneNum)
     }, [])
+
 
     const sendVerification = (phoneNum) => {
         const phoneProvider = new firebase.auth.PhoneAuthProvider();

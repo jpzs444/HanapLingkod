@@ -8,7 +8,8 @@ import { SafeAreaView,
     StyleSheet, 
     TouchableOpacity,
     ActivityIndicator,
-    Dimensions
+    Dimensions,
+    KeyboardAvoidingView
    } from 'react-native';
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -74,10 +75,11 @@ export default function Login({navigation}) {
             setIsLoading(true)
             setIsWrongCredentials(false);
             
-            global.userData = user;
+            global.userData = {...user};
             
             setIsLoading(false)
             setUser({username: "", password: ""});
+            // navigation.navigate("HomeStack");
             navigation.navigate("OTPVerification", {isLogin: true, phoneNum: user.phoneNumber})
 
           } else {
@@ -101,7 +103,7 @@ export default function Login({navigation}) {
     };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
     {/* Header */}
       <View style={styles.orangebg}>
         <View style={styles.darkbluebg}>
@@ -161,7 +163,7 @@ export default function Login({navigation}) {
         </View>
      </View>
 
-     <View style={{ width: '80%', alignContent: 'center', position: 'absolute', bottom: 50}}>  
+     <View style={{ width: '80%', alignContent: 'center', position: 'relative', top: 50}}>  
         <View style={[styles.inputErrorView, {opacity: isWrongCredentials ? 1 : 0,  marginBottom: isWrongCredentials ? 10 : 0}]}>
           <Text style={styles.inputErrorText}>The username or password you entered is incorrect</Text>
         </View>
@@ -191,7 +193,7 @@ export default function Login({navigation}) {
         </View>
      </View>
 
-    </SafeAreaView>
+    </View>
   );
 }
 
