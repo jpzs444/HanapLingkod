@@ -9,19 +9,20 @@ import Registration from '../Screens/Registration';
 import Home from '../Screens/Home';
 
 import HomeStack from '../Components/HomeStack';
+import DrawerNavigation from './DrawerNavigation';
 
 const LoginStack = createNativeStackNavigator();
 
 
 export default function LoginNavigationStack(){
     return(
-      <LoginStack.Navigator initialRouteName="HomeStack" screenOptions={{headerShown: false}} >
+      <LoginStack.Navigator initialRouteName="Login" screenOptions={{headerShown: false}} >
           <LoginStack.Screen name="Login" component={Login} />
           <LoginStack.Screen name="AccountTypeSelect" component={RegisterUserAccountType} />
           <LoginStack.Screen name="Register" component={Registration} />
           <LoginStack.Screen name="OTPVerification" component={OTPVerification} />
           <LoginStack.Screen name="WelcomeScreen" component={Welcome} />
-          <LoginStack.Screen name="HomeStack" component={HomeStack} />
+          <LoginStack.Screen name="HomeStack" component={DrawerNavigation} />
       </LoginStack.Navigator>
     )
   }
