@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const UserNotification = require("../Models/Notifications");
 const Work = require("../Models/Work");
+const Worker = require("../Models/Workers");
+const Recuiter = require("../Models/Recuiters");
 
 router
   .route("/notification/:pushtoken")
@@ -21,5 +23,18 @@ router
     );
     res.send("Updated Successfully");
   });
+
+router.route("/setToken/:userID").put(function (req, res) {
+  console.log(req.body.pushtoken);
+  Worker.findByIdAndUpdate(
+    { _id: req.params.userID },
+    { $set: { pushtoken: req.body.pushtoken } }
+  );
+  Recuiter.findByIdAndUpdate(
+    { _id: req.params.userID },
+    { $set: { pushtoken: req.body.pushtoken } }
+  );
+  res.send("Updated Successfully");
+});
 
 module.exports = router;
