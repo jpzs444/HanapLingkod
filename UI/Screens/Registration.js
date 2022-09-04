@@ -1,8 +1,9 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useFocusEffect} from 'react';
 import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, 
-  Image, Button, StyleSheet, StatusBar, ScrollView, Modal, Platform, Dimensions } from 'react-native';
+  Image, Button, StyleSheet, StatusBar, ScrollView, Modal, 
+  Platform, Dimensions, BackHandler } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -35,6 +36,7 @@ export default function Registration({route}) {
 
     const navigation = useNavigation();
     
+    const [placeholderPhoneNum, setPlaceholderPhoneNum] = useState("Phone Number")
     const [user, setUser] = useState({
       username: "", password: "", email: "", firstname: "",
       lastname: "", birthday: "", age: "", gender: "", street: "",
@@ -45,27 +47,8 @@ export default function Registration({route}) {
     const [confirmPW, setConfirmPW] = useState("")
     const [pwMatch, setPWMatch] = useState(true);
 
-    useEffect(() => {
-      user.password === confirmPW ? setPWMatch(true) : setPWMatch(false)
-    }, [confirmPW, user.password])
-
-    // useEffect(() => {
-
-    // }, [services[0].lowestPrice, services[0].highestPrice])
-
-    const [placeholderPhoneNum, setPlaceholderPhoneNum] = useState("Phone Number")
-    const [phoneVerified, setPhoneVerified] = useState(false);
-
-    const handlePhoneVerification = (isverified) => {
-      setPhoneVerified(isverified)
-    }
-
     const [next, setNext] = useState(1)
     const [nextNum, setNextNum] = useState(1)
-
-    const updateNextNum = () => {
-      setNextNum(next)
-    }
 
     const [isConfirm, setisConfirm] = useState(false)
     const [chooseData, setchooseData] = useState("")
@@ -89,6 +72,35 @@ export default function Registration({route}) {
     const [dateSelected, setSelected] = useState(false)
 
     const [datePickerVisible, setDatePickerVisibility] = useState(false);
+
+    useEffect(() => {
+      user.password === confirmPW ? setPWMatch(true) : setPWMatch(false)
+    }, [confirmPW, user.password])
+
+
+    // componentdidmount
+    // use effect is for back button found on the phone
+    useEffect(() => {
+      console.log("backbtn pressed");
+      BackHandler.addEventListener("hardwareBackPress", ()=>handleSystemBackButton())
+      
+      // componentwillunmount
+      return () => {
+        BackHandler.removeEventListener("hardwareBackPress", ()=>handleSystemBackButton())
+      }
+    }, [next]);
+
+    const handleSystemBackButton =()=> {
+      if(next === 1) {
+        navigation.goBack()
+        return false
+      } else {
+        console.log(next)
+        setNext((prev)=> prev-1)
+        return true;
+      }
+    }
+
 
     const handleServiceAdd = () => {
       setServices([...services, {service: "", lowestPrice: "", highestPrice: ""}])
@@ -275,9 +287,6 @@ export default function Registration({route}) {
     //single license image
     const [imageSingleLicense, setSingleLicenseImage] = useState('');
 
-    // const [imageW, setImageW] = useState(Number);
-    // const [imageH, setImageH] = useState(Number);
-    // let imageList = [];
 
     const [isPriceGreater, setIsPriceGreater] = useState(true)
     useEffect(() => {

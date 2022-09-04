@@ -23,7 +23,7 @@ const Tab = createBottomTabNavigator();
 const TabNavigation = () => {
   return (
     <Tab.Navigator
-        initialRouteName='HomeTab'
+        initialRouteName='Home_Tab'
         screenOptions={{
             headerShown: false,
             tabBarShowLabel: false,
@@ -37,14 +37,14 @@ const TabNavigation = () => {
                 bottom: 30,
                 left: 30, 
                 right: 30,
-                backgroundColor: ThemeDefaults.themeOrange,
+                backgroundColor: "#FF803C",
                 elevation: 5,
                 zIndex: 20,               
             }
         }}
     >
         {/* Home Screen Tab */}
-        <Tab.Screen name="Home_Tab" component={Home} 
+        <Tab.Screen name="Home_Tab" component={HomeNavigationStack} 
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="home" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
@@ -84,7 +84,7 @@ const TabNavigation = () => {
             options={{
                 tabBarBadge: 5,
                 tabBarBadgeStyle: {
-                    backgroundColor: ThemeDefaults.themeDarkBlue,
+                    backgroundColor: '#BB1E00',
                 },
                 tabBarIcon: ({focused}) => (
                     <Icon name="bell" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />

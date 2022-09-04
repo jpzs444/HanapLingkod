@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
 import {
-    SafeAreaView, View, TouchableOpacity, TextInput, StatusBar, StyleSheet, ActivityIndicator, Pressable
+    SafeAreaView, View, TouchableOpacity, TextInput, StatusBar, StyleSheet, ActivityIndicator, Pressable, BackHandler
 } from 'react-native'
 
 import {FirebaseRecaptchaVerifierModal} from 'expo-firebase-recaptcha';
@@ -32,7 +32,56 @@ export default function OTPVerification({route}, props) {
     const [timerPressed, setTimerPressed] = useState(false);
     const timerRef = useRef(timerCountdown)
 
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(false);
+
+    const [isotpMatch, setotpMatch] = useState(0)
+
+    const num1 = useRef();
+    const num2 = useRef();
+    const num3 = useRef();
+    const num4 = useRef();
+    const num5 = useRef();
+    const num6 = useRef();
+
+    // Send Verification with given number on the registration
+    useEffect(() => {
+        sendVerification();
+
+        // navigation.replace("HomeStack")
+        // createWorkerAccount()
+    },[])
+
+    useEffect(() => {
+        const timerId = setInterval(() => {
+            if (timerRef.current !== 0 && timerPressed) {
+                timerRef.current -= 1;
+                setTimerCountdown(timerRef.current);
+            //   sendVerification();
+            } else {
+                clearInterval(timerId);
+                setTimerCountdown(60)
+            }
+        }, 1000);
+    }, [timerPressed]);
+  
+      // is invalid otp
+    useEffect(() => {
+        setshowInvalidMsg(!isInvalidOTP)
+    }, [isInvalidOTP]);
+
+    useEffect(() => {
+        BackHandler.addEventListener("hardwareBackPress", () => handleSystemBackButton())
+
+        return () => {
+            BackHandler.removeEventListener("hardwareBackPress", () => handleSystemBackButton())
+        }
+    }, [])
+
+    const handleSystemBackButton = () => {
+        navigation.navigate("Login")
+    }
+
+
 
     if(isLoading){
         return (
@@ -74,7 +123,7 @@ export default function OTPVerification({route}, props) {
             role === 'worker' && !isLogin && createWorkerAccount()
             
             setIsLoading(false)
-            isLogin ? navigation.replace("HomeStack") : navigation.replace("WelcomeScreen", {role: role});
+            isLogin && navigation.navigate("HomeStack");
         })
         .catch((error) => {
             setCode("")
@@ -86,15 +135,6 @@ export default function OTPVerification({route}, props) {
             console.log("error: ", error.message)
         })
     }
-
-    // Send Verification with given number on the registration
-    useEffect(() => {
-        sendVerification();
-
-        // navigation.replace("HomeStack")
-        // createWorkerAccount()
-    },[])
-
 
     const [otpNum, setotpNum] = useState({
         n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",
@@ -227,41 +267,16 @@ export default function OTPVerification({route}, props) {
       }
   
 
-        useEffect(() => {
-            const timerId = setInterval(() => {
-                if (timerRef.current !== 0 && timerPressed) {
-                    timerRef.current -= 1;
-                    setTimerCountdown(timerRef.current);
-                //   sendVerification();
-                } else {
-                    clearInterval(timerId);
-                    setTimerCountdown(60)
-                }
-            }, 1000);
-        }, [timerPressed]);
-      
-          // is invalid otp
-        useEffect(() => {
-            setshowInvalidMsg(!isInvalidOTP)
-        }, [isInvalidOTP]);
-
 
 
     //  isotpMatch == 0 default hidden
     //       "     == 1 not matching
     //       "     == 2 otp matched
-    const [isotpMatch, setotpMatch] = useState(0)
-
-    const num1 = useRef();
-    const num2 = useRef();
-    const num3 = useRef();
-    const num4 = useRef();
-    const num5 = useRef();
-    const num6 = useRef();
 
   return (
     <SafeAreaView style={styles.container}>
         {/* Appbar */}
+        
         
         <FirebaseRecaptchaVerifierModal 
                 ref={recaptchaVerifier}
@@ -294,6 +309,8 @@ export default function OTPVerification({route}, props) {
                         val ? num2.current.focus() : null
 
                         // setCode((prev) => `${prev}${val}`)
+                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
                     }}
                     ref={num1}
                 />
@@ -310,6 +327,7 @@ export default function OTPVerification({route}, props) {
                         val ? num3.current.focus() : num1.current.focus()
 
                         // setCode((prev) => `${prev}${val}`)
+                        setCode((prev) => `${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
 
                     }}
                     ref={num2}
@@ -326,6 +344,8 @@ export default function OTPVerification({route}, props) {
                         setotpNum({...otpNum, n3: val})
                         val ? num4.current.focus() : num2.current.focus()
                         // setCode((prev) => `${prev}${val}`)
+                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
 
                     }}
                     ref={num3}
@@ -342,6 +362,8 @@ export default function OTPVerification({route}, props) {
                         setotpNum({...otpNum, n4: val})
                         val ? num5.current.focus() : num3.current.focus()
                         // setCode((prev) => `${prev}${val}`)
+                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
                     }}
                     ref={num4}
                 />
@@ -357,6 +379,8 @@ export default function OTPVerification({route}, props) {
                         setotpNum({...otpNum, n5: val})
                         val ? num6.current.focus() : num4.current.focus()
                         // setCode((prev) => `${prev}${val}`)
+                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
                     }}
                     ref={num5}
                 />
@@ -371,8 +395,10 @@ export default function OTPVerification({route}, props) {
                     onChangeText={(val) => {
                         setotpNum({...otpNum, n6: val})
                         !val && num5.current.focus()
-
+                        console.log(otpNum.n6)
                         // setCode((prev) => `${prev}${val}`)
+                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
                     }}
                     ref={num6}
                 />
@@ -398,9 +424,13 @@ export default function OTPVerification({route}, props) {
         <View style={styles.submitContainer}>
             <TouchableOpacity 
                 onPress={()=> {
+                    
                     // transform number inputs into a string for phone verification
+                    setCode("")
                     setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
-                    confirmCode()
+                    console.log(code)
+                    // confirmCode()
+                    navigation.navigate("HomeStack")
                 }}
                 style={styles.submitBtn}
             >
