@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import Appbar from '../Components/Appbar';
 import { Icon } from 'react-native-vector-icons/MaterialCommunityIcons';
 import { role, userID } from '../global/global';
+import TabNavigation from '../Components/TabNavigation';
 
 export default function Home({route}) {
 
@@ -14,9 +15,9 @@ export default function Home({route}) {
 
   return (
     <SafeAreaView style={{flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: StatusBar.currentHeight, backgroundColor: '#fff'}}>
-        <ScrollView style={{flex: 1, width: '100%'}}>
+        <ScrollView style={{flex: 1, width: '100%',}}>
             <Appbar hasPicture={true} menuBtn={true} />
-            <View style={{alignItems: 'center', justifyContent: 'center'}}>
+            <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
               <TText>Welcome to the Home Screen of HanapLingkod</TText>
               <TText>{global.userData.firstname} {global.userData.lastname}</TText>
               <TText>{global.userData.role}</TText>
