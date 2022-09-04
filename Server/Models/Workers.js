@@ -30,6 +30,7 @@ const workerSchema = new mongoose.Schema({
   workprovince: String,
   licenseCertificate: String,
   workDescription: String,
+  pushtoken: { type: String, default: "" },
 
   comments: [
     {

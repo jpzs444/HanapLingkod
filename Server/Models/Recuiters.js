@@ -20,6 +20,7 @@ const recruiterSchema = new mongoose.Schema({
   GovId: String,
   verification: Boolean,
   accountStatus: String,
+  pushtoken: { type: String, default: "" },
 
   role: String,
   comments: [
