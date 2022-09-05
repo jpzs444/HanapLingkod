@@ -25,15 +25,30 @@ router
   });
 
 router.route("/setToken/:userID").put(function (req, res) {
-  console.log(req.body.pushtoken);
-  Worker.findByIdAndUpdate(
-    { _id: req.params.userID },
-    { $set: { pushtoken: req.body.pushtoken } }
+  console.log(req.params.userID);
+  Worker.updateOne(
+    { _id: { $eq: req.params.userID } },
+    { pushtoken: req.body.pushtoken },
+    function (err, docs) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Updated Docs : ", docs);
+      }
+    }
   );
-  Recuiter.findByIdAndUpdate(
-    { _id: req.params.userID },
-    { $set: { pushtoken: req.body.pushtoken } }
+  Recuiter.updateOne(
+    { _id: { $eq: req.params.userID } },
+    { pushtoken: req.body.pushtoken },
+    function (err, docs) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Updated Docs : ", docs);
+      }
+    }
   );
+
   res.send("Updated Successfully");
 });
 
