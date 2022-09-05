@@ -15,6 +15,7 @@ import Login from '../Screens/Login';
 import Home from '../Screens/Home';
 import RegisterUserAccountType from '../Screens/RegisterUserAccountType';
 import Welcome from '../Screens/Welcome';
+import Notifications from '../Screens/Notifications';
 
 
 
@@ -28,18 +29,7 @@ const TabNavigation = () => {
             headerShown: false,
             tabBarShowLabel: false,
             tabBarStyle: {
-                alignItems: 'center',
-                position: 'absolute',
-                borderRadius: 18,
-                height: 60,
-                padding: 14,
-                paddingBottom: 12,
-                bottom: 30,
-                left: 30, 
-                right: 30,
-                backgroundColor: "#FF803C",
-                elevation: 5,
-                zIndex: 20,               
+                ...styles.container               
             }
         }}
     >
@@ -66,8 +56,9 @@ const TabNavigation = () => {
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="clipboard-text-multiple" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
-                )
+                ),
             }}
+            
         />
 
         {/* Messages Tab */}
@@ -80,7 +71,7 @@ const TabNavigation = () => {
         />
 
         {/* Notification Tab */}
-        <Tab.Screen name="Notification" component={Login} 
+        <Tab.Screen name="Notification" component={Notifications} 
             options={{
                 tabBarBadge: 5,
                 tabBarBadgeStyle: {
@@ -88,7 +79,7 @@ const TabNavigation = () => {
                 },
                 tabBarIcon: ({focused}) => (
                     <Icon name="bell" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
-                )
+                ),
             }}
         />
     </Tab.Navigator>
@@ -99,16 +90,17 @@ export default TabNavigation
 
 const styles = StyleSheet.create({
     container: {
-        position: 'absolute',
-        justifyContent: 'space-around',
         alignItems: 'center',
-        flexDirection: 'row',
+        position: 'absolute',
         borderRadius: 18,
-        padding: 10,
+        height: 60,
+        padding: 14,
+        paddingBottom: 12,
         bottom: 30,
         left: 30, 
         right: 30,
-        backgroundColor: ThemeDefaults.themeOrange,
-        zIndex: 20,
+        backgroundColor: "#FF803C",
+        elevation: 5,
+        zIndex: 20,   
     }
 })

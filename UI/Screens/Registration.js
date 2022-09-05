@@ -87,8 +87,10 @@ export default function Registration({route}) {
       // componentwillunmount
       return () => {
         BackHandler.removeEventListener("hardwareBackPress", ()=>handleSystemBackButton())
+        setShowDialog(false)
       }
     }, [next]);
+
 
     const handleSystemBackButton =()=> {
       if(next === 1) {
@@ -542,7 +544,7 @@ export default function Registration({route}) {
                         </View>
                       </View>
                   
-                      {/* {
+                      {
                         services.length - 1 === index &&
                           <View style={{alignItems: 'center', marginTop: 150}}>
                           <TouchableOpacity style={{width: 60, height: 60, borderRadius: 30, backgroundColor: '#595959', alignItems: 'center', justifyContent: 'center' ,marginBottom: 15}}
@@ -555,7 +557,7 @@ export default function Registration({route}) {
                           </TouchableOpacity>
                           <TText style={{width: 130, textAlign: 'center'}}>Add another service offered</TText>
                         </View>
-                      } */}
+                      }
                     </View>
                   ))
                 }

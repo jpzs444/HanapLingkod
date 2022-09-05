@@ -123,7 +123,7 @@ export default function OTPVerification({route}, props) {
             role === 'worker' && !isLogin && createWorkerAccount()
             
             setIsLoading(false)
-            isLogin && navigation.navigate("HomeStack");
+            isLogin && navigation.replace("HomeStack");
         })
         .catch((error) => {
             setCode("")
@@ -247,11 +247,21 @@ export default function OTPVerification({route}, props) {
         formData.append("phoneNumber", user.phonenumber);
         formData.append("emailAddress", user.email);
         formData.append("GovId", filename);
-        formData.append("Category", work.Category === "unlisted" ? work.Category : "");
+        // formData.append("Category", work.Category === "unlisted" ? work.Category : "");
         // work.Category === "unlisted" ? formData.append("Category", work.Category) : null;
-        formData.append("ServiceSubCategory", work[0].service);
-        formData.append("minPrice", work[0].lowestPrice);
-        formData.append("maxPrice", work[0].highestPrice);
+        // formData.append("ServiceSubCategory", work[0].service);
+        // formData.append("minPrice", work[0].lowestPrice);
+        // formData.append("maxPrice", work[0].highestPrice);
+
+
+        // append work information listed by the worker from the registration
+        for (let i = 0; i < work.length; i++){
+            formData.append("Category", work[i].Category === "unlisted" ? work[i].Category : "");
+            formData.append("ServiceSubCategory", work[i].service);
+            formData.append("minPrice", work[i].lowestPrice);
+            formData.append("maxPrice", work[i].highestPrice);
+        }
+
   
         fetch("http://"+ IPAddress +":3000/signup/worker?username=" + user.username, {
           method: "POST",
