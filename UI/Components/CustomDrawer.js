@@ -3,11 +3,13 @@ import React from 'react'
 import {DrawerContentScrollView, DrawerItemList} from '@react-navigation/drawer'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import TText from './TText';
+import { useNavigation } from '@react-navigation/native';
 
 import LoginNavigationStack from './LoginStack';
 
 
 const CustomDrawer = (props) => {
+    const navigation = useNavigation()
   return (
     <View style={{flex: 1, height: '100%'}}>
         <DrawerContentScrollView {...props} >
@@ -28,7 +30,12 @@ const CustomDrawer = (props) => {
             {/* Drawer Bottom options */}
             <View style={{borderTopColor: '#ccc', borderTopWidth: 0.5, padding: 20,}}>
                 <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}}
-                    onPress={() => props.navigation.navigate("HomeStack")}
+                    onPress={() => {
+                        global.userData = ""
+                        global.deviceExpoPushToken = ""
+                        navigation.replace("LoginNavigationStack")
+                        console.log("logout btn")
+                    }}
                 >
                     <Icon name="logout" size={25} style={{marginRight: 15}} />
                     <TText>Logout</TText>

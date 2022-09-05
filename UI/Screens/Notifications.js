@@ -1,5 +1,5 @@
-import React from 'react'
-import { SafeAreaView, View, Image, Text, StatusBar, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, {useEffect} from 'react'
+import { SafeAreaView, View, Image, Text, StatusBar, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import TText from '../Components/TText'
 import { useNavigation } from '@react-navigation/native';
 import Appbar from '../Components/Appbar';
@@ -12,14 +12,20 @@ export default function Notifications({route}) {
   const navigation = useNavigation();
   // const {user, role} = route.params;
 
+  // use useEffect for componentDidMount or for when the page loads
+  useEffect(() => {
+    // loads all of the notifications sent to the user 
+    // ;)
+    Linking.openURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+  }, [])
+
+
   return (
     <SafeAreaView style={styles.container}>
         <ScrollView style={{flex: 1, width: '100%'}}>
             <Appbar hasPicture={true} menuBtn={true} />
             <View style={styles.header}>
               <TText style={styles.headerTitle}>Notifications</TText>
-              <TText>{global.userData.firstname} {global.userData.lastname}</TText>
-              <TText>{global.userData.role}</TText>
               <View style={styles.btnContainer}>
                 <TouchableOpacity style={styles.btnUnread}>
                     <View style={styles.btnContent}>
@@ -71,6 +77,7 @@ const styles = StyleSheet.create({
     },
     btnContainer: {
       width: "85%",
+      marginTop: 40,
     },
     btnContent: {
       flexDirection: 'row', padding: "5%",
