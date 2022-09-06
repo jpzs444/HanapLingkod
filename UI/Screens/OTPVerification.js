@@ -36,6 +36,11 @@ export default function OTPVerification({route}, props) {
 
     const [isotpMatch, setotpMatch] = useState(0)
 
+    const [otpNum, setotpNum] = useState({
+        n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",
+    })
+
+
     const num1 = useRef();
     const num2 = useRef();
     const num3 = useRef();
@@ -46,11 +51,9 @@ export default function OTPVerification({route}, props) {
     // Send Verification with given number on the registration
     useEffect(() => {
         sendVerification();
-
-        // navigation.replace("HomeStack")
-        // createWorkerAccount()
     },[])
 
+    // update resend otp code countdown timer
     useEffect(() => {
         const timerId = setInterval(() => {
             if (timerRef.current !== 0 && timerPressed) {
@@ -64,7 +67,7 @@ export default function OTPVerification({route}, props) {
         }, 1000);
     }, [timerPressed]);
   
-      // is invalid otp
+    // is invalid otp
     useEffect(() => {
         setshowInvalidMsg(!isInvalidOTP)
     }, [isInvalidOTP]);
@@ -80,7 +83,6 @@ export default function OTPVerification({route}, props) {
     const handleSystemBackButton = () => {
         navigation.navigate("Login")
     }
-
 
 
     if(isLoading){
@@ -99,6 +101,7 @@ export default function OTPVerification({route}, props) {
     }
 
     const confirmCode = () => {
+        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
         setIsLoading(true)
         const credential = firebase.auth.PhoneAuthProvider.credential(
             verificationId,
@@ -119,8 +122,9 @@ export default function OTPVerification({route}, props) {
             // if authentication is successful, continue to the welcome screen
             isLogin ? console.log(" going to home screen") : null
             
-            role === 'recruiter' && !isLogin && createRecruiterAccount()
-            role === 'worker' && !isLogin && createWorkerAccount()
+            console.log("confirm code | account type: ", role)
+            role === 'recruiter' ? createRecruiterAccount() : null
+            role === 'worker' ? createWorkerAccount() : null
             
             setIsLoading(false)
             isLogin && navigation.replace("HomeStack");
@@ -136,10 +140,6 @@ export default function OTPVerification({route}, props) {
         })
     }
 
-    const [otpNum, setotpNum] = useState({
-        n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",
-    })
-
 
 
     // CREATE ACCOUNT
@@ -148,6 +148,7 @@ export default function OTPVerification({route}, props) {
     // CREATE RECRUITER ACCOUNT
 
     const createRecruiterAccount = () => {
+        console.log("userType: recruiter | creater user")
         let localUri = singleImage;
         let filename = localUri.split("/").pop();
   
@@ -189,9 +190,9 @@ export default function OTPVerification({route}, props) {
             "content-type": "multipart/form-data",
           },
         }).then(() => {
-            // alert("Account created");
-            navigation.replace("WelcomeScreen", {role: "recruiter", user: user})
-        }).catch((er) => {console.log("error: ", er)})
+            console.log("Account created | recruiter");
+            navigation.navigate("WelcomePage", {role: "recruiter", user: user})
+        }).catch((er) => {console.log("error: ", er.message)})
       }
 
 
@@ -199,6 +200,8 @@ export default function OTPVerification({route}, props) {
       // CREATE WORKER ACCOUNT
 
     const createWorkerAccount = () => {
+        console.log("userType: worker | creater user")
+
         // Govt ID
         let localUri = singleImage;
         let filename = localUri.split("/").pop();
@@ -248,18 +251,19 @@ export default function OTPVerification({route}, props) {
         formData.append("emailAddress", user.email);
         formData.append("GovId", filename);
         // formData.append("Category", work.Category === "unlisted" ? work.Category : "");
-        // work.Category === "unlisted" ? formData.append("Category", work.Category) : null;
         // formData.append("ServiceSubCategory", work[0].service);
         // formData.append("minPrice", work[0].lowestPrice);
         // formData.append("maxPrice", work[0].highestPrice);
 
-
+          console.log("work length: ", work.length)
         // append work information listed by the worker from the registration
         for (let i = 0; i < work.length; i++){
             formData.append("Category", work[i].Category === "unlisted" ? work[i].Category : "");
             formData.append("ServiceSubCategory", work[i].service);
             formData.append("minPrice", work[i].lowestPrice);
             formData.append("maxPrice", work[i].highestPrice);
+
+            console.log("work service: ", work[i].service)
         }
 
   
@@ -270,23 +274,15 @@ export default function OTPVerification({route}, props) {
             "content-type": "multipart/form-data",
           },
         }).then(() => {
-            // alert("Account created | worker");
-        //   props.navigation.navigate("OTPVerification", {role: user.role});
-            navigation.replace("WelcomeScreen", {role: 'worker',})
-        }).catch((er) => {console.log("error: ", er)})
+            console.log("Account created | worker");
+            //props.navigation.navigate("OTPVerification", {role: user.role});
+            navigation.navigate("WelcomePage", {role: 'worker',})
+        }).catch((er) => {console.log("error: ", er.message)})
       }
-  
 
-
-
-    //  isotpMatch == 0 default hidden
-    //       "     == 1 not matching
-    //       "     == 2 otp matched
 
   return (
-    <SafeAreaView style={styles.container}>
-        {/* Appbar */}
-        
+    <SafeAreaView style={styles.container}>        
         
         <FirebaseRecaptchaVerifierModal 
                 ref={recaptchaVerifier}
@@ -406,8 +402,9 @@ export default function OTPVerification({route}, props) {
                         setotpNum({...otpNum, n6: val})
                         !val && num5.current.focus()
                         console.log(otpNum.n6)
+                        console.log(val)
                         // setCode((prev) => `${prev}${val}`)
-                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${val}`)
 
                     }}
                     ref={num6}
@@ -438,9 +435,9 @@ export default function OTPVerification({route}, props) {
                     // transform number inputs into a string for phone verification
                     setCode("")
                     setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
-                    console.log(code)
-                    // confirmCode()
-                    navigation.navigate("HomeStack")
+                    console.log("input otp: ", code)
+                    confirmCode()
+                    // navigation.navigate("HomeStack")
                 }}
                 style={styles.submitBtn}
             >

@@ -2,13 +2,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import Login from '../Screens/Login'
-import Welcome from '../Screens/Welcome';
 import RegisterUserAccountType from '../Screens/RegisterUserAccountType';
-import OTPVerification from '../Screens/OTPVerification';
 import Registration from '../Screens/Registration';
-import Home from '../Screens/Home';
-
-import HomeStack from '../Components/HomeStack';
+import OTPVerification from '../Screens/OTPVerification';
+import Welcome from '../Screens/Welcome';
 import DrawerNavigation from './DrawerNavigation';
 
 const LoginStack = createNativeStackNavigator();
@@ -21,7 +18,7 @@ export default function LoginNavigationStack(){
           <LoginStack.Screen name="AccountTypeSelect" component={RegisterUserAccountType} />
           <LoginStack.Screen name="Register" component={Registration} />
           <LoginStack.Screen name="OTPVerification" component={OTPVerification} />
-          <LoginStack.Screen name="WelcomeScreen" component={Welcome} />
+          <LoginStack.Screen name="WelcomePage" component={Welcome} />
           <LoginStack.Screen name="HomeStack" component={DrawerNavigation} />
       </LoginStack.Navigator>
     )

@@ -24,8 +24,10 @@ router
     res.send("Updated Successfully");
   });
 
+
 router.route("/setToken/:userID").put(function (req, res) {
   console.log(req.params.userID);
+  console.log(req.body);
   Worker.updateOne(
     { _id: { $eq: req.params.userID } },
     { pushtoken: req.body.pushtoken },

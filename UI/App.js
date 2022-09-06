@@ -7,7 +7,6 @@ import * as Notifications from "expo-notifications";
 
 import 'react-native-gesture-handler';
 
-import deviceExpoPushToken from './global/global'
 
 
 import LoginNavigationStack from './Components/LoginStack';
@@ -15,6 +14,8 @@ import LoginNavigationStack from './Components/LoginStack';
 import TabNavigation from './Components/TabNavigation';
 import DrawerNavigator from './Components/DrawerNavigation';
 import { Linking } from "react-native";
+import "./global/global";
+
 
 const AppStack = createNativeStackNavigator();
 
@@ -38,7 +39,8 @@ export default function App() {
   useEffect(() => {
     registerForPushNotificationsAsync().then((token) =>{
       setExpoPushToken(token)
-      global.deviceExpoPushToken = expoPushToken
+      global.deviceExpoPushToken = token;
+      console.log("app.js pt", global.deviceExpoPushToken)
     });
 
     // This listener is fired whenever a notification is received while the app is foregrounded
@@ -51,7 +53,6 @@ export default function App() {
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log(response);
-        Linking.openURL('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
       });
     
     Notifications.setNotificationHandler({
