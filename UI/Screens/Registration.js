@@ -933,7 +933,7 @@ export default function Registration({route}) {
               
               {/* Checks if the user confirms the creation of his/her account  */}
               {
-                isConfirmed ? navigation.navigate("OTPVerification", {user: user, phoneNum: user.phonenumber, singleImage: singleImage, image: image}) : null
+                isConfirmed ? navigation.navigate("OTPVerification", {user: user, phoneNum: user.phonenumber, singleImage: singleImage, image: image, role: user.role}) : null
               }
 
               {/* show confirm create account dialog */}

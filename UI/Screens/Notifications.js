@@ -1,22 +1,35 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import { SafeAreaView, View, Image, Text, StatusBar, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import TText from '../Components/TText'
 import { useNavigation } from '@react-navigation/native';
 import Appbar from '../Components/Appbar';
 import { Icon } from 'react-native-vector-icons/MaterialCommunityIcons';
-import { role, userID } from '../global/global';
+import { IPAddress, role, userID } from '../global/global';
 
 export default function Notifications({route}) {
 
 
   const navigation = useNavigation();
   // const {user, role} = route.params;
+  const [notifications, setNotifications] = useState({})
 
   // use useEffect for componentDidMount or for when the page loads
   useEffect(() => {
     // loads all of the notifications sent to the user 
-    // ;)
-    Linking.openURL("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+    
+  }, [])
+
+  useEffect(() => {
+    fetch("http://" + IPAddress + ":300/notification/:" + global.devicePushToken, {
+      method: "GET",
+      headers: {
+        "content-type": "application/json",
+      },
+    }).then((res) => {
+      setNotifications({...res})
+    }).catch((err) => {
+      console.log("error: ", err.message)
+    })
   }, [])
 
 

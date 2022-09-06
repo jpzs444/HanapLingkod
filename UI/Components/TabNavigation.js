@@ -1,6 +1,6 @@
 // Bottom Tab Navigation
 
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -11,17 +11,32 @@ import ThemeDefaults from './ThemeDefaults';
 import LoginNavigationStack from './LoginStack';
 import HomeNavigationStack from './HomeStack';
 
-import Login from '../Screens/Login';
 import Home from '../Screens/Home';
 import RegisterUserAccountType from '../Screens/RegisterUserAccountType';
-import Welcome from '../Screens/Welcome';
 import Notifications from '../Screens/Notifications';
+import { devicePushToken, IPAddress } from '../global/global';
 
 
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
+
+  const [notificationCount, setNotificationCount] = useState(0)
+  useEffect(() => {
+    fetch("http://" + IPAddress + ":300/notification/:" + devicePushToken, {
+      method: "GET",
+      headers: {
+        "content-type": "application/json",
+      },
+    }).then((res) => {
+      setNotificationCount(res.length)
+      console.log('notif length: ', res.length)
+    }).catch((err) => {
+      console.log("error: ", err.message)
+    })
+  }, [])
+
   return (
     <Tab.Navigator
         initialRouteName='Home_Tab'
@@ -73,7 +88,7 @@ const TabNavigation = () => {
         {/* Notification Tab */}
         <Tab.Screen name="Notification" component={Notifications} 
             options={{
-                tabBarBadge: 5,
+                tabBarBadge: notificationCount,
                 tabBarBadgeStyle: {
                     backgroundColor: '#BB1E00',
                 },

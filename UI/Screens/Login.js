@@ -15,7 +15,7 @@ import { useFonts } from 'expo-font';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import TText from '../Components/TText';
-import { IPAddress, role, userID } from '../global/global';
+import { IPAddress, userData } from '../global/global';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -75,7 +75,7 @@ export default function Login({navigation}) {
             setIsLoading(true)
             setIsWrongCredentials(false);
             
-            global.userData = {...user};
+            global.userData = user;
             
             setIsLoading(false)
             setUser({username: "", password: ""});
