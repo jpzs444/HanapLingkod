@@ -57,7 +57,7 @@ const multipleFile = upload.fields([
   { name: "certificate" },
 ]);
 
-// notification(["ExponentPushToken[lHLRMxMMGeYbrjqxbILWj_]"], "HanapLingkod", "Recruiter Juan needs your service");
+// notification(["ExponentPushToken[lHLRMxMMGeYbrjqxbILWj_]"], "HanapLingkod", "Recruiter Narda needs your service. Punta ka na dito papi. Maraming gawain dito ;)");
 
 //Login
 app.post("/login", async (req, res) => {

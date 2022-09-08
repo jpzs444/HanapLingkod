@@ -47,6 +47,13 @@ export default function Home({route}) {
         }).then((res) => res.json())
         .then((data) => {
           global.notificationCount = data.length
+          let notifCount = 0
+          for(read of data){
+            if(!read.read){
+              notifCount = notifCount + 1
+            }
+          }
+          global.notificationCount = notifCount
         }).catch((err) => {
           console.log("error: ", err.message)
         })

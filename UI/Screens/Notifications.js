@@ -1,10 +1,8 @@
 import React, {useEffect, useState, useRef} from 'react'
 import { SafeAreaView, View, Image, Text, StatusBar, ScrollView, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import TText from '../Components/TText'
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import * as NotificationsL from "expo-notifications";
-import { Icon } from 'react-native-vector-icons/MaterialCommunityIcons';
-import { floor } from 'react-native-reanimated';
 
 import { IPAddress, role, userID } from '../global/global';
 import Appbar from '../Components/Appbar';
@@ -17,14 +15,16 @@ export default function Notifications({route}) {
   const [notifications, setNotifications] = useState([])
   const [notificationIDClicked, setNotificationIDClick] = useState(null)
   const notificationListener = useRef();
+  const scrollToTop = useRef()
+  // useScrollToTop(scrollToTop)
+
+  let notificationListEndIndex = notifications.length - 1
 
   let listViewRef;
-
 
   // use useEffect for componentDidMount or for when the page loads
   useEffect(() => {
     fetchNotificationList()
-    // setTimeout(fetchNotificationList, 2000)
 
     // still load notification even when page is not in focus
       // return () => {
@@ -32,10 +32,6 @@ export default function Notifications({route}) {
       // }
   }, [])
 
-  useEffect(() => {
-    // console.log("notificationState", notifications)
-    handleNotificationAge("2022-09-07T14:54:42.617Z")
-  }, [notifications])
 
   // update notification page within receiving of the notification
   // notificationListener.current =
@@ -55,12 +51,28 @@ export default function Notifications({route}) {
       console.log("res length: ", data.length)
       
       setNotifications([...data])
-      global.notificationCount = data.length
+
+      let notifCount = 0
+      for(read of data){
+        if(!read.read){
+          notifCount = notifCount + 1
+        }
+      }
+      global.notificationCount = notifCount
+
     }).catch((err) => {
       console.log("error: ", err.message)
     })
     setTimeout(fetchNotificationList, 5000)
   }
+
+  // useEffect(() => {
+  //   console.log(notifications.length)
+  //   scrollToTop.current.scrollToIndex({
+  //     index: (notifications.length - 1),
+  //     animated: true,
+  //   })
+  // }, [notifications])
 
 
   const listHeaderComponent = () => {
@@ -84,20 +96,24 @@ export default function Notifications({route}) {
     dateDiff = dateDiff / 1000
     // console.log("seconds: ", dateDiff)
 
-    let hours = Math.floor(dateDiff / 60 / 60 )
-
-    if ( hours === 0 ) {
-      let minutes = Math.floor(dateDiff / 60 % 60)
-      
-      if ( minutes === 0 ) {
-        let seconds = Math.floor(dateDiff % 60)
-        return `${seconds}s`
+    let day = Math.floor(dateDiff / 60 / 60 / 24)
+    if(day === 0) {
+      console.log("day: ", day)
+  
+      let hours = Math.floor(dateDiff / 60 / 60 )
+      if ( hours === 0 ) {
+        let minutes = Math.floor(dateDiff / 60 % 60)
+        
+        if ( minutes === 0 ) {
+          let seconds = Math.floor(dateDiff % 60)
+          return `${seconds} seconds ago`
+        }
+        
+        return minutes > 1 ? `${minutes} minutes ago` : `${minutes} minute ago`
       }
-      
-      return `${minutes}min`
+        return hours > 1 ? `${hours} hours ago` : `${hours} hour ago`
     }
-      return `${hours}hrs`
-
+    return day > 1 ? `${day} days ago` : `${day} day ago`
   }
 
 
@@ -116,9 +132,11 @@ export default function Notifications({route}) {
                   <FlatList 
                     showsVerticalScrollIndicator ={false}
                     showsHorizontalScrollIndicator={false}
-                    inverted={true}
-                    ListFooterComponent={listHeaderComponent}
-                    data={notifications}
+                    // ref={scrollToTop.current?.scrollToIndex({index: notifications.length - 1, animated: true})}
+                    // initialScrollIndex={1}
+                    // inverted={true}
+                    ListHeaderComponent={listHeaderComponent}
+                    data={notifications.reverse()}
                     keyExtractor={(item) => item._id}
                     renderItem={({item}) => (
                       <View style={styles.btnItemContainer} >
@@ -126,6 +144,17 @@ export default function Notifications({route}) {
                         onPress={() => {
                           setNotificationIDClick(item._id)
                           console.log(item)
+
+                          fetchNotificationList()
+                          // turn notification.read to true 
+                          fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+                            method: "PUT",
+                            header: {
+                              'content-type': 'application/json',
+                            }
+                          }).then(() => console.log("all notification read"))
+                          .catch((error) => console.log("error: ", error.message))
+
                           // {
                           //   notification.from === 'service_request' ?
                           //     navigation.navigate("Request", {reqID: notification._id})
@@ -153,7 +182,7 @@ export default function Notifications({route}) {
                       </View>
                       )
                     }
-                    ListHeaderComponent={() => (
+                    ListFooterComponent={() => (
                       <View style={{height: 350, marginTop: 20, alignItems: 'center'}}>
                         <TText style={styles.footerTitle}>---- End of List ----</TText>
                       </View>
