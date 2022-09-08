@@ -29,13 +29,14 @@ const TabNavigation = () => {
       headers: {
         "content-type": "application/json",
       },
-    }).then((res) => {
+    }).then((res) => res.json())
+    .then((res) => {
       setNotificationCount(res.length)
       console.log('notif length: ', res.length)
     }).catch((err) => {
       console.log("error: ", err.message)
     })
-  }, [])
+  }, [global.notificationCount])
 
   return (
     <Tab.Navigator
@@ -88,7 +89,7 @@ const TabNavigation = () => {
         {/* Notification Tab */}
         <Tab.Screen name="Notification" component={Notifications} 
             options={{
-                tabBarBadge: notificationCount,
+                tabBarBadge: global.notificationCount,
                 tabBarBadgeStyle: {
                     backgroundColor: '#BB1E00',
                 },
