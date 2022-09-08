@@ -33,6 +33,13 @@ const TabNavigation = () => {
     .then((res) => {
       setNotificationCount(res.length)
       console.log('notif length: ', res.length)
+      let notifCount = 0
+        for(read of data){
+        if(!read.read){
+            notifCount = notifCount + 1
+        }
+        }
+        global.notificationCount = notifCount
     }).catch((err) => {
       console.log("error: ", err.message)
     })
