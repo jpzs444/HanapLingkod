@@ -36,6 +36,25 @@ export default function Home({route}) {
     .catch((err) => console.log("err : ", err.message))
   }, [])
 
+
+  useEffect(() => {
+    try {
+      fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        }).then((res) => res.json())
+        .then((data) => {
+          global.notificationCount = data.length
+        }).catch((err) => {
+          console.log("error: ", err.message)
+        })
+    } catch {
+      console.log(error)
+    }
+  }, [])
+
   
 
   return (

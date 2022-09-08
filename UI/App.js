@@ -15,6 +15,7 @@ import TabNavigation from './Components/TabNavigation';
 import DrawerNavigator from './Components/DrawerNavigation';
 import { Linking } from "react-native";
 import "./global/global";
+import { IPAddress } from "./global/global";
 
 
 const AppStack = createNativeStackNavigator();
@@ -47,12 +48,25 @@ export default function App() {
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         setNotification(notification);
+        
       });
 
     // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log(response);
+
+        // turn notification.read to true 
+        fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+          method: "PUT",
+          header: {
+            'content-type': 'application/json',
+          }
+        }).then(() => console.log("all notification read"))
+        .catch((error) => console.log("error: ", error.message))
+
+        // go to request/booking page
+        // fetch(/request/id || /booking/id)
       });
     
     Notifications.setNotificationHandler({
