@@ -18,6 +18,7 @@ const notification = require("./Helpers/PushNotification");
 const ServiceCategoryRoutes = require("./Routes/ServiceCategoryRoutes");
 const ServiceSubCategoryRoutes = require("./Routes/ServiceSubCategory");
 const UsernotificationRoutes = require("./Routes/UserNotificationRoutes");
+const WorkerRoutes = require("./Routes/WorkerRoutes");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -231,5 +232,6 @@ app.post(
 app.use(ServiceCategoryRoutes);
 app.use(ServiceSubCategoryRoutes);
 app.use(UsernotificationRoutes);
+app.use(WorkerRoutes);
 
 app.listen(3000, () => console.log("listening on port 3000."));
