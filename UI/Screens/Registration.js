@@ -40,7 +40,7 @@ export default function Registration({route}) {
     const [user, setUser] = useState({
       username: "", password: "", email: "", firstname: "",
       lastname: "", birthday: "", age: "", gender: "", street: "",
-      purok: "", barangay: "", city: "Daet", province: "Camarines Norte", phonenumber: "+63",
+      purok: "", barangay: "", city: "Daet", province: "Camarines Norte", phonenumber: "",
       role: userType,
     })
 
