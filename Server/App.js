@@ -59,7 +59,11 @@ const multipleFile = upload.fields([
   { name: "certificate" },
 ]);
 
-// notification(["ExponentPushToken[lHLRMxMMGeYbrjqxbILWj_]"], "HanapLingkod", "Recruiter Narda needs your service. Punta ka na dito papi. Maraming gawain dito ;)");
+// notification(
+//   ["ExponentPushToken[lHLRMxMMGeYbrjqxbILWj_]"],
+//   "HanapLingkod",
+//   "Recruiter Narda needs your service. Punta ka na dito papi. Maraming gawain dito ;)"
+// );
 
 //Login
 app.post("/login", async (req, res) => {
@@ -97,13 +101,19 @@ app.post(
   Check.ifWorkerExist,
   multipleFile,
   async (req, res) => {
+    //initialize transactions
     const session = await conn.startSession();
 
     try {
+      //initialize transactions
       session.startTransaction();
       console.log(req.body);
+
+      //hash the password using bcrypt
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+      //create worker
       const worker = await Worker.create(
         [
           {
@@ -133,6 +143,8 @@ app.post(
         { session }
       );
 
+      //save service sub category id for future use
+      //convert category sub category min max price to arrays to create multiple works documents
       let serviceSubCategoryID;
       const Category = [].concat(req.body.Category);
       const SubCategory = [].concat(req.body.ServiceSubCategory);
@@ -140,6 +152,7 @@ app.post(
       const max = [].concat(req.body.maxPrice);
 
       for (var i = 0; i < Category.length; i += 1) {
+        //check if the sub category is unlisted or not if unlisted create a new sub category if not query and get the id of the sub category
         if (Category[i] == "unlisted") {
           let unlistedID = await ServiceCategory.findOne(
             { Category: "unlisted" },
@@ -164,6 +177,7 @@ app.post(
           );
           serviceSubCategoryID = result._id;
         }
+        //create work
         const work = await Work.create(
           [
             {
@@ -235,6 +249,7 @@ app.post(
   }
 );
 
+//routes
 app.use(ServiceCategoryRoutes);
 app.use(ServiceSubCategoryRoutes);
 app.use(UsernotificationRoutes);
