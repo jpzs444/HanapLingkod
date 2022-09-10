@@ -11,6 +11,7 @@ import TabNavigation from './TabNavigation';
 import ThemeDefaults from './ThemeDefaults';
 import CustomDrawer from './CustomDrawer';
 import Welcome from '../Screens/Welcome';
+import Login from '../Screens/Login';
 
 
 const Drawer = createDrawerNavigator();
@@ -46,6 +47,12 @@ export default function DrawerNavigation(){
             }} />
 
             <Drawer.Screen name="RUT2" component={RegisterUserAccountType} options={{
+                drawerIcon: ({color}) => (
+                    <Icon name="clipboard-edit" size={25} color={color}  />
+                )
+            }} />
+
+            <Drawer.Screen name="LoginScreen" component={Login} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="clipboard-edit" size={25} color={color}  />
                 )

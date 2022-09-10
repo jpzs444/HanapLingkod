@@ -1,4 +1,4 @@
-export const IPAddress = "192.168.68.104"
+export const IPAddress = "192.168.1.5"
 
 global.userData = {};
 global.deviceExpoPushToken = "";

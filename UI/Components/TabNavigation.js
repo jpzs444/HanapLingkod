@@ -8,14 +8,13 @@ import ThemeDefaults from './ThemeDefaults';
 
 // import Home from '../Screens/Home';
 
-import LoginNavigationStack from './LoginStack';
-import HomeNavigationStack from './HomeStack';
-
 import Home from '../Screens/Home';
-import RegisterUserAccountType from '../Screens/RegisterUserAccountType';
+import Workers from '../Screens/Workers';
+import PostRequests from '../Screens/PostRequests';
+import Messaging from '../Screens/Messaging';
 import Notifications from '../Screens/Notifications';
-import { devicePushToken, IPAddress } from '../global/global';
 
+import { devicePushToken, IPAddress } from '../global/global';
 
 
 const Tab = createBottomTabNavigator();
@@ -57,7 +56,7 @@ const TabNavigation = () => {
         }}
     >
         {/* Home Screen Tab */}
-        <Tab.Screen name="Home_Tab" component={HomeNavigationStack} 
+        <Tab.Screen name="Home_Tab" component={Home} 
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="home" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
@@ -66,7 +65,7 @@ const TabNavigation = () => {
         />
 
         {/* Worker List Tab */}
-        <Tab.Screen name="WorkerTab" component={RegisterUserAccountType} 
+        <Tab.Screen name="WorkerTab" component={Workers} 
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="account-hard-hat" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
@@ -75,7 +74,7 @@ const TabNavigation = () => {
         />
 
         {/* Tasks Tab */}
-        <Tab.Screen name="LoginStackGrp" component={Home} 
+        <Tab.Screen name="PostRequestsTab" component={PostRequests} 
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="clipboard-text-multiple" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
@@ -85,7 +84,7 @@ const TabNavigation = () => {
         />
 
         {/* Messages Tab */}
-        <Tab.Screen name="Messages" component={Home} 
+        <Tab.Screen name="MessagingTab" component={Messaging} 
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="forum" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
@@ -94,7 +93,7 @@ const TabNavigation = () => {
         />
 
         {/* Notification Tab */}
-        <Tab.Screen name="Notification" component={Notifications} 
+        <Tab.Screen name="NotificationsTab" component={Notifications} 
             options={{
                 tabBarBadge: global.notificationCount,
                 tabBarBadgeStyle: {
