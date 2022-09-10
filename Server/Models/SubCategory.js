@@ -9,7 +9,7 @@ const serviceSubCategorySchema = mongoose.Schema({
 
 serviceSubCategorySchema.pre("find", function (next) {
   this.populate("ServiceID");
-  
+
   next();
 });
 
