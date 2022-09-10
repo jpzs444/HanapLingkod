@@ -192,7 +192,7 @@ export default function OTPVerification({route}, props) {
         }).then(() => {
             console.log("Account created | recruiter");
             navigation.navigate("WelcomePage", {role: "recruiter", user: user})
-        }).catch((er) => {console.log("error: ", er.message)})
+        }).catch((er) => {console.log("error: ", er)})
       }
 
 

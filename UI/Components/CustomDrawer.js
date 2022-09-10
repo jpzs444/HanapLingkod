@@ -5,7 +5,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import TText from './TText';
 import { useNavigation } from '@react-navigation/native';
 
-import LoginNavigationStack from './LoginStack';
 
 
 const CustomDrawer = (props) => {
@@ -32,7 +31,7 @@ const CustomDrawer = (props) => {
                 <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}}
                     onPress={() => {
                         global.userData = ""
-                        navigation.replace("LoginNavigationStack")
+                        navigation.replace("LoginScreen")
                         console.log("logout btn")
                     }}
                 >

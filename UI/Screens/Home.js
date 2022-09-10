@@ -5,7 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 import Appbar from '../Components/Appbar';
 import { Icon } from 'react-native-vector-icons/MaterialCommunityIcons';
 import { role, userID } from '../global/global';
-import TabNavigation from '../Components/TabNavigation';
 
 import {IPAddress} from '../global/global'
 
