@@ -18,6 +18,8 @@ const notification = require("./Helpers/PushNotification");
 const ServiceCategoryRoutes = require("./Routes/ServiceCategoryRoutes");
 const ServiceSubCategoryRoutes = require("./Routes/ServiceSubCategory");
 const UsernotificationRoutes = require("./Routes/UserNotificationRoutes");
+const WorkerRoutes = require("./Routes/WorkerRoutes");
+const WorkRoutes = require("./Routes/WorkRoutes");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -132,8 +134,13 @@ app.post(
       );
 
       let serviceSubCategoryID;
-      for (var i = 0; i < req.body.Category.length; i += 1) {
-        if (req.body.Category[i] == "unlisted") {
+      const Category = [].concat(req.body.Category);
+      const SubCategory = [].concat(req.body.ServiceSubCategory);
+      const min = [].concat(req.body.minPrice);
+      const max = [].concat(req.body.maxPrice);
+
+      for (var i = 0; i < Category.length; i += 1) {
+        if (Category[i] == "unlisted") {
           let unlistedID = await ServiceCategory.findOne(
             { Category: "unlisted" },
             { Category: 0 }
@@ -142,7 +149,7 @@ app.post(
             [
               {
                 ServiceID: unlistedID._id,
-                ServiceSubCategory: req.body.ServiceSubCategory[i],
+                ServiceSubCategory: SubCategory[i],
               },
             ],
             { session }
@@ -151,7 +158,7 @@ app.post(
           serviceSubCategoryID = serviceSubCategory[0].id;
         } else {
           let result = await ServiceSubCategory.findOne(
-            { ServiceSubCategory: req.body.ServiceSubCategory[i] },
+            { ServiceSubCategory: SubCategory[i] },
             { ServiceSubCategory: 0, ServiceID: 0 },
             { session }
           );
@@ -160,10 +167,10 @@ app.post(
         const work = await Work.create(
           [
             {
-              ServiceSubCode: serviceSubCategoryID,
+              ServiceSubId: serviceSubCategoryID,
               workerId: worker[0].id,
-              minPrice: req.body.minPrice[i],
-              maxPrice: req.body.maxPrice[i],
+              minPrice: min[i],
+              maxPrice: max[i],
             },
           ],
           { session }
@@ -231,5 +238,7 @@ app.post(
 app.use(ServiceCategoryRoutes);
 app.use(ServiceSubCategoryRoutes);
 app.use(UsernotificationRoutes);
+app.use(WorkerRoutes);
+app.use(WorkRoutes);
 
 app.listen(3000, () => console.log("listening on port 3000."));
