@@ -60,9 +60,9 @@ const multipleFile = upload.fields([
 ]);
 
 // notification(
-//   ["ExponentPushToken[lHLRMxMMGeYbrjqxbILWj_]"],
+//   ["ExponentPushToken[SGLOLBPJ8RivZf4UtD8-TL]"],
 //   "HanapLingkod",
-//   "Recruiter Narda needs your service. Punta ka na dito papi. Maraming gawain dito ;)"
+//   "ang jologs ko sorry, i will be better"
 // );
 
 //Login

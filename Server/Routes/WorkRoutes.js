@@ -4,6 +4,7 @@ const Work = require("../Models/Work");
 const ServiceCategory = require("../Models/ServiceCategory");
 const ServiceSubCategory = require("../Models/SubCategory");
 const mongoose = require("mongoose");
+const { json } = require("body-parser");
 
 router
   .route("/Work")
@@ -72,14 +73,24 @@ router
     }
   });
 
-router.route("/Work/:UserId").get(function (req, res) {
-  Work.find({ workerId: req.params.UserId }, function (err, found) {
-    if (found) {
-      res.send(found);
-    } else {
-      res.send("No such data found");
+////get works on specific category
+router.route("/Work/:category").get(async function (req, res) {
+  try {
+    result = [];
+    let query = await Work.find({}).lean().exec();
+    for (var i = 0; i < query.length; i++) {
+      if (query[i].ServiceSubId.ServiceSubCategory === req.params.category) {
+        result.push(query[i]);
+      }
     }
-  });
+    res.send(result);
+  } catch (err) {
+    res.send(err);
+  }
+});
+router.route("/Work/:category/:id").get(async function (req, res) {
+  let queryResult = await Work.find({ _id: req.params.id }).exec();
+  res.send(queryResult);
 });
 
 module.exports = router;
