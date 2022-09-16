@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 
 //models
 const Worker = require("./Models/Workers");
-const Recuiter = require("./Models/Recuiters");
+const Recruiter = require("./Models/Recruiters");
 const Work = require("./Models/Work");
 const ServiceCategory = require("./Models/ServiceCategory");
 const ServiceSubCategory = require("./Models/SubCategory");
@@ -20,6 +20,7 @@ const ServiceSubCategoryRoutes = require("./Routes/ServiceSubCategory");
 const UsernotificationRoutes = require("./Routes/UserNotificationRoutes");
 const WorkerRoutes = require("./Routes/WorkerRoutes");
 const WorkRoutes = require("./Routes/WorkRoutes");
+const RecruiterRoutes = require("./Routes/RecruiterRoutes");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -73,14 +74,14 @@ app.post("/login", async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({ msg: "Not all fields have been entered" });
     }
-    //check if the username exist in recuiter or worker
+    //check if the username exist in recruiter or worker
     let ifWorkerExist = await Worker.exists({ username: username });
-    let ifRecuiterExist = await Recuiter.exists({ username: username });
+    let ifRecruiterExist = await Recruiter.exists({ username: username });
     let user;
     if (ifWorkerExist) {
       user = await Worker.findOne({ username: username });
     } else {
-      user = await Recuiter.findOne({ username: username });
+      user = await Recruiter.findOne({ username: username });
     }
     if (!user) {
       return res.status(400).json({ msg: "Invalid Username" });
@@ -209,10 +210,11 @@ app.post(
   upload.single("govId"),
   async (req, res) => {
     try {
+      console.log(req.file);
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-      const recuiter = new Recuiter({
+      const recruiter = new Recruiter({
         username: req.body.username,
         password: hashedPassword,
         firstname: req.body.firstname,
@@ -229,16 +231,16 @@ app.post(
         phoneNumber: req.body.phoneNumber,
         emailAddress: req.body.emailAddress,
         profilePic: "pic",
-        GovId: req.body.path,
+        GovId: req.file.filename,
         verification: false,
         accountStatus: "active",
-        role: "recuiter",
+        role: "recruiter",
       });
-      recuiter.save((err) => {
+      recruiter.save((err) => {
         if (err) {
           res.json({ message: err.message, type: "danger" });
         } else {
-          res.send("Recuiter account created");
+          res.send("Recruiter account created");
         }
       });
     } catch {
@@ -252,6 +254,7 @@ app.use(ServiceCategoryRoutes);
 app.use(ServiceSubCategoryRoutes);
 app.use(UsernotificationRoutes);
 app.use(WorkerRoutes);
+app.use(RecruiterRoutes);
 app.use(WorkRoutes);
 
 app.listen(3000, () => console.log("listening on port 3000."));

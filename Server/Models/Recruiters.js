@@ -31,4 +31,4 @@ const recruiterSchema = new mongoose.Schema({
   ],
 });
 
-module.exports = mongoose.model("Recuiter", recruiterSchema);
+module.exports = mongoose.model("Recruiter", recruiterSchema);
