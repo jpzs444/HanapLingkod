@@ -107,41 +107,39 @@ app.post(
     try {
       //initialize transactions
       session.startTransaction();
-      console.log(req.body);
+      // console.log(req.body);
 
       //hash the password using bcrypt
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      let workerObj = {
+        username: req.body.username,
+        password: hashedPassword,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        middlename: req.body.middlename,
+        birthday: req.body.birthday,
+        age: req.body.age,
+        sex: req.body.sex,
+        street: req.body.street,
+        purok: req.body.purok,
+        barangay: req.body.barangay,
+        city: req.body.city,
+        province: req.body.province,
+        phoneNumber: req.body.phoneNumber,
+        emailAddress: req.body.emailAddress,
+        profilePic: "pic",
+        GovId: req.files.govId[0].filename,
+        role: "worker",
+        verification: false,
+        accountStatus: "active",
+      };
+      if (req.files.certificate !== undefined) {
+        workerObj.licenseCertificate = req.files.certificate[0].filename;
+      }
 
       //create worker
-      const worker = await Worker.create(
-        [
-          {
-            username: req.body.username,
-            password: hashedPassword,
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            middlename: req.body.middlename,
-            birthday: req.body.birthday,
-            age: req.body.age,
-            sex: req.body.sex,
-            street: req.body.street,
-            purok: req.body.purok,
-            barangay: req.body.barangay,
-            city: req.body.city,
-            province: req.body.province,
-            phoneNumber: req.body.phoneNumber,
-            emailAddress: req.body.emailAddress,
-            profilePic: "pic",
-            GovId: req.files.govId[0].filename,
-            licenseCertificate: req.files.certificate[0].filename,
-            role: "worker",
-            verification: false,
-            accountStatus: "active",
-          },
-        ],
-        { session }
-      );
+      const worker = await Worker.create([workerObj], { session });
 
       //save service sub category id for future use
       //convert category sub category min max price to arrays to create multiple works documents
