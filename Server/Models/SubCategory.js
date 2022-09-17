@@ -12,18 +12,19 @@ serviceSubCategorySchema.pre("find", function (next) {
   next();
 });
 
-serviceSubCategorySchema.post("deleteMany", function (next) {
-  Work.deleteMany({}).exec();
-  next();
-});
+// serviceSubCategorySchema.post("deleteMany", function (next) {
+//   Work.deleteMany({}).exec();
+//   next();
+// });
 
 serviceSubCategorySchema.post("findOneAndDelete", async function (doc, next) {
   // if a service category is deleted query the sub category and find the null values and then delete it
+
   let array = await Work.find({})
-    .select({ ServiceIDServiceSubId: 1, _id: 1 })
+    .select({ workerId: 0, minPrice: 0, maxPrice: 0 })
     .lean()
     .exec();
-  console.log(array);
+  // console.log(array);
   console.time();
   for (var i = 0; i < array.length; i += 1) {
     if (array[i].ServiceSubId === null) {
@@ -31,6 +32,7 @@ serviceSubCategorySchema.post("findOneAndDelete", async function (doc, next) {
     }
   }
   console.timeEnd();
+  next();
 });
 
 module.exports = mongoose.model("ServiceSubCategory", serviceSubCategorySchema);

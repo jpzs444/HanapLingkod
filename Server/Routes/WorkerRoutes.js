@@ -1,6 +1,8 @@
 const express = require("express");
+const Workers = require("../Models/Workers");
 const router = express.Router();
 const Worker = require("../Models/Workers");
+const Work = require("../Models/Work");
 
 router.route("/Worker").get(function (req, res) {
   Worker.find({}, function (err, found) {
@@ -42,13 +44,14 @@ router
   })
 
   .delete(function (req, res) {
-    Worker.findOneAndDelete({ _id: req.params.id }, function (err) {
+    Worker.findOneAndDelete({ _id: req.params.id }).exec();
+    Work.deleteMany({ workerId: req.params.id }, function (err) {
       if (!err) {
-        res.send("Deleted Successfully");
+        res.send("Deleted Successfully ");
       } else {
         res.send(err);
       }
     });
+    // res.send("DeleteDone");
   });
-
 module.exports = router;
