@@ -131,6 +131,7 @@ app.post(
         emailAddress: req.body.emailAddress,
         profilePic: "pic",
         GovId: req.files.govId[0].filename,
+        workDescription: req.body.workDescription,
         role: "worker",
         verification: false,
         accountStatus: "active",

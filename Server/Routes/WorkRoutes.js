@@ -88,9 +88,33 @@ router.route("/Work/:category").get(async function (req, res) {
     res.send(err);
   }
 });
-router.route("/Work/:category/:id").get(async function (req, res) {
-  let queryResult = await Work.find({ _id: req.params.id }).exec();
-  res.send(queryResult);
-});
+router
+  .route("/Work/:category/:id")
+  .get(async function (req, res) {
+    let queryResult = await Work.find({ _id: req.params.id }).exec();
+    res.send(queryResult);
+  })
+  .put(function (req, res) {
+    Work.findByIdAndUpdate(
+      { _id: req.params.id },
+      { minPrice: req.body.minPrice, maxPrice: req.body.maxPrice },
+      function (err) {
+        if (!err) {
+          res.send("Updated Successfully");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  })
+  .delete(function (req, res) {
+    Work.deleteOne({ _id: req.params.id }, function (err) {
+      if (!err) {
+        res.send("Deleted Successfully ");
+      } else {
+        res.send(err);
+      }
+    });
+  });
 
 module.exports = router;
