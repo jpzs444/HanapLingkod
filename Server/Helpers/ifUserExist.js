@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 Worker = require("../Models/Workers");
-const Recuiter = require("../Models/Recuiters");
+const Recruiter = require("../Models/Recruiters");
 
 //middleware check if username already exist
 function ifRecruiterExist(req, res, next) {
-  Recuiter.findOne({ username: req.query.username })
+  Recruiter.findOne({ username: req.query.username })
     .select("username")
     .lean()
     // .count()

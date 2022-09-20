@@ -3,7 +3,7 @@ const router = express.Router();
 const UserNotification = require("../Models/Notifications");
 const Work = require("../Models/Work");
 const Worker = require("../Models/Workers");
-const Recuiter = require("../Models/Recuiters");
+const Recruiter = require("../Models/Recruiters");
 
 router
   .route("/notification/:pushtoken")
@@ -18,12 +18,11 @@ router
   })
   .put(async function (req, res) {
     await UserNotification.updateMany(
-      { to: req.params.pushtoken },   
+      { to: req.params.pushtoken },
       { $set: { read: 1 } }
     );
     res.send("Updated Successfully");
   });
-
 
 router.route("/setToken/:userID").put(function (req, res) {
   console.log(req.params.userID);
@@ -39,7 +38,7 @@ router.route("/setToken/:userID").put(function (req, res) {
       }
     }
   );
-  Recuiter.updateOne(
+  Recruiter.updateOne(
     { _id: { $eq: req.params.userID } },
     { pushtoken: req.body.pushtoken },
     function (err, docs) {

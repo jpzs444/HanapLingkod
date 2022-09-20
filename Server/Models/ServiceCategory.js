@@ -5,12 +5,13 @@ const serviceCategorySchema = mongoose.Schema({
   Category: String,
 });
 
-serviceCategorySchema.post(/Many$/, function (next) {
-  ServiceSubCategory.deleteMany({}).exec();
-  next();
-});
+// serviceCategorySchema.post(/Many$/, function (next) {
+//   ServiceSubCategory.deleteMany({}).exec();
+//   next();
+// });
 
 serviceCategorySchema.post("findOneAndDelete", async function (doc, next) {
+  // if a service category is deleted query the sub category and find the null values and then delete it
   let array = await ServiceSubCategory.find({})
     .select({ ServiceID: 1, _id: 1 })
     .lean()

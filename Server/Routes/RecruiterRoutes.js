@@ -1,11 +1,9 @@
 const express = require("express");
-const Workers = require("../Models/Workers");
 const router = express.Router();
-const Worker = require("../Models/Workers");
-const Work = require("../Models/Work");
+const Recruiter = require("../Models/Recruiters");
 
-router.route("/Worker").get(function (req, res) {
-  Worker.find({}, function (err, found) {
+router.route("/Recruiter").get(function (req, res) {
+  Recruiter.find({}, function (err, found) {
     if (found) {
       res.send(found);
     } else {
@@ -17,9 +15,9 @@ router.route("/Worker").get(function (req, res) {
 //////specific///
 
 router
-  .route("/Worker/:id")
+  .route("/Recruiter/:id")
   .get(function (req, res) {
-    Worker.findOne({ _id: req.params.id }, function (err, found) {
+    Recruiter.findOne({ _id: req.params.id }, function (err, found) {
       if (found) {
         res.send(found);
       } else {
@@ -28,7 +26,7 @@ router
     });
   })
   .put(function (req, res) {
-    Worker.findOneAndUpdate(
+    Recruiter.findOneAndUpdate(
       { _id: req.params.id },
       {
         profilePic: "psssic",
@@ -44,14 +42,13 @@ router
   })
 
   .delete(function (req, res) {
-    Worker.findOneAndDelete({ _id: req.params.id }).exec();
-    Work.deleteMany({ workerId: req.params.id }, function (err) {
+    Recruiter.findOneAndDelete({ _id: req.params.id }, function (err) {
       if (!err) {
-        res.send("Deleted Successfully ");
+        res.send("Deleted Successfully");
       } else {
         res.send(err);
       }
     });
-    // res.send("DeleteDone");
   });
+
 module.exports = router;
