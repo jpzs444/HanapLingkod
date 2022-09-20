@@ -30,6 +30,8 @@ import OTPVerification from './OTPVerification';
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
+const emailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,})+$/;
+
 export default function Registration({route}) {
 
     const {userType} = route.params;
@@ -38,7 +40,7 @@ export default function Registration({route}) {
     
     const [placeholderPhoneNum, setPlaceholderPhoneNum] = useState("Phone Number")
     const [user, setUser] = useState({
-      username: "", password: "", email: "", firstname: "",
+      username: "", password: "", firstname: "",
       lastname: "", birthday: "", age: "", gender: "", street: "",
       purok: "", barangay: "", city: "Daet", province: "Camarines Norte", phonenumber: "",
       role: userType,
@@ -72,6 +74,8 @@ export default function Registration({route}) {
     const [dateSelected, setSelected] = useState(false)
 
     const [datePickerVisible, setDatePickerVisibility] = useState(false);
+    
+    const [isUsernameAvailable, setUsernameAvailable] = useState(false)
 
     useEffect(() => {
       user.password === confirmPW ? setPWMatch(true) : setPWMatch(false)
@@ -97,7 +101,6 @@ export default function Registration({route}) {
         navigation.goBack()
         return false
       } else {
-        console.log(next)
         setNext((prev)=> prev-1)
         return true;
       }
@@ -278,6 +281,10 @@ export default function Registration({route}) {
       haveBlanks()
       console.log(dateString)
     };
+
+    // const handleUsernameAvailable = () => {
+
+    // }
 
     // OPEN IMAGE PICKER
     // multi ID images
@@ -577,7 +584,7 @@ export default function Registration({route}) {
                       onPress={() => {
                         console.log("confirm from worker information work description")
                         haveBlanks()
-                        if(hasBlanks){
+                        if(hasBlanks ){
                           setShowDialog(true)
                         }
                         
@@ -856,13 +863,15 @@ export default function Registration({route}) {
                     <Icon name="camera-plus" size={40} color={"#E7745D"} style={{marginBottom: 10}} />
                     <TText>Attach photo(s) here</TText>
                   </TouchableOpacity>
-                
+
+                  <TText style={{marginTop: 30, textAlign: 'center', color: 'gray', fontSize: 14}}>The uploaded government ID will only be used to validate your personal information.</TText>
+              
                 </View>
 
                 <View style={{width: '100%', alignItems: 'center', pading: 15, marginTop: 30,}}>
                 {
                     singleImage ? 
-                      <Image source={{uri: singleImage}} style={{width: 400, height: 320, marginVertical: 20}} />
+                      <Image source={{uri: singleImage}} style={{ marginVertical: 20, width: 380, height: 260,}} />
                     :
                     image.map(function(item, index) {
                       console.log("item: ", item)
@@ -962,7 +971,7 @@ export default function Registration({route}) {
             <View>
             <View style={styles.inputGrp}>
               {/* Username input */}
-              <View style={styles.inputContainer}>
+              <View style={[styles.inputContainer, {marginBottom: !isUsernameAvailable ? 18 : 5}]}>
                 <Icon name='account-circle' size={23} color={"#D0CCCB"} />
                 <TextInput style={styles.input} 
                   autoCapitalize={'none'}
@@ -973,10 +982,18 @@ export default function Registration({route}) {
                   textContentType={'username'}
                   onChangeText={ (val) => {
                     setUser((prev) => ({...prev, username: val}))
+                    // username availability checker
+                    // handleUsernameAvailable()
                     haveBlanks()
                     } }
                   onSubmitEditing={ () => ref_pw.current.focus() } />
               </View>
+              {
+                !isUsernameAvailable ? null : 
+                <View style={{ alignSelf: 'flex-start', marginLeft: '10%',}}>
+                  <TText style={{color: ThemeDefaults.appIcon, fontSize: 14}}>Username already taken. Try again</TText>
+                </View>
+              }
               
               {/* Password input */}
               <View style={styles.inputContainer}>
@@ -1012,7 +1029,7 @@ export default function Registration({route}) {
                     console.log("pwMatch: ", pwMatch)
                     console.log("confirmpw: ", confirmPW)
                   }}
-                  onSubmitEditing={ () => ref_email.current.focus() }
+                  onSubmitEditing={ () => ref_fn.current.focus() }
                   ref={ref_cpw} />
               </View>
                 <View style={{marginBottom: 0, width: '100%', paddingHorizontal: '10%' }}>
@@ -1021,7 +1038,7 @@ export default function Registration({route}) {
 
 
               {/* Email input */}
-              <View style={[styles.inputContainer]}>
+              {/* <View style={[styles.inputContainer]}>
                 <Icon name='at' size={23} color={"#D0CCCB"} />
                 <TextInput style={styles.input} 
                   autoCapitalize={'none'}
@@ -1038,7 +1055,7 @@ export default function Registration({route}) {
                   onSubmitEditing={ () => ref_fn.current.focus() } 
                   ref={ref_email}
                   />
-              </View>
+              </View> */}
               
               {/* First Name input */}
               <View style={styles.inputContainer}>
@@ -1111,6 +1128,8 @@ export default function Registration({route}) {
                       onCancel={() => setDatePickerVisibility(false)}
                     />
                 </View>
+
+                {/* age input */}
                 <View style={styles.ageView}>
                   <Icon name='counter' size={15} color={"#D0CCCB"} />
                   <TextInput style={styles.input} 
@@ -1126,10 +1145,12 @@ export default function Registration({route}) {
                     } }
                     ref={ref_age} />
                 </View>
-                <View style={styles.sexView}>
+
+                {/* Sex Select */}
+                <TouchableOpacity style={styles.sexView} onPress={() => changeModalVisibility(true)}>
                   <Icon name='gender-male-female' size={15} color={"#D0CCCB"} /> 
                     <TouchableOpacity 
-                      onPress={() => changeModalVisibility(true)}
+                      // onPress={() => changeModalVisibility(true)}
                       style={{
                         width: '85%', 
                         flexDirection: 'row', 
@@ -1161,7 +1182,7 @@ export default function Registration({route}) {
                       </Modal>
                       <Icon name="arrow-down-drop-circle" size={20} color={"#D0CCCB"} style={{paddingRight: 6}} />
                     </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
               </View>
             </View>
             

@@ -12,6 +12,7 @@ import ThemeDefaults from './ThemeDefaults';
 import CustomDrawer from './CustomDrawer';
 import Welcome from '../Screens/Welcome';
 import Login from '../Screens/Login';
+import UserProfile from '../Screens/UserProfile';
 
 
 const Drawer = createDrawerNavigator();
@@ -57,6 +58,7 @@ export default function DrawerNavigation(){
                     <Icon name="clipboard-edit" size={25} color={color}  />
                 )
             }} />
+
 
         </Drawer.Navigator>
     )

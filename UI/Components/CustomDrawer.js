@@ -31,7 +31,7 @@ const CustomDrawer = (props) => {
                 <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}}
                     onPress={() => {
                         global.userData = ""
-                        navigation.replace("LoginScreen")
+                        navigation.replace("Login")
                         console.log("logout btn")
                     }}
                 >

@@ -24,6 +24,7 @@ export default function Login({navigation}) {
 
     const pw_ref = useRef();
 
+
     const [user, setUser] = useState({
         username: '',
         password: ''
@@ -69,7 +70,6 @@ export default function Login({navigation}) {
       })
         .then((response) => response.json())
         .then((user) => {
-          console.log("data: ", user);
 
           if(user._id){
             setIsLoading(true)
