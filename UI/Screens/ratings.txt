@@ -1,0 +1,157 @@
+<View>
+                {/* Rating header */}
+                <View style={{marginVertical: 20, padding: 20, backgroundColor: '#fff', borderRadius: 10,}}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <TText style={{fontSize: 18, fontFamily: 'LexendDeca_Medium'}}>Reviews   </TText>
+                        <View style={{paddingHorizontal: 6, paddingVertical: 4, borderRadius: 30, backgroundColor: 'lightgray'}}>
+                            <TText>10</TText>
+                        </View>
+                        <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 10}}>
+                            <Icon name={"star"} color={"gold"} size={25} />
+                            <TText> 4.2</TText>
+                        </View>
+                    </View>
+                    {/* List */}
+                    <TouchableOpacity style={{marginTop: 15, borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 10, overflow: 'hidden' }}>
+                        <View style={{flexDirection: 'row', alignItems: 'center',}}>
+                            <View>
+                                <Image source={require("../assets/images/bg-welcome-worker.png")} style={{width: 100, height: 100, }} />
+                            </View>
+                            <View style={{padding: 15}}>
+                                <View style={{marginBottom: 10}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <TText style={{color: 'gray'}}>Reviewer Name </TText>
+                                        <Icon name="check-decagram" size={18} color={ThemeDefaults.appIcon} />
+                                    </View>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <Icon name='star' size={18} color={"gold"} />
+                                        <TText> 4.5</TText>
+                                    </View>
+                                </View>
+                                <View>
+                                    <TText style={{fontSize: 18}}>Recruiter is very generous</TText>
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity style={{marginTop: 15, borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 10, overflow: 'hidden' }}>
+                        <View style={{flexDirection: 'row', alignItems: 'center',}}>
+                            <View>
+                                <Image source={require("../assets/images/bg-welcome-worker.png")} style={{width: 100, height: 100, }} />
+                            </View>
+                            <View style={{padding: 15}}>
+                                <View style={{marginBottom: 10}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <TText style={{color: 'gray'}}>Reviewer Name </TText>
+                                        <Icon name="check-decagram" size={18} color={ThemeDefaults.appIcon} />
+                                    </View>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <Icon name='star' size={18} color={"gold"} />
+                                        <TText> 4.5</TText>
+                                    </View>
+                                </View>
+                                <View>
+                                    <TText style={{fontSize: 18}}>Recruiter is very generous</TText>
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity style={{marginTop: 15, borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 10, overflow: 'hidden' }}>
+                        <View style={{flexDirection: 'row', alignItems: 'center',}}>
+                            <View>
+                                <Image source={require("../assets/images/bg-welcome.png")} style={{width: 100, height: 100, }} />
+                            </View>
+                            <View style={{padding: 15}}>
+                                <View style={{marginBottom: 10}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <TText style={{color: 'gray'}}>Reviewer Name </TText>
+                                        <Icon name="check-decagram" size={18} />
+                                    </View>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <Icon name='star' size={18} color={"gold"} />
+                                        <TText> 5.0</TText>
+                                    </View>
+                                </View>
+                                <View>
+                                    <TText style={{fontSize: 18}}>Suki yarn!</TText>
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity style={{marginTop: 15, borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 10, overflow: 'hidden' }}>
+                        <View style={{flexDirection: 'row', alignItems: 'center',}}>
+                            <View>
+                                <Image source={require("../assets/images/bg-welcome-worker.png")} style={{width: 100, height: 100, }} />
+                            </View>
+                            <View style={{padding: 15}}>
+                                <View style={{marginBottom: 10}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <TText style={{color: 'gray'}}>Reviewer Name </TText>
+                                        <Icon name="check-decagram" size={18} color={ThemeDefaults.appIcon} />
+                                    </View>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <Icon name='star' size={18} color={"gold"} />
+                                        <TText> 4.5</TText>
+                                    </View>
+                                </View>
+                                <View>
+                                    <TText style={{fontSize: 18}}>Recruiter is very generous</TText>
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity style={{marginTop: 15, borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 10, overflow: 'hidden' }}>
+                        <View style={{flexDirection: 'row', alignItems: 'center',}}>
+                            <View>
+                                <Image source={require("../assets/images/bg-welcome-worker.png")} style={{width: 100, height: 100, }} />
+                            </View>
+                            <View style={{padding: 15}}>
+                                <View style={{marginBottom: 10}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <TText style={{color: 'gray'}}>Reviewer Name </TText>
+                                        <Icon name="check-decagram" size={18} color={ThemeDefaults.appIcon} />
+                                    </View>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <Icon name='star' size={18} color={"gold"} />
+                                        <TText> 4.5</TText>
+                                    </View>
+                                </View>
+                                <View>
+                                    <TText style={{fontSize: 18}}>Recruiter is very generous</TText>
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity style={{marginTop: 15, borderWidth: 0.5, borderColor: 'lightgray', borderRadius: 10, overflow: 'hidden' }}>
+                        <View style={{flexDirection: 'row', alignItems: 'center',}}>
+                            <View>
+                                <Image source={require("../assets/images/bg-welcome.png")} style={{width: 100, height: 100, }} />
+                            </View>
+                            <View style={{padding: 15}}>
+                                <View style={{marginBottom: 10}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <TText style={{color: 'gray'}}>Reviewer Name </TText>
+                                        <Icon name="check-decagram" size={18} />
+                                    </View>
+                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                        <Icon name='star' size={18} color={"gold"} />
+                                        <TText> 5.0</TText>
+                                    </View>
+                                </View>
+                                <View>
+                                    <TText style={{fontSize: 18}}>Suki yarn!</TText>
+                                </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+                </View>

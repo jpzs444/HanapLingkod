@@ -18,7 +18,7 @@ import RnOtpTimer from 'react-native-otp-timer';
 
 export default function OTPVerification({route}, props) {
     const navigation = useNavigation();
-    const {phoneNum, role, user, singleImage, image, isLogin, work, imagelicense} = route.params;
+    const {phoneNum, role, user, singleImage, image, isLogin, work, imagelicense, fromWelcome} = route.params;
 
     // Firebase OTP Verification Code
     const [code, setCode] = useState('');
@@ -128,6 +128,7 @@ export default function OTPVerification({route}, props) {
             
             setIsLoading(false)
             isLogin && navigation.replace("HomeStack");
+            isLogin && fromWelcome && navigation.replace("HomeStack");
         })
         .catch((error) => {
             setCode("")
@@ -180,7 +181,7 @@ export default function OTPVerification({route}, props) {
         formData.append("city", user.city);
         formData.append("province", user.province);
         formData.append("phoneNumber", user.phonenumber);
-        formData.append("emailAddress", user.email);
+        // formData.append("emailAddress", user.email);
         formData.append("GovId", filename);
   
         fetch("http://"+ IPAddress +":3000/signup/recruiter?username=" + user.username, {
@@ -248,7 +249,7 @@ export default function OTPVerification({route}, props) {
         formData.append("city", user.city);
         formData.append("province", user.province);
         formData.append("phoneNumber", user.phonenumber);
-        formData.append("emailAddress", user.email);
+        // formData.append("emailAddress", user.email);
         formData.append("GovId", filename);
         // formData.append("Category", work.Category === "unlisted" ? work.Category : "");
         // formData.append("ServiceSubCategory", work[0].service);

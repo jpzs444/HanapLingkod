@@ -21,12 +21,14 @@ export default function ModalDialog(props) {
     <View
         style={styles.container}
     >
-        <View style={[styles.modal, {width: WIDTH - 100, maxHeight: HEIGHT/2 }]}>
+        <View style={[styles.modal, {width: WIDTH - 90, maxHeight: HEIGHT/1.5, paddingTop: 25 }]}>
             {/* Message */}
-            <TText style={styles.text}>
-                {props.message}
-            </TText>
+            {/* <TText style={[styles.text, styles.textHeader]}>Data Privacy Act Title Something</TText> */}
+            <TText style={[styles.text,]}>All the details you have provided to HanapLingkod will be treated with utmost confidentiality with regards to the Data Privacy Act of 2012.</TText>
+            <TText style={styles.text}>By clicking confirm, you hereby acknowledge and agree that HanapLingkod will collect and store your data. Your account will then be registered, and no further changes can be made upon registration.</TText>
 
+
+            {/* Buttons */}
             {
                 props.numBtn == 2 ?
                     <View style={styles.btnContainer}>
@@ -36,6 +38,7 @@ export default function ModalDialog(props) {
                         onPress={() => {
                             onPressCancel()
                         }}>
+
                             <TText style={styles.btnText}>{props.cancelText}</TText>
                         </TouchableOpacity>
                         
@@ -85,13 +88,17 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         overflow: 'hidden',
     },
+    textHeader: {
+        marginTop: 30, fontFamily: 'LexendDeca_SemiBold', fontSize: 20
+    },
     text: {
-        fontFamily: 'sans-serif',
-        fontWeight: 'bold',
-        fontSize: 20, 
+        fontFamily: 'LexendDeca_Medium',
+        // fontWeight: '500',
+        fontSize: 18, 
         color: ThemeDefaults.themeWhite, 
-        paddingVertical: 30, 
-        paddingHorizontal: 20, 
+        // paddingVertical: 20, 
+        paddingHorizontal: 25, 
+        marginBottom: 30,
         textAlign: 'center',
     },
     btnContainer: {
