@@ -69,6 +69,7 @@ const multipleFile = upload.fields([
 //upload prev works
 app.post("/prevWorks/:id", upload.array("pastWorks", 12), function (req, res) {
   //put the filename to array
+  // console.log("");
   let prevWorkslist = req.files.map((item) => {
     return item.filename;
   });
@@ -86,6 +87,29 @@ app.post("/prevWorks/:id", upload.array("pastWorks", 12), function (req, res) {
       }
     }
   );
+});
+app.delete("/prevWorks/:id", function (req, res) {
+  const fs = require("fs");
+  try {
+    console.log(req.body.toDelete);
+    const path = "./Public/Uploads/" + req.body.toDelete;
+    fs.unlinkSync(path);
+    Worker.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        $pull: { prevWorks: req.body.toDelete },
+      },
+      function (err) {
+        if (!err) {
+          res.send("Deleted Successfully");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 //Login
