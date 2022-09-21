@@ -20,8 +20,8 @@ export default function Home({route}) {
     const formData = new FormData();
     formData.append("pushtoken", global.deviceExpoPushToken)
 
-    console.log("userData: ", global.userData._id)
-    console.log("pushToken: ", global.deviceExpoPushToken)
+    // console.log("userData: ", global.userData._id)
+    // console.log("pushToken: ", global.deviceExpoPushToken)
 
     fetch("http://" + IPAddress + ":3000/setToken/" + global.userData._id, {
       method: 'PUT',

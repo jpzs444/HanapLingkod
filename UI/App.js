@@ -16,6 +16,7 @@ import DrawerNavigator from './Components/DrawerNavigation';
 import { Linking } from "react-native";
 import "./global/global";
 import { IPAddress } from "./global/global";
+import UserProfileStack from "./Components/UserProfileStack";
 
 
 const AppStack = createNativeStackNavigator();
@@ -41,7 +42,6 @@ export default function App() {
     registerForPushNotificationsAsync().then((token) =>{
       setExpoPushToken(token)
       global.deviceExpoPushToken = token;
-      console.log("app.js pt", global.deviceExpoPushToken)
     });
 
     // This listener is fired whenever a notification is received while the app is foregrounded
@@ -126,7 +126,6 @@ async function registerForPushNotificationsAsync() {
         return;
     }
     token = (await Notifications.getExpoPushTokenAsync()).data;
-    console.log("token: ", token);
   }
 
     if (Platform.OS === 'android') {
@@ -147,6 +146,7 @@ async function registerForPushNotificationsAsync() {
         <AppStack.Navigator initialRouteName="LoginNavigationStack" screenOptions={{headerShown: false}} >
           <AppStack.Screen name="LoginNavigationStack" component={LoginNavigationStack} /> 
           <AppStack.Screen name="DrawerNavigation" component={DrawerNavigator} /> 
+          <AppStack.Screen name="UserProfileStack" component={UserProfileStack} /> 
         </AppStack.Navigator>
 
         {/* <LoginNavigationStack /> */}

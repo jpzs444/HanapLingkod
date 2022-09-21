@@ -3,6 +3,7 @@ import { View, Image, TouchableOpacity, StatusBar, StyleSheet, ScrollView, SafeA
 import TText from '../Components/TText';
 import { useNavigation } from '@react-navigation/native';
 import ThemeDefaults from '../Components/ThemeDefaults';
+import { IPAddress } from '../global/global';
 
 export default function Welcome({route}) {
 
@@ -24,7 +25,36 @@ export default function Welcome({route}) {
                 <View style={styles.btnContainer}>
                     <TouchableOpacity
                         style={styles.btn}
-                        onPress={() => navigation.navigate("HomeStack", {user:user, role: role})}
+                        // onPress={() => navigation.navigate("Login", {userD:user, role: role, username: user.username, pw: user.password, islogin: true})}
+                        onPress={() => {
+                            fetch("http://" + IPAddress + ":3000/login?username="+user.username, {
+                                method: "POST",
+                                body: JSON.stringify({
+                                username: user.username,
+                                password: user.password,
+                                }),
+                                headers: {
+                                "content-type": "application/json",
+                                },
+                            })
+                                .then((response) => response.json())
+                                .then((user) => {
+                                    console.log("data: ", user);
+                                    console.log("login from welcome screen")
+
+                                    if(user._id){                                        
+                                        global.userData = user;
+                                        
+                                        navigation.replace("HomeStack");
+                                        // navigation.navigate("OTPVerification", {isLogin: true, phoneNum: user.phoneNumber, fromWelcome: true})
+                                    } 
+
+                                })
+                                .catch((error) => {
+                                    console.log("error: ", error.message)
+                                })
+
+                        }}
                     >
                         <TText style={styles.btnText}>Go to Homepage</TText>
                     </TouchableOpacity>

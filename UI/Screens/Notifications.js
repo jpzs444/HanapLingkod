@@ -97,9 +97,7 @@ export default function Notifications({route}) {
     // console.log("seconds: ", dateDiff)
 
     let day = Math.floor(dateDiff / 60 / 60 / 24)
-    if(day === 0) {
-      console.log("day: ", day)
-  
+    if(day === 0) {  
       let hours = Math.floor(dateDiff / 60 / 60 )
       if ( hours === 0 ) {
         let minutes = Math.floor(dateDiff / 60 % 60)

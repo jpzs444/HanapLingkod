@@ -15,6 +15,12 @@ import Messaging from '../Screens/Messaging';
 import Notifications from '../Screens/Notifications';
 
 import { devicePushToken, IPAddress } from '../global/global';
+import HomeNavigationStack from './HomeStack';
+import UserProfile from '../Screens/UserProfile';
+
+const hiddenTabNavBtn = () => ({
+    tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
+  });
 
 
 const Tab = createBottomTabNavigator();
@@ -56,7 +62,7 @@ const TabNavigation = () => {
         }}
     >
         {/* Home Screen Tab */}
-        <Tab.Screen name="Home_Tab" component={Home} 
+        <Tab.Screen name="Home_Tab" component={HomeNavigationStack} 
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="home" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
@@ -104,6 +110,10 @@ const TabNavigation = () => {
                 ),
             }}
         />
+
+        {/* <Tab.Screen name="UserProfileScreen" component={UserProfile} 
+            options={hiddenTabNavBtn}
+        /> */}
     </Tab.Navigator>
   )
 }

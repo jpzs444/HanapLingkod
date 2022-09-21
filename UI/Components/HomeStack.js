@@ -11,6 +11,7 @@ import Workers from '../Screens/Workers';
 
 const HomeStack = createNativeStackNavigator();
 
+
 export default function HomeNavigationStack () {
     return(
       <HomeStack.Navigator initialRouteName="HomeScreen" screenOptions={{headerShown: false}} >
