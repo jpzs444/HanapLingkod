@@ -66,6 +66,28 @@ const multipleFile = upload.fields([
 //   "ang jologs ko sorry, i will be better"
 // );
 
+//upload prev works
+app.post("/prevWorks/:id", upload.array("pastWorks", 12), function (req, res) {
+  //put the filename to array
+  let prevWorkslist = req.files.map((item) => {
+    return item.filename;
+  });
+
+  Worker.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      $push: { prevWorks: prevWorkslist },
+    },
+    function (err) {
+      if (!err) {
+        res.send("Updated Successfully");
+      } else {
+        res.send(err);
+      }
+    }
+  );
+});
+
 //Login
 app.post("/login", async (req, res) => {
   console.log(req.body);

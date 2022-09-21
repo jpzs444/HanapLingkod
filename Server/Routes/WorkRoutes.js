@@ -117,4 +117,14 @@ router
     });
   });
 
+router.route("/WorkList/:UserId").get(function (req, res) {
+  Work.find({ workerId: req.params.UserId }, function (err, found) {
+    if (found) {
+      res.send(found);
+    } else {
+      res.send("No such data found");
+    }
+  });
+});
+
 module.exports = router;
