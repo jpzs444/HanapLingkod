@@ -66,6 +66,77 @@ const multipleFile = upload.fields([
 //   "ang jologs ko sorry, i will be better"
 // );
 
+app.get("/search", async function (req, res) {
+  let keyword = req.query.keyword;
+  let regex = new RegExp(`${keyword}`);
+  // console.log(regex);
+
+  let WorkerResult = await Worker.find({
+    $or: [{ firstname: regex }, { lastname: regex }, { middlename: regex }],
+  })
+    .lean()
+    .exec();
+  let CategoryResult = await ServiceCategory.find({ Category: regex })
+    .lean()
+    .exec();
+  let SubCategoryResult = await ServiceSubCategory.find({
+    ServiceSubCategory: regex,
+  })
+    .lean()
+    .exec();
+
+  res.send({
+    worker: WorkerResult,
+    category: CategoryResult,
+    subCategory: SubCategoryResult,
+  });
+});
+
+//upload prev works
+app.post("/prevWorks/:id", upload.array("pastWorks", 12), function (req, res) {
+  //put the filename to array
+  let prevWorkslist = req.files.map((item) => {
+    return item.filename;
+  });
+
+  Worker.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      $push: { prevWorks: prevWorkslist },
+    },
+    function (err) {
+      if (!err) {
+        res.send("Updated Successfully");
+      } else {
+        res.send(err);
+      }
+    }
+  );
+});
+app.delete("/prevWorks/:id", function (req, res) {
+  const fs = require("fs");
+  try {
+    console.log(req.body.toDelete);
+    const path = "./Public/Uploads/" + req.body.toDelete;
+    fs.unlinkSync(path);
+    Worker.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        $pull: { prevWorks: req.body.toDelete },
+      },
+      function (err) {
+        if (!err) {
+          res.send("Deleted Successfully");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 //Login
 app.post("/login", async (req, res) => {
   console.log(req.body);
