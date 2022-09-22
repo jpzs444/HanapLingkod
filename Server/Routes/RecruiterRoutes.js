@@ -2,6 +2,24 @@ const express = require("express");
 const router = express.Router();
 const Recruiter = require("../Models/Recruiters");
 
+const multer = require("multer");
+
+//store photos
+const storage = multer.diskStorage({
+  //destination for files
+  destination: function (request, file, callback) {
+    callback(null, "./Public/Uploads");
+  },
+
+  //add back the extension
+  filename: function (request, file, callback) {
+    callback(null, Date.now() + file.originalname);
+  },
+});
+
+//upload the image
+const upload = multer({ storage: storage });
+
 router.route("/Recruiter").get(function (req, res) {
   Recruiter.find({}, function (err, found) {
     if (found) {
@@ -25,12 +43,29 @@ router
       }
     });
   })
-  .put(function (req, res) {
+  .put(upload.single("profilePic"), function (req, res) {
+    let recruiterObj = {
+      username: req.body.username,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      middlename: req.body.middlename,
+      birthday: req.body.birthday,
+      age: req.body.age,
+      sex: req.body.sex,
+      street: req.body.street,
+      purok: req.body.purok,
+      barangay: req.body.barangay,
+      city: req.body.city,
+      province: req.body.province,
+      phoneNumber: req.body.phoneNumber,
+      emailAddress: req.body.emailAddress,
+    };
+    if (req.file !== undefined) {
+      recruiterObj.profilePic = req.file.filename;
+    }
     Recruiter.findOneAndUpdate(
       { _id: req.params.id },
-      {
-        profilePic: "psssic",
-      },
+      recruiterObj,
       function (err) {
         if (!err) {
           res.send("Updated Successfully");

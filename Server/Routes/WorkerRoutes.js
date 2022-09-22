@@ -4,6 +4,23 @@ const router = express.Router();
 const Worker = require("../Models/Workers");
 const Work = require("../Models/Work");
 const { Router } = require("express");
+const multer = require("multer");
+
+//store photos
+const storage = multer.diskStorage({
+  //destination for files
+  destination: function (request, file, callback) {
+    callback(null, "./Public/Uploads");
+  },
+
+  //add back the extension
+  filename: function (request, file, callback) {
+    callback(null, Date.now() + file.originalname);
+  },
+});
+
+//upload the image
+const upload = multer({ storage: storage });
 
 router.route("/Worker").get(function (req, res) {
   Worker.find({}, function (err, found) {
@@ -28,20 +45,36 @@ router
       }
     });
   })
-  .put(function (req, res) {
-    Worker.findOneAndUpdate(
-      { _id: req.params.id },
-      {
-        profilePic: "psssic",
-      },
-      function (err) {
-        if (!err) {
-          res.send("Updated Successfully");
-        } else {
-          res.send(err);
-        }
+  .put(upload.single("profilePic"), function (req, res) {
+    let workerObj = {
+      username: req.body.username,
+      // password: hashedPassword,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      middlename: req.body.middlename,
+      birthday: req.body.birthday,
+      age: req.body.age,
+      sex: req.body.sex,
+      street: req.body.street,
+      purok: req.body.purok,
+      barangay: req.body.barangay,
+      city: req.body.city,
+      province: req.body.province,
+      phoneNumber: req.body.phoneNumber,
+      emailAddress: req.body.emailAddress,
+      workDescription: req.body.workDescription,
+    };
+    if (req.file !== undefined) {
+      workerObj.profilePic = req.file.filename;
+    }
+
+    Worker.findOneAndUpdate({ _id: req.params.id }, workerObj, function (err) {
+      if (!err) {
+        res.send("Updated Successfully");
+      } else {
+        res.send(err);
       }
-    );
+    });
   })
 
   .delete(function (req, res) {
