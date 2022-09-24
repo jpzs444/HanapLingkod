@@ -121,6 +121,7 @@ router.route("/WorkList/:UserId").get(function (req, res) {
   Work.find({ workerId: req.params.UserId }, function (err, found) {
     if (found) {
       res.send(found);
+      console.log(res)
     } else {
       res.send("No such data found");
     }

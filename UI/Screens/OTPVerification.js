@@ -277,7 +277,7 @@ export default function OTPVerification({route}, props) {
         }).then(() => {
             console.log("Account created | worker");
             //props.navigation.navigate("OTPVerification", {role: user.role});
-            navigation.navigate("WelcomePage", {role: 'worker',})
+            navigation.navigate("WelcomePage", {role: 'worker', user: user})
         }).catch((er) => {console.log("error: ", er.message)})
       }
 

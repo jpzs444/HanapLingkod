@@ -27,7 +27,7 @@ export default function Welcome({route}) {
                         style={styles.btn}
                         // onPress={() => navigation.navigate("Login", {userD:user, role: role, username: user.username, pw: user.password, islogin: true})}
                         onPress={() => {
-                            fetch("http://" + IPAddress + ":3000/login?username="+user.username, {
+                            fetch("http://" + IPAddress + ":3000/login?username="+ user.username, {
                                 method: "POST",
                                 body: JSON.stringify({
                                 username: user.username,

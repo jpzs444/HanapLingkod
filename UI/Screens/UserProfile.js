@@ -21,9 +21,12 @@ const UserProfile = ({route}) => {
     const [workList, setWorkList] = useState([])
     const [activeTab, setActiveTab] = useState('works')
 
+    let workerID = global.userData._id
+    // console.log(global.userData._id)
+
     // fetch data if role of user is worker
     useEffect(() => {
-        fetch("http://" + IPAddress + ":3000/Work/" + global.userData._id, {
+        fetch("http://" + IPAddress + ":3000/WorkList/" + global.userData._id, {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
@@ -31,7 +34,7 @@ const UserProfile = ({route}) => {
         }).then((res) => res.json())
         .then((data) => {
             setWorkList([...data])
-        }).catch((error) => console.log(error.message))
+        }).catch((error) => console.log("workList fetch: ", error.message))
     }, [])
 
     const viewImage = () => {
