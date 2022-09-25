@@ -12,7 +12,6 @@ const ServiceSubCategory = require("./Models/SubCategory");
 const Work = require("./Models/Work");
 
 //helper
-const Check = require("./Helpers/ifUserExist");
 const notification = require("./Helpers/PushNotification");
 //routes
 const ServiceCategoryRoutes = require("./Routes/ServiceCategoryRoutes");
@@ -137,6 +136,27 @@ app.delete("/prevWorks/:id", function (req, res) {
   }
 });
 
+//check username
+app.post("/isUsernameUnique", async function (req, res) {
+  // console.log("asd");
+  let RecruiterCount = await Recruiter.find({ username: req.body.username })
+    .select("username")
+    .lean()
+    .count()
+    .exec();
+
+  let WorkerCount = await Worker.find({ username: req.body.username })
+    .select("username")
+    .lean()
+    .count()
+    .exec();
+  if (WorkerCount === 0 && RecruiterCount === 0) {
+    res.send(true);
+  } else {
+    res.send(false);
+  }
+});
+
 //Login
 app.post("/login", async (req, res) => {
   console.log(req.body);
@@ -167,118 +187,114 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.post(
-  "/signup/worker",
-  Check.ifRecruiterExist,
-  Check.ifWorkerExist,
-  multipleFile,
-  async (req, res) => {
+app.post("/signup/worker", multipleFile, async (req, res) => {
+  //initialize transactions
+  const session = await conn.startSession();
+
+  try {
     //initialize transactions
-    const session = await conn.startSession();
+    session.startTransaction();
+    // console.log(req.body);
 
-    try {
-      //initialize transactions
-      session.startTransaction();
-      // console.log(req.body);
+    //hash the password using bcrypt
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    const SubCategory = [].concat(req.body.ServiceSubCategory);
 
-      //hash the password using bcrypt
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(req.body.password, salt);
-      let workerObj = {
-        username: req.body.username,
-        password: hashedPassword,
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        middlename: req.body.middlename,
-        birthday: req.body.birthday,
-        age: req.body.age,
-        sex: req.body.sex,
-        street: req.body.street,
-        purok: req.body.purok,
-        barangay: req.body.barangay,
-        city: req.body.city,
-        province: req.body.province,
-        phoneNumber: req.body.phoneNumber,
-        emailAddress: req.body.emailAddress,
-        profilePic: "pic",
-        GovId: req.files.govId[0].filename,
-        workDescription: req.body.workDescription,
-        role: "worker",
-        verification: false,
-        accountStatus: "active",
-      };
-      if (req.files.certificate !== undefined) {
-        workerObj.licenseCertificate = req.files.certificate[0].filename;
-      }
+    let workerObj = {
+      username: req.body.username,
+      password: hashedPassword,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      middlename: req.body.middlename,
+      birthday: req.body.birthday,
+      age: req.body.age,
+      sex: req.body.sex,
+      street: req.body.street,
+      purok: req.body.purok,
+      barangay: req.body.barangay,
+      city: req.body.city,
+      province: req.body.province,
+      phoneNumber: req.body.phoneNumber,
+      emailAddress: req.body.emailAddress,
+      profilePic: "pic",
+      GovId: req.files.govId[0].filename,
+      workDescription: req.body.workDescription,
+      works: SubCategory,
+      role: "worker",
+      verification: false,
+      accountStatus: "active",
+    };
+    if (req.files.certificate !== undefined) {
+      workerObj.licenseCertificate = req.files.certificate[0].filename;
+    }
 
-      //create worker
-      const worker = await Worker.create([workerObj], { session });
+    //create worker
+    const worker = await Worker.create([workerObj], { session });
 
-      //save service sub category id for future use
-      //convert category sub category min max price to arrays to create multiple works documents
-      let serviceSubCategoryID;
-      const Category = [].concat(req.body.Category);
-      const SubCategory = [].concat(req.body.ServiceSubCategory);
-      const min = [].concat(req.body.minPrice);
-      const max = [].concat(req.body.maxPrice);
+    //save service sub category id for future use
+    //convert category sub category min max price to arrays to create multiple works documents
+    let serviceSubCategoryID;
+    const Category = [].concat(req.body.Category);
+    const min = [].concat(req.body.minPrice);
+    const max = [].concat(req.body.maxPrice);
 
-      for (var i = 0; i < Category.length; i += 1) {
-        //check if the sub category is unlisted or not if unlisted create a new sub category if not query and get the id of the sub category
-        if (Category[i] == "unlisted") {
-          let unlistedID = await ServiceCategory.findOne(
-            { Category: "unlisted" },
-            { Category: 0 }
-          );
-          const serviceSubCategory = await ServiceSubCategory.create(
-            [
-              {
-                ServiceID: unlistedID._id,
-                ServiceSubCategory: SubCategory[i],
-              },
-            ],
-            { session }
-          );
-
-          serviceSubCategoryID = serviceSubCategory[0].id;
-        } else {
-          let result = await ServiceSubCategory.findOne(
-            { ServiceSubCategory: SubCategory[i] },
-            { ServiceSubCategory: 0, ServiceID: 0 },
-            { session }
-          );
-          serviceSubCategoryID = result._id;
-        }
-        //create work
-        const work = await Work.create(
+    for (var i = 0; i < Category.length; i += 1) {
+      //check if the sub category is unlisted or not if unlisted create a new sub category if not query and get the id of the sub category
+      if (Category[i] == "unlisted") {
+        let unlistedID = await ServiceCategory.findOne(
+          { Category: "unlisted" },
+          { Category: 0 }
+        );
+        const serviceSubCategory = await ServiceSubCategory.create(
           [
             {
-              ServiceSubId: serviceSubCategoryID,
-              workerId: worker[0].id,
-              minPrice: min[i],
-              maxPrice: max[i],
+              ServiceID: unlistedID._id,
+              ServiceSubCategory: SubCategory[i],
             },
           ],
           { session }
         );
+
+        serviceSubCategoryID = serviceSubCategory[0].id;
+      } else {
+        let result = await ServiceSubCategory.findOne(
+          { ServiceSubCategory: SubCategory[i] },
+          { ServiceSubCategory: 0, ServiceID: 0 },
+          { session }
+        );
+        serviceSubCategoryID = result._id;
       }
-      await session.commitTransaction();
-      console.log("success");
-      res.send("Succesfully Created");
-    } catch (err) {
-      console.log(err);
-
-      await session.abortTransaction();
-
-      res.status(500).send();
+      //create work
+      const work = await Work.create(
+        [
+          {
+            ServiceSubId: serviceSubCategoryID,
+            workerId: worker[0].id,
+            minPrice: min[i],
+            maxPrice: max[i],
+          },
+        ],
+        { session }
+      );
     }
+    await session.commitTransaction();
+    console.log("success");
+    res.send("Succesfully Created");
+  } catch (err) {
+    console.log(err);
+
+    await session.abortTransaction();
+
+    res.status(500).send();
   }
-);
+});
 
 //signup recruiter
 app.post(
   "/signup/recruiter",
-  Check.ifRecruiterExist,
-  Check.ifWorkerExist,
+  // Check.ifRecruiterExist,
+  // Check.ifWorkerExist,
   upload.single("govId"),
   async (req, res) => {
     try {

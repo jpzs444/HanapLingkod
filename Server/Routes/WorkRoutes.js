@@ -3,8 +3,8 @@ const router = express.Router();
 const Work = require("../Models/Work");
 const ServiceCategory = require("../Models/ServiceCategory");
 const ServiceSubCategory = require("../Models/SubCategory");
+const Worker = require("../Models/Workers");
 const mongoose = require("mongoose");
-const { json } = require("body-parser");
 
 router
   .route("/Work")
@@ -13,7 +13,7 @@ router
     res.send(queryResult);
   })
   .post(async function (req, res) {
-    console.log(req.body);
+    // console.log(req.body);
     const session = await mongoose.connection.startSession();
 
     try {
@@ -47,6 +47,7 @@ router
             { ServiceSubCategory: 0, ServiceID: 0 },
             { session }
           );
+          console.log(result);
           serviceSubCategoryID = result._id;
         }
         const work = await Work.create(
@@ -61,7 +62,15 @@ router
           { session }
         );
       }
+
       await session.commitTransaction();
+
+      Worker.findOneAndUpdate(
+        { _id: req.body.userId },
+        {
+          $push: { works: SubCategory },
+        }
+      );
       console.log("success");
       res.send("Succesfully Created");
     } catch (err) {
