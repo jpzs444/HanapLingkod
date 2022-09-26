@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 //upload the image
 const upload = multer({ storage: storage });
 
-router.route("/Worker").get(function (req, res) {
+router.route("/Worker").get(async function (req, res) {
   Worker.find({}, function (err, found) {
     if (found) {
       res.send(found);
