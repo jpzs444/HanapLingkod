@@ -126,7 +126,7 @@ export default function Appbar(props) {
                     : null
             }
             {
-                props.accTypeSelect === true ? 
+                props.accTypeSelect === true && !props.hasPicture ? 
                     <TText style={[styles.rightText, {color: props.light ? '#fff' : '#000'}]}>Page 1 of ?</TText>
                     : null
             }

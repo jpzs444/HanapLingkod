@@ -54,7 +54,7 @@ const Edit_UserProfile = () => {
     }, []);
 
     useEffect(() => {
-        fetch("http://" + IPAddress + ":3000/Work/" + global.userData._id, {
+        fetch("http://" + IPAddress + ":3000/WorkList/" + global.userData._id, {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
@@ -91,22 +91,6 @@ const Edit_UserProfile = () => {
         })();
     }, []);
 
-    // useEffect(() => {
-    //     copyWorkList()
-    //     console.log("edit user work: ", userWorkListEdit)
-    // }, [])
-
-    // if(backBtnPressed) {
-    //     return(
-    //         <Modal 
-    //         transparent={true}
-    //         style={{flex: 1, backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center'}}>
-    //             <View style={{backgroundColor: '#fff'}}>
-    //                 <TText>Hello</TText>
-    //             </View>
-    //         </Modal>
-    //     )
-    // }
 
     const handleBackButtonPressed = () => {
         
@@ -114,19 +98,6 @@ const Edit_UserProfile = () => {
         setBackBtnPressed(true)
         return true;
         // editHasChanges ? setBackBtnPressed(true) : navigation.navigate("UserProfileScreen")
-    }
-
-    const copyWorkList = () => {
-        setUserWorkListEdit([])
-        for (let i = 0; i < workList.length; i++){
-            setUserWorkListEdit((prev) => ([...prev, {
-                category: workList[i].category,
-                sub_category: workList[i].ServiceSubId.ServiceSubCategory,
-                minPrice: workList[i].minPrice,
-                maxPrice: workList[i].maxPrice,
-            }]))
-        }
-        // console.log("copywork", userWorkListEdit)
     }
 
     const setBarangay = (option) => {
@@ -229,6 +200,58 @@ const Edit_UserProfile = () => {
         setEditHasChanges(true)
     }
 
+    const saveUserInformation = () => {
+        let formData = new FormData()
+
+        // Profile Picture upload
+        let localUri = profilePicture;
+        let filename = localUri.split("/").pop();
+        
+        // Infer the type of the image
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+        
+        // upload profile picture
+        formData.append("profilePic", {
+            uri: localUri,
+            name: filename,
+            type,
+        });
+
+        if(global.userData.role === 'worker'){
+            // License Pic
+            let uriLicense = imagelicense;
+            let licensefilename = uriLicense.split("/").pop();
+            if(pastAppointmentSingleImage) {
+                let pastImagesURI = pastAppointmentSingleImage;
+                let pastImagesFilename = pastImagesURI.split("/").pop();
+
+                // Infer the type of the image
+                let match = /\.(\w+)$/.exec(pastImagesFilename);
+                let type = match ? `image/${match[1]}` : `image`;
+
+                // upload profile picture
+                formData.append("profilePic", {
+                    uri: pastImagesURI,
+                    name: pastImagesFilename,
+                    type,
+                });
+            }
+            
+        }
+  
+
+
+
+        fetch("http://" + IPAddress + ":3000/" + global.userData.role === 'recruiter' ? "Recruiter/" : "Worker/" + global.userData._id, {
+            method: "PUT",
+            headers: {
+                "content-type": "multipart/form-data",
+            },
+            body: formData,
+        })
+    }
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -294,7 +317,9 @@ const Edit_UserProfile = () => {
                                 >
                                     <TText style={styles.modal_btnTxt}>Don't Save</TText>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.modal_btn}>
+                                <TouchableOpacity style={styles.modal_btn}
+                                    onPress={() => saveUserInformation()}
+                                >
                                     <TText style={styles.modal_btnTxt}>Save</TText>
                                 </TouchableOpacity>
                             </View>
