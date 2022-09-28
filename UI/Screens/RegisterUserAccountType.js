@@ -27,7 +27,7 @@ export default function RegisterUserAccountType() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Appbar */}
-      <Appbar backBtn={true} hasPicture={false} accTypeSelect={true} />
+      <Appbar backBtn={true} hasPicture={false} accTypeSelect={true} showLogo={true} />
 
       {/* Header */}
       <View style={styles.header}>

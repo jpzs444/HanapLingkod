@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, SafeAreaView, TextInput, Image, TouchableOpacity, 
-    StatusBar, ScrollView, Modal, BackHandler, Dimensions } from 'react-native'
+    StatusBar, ScrollView, Modal, BackHandler, Dimensions, ActivityIndicator } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import TText from '../Components/TText'
 import Appbar from '../Components/Appbar'
@@ -12,6 +12,7 @@ import { IPAddress } from '../global/global'
 import ThemeDefaults from '../Components/ThemeDefaults'
 
 import { useNavigation } from '@react-navigation/native'
+import OTPVerification from './OTPVerification'
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -21,8 +22,10 @@ const Edit_UserProfile = () => {
     const navigation = useNavigation()
 
     const [isLoading, setIsLoading] = useState(false);
+    const [minPriceHigher, setminPriceHigher] = useState(false)
     const [backBtnPressed, setBackBtnPressed] = useState(false)
     const [workList, setWorkList] = useState([])
+    const [worksubcat, setWorksubcat] = useState([])
 
     const [profilePicture, setProfilePicture] = useState("")
     const [pastAppointmentImages, setPastAppointmentImages] = useState([])
@@ -42,6 +45,7 @@ const Edit_UserProfile = () => {
     const [isModalVisible, setModalVisible] = useState(false)
     const [editHasChanges, setEditHasChanges] = useState(false)
     const [isPickerVisible, setPickerVisible] = useState(false)
+    const [appIsSaving, setAppIsSaving] = useState(false)
 
     useEffect(() => {
         console.log("backbtn pressed");
@@ -53,7 +57,12 @@ const Edit_UserProfile = () => {
         }
     }, []);
 
+
     useEffect(() => {
+        // reset state on load
+        setWorkList([])
+        setUserWorkListEdit([])
+
         fetch("http://" + IPAddress + ":3000/WorkList/" + global.userData._id, {
             method: 'GET',
             headers: {
@@ -62,6 +71,8 @@ const Edit_UserProfile = () => {
         }).then((res) => res.json())
         .then((data) => {
             setWorkList([...data])
+            // console.log("minPrice", data[0]._id)
+            // console.log("sub_cat: ", data[0].ServiceSubId.ServiceSubCategory)
 
             for (let i = 0; i < data.length; i++){
                 setUserWorkListEdit((prev) => ([...prev, {
@@ -89,12 +100,14 @@ const Edit_UserProfile = () => {
             }
           }
         })();
+        
     }, []);
 
 
     const handleBackButtonPressed = () => {
+        // console.log("worklist: ", workList)
         
-        console.log("gooooooo", editHasChanges)
+        // console.log("gooooooo", editHasChanges)
         setBackBtnPressed(true)
         return true;
         // editHasChanges ? setBackBtnPressed(true) : navigation.navigate("UserProfileScreen")
@@ -120,27 +133,27 @@ const Edit_UserProfile = () => {
 
     const handleRemoveWorkItem = (index) => {
         const list = [...userWorkListEdit];
-        console.log(list)
+        // console.log(list)
         list.splice(index, 1);
         setUserWorkListEdit(list)
-        console.log(list)
+        // console.log(list)
         setEditHasChanges(true)
     }
 
     const handleServiceSelect = (val, index) => {
       const list = [...userWorkListEdit];
-      console.log("val handle service: ", val)
+    //   console.log("val handle service: ", val)
 
       if(val.sub_category === "unlisted"){
         list[index]['category'] = 'unlisted'
       } else {
-        console.log("val cat: ", val.Category)
+        // console.log("val cat: ", val.Category)
   
         list[index]['sub_category'] = val.ServiceSubCategory;
         list[index]['category'] = "";
         setUserWorkListEdit(list)
       }
-      console.log(workList)
+    //   console.log(workList)
       setEditHasChanges(true)
     }
 
@@ -149,6 +162,10 @@ const Edit_UserProfile = () => {
 
         if(minMax === 'min') list[index]['minPrice'] = val
         else if(minMax === 'max') list[index]['maxPrice'] = val
+
+        list[index]['minPrice'] > list[index]['maxPrice'] ? setminPriceHigher(true) : setminPriceHigher(false)
+
+        list[index]['hasGreaterMin'] = list[index]['minPrice'] > list[index]['maxPrice']
 
         setUserWorkListEdit(list)
         setEditHasChanges(true)
@@ -165,14 +182,15 @@ const Edit_UserProfile = () => {
           quality: 0.5,
         });
   
-        console.log("selected", result.selected);
+        // console.log("selected", result.selected);
   
         if (!result.cancelled) {
             if(!result.selected){
                 setProfilePicture(result.uri)
+                // console.log(result.uri)
             }
         }
-        console.log("Image state: ", profilePicture)
+        // console.log("Image state: ", profilePicture)
         setEditHasChanges(true)
     };
 
@@ -184,13 +202,13 @@ const Edit_UserProfile = () => {
           quality: 0.5,
         });
   
-        console.log("selected", result.selected);
+        // console.log("selected", result.selected);
   
         if (!result.cancelled) {
             if(!result.selected) setPastAppointmentSingleImage(result.uri)
             else setPastAppointmentImages([...result.selected])
         }
-        console.log("Image state: ", pastAppointmentImages)
+        // console.log("Image state: ", pastAppointmentImages)
       };
 
     const handleRemoveImage = (index) => {
@@ -200,28 +218,28 @@ const Edit_UserProfile = () => {
         setEditHasChanges(true)
     }
 
+    if(appIsSaving){
+        return(
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <ActivityIndicator size='large' />
+            </View>
+        )
+    }
+
+
     const saveUserInformation = () => {
+        
+        setAppIsSaving(true)
+
+        // general user information
         let formData = new FormData()
 
-        // Profile Picture upload
-        let localUri = profilePicture;
-        let filename = localUri.split("/").pop();
-        
-        // Infer the type of the image
-        let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : `image`;
-        
-        // upload profile picture
-        formData.append("profilePic", {
-            uri: localUri,
-            name: filename,
-            type,
-        });
+        // images from past works && new work information | worker route
+        let formDataPastWorks = new FormData()
 
+        // Upload images from past appointments | worker
         if(global.userData.role === 'worker'){
-            // License Pic
-            let uriLicense = imagelicense;
-            let licensefilename = uriLicense.split("/").pop();
+            
             if(pastAppointmentSingleImage) {
                 let pastImagesURI = pastAppointmentSingleImage;
                 let pastImagesFilename = pastImagesURI.split("/").pop();
@@ -231,25 +249,148 @@ const Edit_UserProfile = () => {
                 let type = match ? `image/${match[1]}` : `image`;
 
                 // upload profile picture
-                formData.append("profilePic", {
+                formDataPastWorks.append("pastWorks", {
                     uri: pastImagesURI,
                     name: pastImagesFilename,
                     type,
                 });
+            } else if (pastAppointmentImages) {
+                for(let i = 0; i < pastAppointmentImages.length; i++){
+                    let pastImagesURI = pastAppointmentImages[i].uri;
+                    let pastImagesFilename = pastImagesURI.split("/").pop();
+
+                    // Infer the type of the image
+                    let match = /\.(\w+)$/.exec(pastImagesFilename);
+                    let type = match ? `image/${match[1]}` : `image`;
+
+                    // upload profile picture
+                    formDataPastWorks.append("pastWorks", {
+                        uri: pastImagesURI,
+                        name: pastImagesFilename,
+                        type,
+                    });
+                }
+            }
+
+            // Upload set of works
+            for(let i = 0; i < userWorkListEdit.length; i++){
+                fetch("http://" + IPAddress + ":3000/Work", {
+                    method: "POST",
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify({
+                    "Category": userWorkListEdit[i].Category ? 'unlisted' : "",
+                    "ServiceSubCategory": userWorkListEdit[i].sub_category,
+                    "minPrice": userWorkListEdit[i].minPrice,
+                    "maxPrice": userWorkListEdit[i].maxPrice,
+                    "userId": global.userData._id,
+                }),
+                }).then((res) => console.log("successfully added works"))
+                .catch((error) => console.log(error.message))
             }
             
+            // Update/Upload Works/Services offered by the Worker
+            for(let i = 0; i < workList.length; i++){
+                fetch("http://" + IPAddress + ":3000/Work/" + workList[i].ServiceSubId.ServiceSubCategory + "/" + workList[i]._id, {
+                    method: "DELETE",
+                    headers: {
+                        "content-type": "multipart/form-data",
+                    },
+                }).then((res) => console.log("old set of work deleted successfully   ", res.message))
+                .catch((error) => console.log(error.message))
+            }
+            // console.log("Delete fetch")
+            
+            userEditData.bio ? formData.append("workDescription", userEditData.bio) : null
+
         }
-  
 
+        // Profile Picture upload
+        let profilePic = profilePicture;
+        let filename = profilePic.split("/").pop();
+        
+        // Infer the type of the image
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
 
+        // upload profile picture
+        if(profilePicture){
+            formData.append("profilePic", {
+                uri: profilePic,
+                name: filename,
+                type,
+            });
+        }
 
-        fetch("http://" + IPAddress + ":3000/" + global.userData.role === 'recruiter' ? "Recruiter/" : "Worker/" + global.userData._id, {
+        userEditData.phonenumber ? formData.append("phoneNumber", userEditData.phonenumber) : formData.append("phoneNumber", global.userData.phoneNumber)
+        userEditData.street ? formData.append("street", userEditData.street) : formData.append("street", global.userData.street)
+        userEditData.purok ? formData.append("purok", userEditData.purok) : formData.append("purok", global.userData.purok)
+        userEditData.barangay ? formData.append("barangay", userEditData.barangay) : formData.append("barangay", global.userData.barangay)
+
+        formData.append("username", global.userData.username)
+        formData.append("firstname", global.userData.firstname)
+        formData.append("lastname", global.userData.lastname)
+        formData.append("middlename", global.userData.middlename)
+        formData.append("birthday", global.userData.birthday)
+        formData.append("age", global.userData.age)
+        formData.append("sex", global.userData.sex)
+        formData.append("city", global.userData.city)
+        formData.append("province", global.userData.province)
+
+        let route = global.userData.role === "recruiter" ? "http://" + IPAddress + ":3000/Recruiter/" + global.userData._id 
+        : "http://" + IPAddress + ":3000/Worker/" + global.userData._id 
+
+        // update recruiter and worker profile picture and basic information
+        fetch(route, {
             method: "PUT",
             headers: {
                 "content-type": "multipart/form-data",
             },
             body: formData,
-        })
+        }).then((response) => console.log("successfully updated user basic information"))
+        .catch((error) => console.log(error.message))
+
+        // // upload pasworks images upload by the worker
+        // fetch("http://" + IPAddress + ":3000/prevWorks/" + global.userData._id, {
+        //     method: "PUT",
+        //     headers: {
+        //         "content-type": "multipart/form-data",
+        //     },
+        //     body: formDataPastWorks,
+        // }).then((res) => console.log("successfully uploaded past work images"))
+        // .catch((error) => console.log(error.message))
+
+
+        // navigation.navigate("OTPVScreen", {
+        //     phoneNum: userEditData.phonenumber ? userEditData.phonenumber : global.userData.phoneNumber, 
+        //     fromEditUserInfo: true,
+        //     formDataUserInfo: formData,
+        //     formDataPastWorks: formDataPastWorks,
+        //     formDataSetOfWorks: formDataSetOfWorks,
+        //     workList: workList
+        // })
+
+        // fetch(route, {
+        //     method: "GET",
+        //     header: {
+        //         "conten-type": "application/json"
+        //     },
+        // }).then((res) => res.json())
+        // .then((user) => {
+        //     console.log("fetched after user update:", user)
+
+        //     if(user._id){
+        //         global.userData = user
+        //     }
+        // })
+        // .catch((error) => console.log(error.message))
+
+        setBackBtnPressed(false)
+        setEditHasChanges(false)
+        setAppIsSaving(false)
+        navigation.push("UserProfileScreen")
+
     }
 
 
@@ -318,7 +459,10 @@ const Edit_UserProfile = () => {
                                     <TText style={styles.modal_btnTxt}>Don't Save</TText>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.modal_btn}
-                                    onPress={() => saveUserInformation()}
+                                    onPress={() => {
+                                        setAppIsSaving(true)
+                                        saveUserInformation()
+                                    }}
                                 >
                                     <TText style={styles.modal_btnTxt}>Save</TText>
                                 </TouchableOpacity>
@@ -334,7 +478,7 @@ const Edit_UserProfile = () => {
 
                 <View style={styles.picturePlaceholder}>
                     <View>
-                        <Image source={profilePicture ? {uri: profilePicture} : require("../assets/images/bg-welcome.png")} style={styles.profilePicture} />
+                        <Image source={profilePicture ? {uri: profilePicture} : {uri: global.userData.profilePic}} style={styles.profilePicture} />
                         <TouchableOpacity style={{position:'absolute', bottom: -5, right: 15, backgroundColor: '#fff', borderRadius: 20}}
                             onPress={()=> pickImage()}
                         >
@@ -349,10 +493,6 @@ const Edit_UserProfile = () => {
                 </View>
             </View>
 
-            {/* <View style={{marginBottom: 30, paddingLeft: 30, flexDirection: 'row', alignItems: 'center'}}>
-                <Icon name={'account-circle'} size={22} />
-                <TText style={{fontSize: 18, marginLeft: 5}}>Personal Information</TText>
-            </View> */}
 
             {/* Inputs */}
             <View>
@@ -363,7 +503,7 @@ const Edit_UserProfile = () => {
                         <View style={styles.textInputContainer}>
                             <TextInput 
                                 defaultValue={global.userData.username}
-                                style={{fontSize: 16,}}
+                                style={{fontSize: 16, fontFamily: 'LexendDeca'}}
                                 editable={false}
                                 onChangeText={() => setEditHasChanges(true)}
                             />
@@ -377,7 +517,7 @@ const Edit_UserProfile = () => {
                             <TextInput 
                                 defaultValue={global.userData.phoneNumber}
                                 placeholder={"9123456789"}
-                                style={{fontSize: 16,}}
+                                style={{fontSize: 16, fontFamily: 'LexendDeca'}}
                                 onChangeText={(val) => {
                                     setEditHasChanges(true)
 
@@ -396,7 +536,7 @@ const Edit_UserProfile = () => {
                         <View style={styles.textInputContainer}>
                             <TextInput 
                                 defaultValue={global.userData.street}
-                                style={{fontSize: 16,}}
+                                style={{fontSize: 16, fontFamily: 'LexendDeca'}}
 
                                 onChangeText={(val) => {
                                     setEditHasChanges(true)
@@ -412,7 +552,7 @@ const Edit_UserProfile = () => {
                         <View style={styles.textInputContainer}>
                             <TextInput 
                                 defaultValue={global.userData.purok}
-                                style={{fontSize: 16,}}
+                                style={{fontSize: 16, fontFamily: 'LexendDeca'}}
 
                                 onChangeText={(val) => {
                                     setEditHasChanges(true)
@@ -431,7 +571,7 @@ const Edit_UserProfile = () => {
                         <TouchableOpacity style={styles.textInputContainer}
                             onPress={()=> setModalVisible(true)}
                         >
-                            <TText style={{marginTop: 5,}}>{ userEditData.barangay ? userEditData.barangay : global.userData.barangay}</TText>
+                            <TText style={{marginTop: 5, fontFamily: 'LexendDeca'}}>{ userEditData.barangay ? userEditData.barangay : global.userData.barangay}</TText>
 
                             <Modal
                             transparent={true}
@@ -487,26 +627,30 @@ const Edit_UserProfile = () => {
                     </View>
                 </View>
 
-                {/* bio */}
-                <View style={styles.rowForm}>
-                    <View style={[styles.blockContainer, {flex: 1}]}>
-                        <TText style={styles.inputLabel}>Bio</TText>
-                        <View style={styles.textInputContainer}>
-                            <TextInput 
-                                defaultValue={'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua'}
-                                style={{fontSize: 16,}}
-                                numberOfLines={3}
-                                multiline
+                {/* work description */}
+                {
+                    global.userData.role === 'worker' ?
+                        <View style={styles.rowForm}>
+                            <View style={[styles.blockContainer, {flex: 1}]}>
+                                <TText style={styles.inputLabel}>Work Description</TText>
+                                <View style={styles.textInputContainer}>
+                                    <TextInput 
+                                        defaultValue={global.userData.workDescription}
+                                        style={{fontSize: 16,}}
+                                        numberOfLines={3}
+                                        multiline
 
-                                onChangeText={(val) => {
-                                    setEditHasChanges(true)
+                                        onChangeText={(val) => {
+                                            setEditHasChanges(true)
 
-                                    setUserEditData((prev) => ({...prev, bio: val}))
-                                }}
-                            />
+                                            setUserEditData((prev) => ({...prev, bio: val}))
+                                        }}
+                                    />
+                                </View>
+                            </View>
                         </View>
-                    </View>
-                </View>
+                    : null
+                }
 
                 {
                     global.userData.role === 'worker' ? 
@@ -526,24 +670,6 @@ const Edit_UserProfile = () => {
                 {
                     global.userData.role === 'worker' ?
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{paddingHorizontal: 20, marginBottom: 30}}>
-                                {/* <TouchableOpacity onPress={() => {}} style={{ width: 200, height: 200, padding: 4, elevation: 4, backgroundColor: '#929292', marginRight: 20, borderWidth: 0.8, borderColor: '#000', }}>
-                                    <TouchableOpacity style={{backgroundColor: '#fff', borderRadius: 20, position: 'absolute', top: 5, right: 5, zIndex: 5}}>
-                                        <Icon name='close-circle' size={28} color={"#FF5353"} />
-                                    </TouchableOpacity>
-                                    <Image source={require("../assets/images/bg-welcome.png")} style={{width: '100%', height: '100%',}} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => {}} style={{ width: 200, height: 200, padding: 4, elevation: 4, backgroundColor: '#929292', marginRight: 20, borderWidth: 0.8, borderColor: '#000', }}>
-                                    <TouchableOpacity style={{backgroundColor: '#fff', borderRadius: 20, position: 'absolute', top: 5, right: 5, zIndex: 5}}>
-                                        <Icon name='close-circle' size={28} color={"#FF5353"} />
-                                    </TouchableOpacity>
-                                    <Image source={require("../assets/images/bg-welcome.png")} style={{width: '100%', height: '100%',}} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => {}} style={{ width: 200, height: 200, padding: 4, elevation: 4, backgroundColor: '#929292', marginRight: 70, borderWidth: 0.8, borderColor: '#000', }}>
-                                    <TouchableOpacity style={{backgroundColor: '#fff', borderRadius: 20, position: 'absolute', top: 5, right: 5, zIndex: 5}}>
-                                        <Icon name='close-circle' size={28} color={"#FF5353"} />
-                                    </TouchableOpacity>
-                                    <Image source={require("../assets/images/bg-welcome.png")} style={{width: '100%', height: '100%',}} />
-                                </TouchableOpacity> */}
 
                                 {
                                     pastAppointmentImages.map(function(image, index){
@@ -567,7 +693,7 @@ const Edit_UserProfile = () => {
                 {/* Works */}
                 {
                     global.userData.role === "worker" ?
-                        <View style={{marginTop: 30, marginBottom: 50, paddingHorizontal: 30}}>
+                        <View style={{marginTop: 30, marginBottom: 150, paddingHorizontal: 30}}>
                             <View style={{flexDirection: 'row', alignContent: 'center',}}>
                                 <Icon name="briefcase" size={22} color={ThemeDefaults.themeDarkBlue} />
                                 <TText style={{fontSize: 18, marginBottom: 10, marginLeft: 5}}>Services Offered</TText>
@@ -601,7 +727,7 @@ const Edit_UserProfile = () => {
                                                 >
                                                     <View style={{flexDirection: 'row', alignContent: 'center', marginTop: 10}}>
                                                         <Icon name='hard-hat' size={22} color={ThemeDefaults.themeOrange} />
-                                                        <TText style={{fontSize: 18, marginLeft: 10}}>{ workItem.sub_category ? workItem.sub_category : ""}</TText>
+                                                        <TText style={{fontSize: 18, marginLeft: 10}}>{ workItem.sub_category ? workItem.sub_category : "Select Work"}</TText>
                                                     </View>
                                                     {/* <TText style={{marginTop: 5,}}>{ workList.service ? "" : workItem.ServiceSubId.ServiceSubCategory}</TText> */}
                                                     <Icon name="arrow-down-drop-circle" size={20} color={"gray"} />
@@ -625,47 +751,53 @@ const Edit_UserProfile = () => {
                                         </View>
 
                                         {/* min max Prices */}
-                                        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20}}>
-                                            <View style={[styles.blockContainer, ]}>
-                                                <TText style={styles.inputLabel}>Minimum Price</TText>
-                                                <View style={[styles.textInputContainer, {marginTop: 5, }]}>
-                                                {/* <TText>{workItem.minPrice}</TText> */}
-                                                    {/* <Icon name="arrow-down-bold" size={22} color={'red'} /> */}
-                                                    <TextInput 
-                                                        defaultValue={ workItem.minPrice ? workItem.minPrice.toString() : ""}
-                                                        style={{fontSize: 18, width: '90%', paddingTop: 3}}
-                                                        keyboardType={"numeric"}
+                                        <View style={{marginTop: 20}}>
+                                            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                                                <View style={[styles.blockContainer, ]}>
+                                                    <TText style={styles.inputLabel}>Minimum Price</TText>
+                                                    <View style={[styles.textInputContainer, {marginTop: 5, }]}>
+                                                    {/* <TText>{workItem.minPrice}</TText> */}
+                                                        {/* <Icon name="arrow-down-bold" size={22} color={'red'} /> */}
+                                                        <TextInput 
+                                                            defaultValue={ workItem.minPrice ? workItem.minPrice.toString() : ""}
+                                                            style={{fontSize: 18, width: '90%', paddingTop: 3}}
+                                                            keyboardType={"numeric"}
+                                                            // onFocus={() => console.log(index)}
+                                                            onChangeText={(val) => {
+                                                                setEditHasChanges(true)
+                                                                handleSetPrice(val, index, "min")
+                                                            }}
+                                                        />
+                                                    </View>
+                                                </View>
 
-                                                        onChangeText={(val) => {
-                                                            setEditHasChanges(true)
-
-                                                            // setUserEditData((prev) => ({...prev, lowestPrice: val}))
-                                                            handleSetPrice(val, index, "min")
-                                                        }}
-                                                    />
+                                                <View style={[styles.blockContainer, ]}>
+                                                    <TText style={styles.inputLabel}>Maximum Price</TText>
+                                                    <View style={[styles.textInputContainer, {marginTop: 5}]}>
+                                                        {/* <TText>{workItem.minPrice}</TText> */}
+                                                        {/* <Icon name="arrow-up-bold" size={22} color={'green'} /> */}
+                                                        <TextInput 
+                                                            defaultValue={ workItem.maxPrice ? workItem.maxPrice.toString() : ""}
+                                                            style={{fontSize: 18, paddingTop: 3, width: '90%'}}
+                                                            // value={workItem.minPrice}
+                                                            keyboardType={"numeric"}
+                                                            // onFocus={() => console.log(index)}
+                                                            onChangeText={(val) => {
+                                                                setEditHasChanges(true)
+                                                                handleSetPrice(val, index, "max")
+                                                            }}
+                                                        />
+                                                    </View>
                                                 </View>
                                             </View>
-
-                                            <View style={[styles.blockContainer, ]}>
-                                                <TText style={styles.inputLabel}>Maximum Price</TText>
-                                                <View style={[styles.textInputContainer, {marginTop: 5}]}>
-                                                {/* <TText>{workItem.minPrice}</TText> */}
-                                                    {/* <Icon name="arrow-up-bold" size={22} color={'green'} /> */}
-                                                    <TextInput 
-                                                        defaultValue={ workItem.maxPrice ? workItem.maxPrice.toString() : ""}
-                                                        style={{fontSize: 18, paddingTop: 3, width: '90%'}}
-                                                        // value={workItem.minPrice}
-                                                        keyboardType={"numeric"}
-
-                                                        onChangeText={(val) => {
-                                                            setEditHasChanges(true)
-
-                                                            // setUserEditData((prev) => ({...prev, highestPrice: val}))
-                                                            handleSetPrice(val, index, "max")
-                                                        }}
-                                                    />
-                                                </View>
-                                            </View>
+                                            
+                                            {
+                                                workItem['hasGreaterMin'] ? 
+                                                    <View style={{marginTop: 10}}>
+                                                        <TText style={{color: ThemeDefaults.appIcon}}>Max Price should be higher than Min Price</TText>
+                                                    </View>
+                                                    : null
+                                            }
                                         </View>
                                     </View>
                                     )

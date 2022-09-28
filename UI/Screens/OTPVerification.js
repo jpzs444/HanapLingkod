@@ -18,7 +18,10 @@ import RnOtpTimer from 'react-native-otp-timer';
 
 export default function OTPVerification({route}, props) {
     const navigation = useNavigation();
-    const {phoneNum, role, user, singleImage, image, isLogin, work, imagelicense, fromWelcome} = route.params;
+    const {phoneNum, role, user, singleImage, image, 
+        isLogin, work, imagelicense, fromWelcome, 
+        fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, workList
+    } = route.params;
 
     // Firebase OTP Verification Code
     const [code, setCode] = useState('');
@@ -93,6 +96,7 @@ export default function OTPVerification({route}, props) {
         )
     }
 
+
     const sendVerification = () => {
         const phoneProvider = new firebase.auth.PhoneAuthProvider();
         phoneProvider
@@ -118,6 +122,9 @@ export default function OTPVerification({route}, props) {
 
             // if authenticated, create the account/login
             console.log('auth successful..');
+
+            global.isPhoneNumVerified = true
+            fromEditUserInfo ? updateUserInformation() : null
 
             // if authentication is successful, continue to the welcome screen
             isLogin ? console.log(" going to home screen") : null
@@ -249,6 +256,7 @@ export default function OTPVerification({route}, props) {
         formData.append("city", user.city);
         formData.append("province", user.province);
         formData.append("phoneNumber", user.phonenumber);
+        formData.append("workDescription", user.workDescription);
         // formData.append("emailAddress", user.email);
         formData.append("GovId", filename);
         // formData.append("Category", work.Category === "unlisted" ? work.Category : "");
@@ -281,6 +289,52 @@ export default function OTPVerification({route}, props) {
         }).catch((er) => {console.log("error: ", er.message)})
       }
 
+    const updateUserInformation = () => {
+
+        // DELETE  Update/Upload Works/Services offered by the Worker
+        for(let i = 0; i < workList.length; i++){
+            fetch("http://" + IPAddress + ":3000/Work/" + workList[i].ServiceSubId.ServiceSubCategory + "/" + workList[i]._id, {
+                method: "DELETE",
+                headers: {
+                    "content-type": "application/json",
+                },
+            }).then((res) => console.log("old work set deleted successfully   ", res.message))
+            .catch((error) => console.log(error.message))
+        }
+
+        // upload pasworks images upload by the worker
+        fetch("http://" + IPAddress + ":3000/prevWorks/" + global.userData._id, {
+            method: "PUT",
+            headers: {
+                "content-type": "multipart/form-data",
+            },
+            body: formDataPastWorks
+        }).then((res) => console.log("successfully uploaded past work images"))
+        .catch((error) => console.log(error.message))
+
+        // upload new and updated set of works
+        fetch("http://" + IPAddress + ":3000/Work", {
+            method: "PUT",
+            headers: {
+                "content-type": "multipart/form-data",
+            },
+            body: formDataSetOfWorks
+        }).then((res) => console.log("successfully uploaded and updated works"))
+        .catch((error) => console.log(error.message))
+
+        // update recruiter and worker profile picture and basic information
+        fetch("http://" + IPAddress + ":3000/" + global.userData.role === 'recruiter' ? "Recruiter/" : "Worker/" + global.userData._id, {
+            method: "PUT",
+            headers: {
+                "content-type": "multipart/form-data",
+            },
+            body: formDataUserInfo,
+        }).then((response) => console.log("successfully updated user basic information"))
+        .catch((error) => console.log(error.message))
+
+        navigation.navigate("UserProfileScreen")
+    }
+
 
   return (
     <SafeAreaView style={styles.container}>        
@@ -298,7 +352,7 @@ export default function OTPVerification({route}, props) {
             <TText style={styles.headerTitle}>Verification</TText>
             {/* header description */}
             <View style={styles.headerDesc}>
-                <TText style={{textAlign: 'center', fontSize: 18, lineHeight: 26}}>Please enter the 6-digit OTP that we have sent to your registered phone number.</TText>
+                <TText style={{textAlign: 'center', fontSize: 18, lineHeight: 26}}>Please enter the 6-digit OTP that we have sent to your registered phone number +63{phoneNum}.</TText>
             </View>
         </View>
 

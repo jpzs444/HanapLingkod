@@ -36,7 +36,7 @@ export default function Appbar(props) {
 
             {/* Back Button */}
             {
-                props.backBtn && !props.accTypeSelect ? 
+                props.backBtn && !props.accTypeSelect && props.registration ? 
                     <TouchableOpacity style={styles.left}
                         onPress={() => { navigation.goBack() }}
                     >
@@ -72,7 +72,7 @@ export default function Appbar(props) {
                     : null
             }
             {
-                props.backBtn && !props.accTypeSelect && !props.otpverificationpage ? 
+                props.backBtn && !props.accTypeSelect && !props.otpverificationpage && !props.registration ? 
                     <TouchableOpacity style={styles.left}
                         onPress={() => {
                             if (props.screenView == 1) navigation.goBack()
@@ -106,7 +106,7 @@ export default function Appbar(props) {
         {/* center | HanapLingkod logo */}
         <View style={styles.center}>
             {
-                props.showLogo ? <Image source={require('../assets/logo/logo_icon.png')} 
+                props.showLogo || props.registration ? <Image source={require('../assets/logo/logo_icon.png')} 
                 style={{width: 40, height: 40}} /> : null
             }
         </View>
@@ -142,7 +142,7 @@ export default function Appbar(props) {
             }
             {
                 props.userProfile &&
-                    <TouchableOpacity onPress={() => { navigation.navigate("EditUserProfileScreen") }}>
+                    <TouchableOpacity onPress={() => { navigation.push("EditUserProfileScreen") }}>
                         <Icon name="cog" size={25} style={styles.userPicture} />
                     </TouchableOpacity>
             }

@@ -62,6 +62,11 @@ export default function Registration({route}) {
     ])
 
     const [isModalVisible, setModalVisible] = useState(false)
+
+    const [isSexModalVisible, setSexModalVisible] = useState(false)
+    const [isBarangayModalVisible, setBarangayModalVisible] = useState(false)
+    const [isSubCatModalVisible, setSubCatModalVisible] = useState(false)
+
     const [isUnlistedModalVisible, setUnlistedModalVisible] = useState(false)
     const [showAddUnlistedServiceModal, setshowAddUnlistedServiceModal] = useState(true)
     const [hasBlanks, sethasBlanks] = useState(false)
@@ -76,11 +81,35 @@ export default function Registration({route}) {
     const [datePickerVisible, setDatePickerVisibility] = useState(false);
     
     const [isUsernameAvailable, setUsernameAvailable] = useState(false)
+    const [isUsernameUnique, setIsUsernameUnique] = useState(false)
+
+    const [gobtnNext, setgobtnNext] = useState(true)
 
     useEffect(() => {
       user.password === confirmPW ? setPWMatch(true) : setPWMatch(false)
     }, [confirmPW, user.password])
 
+    useEffect(() => {
+      setgobtnNext(isUsernameUnique && pwMatch)
+    }, [isUsernameUnique, pwMatch])
+
+    useEffect(() => {
+      console.log(user.username)
+      fetch('http://' + IPAddress + ':3000/isUsernameUnique', {
+        method: "POST",
+        headers: {
+          'accept': 'application/json',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          "username": user.username,
+        }),
+      }).then((response) => response.json())
+      .then((isUnique) => {
+        setIsUsernameUnique(isUnique)
+        console.log(isUnique)
+      }).catch((error) => console.log(error.message))
+    }, [user.username])
 
     // componentdidmount
     // use effect is for back button found on the phone
@@ -117,7 +146,7 @@ export default function Registration({route}) {
       const list = [...services];
       console.log("val handle service: ", val)
 
-      if(val.sub_category === "unlisted"){
+      if(val.sub_category === "unlisted" || val === "unlisted"){
         list[index]['category'] = 'unlisted'
       } else {
         console.log("val: ", val.Category)
@@ -260,6 +289,18 @@ export default function Registration({route}) {
       setModalVisible(bool)
     }
 
+    const changeSubCategoryModalVisibility = (bool) => {
+      setSubCatModalVisible(bool)
+    }
+
+    const changeBarangayModalVisibility = (bool) => {
+      setBarangayModalVisible(bool)
+    }
+
+    const changeSexModalVisibility = (bool) => {
+      setSexModalVisible(bool)
+    }
+
     const changeModalDialogVisibility = (bool) => {
       setShowDialog(bool)
       // setUnlistedModalVisible(bool)
@@ -282,8 +323,21 @@ export default function Registration({route}) {
       console.log(dateString)
     };
 
-    // const handleUsernameAvailable = () => {
-
+    // const handleUsernameAvailable = (val) => {
+    //   fetch('http://' + IPAddress + ':3000/isUsernameUnique', {
+    //     method: "POST",
+    //     headers: {
+    //       'accept': 'application/json',
+    //       'content-type': 'application/json'
+    //     },
+    //     body: JSON.stringify({
+    //       "username": val,
+    //     }),
+    //   }).then((response) => response.json())
+    //   .then((isUnique) => {
+    //     setIsUsernameUnique(isUnique)
+    //   })
+    //   .catch((error) => console.log(error.message))
     // }
 
     // OPEN IMAGE PICKER
@@ -385,7 +439,9 @@ export default function Registration({route}) {
             registration={true} 
             currentRegistrationScreen={nextNum} 
             userType={userType} 
-            screenView={next}  />
+            screenView={next}
+            showLogo={true}  
+          />
 
           {/* Page Header */}
           <View style={styles.header}>
@@ -465,7 +521,7 @@ export default function Registration({route}) {
                       <View style={[styles.inputContainer, {width: '80%', justifyContent: 'space-evenly', paddingHorizontal: 15}]}>
                         <Icon name='briefcase' size={23} color={"#D0CCCB"} />
                         <TouchableOpacity 
-                          onPress={() => changeModalVisibility(true)}
+                          onPress={() => changeSubCategoryModalVisibility(true)}
                           style={{
                             width: '100%', 
                             flexDirection: 'row', 
@@ -486,11 +542,11 @@ export default function Registration({route}) {
                             <Modal
                               transparent={true}
                               animationType='fade'
-                              visible={isModalVisible}
-                              onRequestClose={() => changeModalVisibility(false)}
+                              visible={isSubCatModalVisible}
+                              onRequestClose={() => changeSubCategoryModalVisibility(false)}
                             >
                               <ModalPicker 
-                                changeModalVisibility={changeModalVisibility}
+                                changeModalVisibility={changeSubCategoryModalVisibility}
                                 setData={(val) => handleServiceSelect(val, index)}
                                 services={true}
                               />
@@ -553,7 +609,7 @@ export default function Registration({route}) {
                   
                       {
                         services.length - 1 === index &&
-                          <View style={{alignItems: 'center', marginTop: 150}}>
+                          <View style={{alignItems: 'center', marginTop: 50}}>
                           <TouchableOpacity style={{width: 60, height: 60, borderRadius: 30, backgroundColor: '#595959', alignItems: 'center', justifyContent: 'center' ,marginBottom: 15}}
                             onPress={() => {
                               handleServiceAdd()
@@ -571,8 +627,16 @@ export default function Registration({route}) {
                 
                 {
                   !hasBlanks ? 
-                  <View style={{marginTop: '8%', marginBottom: '0%'}}>
-                    <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{ !hasBlanks ? "* Please fill in the required fields." : null}</TText>
+                  <View style={{marginTop: 20, alignItems: 'center'}}>
+                    {
+                      !hasBlanks ?
+                        <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>* Please fill in the required fields</TText> : null
+                    }
+                    {
+                      !pwMatch || !user.password ?
+                        <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>* Passwords does not match</TText> : null
+
+                    }
                     <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{ !pwMatch ? "* Passwords does not match" : null}</TText>
                   </View> : null
                 }
@@ -754,7 +818,7 @@ export default function Registration({route}) {
                   <View style={[styles.inputContainer, {width: '48%'}]}>
                     <Icon name='domain' size={23}color={"#D0CCCB"} />
                     <TouchableOpacity 
-                      onPress={() => changeModalVisibility(true)}
+                      onPress={() => changeBarangayModalVisibility(true)}
                       style={{
                         width: '85%', 
                         flexDirection: 'row', 
@@ -775,11 +839,11 @@ export default function Registration({route}) {
                         <Modal
                           transparent={true}
                           animationType='fade'
-                          visible={isModalVisible}
-                          onRequestClose={() => changeModalVisibility(false)}
+                          visible={isBarangayModalVisible}
+                          onRequestClose={() => changeBarangayModalVisibility(false)}
                         >
                           <ModalPicker 
-                            changeModalVisibility={changeModalVisibility}
+                            changeModalVisibility={changeBarangayModalVisibility}
                             setData={setBarangay}
                             barangay={true}
                           />
@@ -852,7 +916,7 @@ export default function Registration({route}) {
                     ref={ref_ln} />
                 </View>
 
-                <View style={{width: '80%', marginTop: 10}}>
+                <View style={{width: '100%', marginTop: 10}}>
                   <TText style={{fontSize: 18}}>Government Issued ID(s):</TText>
                   <TouchableOpacity 
                     onPress={
@@ -968,10 +1032,10 @@ export default function Registration({route}) {
           }
           {
             next == 1 ?
-            <View>
+            <View style={{}}>
             <View style={styles.inputGrp}>
               {/* Username input */}
-              <View style={[styles.inputContainer, {marginBottom: !isUsernameAvailable ? 18 : 5}]}>
+              <View style={[styles.inputContainer, {marginBottom: isUsernameUnique ? 16 : 5}]}>
                 <Icon name='account-circle' size={23} color={"#D0CCCB"} />
                 <TextInput style={styles.input} 
                   autoCapitalize={'none'}
@@ -983,16 +1047,16 @@ export default function Registration({route}) {
                   onChangeText={ (val) => {
                     setUser((prev) => ({...prev, username: val}))
                     // username availability checker
-                    // handleUsernameAvailable()
+                    // handleUsernameAvailable(val)
                     haveBlanks()
                     } }
                   onSubmitEditing={ () => ref_pw.current.focus() } />
               </View>
               {
-                !isUsernameAvailable ? null : 
-                <View style={{ alignSelf: 'flex-start', marginLeft: '10%',}}>
-                  <TText style={{color: ThemeDefaults.appIcon, fontSize: 14}}>Username already taken. Try again</TText>
-                </View>
+                isUsernameUnique ? null : 
+                  <View style={{ alignSelf: 'flex-start', marginLeft: 0, marginBottom: 5}}>
+                    <TText style={{color: ThemeDefaults.appIcon, fontSize: 14}}>Username already taken. Try again</TText>
+                  </View>
               }
               
               {/* Password input */}
@@ -1032,7 +1096,7 @@ export default function Registration({route}) {
                   onSubmitEditing={ () => ref_fn.current.focus() }
                   ref={ref_cpw} />
               </View>
-                <View style={{marginBottom: 0, width: '100%', paddingHorizontal: '10%' }}>
+                <View style={{marginTop: pwMatch ? 0 : 5, marginBottom: pwMatch ? 0 : 5, width: '100%', }}>
                   <TText style={{fontSize: 14, color: ThemeDefaults.appIcon, opacity: pwMatch ? 0 : 1}}>Password does not match</TText>
                 </View>
 
@@ -1147,10 +1211,9 @@ export default function Registration({route}) {
                 </View>
 
                 {/* Sex Select */}
-                <TouchableOpacity style={styles.sexView} onPress={() => changeModalVisibility(true)}>
+                <TouchableOpacity style={styles.sexView} onPress={() => changeSexModalVisibility(true)}>
                   <Icon name='gender-male-female' size={15} color={"#D0CCCB"} /> 
-                    <TouchableOpacity 
-                      // onPress={() => changeModalVisibility(true)}
+                    <View 
                       style={{
                         width: '85%', 
                         flexDirection: 'row', 
@@ -1159,7 +1222,7 @@ export default function Registration({route}) {
                         paddingTop: 8,
                         paddingBottom: 10,
                       }}>
-                      <TouchableOpacity 
+                      <View 
                         styles={styles.dropdownBtn}
                       >
                       {
@@ -1167,21 +1230,21 @@ export default function Registration({route}) {
                         <TText style={styles.ddText} >{chooseData}</TText>
                         : <TText style={[styles.ddText, {color:"#A1A1A1"}]}>Sex</TText>
                       }
-                      </TouchableOpacity>
+                      </View>
                       <Modal
                         transparent={true}
                         animationType='fade'
-                        visible={isModalVisible}
-                        onRequestClose={() => changeModalVisibility(false)}
+                        visible={isSexModalVisible}
+                        onRequestClose={() => changeSexModalVisibility(false)}
                       >
                         <ModalPicker 
-                          changeModalVisibility={changeModalVisibility}
+                          changeModalVisibility={changeSexModalVisibility}
                           setData={setData}
                           sex={true}
                         />
                       </Modal>
                       <Icon name="arrow-down-drop-circle" size={20} color={"#D0CCCB"} style={{paddingRight: 6}} />
-                    </TouchableOpacity>
+                    </View>
                 </TouchableOpacity>
               </View>
             </View>
@@ -1189,6 +1252,7 @@ export default function Registration({route}) {
             {/* Next page button */}
             <View style={styles.btnContainer}>
               <TouchableOpacity
+                disabled={!gobtnNext}
                 style={styles.nextBtn}
                 onPress={()=> { 
                   setNext((current) => current + 1)
@@ -1199,7 +1263,8 @@ export default function Registration({route}) {
                 <Icon name="arrow-right-thin" size={30} color='white' />
               </TouchableOpacity>
             </View>
-          </View> : null
+          </View> 
+          : null
           }
         </ScrollView>
       </SafeAreaView>
@@ -1233,13 +1298,14 @@ const styles = StyleSheet.create({
     },
     inputGrp: {
       alignItems: 'center',
+      marginHorizontal: 40,
     },
     inputContainer: {
       flexDirection: 'row',
       alignItems: 'center',
       borderBottomWidth: 1,
       padding: 7,
-      width: '80%',
+      width: '100%',
       marginBottom: 20
     },
     inputContainerBottom: {
@@ -1247,7 +1313,7 @@ const styles = StyleSheet.create({
       alignItems: 'flex-end',
       justifyContent: 'space-between',
       // padding: 7,
-      width: '80%',
+      width: '100%',
       // marginBottom: 18
     },
     bdView: {
@@ -1331,11 +1397,11 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'flex-end',
       justifyContent: 'space-between',
-      width: '80%'
+      width: '100%'
     },
     confirm: {
       alignItems: 'center',
-      marginTop: 30,
+      marginTop: 10,
       marginBottom: 130,
     },
     confirmBtn: {
