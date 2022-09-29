@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const bcrypt = require("bcrypt");
+const fs = require("fs");
 
 //models
 const Worker = require("./Models/Workers");
@@ -64,6 +65,21 @@ const multipleFile = upload.fields([
 //   "HanapLingkod",
 //   "ang jologs ko sorry, i will be better"
 // );
+
+app.get("/images/:filename", async function (req, res) {
+  let path = "./Public/Uploads/" + req.params.filename;
+  console.log(path);
+  try {
+    if (fs.existsSync(path)) {
+      res.download(path);
+    } else {
+      res.send("Image Does Not Exist");
+      console.log("Image Does Not Exist");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});
 
 app.get("/search", async function (req, res) {
   let keyword = req.query.keyword;
