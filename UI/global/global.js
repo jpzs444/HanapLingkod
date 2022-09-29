@@ -1,5 +1,7 @@
-export const IPAddress = "192.168.1.4"
+export const IPAddress = "192.168.68.131"
 
 global.userData = {};
 global.deviceExpoPushToken = "";
 global.notificationCount=0;
+global.isPhoneNumVerified = false
+global.userProfilePic = ""

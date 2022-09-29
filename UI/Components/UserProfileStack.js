@@ -3,6 +3,7 @@ import UserProfile from '../Screens/UserProfile';
 import Home from '../Screens/Home';
 import Edit_UserProfile from '../Screens/Edit_UserProfile';
 import ViewImage from './ViewImage';
+import OTPVerification from '../Screens/OTPVerification';
 
 const UserProfileStacks = createNativeStackNavigator();
 
@@ -14,6 +15,7 @@ export default function UserProfileStack () {
           <UserProfileStacks.Screen name="UserProfileScreen" component={UserProfile} />
           <UserProfileStacks.Screen name="EditUserProfileScreen" component={Edit_UserProfile} />
           <UserProfileStacks.Screen name="ViewImageScreen" component={ViewImage} />
+          <UserProfileStacks.Screen name="OTPVScreen" component={OTPVerification} />
       </UserProfileStacks.Navigator>
     )
 }

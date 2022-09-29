@@ -27,6 +27,11 @@ const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
 
+    let nc = global.notificationCount
+    useEffect(() => {
+        setNotificationCount(global.notificationCount)
+    }, [notificationCount])
+
   const [notificationCount, setNotificationCount] = useState(0)
   useEffect(() => {
     fetch("http://" + IPAddress + ":300/notification/:" + devicePushToken, {

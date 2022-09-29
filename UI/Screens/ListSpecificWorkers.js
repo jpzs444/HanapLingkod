@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions, View, SafeAreaView, ActivityIndicator, Image, StatusBar, TouchableOpacity } from 'react-native'
+import { StyleSheet, Dimensions, View, Text, SafeAreaView, ActivityIndicator, Image, StatusBar, TouchableOpacity } from 'react-native'
 import React, {useEffect, useState} from 'react'
 import Appbar from '../Components/Appbar'
 import { IPAddress } from '../global/global'
@@ -58,7 +58,7 @@ const ListSpecificWorkers = ({route}) => {
             )}
             // showsVerticalScrollIndicator={false}
             renderItem={({item}) => (
-                <View style={{width: WIDTH, paddingHorizontal: 30}}>
+                <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
                     <TouchableOpacity style={styles.button}>
                         <View style={styles.buttonView}>
                             {/* Profile Picture */}
@@ -80,12 +80,12 @@ const ListSpecificWorkers = ({route}) => {
                                     </View>
                                     <View style={styles.workerAddressBox}>
                                         <Icon name='map-marker' size={16} />
-                                        <TText style={styles.workerAddressText}>{item.workerId.street}, {item.workerId.purok}, {item.workerId.barangay}</TText>
+                                        <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.workerId.street}, {item.workerId.purok}, {item.workerId.barangay}</Text>
                                     </View>
                                 </View>
                                 <View style={styles.descriptionBottom}>
-                                    <TText style={styles.serviceFeeText}>Service Fee: </TText>
-                                    <TText style={styles.serviceFeePrice}>₱{item.minPrice}  to  ₱{item.maxPrice}</TText>
+                                    <TText style={styles.serviceFeeText}>Service Fee:</TText>
+                                    <TText style={styles.serviceFeePrice}>₱{item.minPrice} to ₱{item.maxPrice}</TText>
                                 </View>
                             </View>
                         </View>
@@ -129,6 +129,7 @@ const styles = StyleSheet.create({
     },
     buttonView: {
         // marginHorizontal: 30,
+        width: '100%',
         flexDirection: 'row',
     },
     button: {
@@ -142,26 +143,29 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     imageContainer: {
-        width: 115,
-        height: 115,
+        flex: 1,
+        maxWidth: 110,
+        maxHeight: 115,
     },
     image: {
         width: '100%',
         height: '100%'
     },
     descriptionBox: {
+        flex: 1.9,
         padding: 12,
         width: '100%',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
     },
     descriptionTop: {
-        width: '75%',
+        width: '100%',
+        justifyContent: 'space-between',
     },
     row: {
 
     },
     workerInfo: {
-        width: '70%',
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -171,12 +175,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     workerNameText: {
-        fontSize: 20,
-        marginBottom: 3
+        fontSize: 18,
+        marginBottom: 3,
     },
     workerRatingsHolder: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center'
     },
     workerRatings: {
         marginLeft: 3
@@ -184,10 +189,13 @@ const styles = StyleSheet.create({
     workerAddressBox: {
         flexDirection: 'row',
         alignItems: 'center',
+        width: '90%',
     },
     workerAddressText: {
+        fontFamily: 'LexendDeca',
         fontSize: 14,
-        marginLeft: 3
+        marginLeft: 3,
+        width: '100%',
     },
     descriptionBottom: {
         width: '100%',

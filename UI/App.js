@@ -63,7 +63,7 @@ export default function App() {
             'content-type': 'application/json',
           }
         }).then(() => console.log("all notification read"))
-        .catch((error) => console.log("error: ", error.message))
+        .catch((error) => console.log("notification app js error: ", error.message))
 
         // go to request/booking page
         // fetch(/request/id || /booking/id)

@@ -9,23 +9,52 @@ import { IPAddress } from '../global/global';
 import ViewImage from '../Components/ViewImage';
 import { useNavigation } from '@react-navigation/native';
 
+// import * as pp from '../../Server/Public/Uploads'
+
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
 const UserProfile = ({route}) => {
 
     // const {profile_id} = route.params;
+    // console.log(pp.global.userData.profilePic)
+    console.log(global.userData._id)
 
     const navigation = useNavigation()
 
     const [workList, setWorkList] = useState([])
     const [activeTab, setActiveTab] = useState('works')
+    const [rerender, setRerender] = useState(false)
 
     let workerID = global.userData._id
+    // console.log(global.userData.profilePic)
+    // let iii = "../../Server/Public/Uploads/"
+    // let uu = iii.concat('', global.userData.profilePic)
+    // let sourceImage = require(''.concat(iii, global.userData.profilePic))
+    // let profilePicSource = require(sourceImage)
     // console.log(global.userData._id)
+
+
+    useEffect(() => {
+        let workerRoute = "http://" + IPAddress + ":3000/Worker/" + global.userData._id
+        let route = global.userData.role === "worker" ? "http://" + IPAddress + ":3000/Worker/" + global.userData._id : "http://" + IPAddress + ":3000/Recruiter/" + global.userData._id
+        fetch("http://" + IPAddress + ":3000/Worker/" + global.userData._id, {
+            method: "GET",
+            header: {
+                "conten-type": "application/json"
+            },
+        }).then((res) => res.json())
+        .then((user) => {
+            // console.log("user new load: ", user)
+            global.userData = user
+        })
+        .catch((error) => console.log(error.message))
+        setRerender(!rerender)
+    }, [])
 
     // fetch data if role of user is worker
     useEffect(() => {
+        setWorkList([])
         fetch("http://" + IPAddress + ":3000/WorkList/" + global.userData._id, {
             method: 'GET',
             headers: {
@@ -34,7 +63,9 @@ const UserProfile = ({route}) => {
         }).then((res) => res.json())
         .then((data) => {
             setWorkList([...data])
+            // console.log("new work list: ", data)
         }).catch((error) => console.log("workList fetch: ", error.message))
+
     }, [])
 
     const viewImage = () => {
@@ -47,6 +78,8 @@ const UserProfile = ({route}) => {
             </View>
         )
     }
+    
+    const imagestock = "happy-easter-concept-preparation-holiday-600w-2140482091.jpg"
 
   return (
     <SafeAreaView style={styles.container}>
@@ -58,7 +91,7 @@ const UserProfile = ({route}) => {
             <View>
                 {/* Profile Picture */}
                 <View style={{alignItems: 'center', width: '100%', marginTop: 20}}>
-                    <Image source={require("../assets/images/bg-welcome.png")} style={{width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: 'black'}} />
+                    <Image source={ global.userData.profilePic ?  {uri: "https://scontent.fceb2-2.fna.fbcdn.net/v/t39.30808-6/298825458_7726452997429494_7928239349716663798_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=hP4U0j9HpdoAX-Lp4OI&_nc_ht=scontent.fceb2-2.fna&oh=00_AT-t6cv81R8U8CRapXx98dz77XF0QqL7UszBi_UYcvjljg&oe=6335DFC0" } : require("../assets/images/bg-welcome.png")} style={{width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: 'black'}} />
                     {/* Name and role of User */}
                     <View style={{marginTop: 18, marginBottom: 26, alignItems: 'center'}}>
                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -112,10 +145,12 @@ const UserProfile = ({route}) => {
             }
 
             {
-                global.userData.role === 'recruiter' || activeTab === 'works' ?
-                    <View style={{marginTop: 25, marginBottom: global.userData.role === 'worker' ? 0 : 50, padding: 18, backgroundColor: '#fff', borderRadius: 10, elevation: 2, marginHorizontal: 30,}}>
+                global.userData.role === 'worker' && activeTab === 'works' ?
+                    <View style={{width: '100%', paddingHorizontal: 30}}>
+                    <View style={{ marginTop: 25, marginBottom: global.userData.role === 'worker' ? 0 : 50, padding: 18, backgroundColor: '#fff', borderRadius: 10, elevation: 2, marginHorizontal: 8,}}>
                         <TText style={{fontFamily: "LexendDeca_Medium", fontSize: 18, marginBottom: 8}}>{global.userData.firstname}'s bio</TText>
-                        <TText style={{fontSize:14}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</TText>
+                        <TText style={{fontSize:14}}>{global.userData.workDescription}</TText>
+                    </View>
                     </View>
                     : null
             }
@@ -218,7 +253,7 @@ const UserProfile = ({route}) => {
                                     </TouchableOpacity>
                                     
                                 </View>
-                                <TText style={{marginTop: 40, textAlign: 'center', color: 'gray'}}>Ratings and reviews is not yet available</TText>
+                                <TText style={{marginTop: 40, textAlign: 'center', color: 'lightgray'}}>Ratings and reviews is not yet available</TText>
                             </View>
                         }
                     </View>
@@ -269,7 +304,7 @@ const UserProfile = ({route}) => {
             {/* Ratings and Reviews/Feedbacks */}
             {
                 global.userData.role === 'recruiter' ?
-                    <TText>Ratings and Reviews will be available soon</TText>
+                    <TText style={{color:'lightgray'}}>Ratings and Reviews will be available soon</TText>
                     : null
             }
         </View>
