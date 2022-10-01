@@ -584,7 +584,7 @@ const Edit_UserProfile = () => {
                 <View style={styles.picturePlaceholder}>
                     <View style={{alignItems: 'center'}}>
 
-                        <Image source={profilePicture ? {uri: profilePicture} : global.userData.profilePic !== "" ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/default-profile.jpg")} style={styles.profilePicture} />
+                        <Image source={profilePicture ? {uri: profilePicture} : global.userData.profilePic !== "pic" ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/default-profile.png")} style={styles.profilePicture} />
                                 
                         <TouchableOpacity style={{position:'absolute', bottom: -5, right: 20, backgroundColor: '#fff', borderRadius: 20}}
                             onPress={()=> pickImage()}

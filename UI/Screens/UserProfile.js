@@ -161,12 +161,9 @@ const UserProfile = ({route}) => {
             <View>
                 {/* Profile Picture */}
                 <View style={{alignItems: 'center', width: '100%', marginTop: 20}}>
-                    {
-                        global.userData.profilePic !== "" ?
-                            <Image source={global.userData.profilePic !== null ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/default-profile.jpg")} style={styles.profilePicture} />
-                            :
-                            <Image source={ !global.userData.profilePic === "" ? null : require("../assets/images/default-profile.jpg")} style={[styles.profilePicture, {backgroundColor: 'pink'}]} />
-                    }
+               
+                    <Image source={global.userData.profilePic !== 'pic' ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/default-profile.png")} style={styles.profilePicture} />
+                        
                     {/* <Image source={ global.userData.profilePic ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/bg-welcome.png")} style={{width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: 'black'}} /> */}
                     {/* Name and role of User */}
                     <View style={{marginTop: 18, marginBottom: 26, alignItems: 'center'}}>

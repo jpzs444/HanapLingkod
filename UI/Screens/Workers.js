@@ -17,10 +17,10 @@ const Workers = () => {
   const [listOfWorkers, setListOfWorkers] = useState([])
   const [workerByCategory, setWorkerByCategory] = useState([])
 
-  const [barangayFilter, setBarangayFilter] = useState("")
-  const [verifiedFilter, setVerifiedFilter] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState("")
-  const [ratingFilter, setRatingFilter] = useState("")
+  const [barangayFilter, setBarangayFilter] = useState("all")
+  const [verifiedFilter, setVerifiedFilter] = useState("all")
+  const [categoryFilter, setCategoryFilter] = useState("all")
+  const [ratingFilter, setRatingFilter] = useState("all")
 
   const [barangayViewModal, setBarangayViewModal] = useState(false)
   const [verifiedViewModal, setVerifiedViewModal] = useState(false)
@@ -35,23 +35,8 @@ const Workers = () => {
     setRatingViewModal(bool)
   }
 
+  const firstUpdate = useRef(true)
 
-    const firstUpdate = useRef(true)
-    // useEffect(() => {
-    //     console.log(categoryFilter.ServiceSubCategory)
-    //         fetch("http://" + IPAddress + ":3000/Work/" + categoryFilter.ServiceSubCategory, {
-    //         method: "GET",
-    //         headers: {
-    //             'content-type': 'application/json',
-    //         },
-    //         })
-    //         .then((res) => res.json())
-    //         .then((data) => {
-    //             setListOfWorkers(data)
-    //             console.log(data)
-    //         }).catch((err) => console.log(err.message))
-        
-    // }, [categoryFilter])
 
     useEffect(() => {
         getAllWorkers()
@@ -66,11 +51,11 @@ const Workers = () => {
         }).then((response) => response.json())
         .then((data) => {
             setListOfWorkers([...data])
-            // console.log("list of workers: ", data)
+            console.log("list of workers: ", data)
         })
     }
 
-    // if(categoryFilter){
+    // if(categoryFilter !== 'all'){
     //     fetch("http://" + IPAddress + ":3000/Work/" + categoryFilter.ServiceSubCategory, {
     //         method: "GET",
     //         headers: {
@@ -108,12 +93,180 @@ const Workers = () => {
         setHasFilter(barangayFilter || verifiedFilter || categoryFilter || ratingFilter)
     },[barangayFilter, verifiedFilter, categoryFilter, ratingFilter])
 
+    const filterCategoryList = (fil) => {
+        let list = [...listOfWorkers]
+        let temp = []
+        fetch("http://" + IPAddress + ":3000/Work/" + fil, {
+            method: "GET",
+            headers: {
+                'content-type': 'application/json',
+            },
+        }).then((res) => res.json())
+        .then((data) => {
+            // list = [...data]
+            // setWorkerByCategory([...data])
+            // console.log(data)
+
+            // list.filter(function(item){
+            //     if(item.workerId._id === list._id) temp.push(item)
+            // })
+
+            console.log("list", data)
+        })
+    }
+
+    const filterBarangayList = (fil) => {
+        getAllWorkers()
+        let list = [...listOfWorkers]
+        let temp = []
+
+        console.log('listbefore: ', list)
+        list.map(function(item){
+            // console.log('item includes: ', item.works.includes(fil))
+            
+            if(item.barangay === fil) temp.push(item)
+        })
+
+        console.log("filtered: ", temp)
+        setListOfWorkers([...temp])
+    }
+
+    const filterVerifiedList = (fil) => {
+        getAllWorkers()
+        let list = [...listOfWorkers]
+        let temp = []
+
+        list.map(function(item){
+            // console.log(fil)
+            console.log(!(Number(item.verification) - Number(fil)))
+            if(!(Number(item.verification) - Number(fil))) temp.push(item)
+        })
+        setListOfWorkers([...temp])
+    }
+
+    const ListHeaderComponent = () => {
+        return(
+            <>
+                <Appbar hasPicture={true} backBtn={true} accTypeSelect={true} showLogo={true} />
+                <View style={styles.header}>
+                    <TText style={styles.headerTitle}>Workers</TText>
+                </View>
+                <View style={styles.filterContainer}>
+                    <View style={styles.filterBox}>
+                        <TouchableOpacity style={styles.filterBtn}
+                            onPress={() => setVerifiedViewModal(true)}
+                        >
+                            <TText style={styles.filterText}>{verifiedFilter ? verifiedFilter :"All"}</TText>
+                            <Icon name="chevron-down" size={20} />
+
+                            <Modal
+                                transparent={true}
+                                animationType='fade'
+                                visible={verifiedViewModal}
+                                onRequestClose={() => setVerifiedViewModal(false)}
+                            >
+                                <ModalPicker 
+                                    changeModalVisibility={changeModalVisibility}
+                                    setData={(filter) => {
+                                        setVerifiedFilter(filter)
+                                        
+                                        // filterVerifiedList(filter === "Verified" ? true : false)
+                                    }}
+                                    verifiedFilter={true}
+                                />
+                            </Modal>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.filterBtn}
+                            onPress={() => {
+                                setBarangayViewModal(true)
+                            }}
+                        >
+                            <TText style={styles.filterText}>{barangayFilter ? barangayFilter : "Barangay"}</TText>
+                            <Icon name="chevron-down" size={20} />
+
+                            <Modal
+                                transparent={true}
+                                animationType='fade'
+                                visible={barangayViewModal}
+                                onRequestClose={() => setBarangayViewModal(false)}
+                            >
+                                <ModalPicker 
+                                    changeModalVisibility={changeModalVisibility}
+                                    setData={(filter) => {
+                                        setBarangayFilter("")
+                                        setBarangayFilter(filter)
+                                        filterBarangayList(filter)
+                                    }}
+                                    barangay={true}
+                                />
+                            </Modal>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.filterBtn}
+                            onPress={() => setCategoryViewModal(true)}
+                        >
+                            <TText style={styles.filterText}>{categoryFilter ? categoryFilter.ServiceSubCategory : "Category"}</TText>
+                            <Icon name="chevron-down" size={20} />
+
+                            <Modal
+                                transparent={true}
+                                animationType='fade'
+                                visible={categoryViewModal}
+                                onRequestClose={() => setCategoryViewModal(false)}
+                            >
+                                <ModalPicker 
+                                    changeModalVisibility={changeModalVisibility}
+                                    setData={(filter) => {
+                                        setCategoryFilter(filter)
+                                        // filterCategoryList(filter.ServiceSubCategory)
+                                    }}
+                                    categoryFilter={true}
+                                />
+                            </Modal>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.filterBtn}
+                            onPress={() => setRatingViewModal(true)}
+                        >
+                            <TText style={styles.filterText}>{ ratingFilter ? ratingFilter : "Rating"}</TText>
+                            <Icon name="chevron-down" size={20} />
+
+                            <Modal
+                                transparent={true}
+                                animationType='fade'
+                                visible={ratingViewModal}
+                                onRequestClose={() => setRatingViewModal(false)}
+                            >
+                                <ModalPicker 
+                                    changeModalVisibility={changeModalVisibility}
+                                    setData={(filter) => setRatingFilter(filter)}
+                                    ratingFilter={true}
+                                />
+                            </Modal>
+                        </TouchableOpacity>
+                    </View>
+
+                    {
+                        hasFilter ? 
+                        <View style={styles.resetFilterContainer}>
+                            <TouchableOpacity style={styles.resetFilterBtn} 
+                                onPress={() => handleResetFilter()}
+                            >
+                                <Icon name='close-circle' size={20} />
+                                <TText style={styles.resetFilterTxt}>Reset Filter</TText>
+                            </TouchableOpacity>
+                        </View>
+                        : null
+                    }
+                </View>
+            </>
+        )
+    }
 
   const handleResetFilter = () => {
     setBarangayFilter("")
     setVerifiedFilter("")
     setCategoryFilter("")
     setRatingFilter("")
+    getAllWorkers()
   }
 
   return (
@@ -131,131 +284,28 @@ const Workers = () => {
                         estimatedItemSize={100}
                         showsVerticalScrollIndicator={false}
                         ListHeaderComponent={() => (
-                            <>
-                                <Appbar hasPicture={true} backBtn={true} accTypeSelect={true} showLogo={true} />
-                                <View style={styles.header}>
-                                    <TText style={styles.headerTitle}>Workers</TText>
-                                </View>
-                                <View style={styles.filterContainer}>
-                                    <View style={styles.filterBox}>
-                                        <TouchableOpacity style={styles.filterBtn}
-                                            onPress={() => setVerifiedViewModal(true)}
-                                        >
-                                            <TText style={styles.filterText}>{verifiedFilter ? verifiedFilter :"All"}</TText>
-                                            <Icon name="chevron-down" size={20} />
-
-                                            <Modal
-                                                transparent={true}
-                                                animationType='fade'
-                                                visible={verifiedViewModal}
-                                                onRequestClose={() => setVerifiedViewModal(false)}
-                                            >
-                                                <ModalPicker 
-                                                    changeModalVisibility={changeModalVisibility}
-                                                    setData={(filter) => setVerifiedFilter(filter)}
-                                                    verifiedFilter={true}
-                                                />
-                                            </Modal>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.filterBtn}
-                                            onPress={() => {
-                                                setBarangayViewModal(true)
-                                            }}
-                                        >
-                                            <TText style={styles.filterText}>{barangayFilter ? barangayFilter : "Barangay"}</TText>
-                                            <Icon name="chevron-down" size={20} />
-
-                                            <Modal
-                                                transparent={true}
-                                                animationType='fade'
-                                                visible={barangayViewModal}
-                                                onRequestClose={() => setBarangayViewModal(false)}
-                                            >
-                                                <ModalPicker 
-                                                    changeModalVisibility={changeModalVisibility}
-                                                    setData={(filter) => setBarangayFilter(filter)}
-                                                    barangay={true}
-                                                />
-                                            </Modal>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.filterBtn}
-                                            onPress={() => setCategoryViewModal(true)}
-                                        >
-                                            <TText style={styles.filterText}>{categoryFilter ? categoryFilter.ServiceSubCategory : "Category"}</TText>
-                                            <Icon name="chevron-down" size={20} />
-
-                                            <Modal
-                                                transparent={true}
-                                                animationType='fade'
-                                                visible={categoryViewModal}
-                                                onRequestClose={() => setCategoryViewModal(false)}
-                                            >
-                                                <ModalPicker 
-                                                    changeModalVisibility={changeModalVisibility}
-                                                    setData={(filter) => setCategoryFilter(filter)}
-                                                    categoryFilter={true}
-                                                />
-                                            </Modal>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={styles.filterBtn}
-                                            onPress={() => setRatingViewModal(true)}
-                                        >
-                                            <TText style={styles.filterText}>{ ratingFilter ? ratingFilter : "Rating"}</TText>
-                                            <Icon name="chevron-down" size={20} />
-
-                                            <Modal
-                                                transparent={true}
-                                                animationType='fade'
-                                                visible={ratingViewModal}
-                                                onRequestClose={() => setRatingViewModal(false)}
-                                            >
-                                                <ModalPicker 
-                                                    changeModalVisibility={changeModalVisibility}
-                                                    setData={(filter) => setRatingFilter(filter)}
-                                                    ratingFilter={true}
-                                                />
-                                            </Modal>
-                                        </TouchableOpacity>
-                                    </View>
-
-                                    {
-                                        hasFilter ? 
-                                        <View style={styles.resetFilterContainer}>
-                                            <TouchableOpacity style={styles.resetFilterBtn} 
-                                                onPress={() => handleResetFilter()}
-                                            >
-                                                <Icon name='close-circle' size={20} />
-                                                <TText style={styles.resetFilterTxt}>Reset Filter</TText>
-                                            </TouchableOpacity>
-                                        </View>
-                                        : null
-                                    }
-                                </View>
-                            </>
+                            <ListHeaderComponent />
                         )}
                         ListFooterComponent={() => (
                             <View style={{height: 200}}></View>
                         )}
                         renderItem={({item}) => (
-                            
+                            <>
+                            {
+                                item.verification === verifiedFilter || item.barangay === barangayFilter || item.works.includes(categoryFilter.ServiceSubCategory) || !hasFilter ?
                             <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
                                 <TouchableOpacity style={styles.button}>
                                     <View style={styles.buttonView}>
                                         {/* Profile Picture */}
                                         <View style={styles.imageContainer}>
-                                            <Image source={require("../assets/images/plumbing.jpg")} style={styles.image} />
+                                            <Image source={item.profilePic === "pic" ? require("../assets/images/default-profile.png") : {uri: `http://${IPAddress}:3000/images/${item.profilePic}`}} style={styles.image} />
                                         </View>
                                         {/* Worker Information */}
                                         <View style={styles.descriptionBox}>
                                             <View style={styles.descriptionTop}>
                                                 <View style={[styles.row, styles.workerInfo]}>
                                                     <View style={styles.workerNameHolder}>
-                                                        {
-                                                            categoryFilter ? 
-                                                            <TText style={styles.workerNameText}>{item.workerId.firstname}{item.workerId.middlename === "undefined" ? "" : item.workerId.middlename} {item.workerId.lastname}</TText>
-                                                            :
-                                                            <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
-                                                        }
+                                                        <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
                                                         { !item.verification || !item.workerId.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
                                                     </View>
                                                     <View style={styles.workerRatingsHolder}>
@@ -265,17 +315,10 @@ const Workers = () => {
                                                 </View>
                                                 <View style={styles.workerAddressBox}>
                                                     <Icon name='map-marker' size={16} />
-                                                    {
-                                                        categoryFilter ?
-                                                            <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.workerId.street}, {item.workerId.purok}, {item.workerId.barangay}</Text>
-                                                            :
-                                                            <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
-                                                    }
+                                                    <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
                                                 </View>
                                             </View>
-                                            {
-                                                !categoryFilter ? 
-                                                <View style={styles.descriptionBottom}>
+                                            <View style={styles.descriptionBottom}>
                                                     <View style={[styles.serviceFeeText]}> 
                                                         <Text numberOfLines={1} ellipsizeMode='tail' style={{fontSize: 13, width: '100%'}}>Services:
                                                         {
@@ -288,12 +331,12 @@ const Workers = () => {
                                                         </Text>
                                                     </View>
                                                 </View>
-                                                : null
-                                            }
                                         </View>
                                     </View>
                                 </TouchableOpacity>
                             </View>
+                            : null}
+                            </>
                         )}
                     />
                 </View>
