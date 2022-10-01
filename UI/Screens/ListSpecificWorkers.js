@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
 
 import { FlashList } from '@shopify/flash-list'
+import { FlatList } from 'react-native-gesture-handler'
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -29,6 +30,7 @@ const ListSpecificWorkers = ({route}) => {
         }).then((res) => res.json())
         .then((data) => {
             setWorkers([...data])
+            console.log(data)
         }).catch((err) => console.log("error: ", err.message))
     }, [])
 
@@ -43,7 +45,7 @@ const ListSpecificWorkers = ({route}) => {
     <Appbar hasPicture={true} backBtn={true} accTypeSelect={true} showLogo={true} />
 
     <View style={styles.workersContainer}>
-        <FlashList 
+    <FlashList 
             data={worker}
             keyExtractor={item => item._id}
             estimatedItemSize={50}
@@ -59,6 +61,7 @@ const ListSpecificWorkers = ({route}) => {
             // showsVerticalScrollIndicator={false}
             renderItem={({item}) => (
                 <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
+                    {/* <TText>{item.workerId.age}</TText> */}
                     <TouchableOpacity style={styles.button}>
                         <View style={styles.buttonView}>
                             {/* Profile Picture */}
