@@ -63,14 +63,22 @@ router
         );
       }
 
-      await session.commitTransaction();
-
       Worker.findOneAndUpdate(
         { _id: req.body.userId },
         {
-          $push: { works: SubCategory },
+          $push: { works: { $each: SubCategory } },
+        },
+        { upsert: true },
+        function (err) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("Successfully added");
+          }
         }
       );
+
+      await session.commitTransaction();
       console.log("success");
       res.send("Succesfully Created");
     } catch (err) {
@@ -130,7 +138,7 @@ router.route("/WorkList/:UserId").get(function (req, res) {
   Work.find({ workerId: req.params.UserId }, function (err, found) {
     if (found) {
       res.send(found);
-      console.log(res)
+      console.log(res);
     } else {
       res.send("No such data found");
     }
