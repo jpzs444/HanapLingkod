@@ -106,7 +106,9 @@ const UserProfile = ({route}) => {
   return (
     <SafeAreaView style={styles.container}>
 
-        <Modal 
+        {
+            global.userData.role === 'worker' ? 
+            <Modal 
             transparent={true}
             animationType='fade'
             visible={imageView}
@@ -143,7 +145,8 @@ const UserProfile = ({route}) => {
                     })
                 }
             </Swiper>
-        </Modal>
+        </Modal> : null
+        }
         
       <ScrollView refreshing 
         refreshControl={
@@ -333,7 +336,7 @@ const UserProfile = ({route}) => {
 
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 30, paddingLeft: 30,}}>
                             {
-                                global.userData.prevWorks.map(function(item, index, {length}){
+                                global.userData.role !== "recruiter" && global.userData.prevWorks.map(function(item, index, {length}){
                                     return(
                                         <TouchableOpacity key={index} style={{ width: 220, height: 220, elevation: 4, marginRight: 20, marginRight: index + 1 === length ? 70 : 20}}
                                             onPress={() => {

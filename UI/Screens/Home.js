@@ -136,11 +136,11 @@ export default function Home({route}) {
     return new Promise(resolve => setTimeout(resolve, timeout));
 }
 
-  const refreshFunc = React.useCallback(() => {
+  const onRefresh = () => {
       setIsRefreshing(true)
       getAllCategory()
       wait(500).then(() => setIsRefreshing(false));
-  }, [])
+  }
 
   const handleSearchWord = event => {
     // setSearchWord(event.nativeEvent.text);
@@ -263,13 +263,8 @@ export default function Home({route}) {
   const Mainhomelist = () => {
     return(
       <FlashList 
-        // refreshing 
-        // refreshControl={
-        //     <RefreshControl 
-        //         refreshing={isRefreshing}
-        //         onRefresh={refreshFunc}
-        //     />
-        // }
+        refreshing={isRefreshing} 
+        onRefresh={onRefresh}
         data={category}
         keyExtractor={item => item._id}
         estimatedItemSize={100}
