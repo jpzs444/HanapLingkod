@@ -161,7 +161,7 @@ export default function Home({route}) {
 
         {/* Action bar Button */}
         <View style={styles.actionbar_container}>
-          <TouchableOpacity style={styles.actionbar_btn} onPress={() => navigation.navigate("SubCategoryScreen")}>
+          <TouchableOpacity style={styles.actionbar_btn}>
             <View style={styles.actionbar_iconContainer}>
               <Icon name="clipboard-text-multiple" size={50} color="#275A53" />
             </View>
@@ -440,13 +440,14 @@ const styles = StyleSheet.create({
   actionbar_btn: {
     backgroundColor: '#fff',
     padding: 20,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   actionbar_iconContainer: {
     backgroundColor: '#F8F3F3',
     padding: 18,
     borderRadius: 15,
-    marginBottom: 8
+    marginBottom: 8,
+    elevation: 4,
   },
   actionbar_textContainer: {
 
@@ -466,6 +467,7 @@ const styles = StyleSheet.create({
   },
   services_searchBarContainer: {
     width: '100%',
+    elevation: 4,
   },
   services_searchbar: {
     width: '100%',
