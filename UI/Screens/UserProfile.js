@@ -1,4 +1,4 @@
-import { StyleSheet, Image, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Dimensions, Modal, StatusBar } from 'react-native'
+import { StyleSheet, Image, Text, View, SafeAreaView, ScrollView, TouchableOpacity, Dimensions, Modal, StatusBar, RefreshControl } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import Appbar from '../Components/Appbar'
 import TText from '../Components/TText'
@@ -9,7 +9,8 @@ import { IPAddress } from '../global/global';
 import ViewImage from '../Components/ViewImage';
 import { useNavigation } from '@react-navigation/native';
 
-// import * as pp from '../../Server/Public/Uploads'
+import ImageView from "react-native-image-viewing";
+import Swiper from 'react-native-swiper'
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -18,42 +19,55 @@ const UserProfile = ({route}) => {
 
     // const {profile_id} = route.params;
     // console.log(pp.global.userData.profilePic)
-    console.log(global.userData._id)
+    // console.log(global.userData._id)
 
     const navigation = useNavigation()
+    const isFocused = navigation.isFocused();
 
     const [workList, setWorkList] = useState([])
     const [activeTab, setActiveTab] = useState('works')
     const [rerender, setRerender] = useState(false)
+    const [isRefreshing, setIsRefreshing] = useState(false)
+
+    const [imageView, setImageView] = useState(false)
+    const [initialIndex, setInitialIndex] = useState(0)
+    let imageList = []
+
 
     let workerID = global.userData._id
-    // console.log(global.userData.profilePic)
-    // let iii = "../../Server/Public/Uploads/"
-    // let uu = iii.concat('', global.userData.profilePic)
-    // let sourceImage = require(''.concat(iii, global.userData.profilePic))
-    // let profilePicSource = require(sourceImage)
-    // console.log(global.userData._id)
-
 
     useEffect(() => {
-        let workerRoute = "http://" + IPAddress + ":3000/Worker/" + global.userData._id
-        let route = global.userData.role === "worker" ? "http://" + IPAddress + ":3000/Worker/" + global.userData._id : "http://" + IPAddress + ":3000/Recruiter/" + global.userData._id
-        fetch("http://" + IPAddress + ":3000/Worker/" + global.userData._id, {
+        getUpdatedUserData()
+    }, [])
+    
+    // fetch data if role of user is worker
+    useEffect(() => {
+        getUpdatedWorkList()
+    }, [])
+
+    const getUpdatedUserData = () => {
+        let userRoute = global.userData.role === "recruiter" ? "Recruiter/" : "Worker/"
+
+        fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
             method: "GET",
             header: {
                 "conten-type": "application/json"
             },
         }).then((res) => res.json())
         .then((user) => {
-            // console.log("user new load: ", user)
+            // console.log("user new load: ", route)
             global.userData = user
+
+            // let imageList = []
+            for(let i = 0; i < user.prevWorks.length; i++){
+                imageList.push("http://" + IPAddress + ":3000/images/" + user.prevWorks[i])
+            }
+            // console.log("imagelist: ", imageList)
         })
         .catch((error) => console.log(error.message))
-        setRerender(!rerender)
-    }, [])
+    }
 
-    // fetch data if role of user is worker
-    useEffect(() => {
+    const getUpdatedWorkList = () => {
         setWorkList([])
         fetch("http://" + IPAddress + ":3000/WorkList/" + global.userData._id, {
             method: 'GET',
@@ -65,33 +79,92 @@ const UserProfile = ({route}) => {
             setWorkList([...data])
             // console.log("new work list: ", data)
         }).catch((error) => console.log("workList fetch: ", error.message))
+    }
 
+
+    const wait = (timeout) => {
+        return new Promise(resolve => setTimeout(resolve, timeout));
+    }
+
+    const refreshFunc = React.useCallback(() => {
+        setIsRefreshing(true)
+        getUpdatedUserData()
+        getUpdatedWorkList()
+        wait(500).then(() => setIsRefreshing(false));
     }, [])
 
-    const viewImage = () => {
-        return(
-            <View
-            style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.9', zIndex: 10, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}>
-                <View>
-                    <Image source={require("../assets/images/bg-welcome.png")} style={{width: '100%', height: '100%'}} resizeMode="contain" />
-                </View>
-            </View>
+    const renderPagination = (index, total, context) => {
+        return (
+          <View style={{position: 'absolute', top: 30, right: 40}}>
+            <Text style={{ color: 'white' , fontSize: 16}}>
+              <Text style={{fontSize: 18, color: 'white'}}> {index + 1}</Text> of {total}
+            </Text>
+          </View>
         )
-    }
-    
-    const imagestock = "happy-easter-concept-preparation-holiday-600w-2140482091.jpg"
+      }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+
+        <Modal 
+            transparent={true}
+            animationType='fade'
+            visible={imageView}
+            onRequestClose={()=> setImageView(false)}
+        >
+            <View style={{width: '100%', position:'absolute', top: 0, left: 0, zIndex: 10, alignItems: 'flex-start', paddingTop: 30}}>
+                <TouchableOpacity style={{alignItems: 'flex-end', backgroundColor:'lightgray', marginLeft: 30, borderRadius: 15, padding:0}}
+                    onPress={()=> setImageView(false)}
+                >
+                    <Icon name='close-circle' size={25} />
+                </TouchableOpacity>
+            </View>
+            <Swiper index={initialIndex} 
+            showsPagination
+            paginationStyle={{backgroundColor: 'pink'}}
+            renderPagination={renderPagination}
+            activeDot={
+                <View style={{backgroundColor: ThemeDefaults.appIcon, width: 8, height: 8, borderRadius: 4, marginLeft: 3, marginRight: 3, marginTop: 3, marginBottom: 3,}} />
+            }
+            nextButton={
+                    <TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>›</TText>
+            }
+            prevButton={
+                    <TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>‹</TText>
+            }
+            style={{backgroundColor: 'rgba(0,0,0,0.8)', alignItems: 'center',}}>
+                { 
+                    global.userData.prevWorks.map(function(image, index){
+                        return(
+                            <View key={index} style={{flex:1, alignItems: 'center', justifyContent: 'center', width: WIDTH, }}>
+                                <Image source={{uri: `http://${IPAddress}:3000/images/${image}`}} style={{width: WIDTH - 50, height: HEIGHT / 2}} />
+                            </View>
+                        )
+                    })
+                }
+            </Swiper>
+        </Modal>
+        
+      <ScrollView refreshing 
+        refreshControl={
+            <RefreshControl 
+                refreshing={isRefreshing}
+                onRefresh={refreshFunc}
+            />
+        }
+      >
+
         {/* Top container */}
         <View style={{elevation: 5, paddingTop: 0, paddingBottom: 30, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, backgroundColor: '#fff'}}>
-            <Appbar settingsBtn={true} userProfile={true} showLogo={true} />
+            <Appbar settingsBtn={true} hasPicture={false} userProfile={true} showLogo={true} />
 
             <View>
                 {/* Profile Picture */}
                 <View style={{alignItems: 'center', width: '100%', marginTop: 20}}>
-                    <Image source={ global.userData.profilePic ?  {uri: "https://scontent.fceb2-2.fna.fbcdn.net/v/t39.30808-6/298825458_7726452997429494_7928239349716663798_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=hP4U0j9HpdoAX-Lp4OI&_nc_ht=scontent.fceb2-2.fna&oh=00_AT-t6cv81R8U8CRapXx98dz77XF0QqL7UszBi_UYcvjljg&oe=6335DFC0" } : require("../assets/images/bg-welcome.png")} style={{width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: 'black'}} />
+               
+                    <Image source={global.userData.profilePic !== 'pic' ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/default-profile.png")} style={styles.profilePicture} />
+                        
+                    {/* <Image source={ global.userData.profilePic ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/bg-welcome.png")} style={{width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: 'black'}} /> */}
                     {/* Name and role of User */}
                     <View style={{marginTop: 18, marginBottom: 26, alignItems: 'center'}}>
                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -122,6 +195,7 @@ const UserProfile = ({route}) => {
                 : null
             }
 
+            {/* Works and Reviews Tab */}
             {
                 global.userData.role === "worker" ?
                     <View style={styles.workerViewToggleContainer}>
@@ -144,6 +218,7 @@ const UserProfile = ({route}) => {
                     : null
             }
 
+            {/* bio */}
             {
                 global.userData.role === 'worker' && activeTab === 'works' ?
                     <View style={{width: '100%', paddingHorizontal: 30}}>
@@ -154,19 +229,8 @@ const UserProfile = ({route}) => {
                     </View>
                     : null
             }
-
-                                {/* <View key={index}>
-                                    <View style={{marginTop: 15, padding: 18, backgroundColor: '#fff', borderRadius: 10, borderWidth: .8, borderColor: ThemeDefaults.appIcon, elevation: 2}}>
-                                        <TText style={{fontFamily: "LexendDeca_Medium", fontSize: 18, marginBottom: 8}}>{workItem.ServiceSubId.ServiceSubCategory}</TText>
-                                        <TText style={{fontSize:14}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</TText>
-                                        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8}}>
-                                            <TText>Minimum Price: {workItem.minPrice}</TText>
-                                            <TText>Max Price: {workItem.maxPrice}</TText>
-                                        </View>
-                                    </View>
-                                </View> */}
             
-
+                    {/* works offered by the worker */}
                     <View style={{marginBottom: 15, marginHorizontal: 30, width: '100%', alignItems: 'center'}}>
                         {
                             activeTab === "works" ?
@@ -257,24 +321,9 @@ const UserProfile = ({route}) => {
                             </View>
                         }
                     </View>
-
-            
-                {/* global.userData.role === 'worker' ? 
-                    <View style={{width: '96%', marginBottom: 50, marginHorizontal: 30,}}>
-                        <View style={{width: '100%', flexDirection: 'row', alignItems: 'center', marginTop: 15, padding: 18, backgroundColor: ThemeDefaults.themeOrange, borderRadius: 10, borderWidth: .8, borderColor: ThemeDefaults.appIcon, elevation: 2}}>
-                            <View style={{width: 50, height: 50, borderRadius: 40, backgroundColor: ThemeDefaults.themeDarkBlue, alignItems: 'center', justifyContent: 'center', marginRight: 18}}>
-                                <Icon name="image" size={30} color="#fff" />
-                            </View>
-                            <View>
-                                <TText style={{fontFamily: "LexendDeca_Medium", textAlign: 'center', color: '#fff'}}>Add Photos from previous appointments</TText>
-                            </View>
-
-                        </View>
-                    </View>
-                    : null */}
             
 
-                    {/* Photo Gallery of past appointments */}
+            {/* Photo Gallery of past appointments */}
             {
                 global.userData.role === "worker" && activeTab === 'works' ?
                     <View style={{width:'100%',}}>
@@ -282,19 +331,21 @@ const UserProfile = ({route}) => {
                             <TText style={{fontSize: 18}}>Gallery from previous appointments</TText>
                         </View>
 
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 30, paddingLeft: 30, }}>
-                            <TouchableOpacity onPress={() => (
-                                navigation.navigate("ViewImageScreen", {imageUrl: require("../assets/images/bg-welcome.png")})
-                                
-                            )} style={{ width: 200, height: 200, padding: 4, elevation: 4, backgroundColor: '#929292', marginRight: 20, borderWidth: 0.8, borderColor: '#000'}}>
-                                <Image source={require("../assets/images/bg-welcome.png")} style={{width: '100%', height: '100%',}} />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => viewImage} style={{ width: 200, height: 200, padding: 4, elevation: 4, backgroundColor: '#929292', marginRight: 20, borderWidth: 0.8, borderColor: '#000'}}>
-                                <Image source={require("../assets/images/bg-welcome.png")} style={{width: '100%', height: '100%',}} />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => viewImage()} style={{ width: 200, height: 200, padding: 4, elevation: 4, backgroundColor: '#929292', marginRight: 20, borderWidth: 0.8, borderColor: '#000', marginRight: 70}}>
-                                <Image source={require("../assets/images/bg-welcome.png")} style={{width: '100%', height: '100%',}} />
-                            </TouchableOpacity>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 30, paddingLeft: 30,}}>
+                            {
+                                global.userData.prevWorks.map(function(item, index, {length}){
+                                    return(
+                                        <TouchableOpacity key={index} style={{ width: 220, height: 220, elevation: 4, marginRight: 20, marginRight: index + 1 === length ? 70 : 20}}
+                                            onPress={() => {
+                                                setImageView(true)
+                                                setInitialIndex(index)
+                                            }}
+                                        >
+                                            <Image source={{uri: `http://${IPAddress}:3000/images/${item}`}} style={{width: '100%', height: '100%'}} />
+                                        </TouchableOpacity>
+                                    )
+                                })
+                            }
                         </ScrollView>
                     </View>
                     : null
@@ -363,4 +414,12 @@ const styles = StyleSheet.create({
     ratingText: {
         marginLeft: 3
     },
+    profilePicture: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 0.5,
+        borderColor: "#000",
+        backgroundColor: 'pink'
+    }
 })

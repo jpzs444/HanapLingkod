@@ -168,7 +168,7 @@ const ModalPicker = (props) => {
             <ScrollView>
                 {props.barangay ? optionBarangay : null}
                 {props.verifiedFilter ? optionFilterVerified : null}
-                {props.categoryFilter ? optionCategory : null}
+                {props.categoryFilter ? serviceListOptions : null}
                 {props.ratingFilter ? optionFilterRating : null}
                 {props.services ? serviceListOptions : null}
 

@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import TText from './TText';
 import ThemeDefaults from './ThemeDefaults';
+import { IPAddress } from '../global/global';
 
 export default function Appbar(props) {
 
@@ -114,14 +115,11 @@ export default function Appbar(props) {
         {/* right */}
         <TouchableOpacity style={styles.right}>
             {
-                props.photo ? 
-                    <TText style={[styles.rightText, {color: props.light ? '#fff' : '#000'}]}>1 of 3</TText>
-                    : null
-            }
-            {
                 props.hasPicture ? 
-                    <TouchableOpacity onPress={() => { navigation.navigate("UserProfileStack", {profile_id: global.userData._id}) }}>
-                        <Icon name="account-circle" size={30} style={styles.userPicture} />
+                    <TouchableOpacity style={{borderRadius: 20, elevation: 7, alignSelf: 'flex-end'}} onPress={() => { navigation.navigate("UserProfileStack", {profile_id: global.userData._id}) }}>
+                        <View>
+                            <Image source={global.userData.profilePic !== 'pic' ?{uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/default-profile.png")} style={[styles.userPicture, {width: 40, height: 40, borderRadius: 20, elevation: 4}]} />
+                        </View>
                     </TouchableOpacity>
                     : null
             }

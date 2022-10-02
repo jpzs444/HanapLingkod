@@ -14,6 +14,8 @@ import ThemeDefaults from '../Components/ThemeDefaults'
 import { useNavigation } from '@react-navigation/native'
 import OTPVerification from './OTPVerification'
 
+// import ImageView from "react-native-image-viewing";
+
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
@@ -30,6 +32,14 @@ const Edit_UserProfile = () => {
     const [profilePicture, setProfilePicture] = useState("")
     const [pastAppointmentImages, setPastAppointmentImages] = useState([])
     const [pastAppointmentSingleImage, setPastAppointmentSingleImage] = useState("")
+
+    const [prevArrayPrevWorks, setPrevArrayPrevWorks] = useState([])
+
+    const [isImageOpened, setIsImageOpened] = useState(false)
+
+    const [isRemoveUploadedModal, setRemoveUploadedModal] = useState(false)
+    const [confirmRemoveUploaded, setConfirmRemoveUploaded] = useState(false)
+    const [indexToRemove, setIndexToRemove] = useState("")
     
     const [userEditData, setUserEditData] = useState({
         username: "",
@@ -46,6 +56,9 @@ const Edit_UserProfile = () => {
     const [editHasChanges, setEditHasChanges] = useState(false)
     const [isPickerVisible, setPickerVisible] = useState(false)
     const [appIsSaving, setAppIsSaving] = useState(false)
+
+
+    let arrayofImages = []
 
     useEffect(() => {
         console.log("backbtn pressed");
@@ -88,6 +101,21 @@ const Edit_UserProfile = () => {
         // copyWorkList()
 
     }, [])
+
+
+    useEffect(() => {
+        setPrevArrayPrevWorks([])
+
+        if(global.userData.prevWorks !== null){
+            // console.log("not null")
+            global.userData.prevWorks.map(image => arrayofImages.push(image))
+            setPrevArrayPrevWorks([...arrayofImages])
+        }
+        // console.log(prevArrayPrevWorks)
+        // global.userData.prevWorks !== null ? (
+        // ) : null
+    }, [])
+
 
     useEffect(() => {
         (async () => {
@@ -205,9 +233,22 @@ const Edit_UserProfile = () => {
         // console.log("selected", result.selected);
   
         if (!result.cancelled) {
-            if(!result.selected) setPastAppointmentSingleImage(result.uri)
-            else setPastAppointmentImages([...result.selected])
+            if(!result.selected) {
+                setPastAppointmentSingleImage(result.uri)
+                setPrevArrayPrevWorks([...prevArrayPrevWorks, result.uri])
+            }
+            else {
+                setPastAppointmentImages([...result.selected])
+                for(let i = 0; i < result.selected.length; i++){
+                    console.log("printf: ", result.selected[i].uri)
+                    arrayofImages.push(result.selected[i].uri)
+                    // setPrevArrayPrevWorks([...prevArrayPrevWorks, result.selected[i].uri])
+                }
+                setEditHasChanges(true)
+            }
         }
+
+        console.log("arrayofImages from multiselect: ", prevArrayPrevWorks)
         // console.log("Image state: ", pastAppointmentImages)
       };
 
@@ -218,12 +259,37 @@ const Edit_UserProfile = () => {
         setEditHasChanges(true)
     }
 
+    const handleRemoveUploadedImage = () => {
+        const list = [...prevArrayPrevWorks]
+        list.splice(indexToRemove, 1)
+        setPrevArrayPrevWorks(list)
+        setEditHasChanges(true)
+
+        fetch("http://" + IPAddress + ":3000/prevWorks/" + global.userData._id, {
+            method: "DELETE",
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                "toDelete": prevArrayPrevWorks[indexToRemove],
+            })
+        }).then((res) => console.log("Deleted Uploaded Image Successfully"))
+        .catch((error) => console.log(error.image))
+
+        setRemoveUploadedModal(false)
+        // handleRemoveImage(indexToRemove)
+    }
+
     if(appIsSaving){
         return(
             <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                 <ActivityIndicator size='large' />
             </View>
         )
+    }
+
+    const handeRemovePrevWorksImage = () => {
+
     }
 
 
@@ -248,13 +314,16 @@ const Edit_UserProfile = () => {
                 let match = /\.(\w+)$/.exec(pastImagesFilename);
                 let type = match ? `image/${match[1]}` : `image`;
 
+                // console.log("past images solo")
                 // upload profile picture
                 formDataPastWorks.append("pastWorks", {
                     uri: pastImagesURI,
                     name: pastImagesFilename,
                     type,
                 });
-            } else if (pastAppointmentImages) {
+            } 
+            if (pastAppointmentImages) {
+                let prevWorksArray = []
                 for(let i = 0; i < pastAppointmentImages.length; i++){
                     let pastImagesURI = pastAppointmentImages[i].uri;
                     let pastImagesFilename = pastImagesURI.split("/").pop();
@@ -263,13 +332,25 @@ const Edit_UserProfile = () => {
                     let match = /\.(\w+)$/.exec(pastImagesFilename);
                     let type = match ? `image/${match[1]}` : `image`;
 
-                    // upload profile picture
+                    prevWorksArray.push({uri: pastImagesURI, name: pastImagesFilename, type,})
+
                     formDataPastWorks.append("pastWorks", {
                         uri: pastImagesURI,
                         name: pastImagesFilename,
                         type,
                     });
+
                 }
+
+                // upload pasworks images upload by the worker
+                fetch("http://" + IPAddress + ":3000/prevWorks/" + global.userData._id, {
+                    method: "POST",
+                    headers: {
+                        "content-type": "multipart/form-data",
+                    },
+                    body: formDataPastWorks,
+                }).then((res) => console.log("successfully uploaded past work images"))
+                .catch((error) => console.log(error.message))
             }
 
             // Upload set of works
@@ -323,23 +404,24 @@ const Edit_UserProfile = () => {
             });
         }
 
-        userEditData.phonenumber ? formData.append("phoneNumber", userEditData.phonenumber) : formData.append("phoneNumber", global.userData.phoneNumber)
-        userEditData.street ? formData.append("street", userEditData.street) : formData.append("street", global.userData.street)
-        userEditData.purok ? formData.append("purok", userEditData.purok) : formData.append("purok", global.userData.purok)
-        userEditData.barangay ? formData.append("barangay", userEditData.barangay) : formData.append("barangay", global.userData.barangay)
+        userEditData.phonenumber ? formData.append("phoneNumber", userEditData.phonenumber) : null
+        userEditData.street ? formData.append("street", userEditData.street) : null
+        userEditData.purok ? formData.append("purok", userEditData.purok) : null
+        userEditData.barangay ? formData.append("barangay", userEditData.barangay) : null
+        
+        // formData.append("username", global.userData.username)
+        // formData.append("firstname", global.userData.firstname)
+        // formData.append("lastname", global.userData.lastname)
+        // formData.append("middlename", global.userData.middlename)
+        // formData.append("birthday", global.userData.birthday)
+        // formData.append("age", global.userData.age)
+        // formData.append("sex", global.userData.sex)
+        // formData.append("city", global.userData.city)
+        // formData.append("province", global.userData.province)
 
-        formData.append("username", global.userData.username)
-        formData.append("firstname", global.userData.firstname)
-        formData.append("lastname", global.userData.lastname)
-        formData.append("middlename", global.userData.middlename)
-        formData.append("birthday", global.userData.birthday)
-        formData.append("age", global.userData.age)
-        formData.append("sex", global.userData.sex)
-        formData.append("city", global.userData.city)
-        formData.append("province", global.userData.province)
-
-        let route = global.userData.role === "recruiter" ? "http://" + IPAddress + ":3000/Recruiter/" + global.userData._id 
-        : "http://" + IPAddress + ":3000/Worker/" + global.userData._id 
+        let route = global.userData.role === "recruiter" ? 
+            "http://" + IPAddress + ":3000/Recruiter/" + global.userData._id 
+            : "http://" + IPAddress + ":3000/Worker/" + global.userData._id 
 
         // update recruiter and worker profile picture and basic information
         fetch(route, {
@@ -351,16 +433,6 @@ const Edit_UserProfile = () => {
         }).then((response) => console.log("successfully updated user basic information"))
         .catch((error) => console.log(error.message))
 
-        // // upload pasworks images upload by the worker
-        // fetch("http://" + IPAddress + ":3000/prevWorks/" + global.userData._id, {
-        //     method: "PUT",
-        //     headers: {
-        //         "content-type": "multipart/form-data",
-        //     },
-        //     body: formDataPastWorks,
-        // }).then((res) => console.log("successfully uploaded past work images"))
-        // .catch((error) => console.log(error.message))
-
 
         // navigation.navigate("OTPVScreen", {
         //     phoneNum: userEditData.phonenumber ? userEditData.phonenumber : global.userData.phoneNumber, 
@@ -371,31 +443,64 @@ const Edit_UserProfile = () => {
         //     workList: workList
         // })
 
-        // fetch(route, {
-        //     method: "GET",
-        //     header: {
-        //         "conten-type": "application/json"
-        //     },
-        // }).then((res) => res.json())
-        // .then((user) => {
-        //     console.log("fetched after user update:", user)
 
-        //     if(user._id){
-        //         global.userData = user
-        //     }
-        // })
-        // .catch((error) => console.log(error.message))
+        // update global
+        let routeUser = global.userData.role === 'recruiter' ? 'Recruiter' : "Worker"
+        fetch("http://" + IPAddress + ":3000/" + routeUser + "/" + global.userData._id, {
+            method: "GET",
+            header: {
+                "conten-type": "application/json"
+            },
+        }).then((res) => res.json())
+        .then((user) => {
+            // console.log("user new load: ", route)
+            global.userData = user
+            // console.log("updated user: ", global.userData)
+        })
+        .catch((error) => console.log(error.message))
 
         setBackBtnPressed(false)
         setEditHasChanges(false)
         setAppIsSaving(false)
-        navigation.push("UserProfileScreen")
+        navigation.replace("UserProfileScreen")
 
     }
 
 
   return (
     <SafeAreaView style={styles.container}>
+        <Modal 
+            transparent={true}
+            animationType='fade'
+            visible={isRemoveUploadedModal}
+            onRequestClose={()=> setRemoveUploadedModal(false)}
+        >
+            <View style={styles.modalUploadedRemoveContainer}>
+                <View style={styles.modalURBox}>
+                    <View style={styles.modalURTextBox}>
+                        <TText style={styles.modalURText}>Are you sure to delete this image?</TText>
+                    </View>
+                    <View style={styles.modalURBtnBox}>
+                        <TouchableOpacity style={[styles.modalURBtn, styles.modalURYesBtn]}
+                            onPress={() => {
+                                setConfirmRemoveUploaded(true)
+                                handleRemoveUploadedImage()
+                                setRemoveUploadedModal(false)
+                            }}
+                        >
+                            <TText style={[styles.modalURBtnText, styles.modalURYesText]}>Yes</TText>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.modalURBtn, styles.modalURNoBtn]}
+                            onPress={() => setRemoveUploadedModal(false)}
+                        >
+                            <TText style={styles.modalURBtnText}>No</TText>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+
 
         <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 25, paddingTop: 20, paddingBottom: 5,}}>
             {/* left */}
@@ -477,9 +582,11 @@ const Edit_UserProfile = () => {
                 </View>
 
                 <View style={styles.picturePlaceholder}>
-                    <View>
-                        <Image source={profilePicture ? {uri: profilePicture} : {uri: global.userData.profilePic}} style={styles.profilePicture} />
-                        <TouchableOpacity style={{position:'absolute', bottom: -5, right: 15, backgroundColor: '#fff', borderRadius: 20}}
+                    <View style={{alignItems: 'center'}}>
+
+                        <Image source={profilePicture ? {uri: profilePicture} : global.userData.profilePic !== "pic" ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/default-profile.png")} style={styles.profilePicture} />
+                                
+                        <TouchableOpacity style={{position:'absolute', bottom: -5, right: 20, backgroundColor: '#fff', borderRadius: 20}}
                             onPress={()=> pickImage()}
                         >
                             <Icon name='pencil-circle' size={30} />
@@ -503,7 +610,7 @@ const Edit_UserProfile = () => {
                         <View style={styles.textInputContainer}>
                             <TextInput 
                                 defaultValue={global.userData.username}
-                                style={{fontSize: 16, fontFamily: 'LexendDeca'}}
+                                style={styles.inputTextInput}
                                 editable={false}
                                 onChangeText={() => setEditHasChanges(true)}
                             />
@@ -517,7 +624,7 @@ const Edit_UserProfile = () => {
                             <TextInput 
                                 defaultValue={global.userData.phoneNumber}
                                 placeholder={"9123456789"}
-                                style={{fontSize: 16, fontFamily: 'LexendDeca'}}
+                                style={styles.inputTextInput}
                                 onChangeText={(val) => {
                                     setEditHasChanges(true)
 
@@ -536,7 +643,7 @@ const Edit_UserProfile = () => {
                         <View style={styles.textInputContainer}>
                             <TextInput 
                                 defaultValue={global.userData.street}
-                                style={{fontSize: 16, fontFamily: 'LexendDeca'}}
+                                style={styles.inputTextInput}
 
                                 onChangeText={(val) => {
                                     setEditHasChanges(true)
@@ -552,7 +659,7 @@ const Edit_UserProfile = () => {
                         <View style={styles.textInputContainer}>
                             <TextInput 
                                 defaultValue={global.userData.purok}
-                                style={{fontSize: 16, fontFamily: 'LexendDeca'}}
+                                style={styles.inputTextInput}
 
                                 onChangeText={(val) => {
                                     setEditHasChanges(true)
@@ -669,23 +776,77 @@ const Edit_UserProfile = () => {
 
                 {
                     global.userData.role === 'worker' ?
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{paddingHorizontal: 20, marginBottom: 30}}>
-
+                        <>
+                        {
+                            prevArrayPrevWorks.length > 0 ? 
+                                <TText style={{marginLeft: 30, marginBottom: 15, fontSize: 20, fontFamily: "LexendDeca"}}>Previous Work Appointment</TText> : null
+                        }
+                        <ScrollView  horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingRight: 35}} style={{paddingHorizontal: 30, marginBottom: 30}} >
                                 {
-                                    pastAppointmentImages.map(function(image, index){
+                                    prevArrayPrevWorks.map(function(image, index){
                                         return(
-                                            <TouchableOpacity key={index} onPress={() => {navigation.navigate("ViewImageScreen", {imageUrl: image.uri})}} style={{ width: image.width / 10, height: image.height / 10, maxHeight: 320, backgroundColor: 'pink', elevation: 4, marginRight: index === pastAppointmentImages.length - 1 ? 70 : 20,  }}>
+                                            <TouchableOpacity key={index} 
+                                            onPress={() => {
+                                                // setIsImageOpened(true)
+                                                // navigation.navigate("ViewImageScreen", {imageUrl: `http://${IPAddress}:3000/images/${image}`})
+                                            }} 
+                                            style={{ width: 350, height: 300, maxHeight: 320, backgroundColor: 'pink', elevation: 4, marginRight: 20,}}>
+                                                {/* <TText>{index}</TText> */}
                                                 <TouchableOpacity style={{backgroundColor: '#fff', borderRadius: 20, position: 'absolute', top: 5, right: 5, zIndex: 5}}
-                                                    onPress={()=> handleRemoveImage()}
+                                                    onPress={()=> {
+                                                        // show modal if sure to delete
+                                                        setRemoveUploadedModal(true)
+                                                        setIndexToRemove(index)
+                                                    }}
                                                 >
                                                     <Icon name='close-circle' size={28} color={"#FF5353"} />
                                                 </TouchableOpacity>
-                                                <Image source={{uri: image.uri}} style={{height: '100%', width: '100%'}} resizeMode="cover" />
+                                                <Image source={{uri: `http://${IPAddress}:3000/images/${image}`}} style={{height: '100%', width: '100%'}} resizeMode="cover" />
                                             </TouchableOpacity>
                                         )
                                     })
                                 }
                         </ScrollView>
+                        
+                        {
+                            pastAppointmentImages.length > 0 || pastAppointmentSingleImage ? 
+                                <TText style={{marginLeft: 30, marginBottom: 15, fontSize: 20, fontFamily: "LexendDeca"}}>New Uploads</TText> : null
+                        }
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingRight: 35}} style={{paddingHorizontal: 30, marginBottom: 30}}>
+                                
+                                {
+                                    pastAppointmentImages ? pastAppointmentImages.map(function(image, index){
+                                        return(
+                                            <View key={index + 100} 
+                                            style={{ width: image.height > image.width ? 200 : 350, height: 300, backgroundColor: 'pink', elevation: 4, marginRight: 20,  }}>
+                                                {/* <TText>{index + 100}</TText> */}
+                                                <TouchableOpacity style={{backgroundColor: '#fff', borderRadius: 20, position: 'absolute', top: 5, right: 5, zIndex: 5}}
+                                                    onPress={()=> handleRemoveImage(index)}
+                                                >
+                                                    <Icon name='close-circle' size={28} color={"#FF5353"} />
+                                                </TouchableOpacity>
+                                                <Image source={{uri: image.uri}} style={{height: '100%', width: '100%'}} resizeMode="cover" />
+                                            </View>
+                                        )
+                                    }) : null
+                                }
+                                {
+                                    pastAppointmentSingleImage ?
+                                        <View 
+                                        style={{ width: 350, height: 300, backgroundColor: 'pink', elevation: 4, marginRight: 20,  }}>
+                                            <TouchableOpacity style={{backgroundColor: '#fff', borderRadius: 20, position: 'absolute', top: 5, right: 5, zIndex: 5}}
+                                                onPress={()=> {
+                                                    setPastAppointmentSingleImage("")
+                                                }}
+                                            >
+                                                <Icon name='close-circle' size={28} color={"#FF5353"} />
+                                            </TouchableOpacity>
+                                            <Image source={{uri: pastAppointmentSingleImage}} style={{height: '100%', width: '100%'}} resizeMode="cover" />
+                                        </View>
+                                    : null
+                                }
+                        </ScrollView>
+                    </>
                         : null
                 }
 
@@ -820,6 +981,11 @@ const Edit_UserProfile = () => {
                 }
 
         </ScrollView>
+
+        {/* {
+            imageZoomIn ?
+                
+        } */}
     </SafeAreaView>
   )
 }
@@ -847,7 +1013,8 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         borderWidth: 0.5,
-        borderColor: "#000"
+        borderColor: "#000",
+        backgroundColor: 'gray'
     },
     rowForm: {
         marginBottom: 30, flexDirection: 'row', width: '100%', paddingHorizontal: 30, justifyContent: 'space-between',
@@ -908,5 +1075,67 @@ const styles = StyleSheet.create({
     },
     modal_btnTxt_cancel: {
         color: '#ff5555'
+    },
+    modalUploadedRemoveContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+        backgroundColor: 'rgba(0,0,0,0.7)'
+    },
+    modalURBox: {
+        backgroundColor: ThemeDefaults.appIcon,
+        borderRadius: 12,
+        borderWidth: 1.2,
+        borderColor: ThemeDefaults.appIcon
+,        overflow: 'hidden',
+        elevation: 4
+    },
+    modalURTextBox: {
+        backgroundColor: ThemeDefaults.themeOrange,
+        paddingVertical: 40,
+        paddingHorizontal: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalURText: {
+        textAlign: 'center',
+        fontSize: 20,
+        color: ThemeDefaults.themeWhite,
+    },
+    modalURBtnBox: {
+        flexDirection: 'row',
+        backgroundColor: ThemeDefaults.themeWhite,
+        justifyContent:'center',
+        alignItems: 'center',
+        width: '100%',
+    },
+    modalURBtn: {
+        width: '50%',
+        alignItems: 'center',
+        // paddingHorizontal: 50, 
+        // paddingVertical: 15,
+    },
+    modalURYesBtn: {
+        marginVertical: 15,
+        borderRightWidth: 1.5,
+        borderRightColor: ThemeDefaults.appIcon,
+    },
+    modalURBtnText: {
+        fontFamily: 'LexendDeca_Medium',
+        fontSize: 18,
+    },
+    modalURYesText: {
+        color: ThemeDefaults.appIcon,
+    },
+    modalURNoBtn: {
+
+    },
+    inputTextInput: {
+        width: 120,
+        paddingTop: 0,
+        // backgroundColor: 'pink',
+        fontSize: 16, 
+        fontFamily: 'LexendDeca',
     },
 })

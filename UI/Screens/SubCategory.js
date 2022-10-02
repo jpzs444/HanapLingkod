@@ -32,7 +32,7 @@ const SubCategory = ({route}) => {
         .then((data) => {
             // setIsLoading(true)
             setSubCategories([...data])
-            console.log("sub-category: ", data)
+            // console.log("sub-category: ", data)
         }).catch((err) => console.log("error: ", err.message))
         setIsLoading(false)
     }, [])

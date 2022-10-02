@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { SafeAreaView, View, Image, StatusBar, Dimensions, StyleSheet, TouchableOpacity, TextInput, ImageBackground } from 'react-native';
+import { SafeAreaView, RefreshControl, View, Image, StatusBar, Dimensions, StyleSheet, TouchableOpacity, TextInput, ImageBackground } from 'react-native';
 import TText from '../Components/TText'
 import { useNavigation } from '@react-navigation/native';
 import Appbar from '../Components/Appbar';
@@ -25,6 +25,8 @@ export default function Home({route}) {
   const [searchResultCategory, setSearchResultCategory] = useState([])
   const [searchResultSubCategory, setSearchResultSubCategory] = useState([])
   const [searchResultWorker, setSearchResultWorker] = useState([])
+
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const [userHasSearched, setuserHasSearched] = useState(false)
 
@@ -56,6 +58,10 @@ export default function Home({route}) {
 
   // fetch service category
   useEffect(() => {
+    getAllCategory()
+  }, [])
+
+  const getAllCategory = () => {
     fetch("http://" + IPAddress + ":3000/service-category", {
       method: 'GET',
       headers: {
@@ -65,7 +71,7 @@ export default function Home({route}) {
     .then((data) => {
       setCategory([...data])
     })
-  }, [])
+  }
 
   const fetchNotificationList = () => {
     fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
@@ -125,6 +131,16 @@ export default function Home({route}) {
   // const printOutData = () => {
   //   console.log("worker search: ", searchResultWorker)
   // }
+
+  const wait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+}
+
+  const refreshFunc = React.useCallback(() => {
+      setIsRefreshing(true)
+      getAllCategory()
+      wait(500).then(() => setIsRefreshing(false));
+  }, [])
 
   const handleSearchWord = event => {
     // setSearchWord(event.nativeEvent.text);
@@ -247,6 +263,13 @@ export default function Home({route}) {
   const Mainhomelist = () => {
     return(
       <FlashList 
+        // refreshing 
+        // refreshControl={
+        //     <RefreshControl 
+        //         refreshing={isRefreshing}
+        //         onRefresh={refreshFunc}
+        //     />
+        // }
         data={category}
         keyExtractor={item => item._id}
         estimatedItemSize={100}
@@ -280,6 +303,13 @@ export default function Home({route}) {
     return(
       <>
         <FlashList 
+          // refreshing 
+          // refreshControl={
+          //     <RefreshControl 
+          //         refreshing={isRefreshing}
+          //         onRefresh={refreshFunc}
+          //     />
+          // }
           data={searchResults}
           keyExtractor={item => item._id}
           estimatedItemSize={50}

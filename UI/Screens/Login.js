@@ -17,13 +17,14 @@ import ThemeDefaults from '../Components/ThemeDefaults';
 import TText from '../Components/TText';
 import { IPAddress, userData } from '../global/global';
 
+// import RNFetchBlob from 'rn-fetch-blob'
+
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
 export default function Login({navigation}) {
 
     const pw_ref = useRef();
-
 
     const [user, setUser] = useState({
         username: '',
@@ -54,8 +55,6 @@ export default function Login({navigation}) {
       )
     }
 
-
-
     // FETCH DATA FROM SERVER
     const login = () => {
       fetch("http://" + IPAddress + ":3000/login?username="+user.username, {
@@ -71,6 +70,8 @@ export default function Login({navigation}) {
         .then((response) => response.json())
         .then((user) => {
 
+          console.log("user data: ", user)
+
           if(user._id){
             setIsLoading(true)
             setIsWrongCredentials(false);
@@ -82,7 +83,6 @@ export default function Login({navigation}) {
             navigation.replace("HomeStack");
             // navigation.navigate("OTPVerification", {isLogin: true, phoneNum: user.phoneNumber})
 
-
           } else {
             setIsLoading(false)
             setIsWrongCredentials(true)
@@ -90,7 +90,6 @@ export default function Login({navigation}) {
 
             // alert("username and password are incorrect. please try again")
           }
-
 
           // navigation.navigate("HomeStack");
         })
@@ -102,6 +101,7 @@ export default function Login({navigation}) {
         });
 
     };
+
 
   return (
     <View style={styles.container}>
