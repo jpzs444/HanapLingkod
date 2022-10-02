@@ -18,30 +18,25 @@ const ListSpecificWorkers = ({route}) => {
     const {chosenCategory} = route.params
 
     const [worker, setWorkers] = useState([])
-    const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
-        setIsLoading(true)
-        fetch("http://" + IPAddress + ":3000/Work/" + chosenCategory, {
+        console.log("list spec:", chosenCategory)
+        fetch(`http://${IPAddress}:3000/Work/${chosenCategory}`, {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
             },
-        }).then((res) => res.json())
+        })
+        .then((res) => res.json())
         .then((data) => {
             setWorkers([...data])
             console.log(data)
         }).catch((err) => console.log("error: ", err.message))
     }, [])
 
-    
-    useEffect(() => {
-        setIsLoading(false)
-    }, [worker])
-
 
   return (
-    !isLoading ? <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container}>
     <Appbar hasPicture={true} backBtn={true} accTypeSelect={true} showLogo={true} />
 
     <View style={styles.workersContainer}>
@@ -74,7 +69,7 @@ const ListSpecificWorkers = ({route}) => {
                                     <View style={[styles.row, styles.workerInfo]}>
                                         <View style={styles.workerNameHolder}>
                                             <TText style={styles.workerNameText}>{item.workerId.firstname}{item.workerId.middlename === "undefined" ? "" : item.workerId.middlename} {item.workerId.lastname}</TText>
-                                            { !item.workerId.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
+                                            { item.workerId.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
                                         </View>
                                         <View style={styles.workerRatingsHolder}>
                                             <Icon name="star" color={"gold"} size={18} />
@@ -98,7 +93,6 @@ const ListSpecificWorkers = ({route}) => {
         />
     </View>
 </SafeAreaView>
-: <ActivityIndicator size={"large"} />
   )
 }
 
@@ -107,7 +101,8 @@ export default ListSpecificWorkers
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: StatusBar.currentHeight
+        paddingTop: StatusBar.currentHeight,
+        backgroundColor: ThemeDefaults.themeWhite
     },
     headerContainer: {
         marginTop: 10,

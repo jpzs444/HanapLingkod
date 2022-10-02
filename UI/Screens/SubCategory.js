@@ -76,6 +76,7 @@ const SubCategory = ({route}) => {
                     item.ServiceID._id === categoryID ?
                     <TouchableOpacity style={styles.button}
                         onPress={() => {
+                            console.log("chosen cat:", item.ServiceSubCategory)
                             navigation.navigate("ListSpecificWorkerScreen", {chosenCategory: item.ServiceSubCategory})
                         }}
                     >

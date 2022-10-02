@@ -15,12 +15,19 @@ const HEIGHT = Dimensions.get('window').height
 const Workers = () => {
 
   const [listOfWorkers, setListOfWorkers] = useState([])
-  const [workerByCategory, setWorkerByCategory] = useState([])
 
-  const [barangayFilter, setBarangayFilter] = useState("all")
-  const [verifiedFilter, setVerifiedFilter] = useState("all")
-  const [categoryFilter, setCategoryFilter] = useState("all")
-  const [ratingFilter, setRatingFilter] = useState("all")
+  const [workerByCategory, setWorkerByCategory] = useState([])
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  const [verifiedFilter, setVerifiedFilter] = useState("")
+  const [barangayFilter, setBarangayFilter] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState("")
+  const [ratingFilter, setRatingFilter] = useState("")
+
+  const [filteredResults, setFilteredResults] = useState([])
+  const [filteredSubCatResults, setFilteredSubCatResults] = useState([])
+  const [prevListWorker, setPrevListWorker] = useState([])
+  const [hasResults, setHasResults] = useState(true)
 
   const [barangayViewModal, setBarangayViewModal] = useState(false)
   const [verifiedViewModal, setVerifiedViewModal] = useState(false)
@@ -29,17 +36,19 @@ const Workers = () => {
   const [hasFilter, setHasFilter] = useState(barangayFilter || verifiedFilter || categoryFilter || ratingFilter)
 
   const changeModalVisibility = (bool) => {
+    //getAllWorkers()
     setBarangayViewModal(bool)
     setVerifiedViewModal(bool)
     setCategoryViewModal(bool)
     setRatingViewModal(bool)
+
   }
 
   const firstUpdate = useRef(true)
 
-
     useEffect(() => {
         getAllWorkers()
+        setPrevListWorker([...listOfWorkers])
     }, [])
 
     const getAllWorkers = () => {
@@ -51,98 +60,124 @@ const Workers = () => {
         }).then((response) => response.json())
         .then((data) => {
             setListOfWorkers([...data])
-            console.log("list of workers: ", data)
+            setPrevListWorker([...data])
+            console.log("list of workers: ")
         })
     }
-
-    // if(categoryFilter !== 'all'){
-    //     fetch("http://" + IPAddress + ":3000/Work/" + categoryFilter.ServiceSubCategory, {
-    //         method: "GET",
-    //         headers: {
-    //             'content-type': 'application/json',
-    //         },
-    //     }).then((res) => res.json())
-    //     .then((data) => {
-    //         setListOfWorkers([...data])
-    //         // setWorkerByCategory([...data])
-    //         console.log(data)
-    //     })
-    //     // setCategoryFilter([])
-    //     // return
-    // }
-
-    // useEffect(() => {
-        
-    //     console.log("did")
-    //     fetch("http://" + IPAddress + ":3000/Work/" + categoryFilter.ServiceSubCategory, {
-    //         method: "GET",
-    //         headers: {
-    //             'content-type': 'application/json',
-    //         },
-    //     }).then((res) => res.json())
-    //     .then((data) => {
-    //         if(data.length === 0) getAllWorkers()
-    //         setListOfWorkers([...data])
-    //         // setWorkerByCategory([...data])
-    //         console.log(data)
-    //     })
-        
-    // }, [categoryFilter])
 
     useEffect(() => {
         setHasFilter(barangayFilter || verifiedFilter || categoryFilter || ratingFilter)
     },[barangayFilter, verifiedFilter, categoryFilter, ratingFilter])
 
+    useEffect(() => {
+        getAllWorkers()
+    }, [])
+
+    
     const filterCategoryList = (fil) => {
+        // setPrevListWorker([])
+
         let list = [...listOfWorkers]
+        if(Object.keys(barangayFilter).length > 0){
+            console.log("has barangay filter")
+            filterBarangayList(barangayFilter)
+            // setFilteredResults([...prevListWorker])
+            list = [...filteredResults]
+        }
         let temp = []
-        fetch("http://" + IPAddress + ":3000/Work/" + fil, {
-            method: "GET",
-            headers: {
-                'content-type': 'application/json',
-            },
-        }).then((res) => res.json())
-        .then((data) => {
-            // list = [...data]
-            // setWorkerByCategory([...data])
-            // console.log(data)
 
-            // list.filter(function(item){
-            //     if(item.workerId._id === list._id) temp.push(item)
-            // })
+        console.log("List in brgy: ", list)
 
-            console.log("list", data)
+        list.map(function(item, index){
+            if(item.works.includes(fil)) temp.push(list[index])
+            // console.log("works: ", item.works.includes(fil))
         })
+
+        if(temp.length === 0){
+            setHasResults(false)
+        }
+
+        console.log("temp: ", temp)
+        setFilteredSubCatResults([...temp])
+        setPrevListWorker([...temp])
     }
 
     const filterBarangayList = (fil) => {
-        getAllWorkers()
+        // setPrevListWorker([])
+
+        setCategoryFilter("")
         let list = [...listOfWorkers]
         let temp = []
 
-        console.log('listbefore: ', list)
+        // if(Object.keys(categoryFilter).length > 0){
+        //     filterCategoryList(categoryFilter)
+        //     list = [...filteredSubCatResults]
+        // }
+
+
+        // console.log('list filter: ', fil)
+        // console.log('listbefore: ', list)
         list.map(function(item){
             // console.log('item includes: ', item.works.includes(fil))
-            
             if(item.barangay === fil) temp.push(item)
         })
 
-        console.log("filtered: ", temp)
-        setListOfWorkers([...temp])
+        if(temp.length === 0){
+            setHasResults(false)
+        }
+
+        // console.log("filtered: ", temp)
+        console.log("filtered: ", temp.length)
+        setFilteredResults([...temp])
+        setPrevListWorker([...temp])
     }
 
     const filterVerifiedList = (fil) => {
-        getAllWorkers()
+        // getAllWorkers()
+        // setPrevListWorker([...listOfWorkers])
         let list = [...listOfWorkers]
         let temp = []
+        let unverified = []
+
+        let control = false
+        if(fil === 'All'){
+            // getAllWorkers()
+            setPrevListWorker([...listOfWorkers])
+        }else if(fil === "Verified"){
+            control = true
+        } else {control = false}
 
         list.map(function(item){
-            // console.log(fil)
-            console.log(!(Number(item.verification) - Number(fil)))
-            if(!(Number(item.verification) - Number(fil))) temp.push(item)
+            
+            if(item.verification && control) {temp.push(item)}
+            else {unverified.push(item)}
+            console.log("log: ", control)
         })
-        setListOfWorkers([...temp])
+
+        if(fil === 'Verified') {setPrevListWorker([...temp])}
+        else {setPrevListWorker([...unverified])}
+
+        if(fil === "Verified" && temp.length === 0){
+            setHasResults(false)
+        } else if(fil === "Unverified" && unverified.length === 0){
+            setHasResults(false)
+        } else {
+            setHasResults(true)
+        }
+
+        console.log("verified: ", prevListWorker)
+        console.log("unverfied", prevListWorker)
     }
+
+    const handleResetFilter = () => {
+        setBarangayFilter("")
+        setVerifiedFilter("")
+        setCategoryFilter("")
+        setRatingFilter("")
+        getAllWorkers()
+        setHasResults(true)
+        setPrevListWorker([...listOfWorkers])
+      }
 
     const ListHeaderComponent = () => {
         return(
@@ -169,8 +204,8 @@ const Workers = () => {
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
                                         setVerifiedFilter(filter)
-                                        
-                                        // filterVerifiedList(filter === "Verified" ? true : false)
+                                        filter === "All" ? getAllWorkers() : null
+                                        filterVerifiedList(filter)
                                     }}
                                     verifiedFilter={true}
                                 />
@@ -204,7 +239,7 @@ const Workers = () => {
                         <TouchableOpacity style={styles.filterBtn}
                             onPress={() => setCategoryViewModal(true)}
                         >
-                            <TText style={styles.filterText}>{categoryFilter ? categoryFilter.ServiceSubCategory : "Category"}</TText>
+                            <TText style={styles.filterText}>{categoryFilter ? categoryFilter : "Category"}</TText>
                             <Icon name="chevron-down" size={20} />
 
                             <Modal
@@ -216,8 +251,8 @@ const Workers = () => {
                                 <ModalPicker 
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
-                                        setCategoryFilter(filter)
-                                        // filterCategoryList(filter.ServiceSubCategory)
+                                        setCategoryFilter(filter.ServiceSubCategory)
+                                        filterCategoryList(filter.ServiceSubCategory)
                                     }}
                                     categoryFilter={true}
                                 />
@@ -261,12 +296,16 @@ const Workers = () => {
         )
     }
 
-  const handleResetFilter = () => {
-    setBarangayFilter("")
-    setVerifiedFilter("")
-    setCategoryFilter("")
-    setRatingFilter("")
+  const wait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+}
+
+  const onRefresh = () => {
+    setIsRefreshing(true)
     getAllWorkers()
+    handleResetFilter()
+    setHasResults(true)
+    wait(500).then(() => setIsRefreshing(false));
   }
 
   return (
@@ -277,11 +316,15 @@ const Workers = () => {
             <View style={styles.listContainer}>
         
                 {/* List of workers */}
+                                {/* item.verification === verifiedFilter || item.barangay === barangayFilter || item || !hasFilter ? */}
                 <View style={{width: WIDTH, height: HEIGHT, paddingTop: 0,}}>
                     <FlashList 
-                        data={listOfWorkers}
+                        data={prevListWorker}
+                        extraData={prevListWorker}
                         keyExtractor={item => item._id}
                         estimatedItemSize={100}
+                        onRefresh={onRefresh}
+                        refreshing={isRefreshing}
                         showsVerticalScrollIndicator={false}
                         ListHeaderComponent={() => (
                             <ListHeaderComponent />
@@ -290,9 +333,10 @@ const Workers = () => {
                             <View style={{height: 200}}></View>
                         )}
                         renderItem={({item}) => (
-                            <>
+                            <> 
                             {
-                                item.verification === verifiedFilter || item.barangay === barangayFilter || item.works.includes(categoryFilter.ServiceSubCategory) || !hasFilter ?
+                                hasResults ?
+                                                 
                             <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
                                 <TouchableOpacity style={styles.button}>
                                     <View style={styles.buttonView}>
@@ -306,7 +350,7 @@ const Workers = () => {
                                                 <View style={[styles.row, styles.workerInfo]}>
                                                     <View style={styles.workerNameHolder}>
                                                         <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
-                                                        { !item.verification || !item.workerId.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
+                                                        { item.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
                                                     </View>
                                                     <View style={styles.workerRatingsHolder}>
                                                         <Icon name="star" color={"gold"} size={18} />
@@ -315,10 +359,11 @@ const Workers = () => {
                                                 </View>
                                                 <View style={styles.workerAddressBox}>
                                                     <Icon name='map-marker' size={16} />
-                                                    <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
+                                                    <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, Purok {item.purok}, {item.barangay}</Text>
                                                 </View>
                                             </View>
-                                            <View style={styles.descriptionBottom}>
+                                            
+                                                <View style={styles.descriptionBottom}>
                                                     <View style={[styles.serviceFeeText]}> 
                                                         <Text numberOfLines={1} ellipsizeMode='tail' style={{fontSize: 13, width: '100%'}}>Services:
                                                         {
@@ -330,15 +375,21 @@ const Workers = () => {
                                                         }
                                                         </Text>
                                                     </View>
-                                                </View>
+                                            </View>
                                         </View>
                                     </View>
                                 </TouchableOpacity>
                             </View>
-                            : null}
+                            :
+                            <View style={{backgroundColor: 'pink'}}>
+                                <TText>No results found. Try again</TText>
+                            </View>
+                            }
                             </>
                         )}
                     />
+                    
+
                 </View>
             </View>
       </View>
@@ -371,7 +422,7 @@ const styles = StyleSheet.create({
     },
     filterContainer: {
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 30,
     },
     filterBox: {
         flexDirection: 'row',
@@ -384,10 +435,12 @@ const styles = StyleSheet.create({
     },
     filterBtn: {
         flex: 1,
+        width: '25%',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-evenly',
-        paddingVertical: 8,
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+        paddingHorizontal: 8,
     },
     filterText: {
     },
@@ -480,7 +533,8 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     descriptionBottom: {
-        width: '90%',
+        width: '98%',
+        height: 20,
         flexDirection: 'row',
     },
     serviceFeeText: {

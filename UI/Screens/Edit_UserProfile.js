@@ -106,7 +106,7 @@ const Edit_UserProfile = () => {
     useEffect(() => {
         setPrevArrayPrevWorks([])
 
-        if(global.userData.prevWorks !== null){
+        if(global.userData.prevWorks > 0 && global.userData.role === "worker"){
             // console.log("not null")
             global.userData.prevWorks.map(image => arrayofImages.push(image))
             setPrevArrayPrevWorks([...arrayofImages])

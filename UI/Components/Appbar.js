@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import {
     StatusBar, StyleSheet, View, Image, TouchableOpacity, Modal,
 } from 'react-native'
@@ -12,7 +12,23 @@ export default function Appbar(props) {
 
     const navigation = useNavigation();
 
-    const [backBtnPressed, setBackBtnPressed] = React.useState(false)
+    const [backBtnPressed, setBackBtnPressed] = useState(false)
+
+    const [profilePic, setProfilePic] = useState('')
+
+    // useEffect(() => {
+    //     let userRoute = global.userData.role === 'recruiter' ? "Recruiter/" : "Worker/"
+    //     fetch(`http://${IPAddress}:3000/${userRoute}/${global.userData._id}`, {
+    //         method: "GET",
+    //         headers: {
+    //             'content-type': 'application.json',
+    //         },
+    //     }).then((res) => res.json())
+    //     .then((data) => {
+    //         console.log(data)
+    //         // setProfilePic(data.profilePic)
+    //     })
+    // }, [])
 
   return (
     <View style={styles.container}>

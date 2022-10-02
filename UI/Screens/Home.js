@@ -136,11 +136,11 @@ export default function Home({route}) {
     return new Promise(resolve => setTimeout(resolve, timeout));
 }
 
-  const refreshFunc = React.useCallback(() => {
+  const onRefresh = () => {
       setIsRefreshing(true)
       getAllCategory()
       wait(500).then(() => setIsRefreshing(false));
-  }, [])
+  }
 
   const handleSearchWord = event => {
     // setSearchWord(event.nativeEvent.text);
@@ -161,7 +161,7 @@ export default function Home({route}) {
 
         {/* Action bar Button */}
         <View style={styles.actionbar_container}>
-          <TouchableOpacity style={styles.actionbar_btn} onPress={() => navigation.navigate("SubCategoryScreen")}>
+          <TouchableOpacity style={styles.actionbar_btn}>
             <View style={styles.actionbar_iconContainer}>
               <Icon name="clipboard-text-multiple" size={50} color="#275A53" />
             </View>
@@ -263,13 +263,8 @@ export default function Home({route}) {
   const Mainhomelist = () => {
     return(
       <FlashList 
-        // refreshing 
-        // refreshControl={
-        //     <RefreshControl 
-        //         refreshing={isRefreshing}
-        //         onRefresh={refreshFunc}
-        //     />
-        // }
+        refreshing={isRefreshing} 
+        onRefresh={onRefresh}
         data={category}
         keyExtractor={item => item._id}
         estimatedItemSize={100}
@@ -445,13 +440,14 @@ const styles = StyleSheet.create({
   actionbar_btn: {
     backgroundColor: '#fff',
     padding: 20,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   actionbar_iconContainer: {
     backgroundColor: '#F8F3F3',
     padding: 18,
     borderRadius: 15,
-    marginBottom: 8
+    marginBottom: 8,
+    elevation: 4,
   },
   actionbar_textContainer: {
 
@@ -471,6 +467,7 @@ const styles = StyleSheet.create({
   },
   services_searchBarContainer: {
     width: '100%',
+    elevation: 4,
   },
   services_searchbar: {
     width: '100%',
