@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { SafeAreaView, RefreshControl, View, Image, StatusBar, Dimensions, StyleSheet, TouchableOpacity, TextInput, ImageBackground } from 'react-native';
+import { SafeAreaView, RefreshControl, Text, View, Image, StatusBar, Dimensions, StyleSheet, TouchableOpacity, TextInput, ImageBackground, TouchableHighlight } from 'react-native';
 import TText from '../Components/TText'
 import { useNavigation } from '@react-navigation/native';
 import Appbar from '../Components/Appbar';
@@ -11,6 +11,33 @@ import { FlashList } from '@shopify/flash-list';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
+
+const categoryBG = [
+  {
+    category: "Cleaning",
+    bg: require("../assets/images/cleaning.jpg")
+  },
+  {
+    category: "Plumbing",
+    bg: require("../assets/images/plumbing.jpg")
+  },
+  {
+    category: "Mounting",
+    bg: require('../assets/images/mounting.jpg')
+  },
+  {
+    category: "Electrical",
+    bg: require("../assets/images/electrical.jpg")
+  },
+  {
+    category: "Masonry",
+    bg: require("../assets/images/masonry.jpg")
+  },
+  {
+    category: "Painting Services",
+    bg: require("../assets/images/painting.jpg")
+  }
+]
 
 export default function Home({route}) {
 
@@ -33,9 +60,9 @@ export default function Home({route}) {
   const searchInput = useRef();
 
 
-  useEffect(() => {
-    setSearchWord(searchW)
-  }, [searchW])
+  // useEffect(() => {
+  //   setSearchWord(searchW)
+  // }, [searchW])
   
   useEffect(() => {
     // send pushtoken to backend
@@ -52,9 +79,9 @@ export default function Home({route}) {
   }, [])
 
 
-  useEffect(() => {
-    fetchNotificationList()
-  },[])
+  // useEffect(() => {
+  //   fetchNotificationList()
+  // },[])
 
   // fetch service category
   useEffect(() => {
@@ -102,6 +129,7 @@ export default function Home({route}) {
     console.log("seach q: ", searchW)
 
     setuserHasSearched(true)
+    setSearchBtnPressed(false)
     fetch("http://" + IPAddress + ":3000/search?keyword=" + searchW, {
       method: "GET",
       headers: {
@@ -138,7 +166,7 @@ export default function Home({route}) {
 
   const onRefresh = () => {
       setIsRefreshing(true)
-      getAllCategory()
+      // getAllCategory()
       wait(500).then(() => setIsRefreshing(false));
   }
 
@@ -201,6 +229,8 @@ export default function Home({route}) {
             <TouchableOpacity style={[styles.services_searchbar, {justifyContent: searchBtnPressed ? 'flex-start' : null, paddingLeft: searchBtnPressed ? 10 : null,}]}
               onPress={() => {
                 setSearchBtnPressed(true)
+                searchW = ''
+                setSearchWord("")
                 searchInput.current.focus()
               }}
             >
@@ -209,7 +239,7 @@ export default function Home({route}) {
                 placeholder={"Search for a Service or Worker"}
                 placeholderTextColor="#8A8B97"
                 keyboardType="default"
-                value={searchWord ? searchWord : null}
+                // value={searchW ? searchW : searchWord}
                 enablesReturnKeyAutomatically={true}
                 // onChangeText={(val) => {
                 //   setSearchWord(val)
@@ -227,6 +257,7 @@ export default function Home({route}) {
                       setSearchWord("")
                       setuserHasSearched(false)
                     }}
+                    style={{paddingRight: 5}}
                   >
                     <Icon name='close-circle' size={22} />
                   </TouchableOpacity>
@@ -238,17 +269,6 @@ export default function Home({route}) {
           {
             userHasSearched ? 
               <View style={styles.searchClearResultsContainer}>
-                {/* <View style={styles.clearSearchContainer}>
-                  <TouchableOpacity style={styles.clearSearchBtn} 
-                    onPress={() => {
-                      searchW = ""
-                      setuserHasSearched(false)
-                    }}
-                  >
-                    <Icon name="close-circle" size={20} />
-                    <TText style={styles.clearSearchText}>Clear Search Results</TText>
-                  </TouchableOpacity>
-                </View> */}
                 <TText style={{textAlign: 'center', fontSize: 18, color: 'gray'}}>Search results for '{searchWord}'</TText>
               </View>
               : null
@@ -263,15 +283,15 @@ export default function Home({route}) {
   const Mainhomelist = () => {
     return(
       <FlashList 
-        refreshing={isRefreshing} 
-        onRefresh={onRefresh}
+        // refreshing={isRefreshing} 
+        // onRefresh={onRefresh}
         data={category}
         keyExtractor={item => item._id}
-        estimatedItemSize={100}
-        keyboardDismissMode='none'
-        keyboardShouldPersistTaps={'always'}
+        estimatedItemSize={50}
+        // keyboardDismissMode='none'
+        // keyboardShouldPersistTaps={'always'}
         showsVerticalScrollIndicator={false}
-        ListFooterComponent={() => (<View style={{height: 180}}></View>)}
+        ListFooterComponent={() => (<View style={{height: 120}}></View>)}
         ListHeaderComponent={() => 
           <ScreenHeaderComponent />            
         }
@@ -282,7 +302,7 @@ export default function Home({route}) {
                   navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
                 }}
               >
-                <ImageBackground source={require("../assets/images/stock.jpg")} style={styles.category_imageBG}>
+                <ImageBackground source={require("../assets/images/painting.jpg")} style={styles.category_imageBG}>
                   <View style={styles.textWrapper}>
                     <TText style={styles.categoryTxt}>{item.Category}</TText>
                   </View>
@@ -307,9 +327,7 @@ export default function Home({route}) {
           // }
           data={searchResults}
           keyExtractor={item => item._id}
-          estimatedItemSize={50}
-          keyboardDismissMode='none'
-          keyboardShouldPersistTaps={'always'}
+          estimatedItemSize={70}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={() => (<View style={{height: 180}}></View>)}
           ListHeaderComponent={() => 
@@ -358,7 +376,7 @@ export default function Home({route}) {
                           <View style={styles.buttonWorkerView}>
                               {/* Profile Picture */}
                               <View style={styles.imageContainer}>
-                                  <Image source={require("../assets/images/plumbing.jpg")} style={styles.image} />
+                                  <Image source={item.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: `http://${IPAddress}:3000/images/${item.profilePic}`}} style={styles.image} />
                               </View>
                               {/* Worker Information */}
                               <View style={styles.descriptionBox}>
@@ -366,7 +384,7 @@ export default function Home({route}) {
                                       <View style={[styles.row, styles.workerInfo]}>
                                           <View style={styles.workerNameHolder}>
                                               <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
-                                              { !item.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
+                                              { item.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
                                           </View>
                                           <View style={styles.workerRatingsHolder}>
                                               <Icon name="star" color={"gold"} size={18} />
@@ -375,11 +393,21 @@ export default function Home({route}) {
                                       </View>
                                       <View style={styles.workerAddressBox}>
                                           <Icon name='map-marker' size={16} />
-                                          <TText numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</TText>
+                                          <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
                                       </View>
                                   </View>
                                   <View style={styles.descriptionBottom}>
-                                      <TText>Worker</TText>
+                                      {
+                                        item.works &&
+                                        <Text numberOfLines={1} ellipsizeMode='tail' >
+                                          {
+                                            item.works.map(function(item){
+                                              return item + ", "
+                                            })
+                                          }
+                                        </Text>
+                                        
+                                      }
                                   </View>
                               </View>
                           </View>
@@ -394,31 +422,26 @@ export default function Home({route}) {
     )
   }
 
-
-
   return (
-    <SafeAreaView style={{flex: 1, height: HEIGHT, alignItems: 'center', justifyContent: 'center', marginTop: StatusBar.currentHeight, backgroundColor: '#fff'}}>
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-
-          {/* Service Category List */}
+    <SafeAreaView style={styles.mainContainer}>
           <View style={styles.category_container}>
-
               {
-                !userHasSearched ? <Mainhomelist /> : null
-              }
-
-              {
-                userHasSearched && searchResults ? <ListSearchResults /> : null
+                userHasSearched ? <ListSearchResults /> : <Mainhomelist />
               }  
-          
           </View>
-
-        </View>
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1, 
+    height: HEIGHT, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginTop: StatusBar.currentHeight, 
+    backgroundColor: '#fff',
+  },
   greetingContainer: {
     width: '100%',
     paddingHorizontal: 30,
@@ -441,19 +464,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     alignItems: 'center',
+    // elevation: 4,
   },
   actionbar_iconContainer: {
     backgroundColor: '#F8F3F3',
     padding: 18,
     borderRadius: 15,
     marginBottom: 8,
-    elevation: 4,
+    // elevation: 4,
   },
   actionbar_textContainer: {
 
   },
   actionbar_text: {
-
+    fontSize: 15,
+    color: 'darkgray'
   },
   services_body: {
     width: '100%',
@@ -463,7 +488,8 @@ const styles = StyleSheet.create({
   services_header: {
   },
   services_title: {
-    fontSize: 22
+    fontFamily: 'LexendDeca_Medium',
+    fontSize: 18
   },
   services_searchBarContainer: {
     width: '100%',
@@ -475,9 +501,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
-    marginTop: 30,
-    marginBottom: 20,
-    paddingLeft: 15,
+    marginTop: 10,
+    marginBottom: 10,
+    paddingLeft: 10,
+    paddingRight: 15,
     borderRadius: 18,
     backgroundColor: '#F8F3F3',
 
@@ -495,14 +522,14 @@ const styles = StyleSheet.create({
   },
   categoryBtn: {
     marginTop: 20,
-    marginHorizontal: 30,
+    marginHorizontal: 20,
     borderRadius: 18,
     overflow: 'hidden',
     backgroundColor: '#fff',
     elevation: 4
   },
   category_imageBG: {
-    height: 180,
+    height: 190,
     paddingHorizontal: 20,
     paddingVertical: 15
   },
@@ -654,7 +681,7 @@ const styles = StyleSheet.create({
       width: '100%',
   },
   descriptionBottom: {
-      width: '90%',
+      width: '100%',
       flexDirection: 'row',
   },
   serviceFeeText: {

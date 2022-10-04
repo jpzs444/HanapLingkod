@@ -13,6 +13,7 @@ import Workers from '../Screens/Workers';
 import PostRequests from '../Screens/PostRequests';
 import Messaging from '../Screens/Messaging';
 import Notifications from '../Screens/Notifications';
+import WorkerProfile from '../Screens/WorkerProfile';
 
 import { devicePushToken, IPAddress } from '../global/global';
 import HomeNavigationStack from './HomeStack';
@@ -71,7 +72,8 @@ const TabNavigation = () => {
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="home" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
-                )
+                ),
+                tabBarHideOnKeyboard: true,
             }}
         />
 
