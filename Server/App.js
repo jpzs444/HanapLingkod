@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
 const bcrypt = require("bcrypt");
+const cloudinary = require("./Helpers/cloudinary");
 const fs = require("fs");
 
 //models
@@ -41,9 +42,9 @@ module.exports = conn;
 //store photos
 const storage = multer.diskStorage({
   //destination for files
-  destination: function (request, file, callback) {
-    callback(null, "./Public/Uploads");
-  },
+  // destination: function (request, file, callback) {
+  // callback(null, "./Public/Uploads");
+  // },
 
   //add back the extension
   filename: function (request, file, callback) {
@@ -65,6 +66,24 @@ const multipleFile = upload.fields([
 //   "HanapLingkod",
 //   "ang jologs ko sorry, i will be better"
 // );
+
+// app.post("/rere", upload.single("qqq"), async function (req, res) {
+//   try {
+//     // console.log(req.file);
+//     // const result = await cloudinary.uploader.upload(req.file.path, {
+//     //   folder: "HanapLingkod",
+//     // });
+//     // console.log(result);
+//     // const publicId = extractPublicId(result.url);
+//     const url =
+//       "https://res.cloudinary.com/de7wy4uvq/image/upload/v1664851180/HanapLingkod/certificate/vags0o1zxrm92mp6ljjo.jpg";
+//     const publicId = url.split("/").slice(7).join("/").split(".")[0];
+//     console.log(publicId);
+//     //sample
+//     // const getPublicId = result.url.split("/").pop().split(".")[0];
+//     // console.log(getPublicId);
+//   } catch {}
+// });
 
 app.get("/images/:filename", async function (req, res) {
   let path = "./Public/Uploads/" + req.params.filename;
@@ -108,32 +127,50 @@ app.get("/search", async function (req, res) {
 });
 
 //upload prev works
-app.post("/prevWorks/:id", upload.array("pastWorks", 12), function (req, res) {
-  //put the filename to array
-  let prevWorkslist = req.files.map((item) => {
-    return item.filename;
-  });
-
-  Worker.findOneAndUpdate(
-    { _id: req.params.id },
-    {
-      $push: { prevWorks: prevWorkslist },
-    },
-    function (err) {
-      if (!err) {
-        res.send("Updated Successfully");
-      } else {
-        res.send(err);
-      }
+app.post(
+  "/prevWorks/:id",
+  upload.array("pastWorks", 12),
+  async function (req, res) {
+    //put the filename to array
+    const prevWorkslist = [];
+    const files = req.files;
+    for (const file of files) {
+      const { path } = file;
+      const result = await cloudinary.uploader.upload(path, {
+        folder: "HanapLingkod/prevWorks",
+      });
+      prevWorkslist.push(result.url);
     }
-  );
-});
+    // console.log(prevWorkslist);
+
+    Worker.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        $push: { prevWorks: prevWorkslist },
+      },
+      function (err) {
+        if (!err) {
+          res.send("Updated Successfully");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  }
+);
+
 app.delete("/prevWorks/:id", function (req, res) {
-  const fs = require("fs");
   try {
     console.log(req.body.toDelete);
-    const path = "./Public/Uploads/" + req.body.toDelete;
-    fs.unlinkSync(path);
+    const publicId = req.body.toDelete
+      .split("/")
+      .slice(7)
+      .join("/")
+      .split(".")[0];
+    cloudinary.uploader.destroy(publicId, function (result) {
+      console.log(result);
+    });
+
     Worker.findOneAndUpdate(
       { _id: req.params.id },
       {
@@ -212,6 +249,12 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
     session.startTransaction();
     // console.log(req.body);
 
+    //cloudinary upload
+
+    const GovIdURL = await cloudinary.uploader.upload(req.files.govId[0].path, {
+      folder: "HanapLingkod/GovId",
+    });
+
     //hash the password using bcrypt
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -234,7 +277,7 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
       phoneNumber: req.body.phoneNumber,
       emailAddress: req.body.emailAddress,
       profilePic: "pic",
-      GovId: req.files.govId[0].filename,
+      GovId: "GovIdURL.url",
       workDescription: req.body.workDescription,
       works: SubCategory,
       role: "worker",
@@ -242,7 +285,13 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
       accountStatus: "active",
     };
     if (req.files.certificate !== undefined) {
-      workerObj.licenseCertificate = req.files.certificate[0].filename;
+      const CertificateURL = await cloudinary.uploader.upload(
+        req.files.certificate[0].path,
+        {
+          folder: "HanapLingkod/certificate",
+        }
+      );
+      workerObj.licenseCertificate = CertificateURL.url;
     }
 
     //create worker
@@ -318,6 +367,10 @@ app.post(
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
+      const CertificateURL = await cloudinary.uploader.upload(req.file.path, {
+        folder: "HanapLingkod/certificate",
+      });
+
       const recruiter = new Recruiter({
         username: req.body.username,
         password: hashedPassword,
@@ -335,7 +388,7 @@ app.post(
         phoneNumber: req.body.phoneNumber,
         emailAddress: req.body.emailAddress,
         profilePic: "pic",
-        GovId: req.file.filename,
+        GovId: CertificateURL.url,
         verification: false,
         accountStatus: "active",
         role: "recruiter",
@@ -361,4 +414,5 @@ app.use(WorkerRoutes);
 app.use(RecruiterRoutes);
 app.use(WorkRoutes);
 
-app.listen(3000, () => console.log("listening on port 3000."));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("listening on port 3000."));
