@@ -5,13 +5,14 @@ const Worker = require("../Models/Workers");
 const Work = require("../Models/Work");
 const { Router } = require("express");
 const multer = require("multer");
+const cloudinary = require("../Helpers/cloudinary");
 
 //store photos
 const storage = multer.diskStorage({
   //destination for files
-  destination: function (request, file, callback) {
-    callback(null, "./Public/Uploads");
-  },
+  // destination: function (request, file, callback) {
+  //   callback(null, "./Public/Uploads");
+  // },
 
   //add back the extension
   filename: function (request, file, callback) {
@@ -45,7 +46,7 @@ router
       }
     });
   })
-  .put(upload.single("profilePic"), function (req, res) {
+  .put(upload.single("profilePic"), async function (req, res) {
     let workerObj = {
       username: req.body.username,
       // password: hashedPassword,
@@ -65,7 +66,10 @@ router
       workDescription: req.body.workDescription,
     };
     if (req.file !== undefined) {
-      workerObj.profilePic = req.file.filename;
+      const profilePic = await cloudinary.uploader.upload(req.file.path, {
+        folder: "HanapLingkod/profilePic",
+      });
+      workerObj.profilePic = profilePic.url;
     }
 
     Worker.findOneAndUpdate({ _id: req.params.id }, workerObj, function (err) {
