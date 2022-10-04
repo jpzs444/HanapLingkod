@@ -53,6 +53,14 @@ export default function Appbar(props) {
 
             {/* Back Button */}
             {
+                props.onlyBackBtn && 
+                    <TouchableOpacity style={styles.left}
+                        onPress={() => { navigation.goBack() }}
+                    >
+                        <Icon name="arrow-left" size={30} color={props.light ? '#fff' : '#000'} />
+                    </TouchableOpacity> 
+            }
+            {
                 props.backBtn && !props.accTypeSelect && props.registration ? 
                     <TouchableOpacity style={styles.left}
                         onPress={() => { navigation.goBack() }}
@@ -155,10 +163,10 @@ export default function Appbar(props) {
                     : null
             }
             {
-                props.userProfile &&
+                props.userProfile && props.settingsBtn ?
                     <TouchableOpacity onPress={() => { navigation.push("EditUserProfileScreen") }}>
                         <Icon name="cog" size={25} style={styles.userPicture} />
-                    </TouchableOpacity>
+                    </TouchableOpacity> : null
             }
             {
                 props.saveBtn &&
@@ -182,23 +190,25 @@ const styles = StyleSheet.create({
         paddingBottom: 15,
     },
     left: {
-        flex: 1,
+        flex: 1.2,
         marginLeft: 25,
         borderRadius: 20,
     },
     center: {
-        flex: 2,
+        flex: 1.8,
         alignItems: 'center',
     },
     right: {
-        flex: 1,
+        flex: 1.2,
         justifyContent: 'flex-end',
         width: 'auto',
         marginRight: 25,
         borderRadius: 20,
+        // backgroundColor: 'pink'
     },
     rightText: {
-        textAlign: 'right'
+        textAlign: 'right',
+        fontSize: 14
     },
     userPicture: {
         alignSelf: 'flex-end'
@@ -208,7 +218,8 @@ const styles = StyleSheet.create({
         width: '80%',
         alignSelf: 'flex-end',
         alignItems: 'center',
-        padding: 4,
+        padding: 5,
+        paddingHorizontal: 10,
         borderRadius: 10
     },
     saveBtnText: {

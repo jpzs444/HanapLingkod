@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions, View, Text, SafeAreaView, Modal, ActivityIndicator, Image, StatusBar, TouchableOpacity, FlatList } from 'react-native'
+import { StyleSheet, Dimensions, View, Text, SafeAreaView, Modal, ActivityIndicator, Image, StatusBar, TouchableOpacity, FlatList, ScrollView } from 'react-native'
 import React, {useEffect, useState, useRef, useLayoutEffect} from 'react'
 import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -9,10 +9,14 @@ import { FlashList } from '@shopify/flash-list'
 import { IPAddress } from '../global/global'
 import { ModalPicker } from '../Components/ModalPicker'
 
+import { useNavigation } from '@react-navigation/native'
+
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
 const Workers = () => {
+
+    const navigation = useNavigation();
 
   const [listOfWorkers, setListOfWorkers] = useState([])
 
@@ -25,6 +29,8 @@ const Workers = () => {
   const [ratingFilter, setRatingFilter] = useState("")
 
   const [filteredResults, setFilteredResults] = useState([])
+  const [barangayFilters, setBarangayFilters] = useState([])
+  const [categoryFilters, setCategoryFilters] = useState([])
   const [filteredSubCatResults, setFilteredSubCatResults] = useState([])
   const [prevListWorker, setPrevListWorker] = useState([])
   const [hasResults, setHasResults] = useState(true)
@@ -75,98 +81,64 @@ const Workers = () => {
 
     
     const filterCategoryList = (fil) => {
-        // setPrevListWorker([])
 
         let list = [...listOfWorkers]
-        if(Object.keys(barangayFilter).length > 0){
-            console.log("has barangay filter")
-            filterBarangayList(barangayFilter)
-            // setFilteredResults([...prevListWorker])
-            list = [...filteredResults]
+        let catResult = []
+
+        catResult = list.filter(worker => worker.works.includes(fil))
+
+        if(barangayFilter){
+            catResult = catResult.filter(worker => worker.barangay === barangayFilter)
+            setPrevListWorker([...catResult])
+        } 
+
+        if(verifiedFilter){
+            catResult = catResult.filter(worker => worker.verification === verifiedFilter)
         }
-        let temp = []
-
-        console.log("List in brgy: ", list)
-
-        list.map(function(item, index){
-            if(item.works.includes(fil)) temp.push(list[index])
-            // console.log("works: ", item.works.includes(fil))
-        })
-
-        if(temp.length === 0){
-            setHasResults(false)
-        }
-
-        console.log("temp: ", temp)
-        setFilteredSubCatResults([...temp])
-        setPrevListWorker([...temp])
+        
+        setPrevListWorker([...catResult])
     }
 
     const filterBarangayList = (fil) => {
-        // setPrevListWorker([])
 
-        setCategoryFilter("")
+
         let list = [...listOfWorkers]
-        let temp = []
+        let brgyResult = []
 
-        // if(Object.keys(categoryFilter).length > 0){
-        //     filterCategoryList(categoryFilter)
-        //     list = [...filteredSubCatResults]
-        // }
+        brgyResult = list.filter(worker => worker.barangay === fil)
 
+        if(categoryFilter){
+            brgyResult = brgyResult.filter(worker => worker.works.includes(categoryFilter))
+            setPrevListWorker([...brgyResult])
+        } 
 
-        // console.log('list filter: ', fil)
-        // console.log('listbefore: ', list)
-        list.map(function(item){
-            // console.log('item includes: ', item.works.includes(fil))
-            if(item.barangay === fil) temp.push(item)
-        })
-
-        if(temp.length === 0){
-            setHasResults(false)
+        if(verifiedFilter){
+            brgyResult = brgyResult.filter(worker => worker.verification === verifiedFilter)
         }
-
-        // console.log("filtered: ", temp)
-        console.log("filtered: ", temp.length)
-        setFilteredResults([...temp])
-        setPrevListWorker([...temp])
+        
+        setPrevListWorker([...brgyResult])
     }
 
     const filterVerifiedList = (fil) => {
-        // getAllWorkers()
-        // setPrevListWorker([...listOfWorkers])
+
         let list = [...listOfWorkers]
-        let temp = []
-        let unverified = []
+        let workerStatus = []
 
-        let control = false
-        if(fil === 'All'){
-            // getAllWorkers()
-            setPrevListWorker([...listOfWorkers])
-        }else if(fil === "Verified"){
-            control = true
-        } else {control = false}
-
-        list.map(function(item){
-            
-            if(item.verification && control) {temp.push(item)}
-            else {unverified.push(item)}
-            console.log("log: ", control)
-        })
-
-        if(fil === 'Verified') {setPrevListWorker([...temp])}
-        else {setPrevListWorker([...unverified])}
-
-        if(fil === "Verified" && temp.length === 0){
-            setHasResults(false)
-        } else if(fil === "Unverified" && unverified.length === 0){
-            setHasResults(false)
-        } else {
-            setHasResults(true)
+        workerStatus = list.filter(worker => worker.verification === fil)
+        console.log("workerStatus: ", workerStatus)
+        
+        if(categoryFilter){
+            console.log("verification has category filter")
+            workerStatus = workerStatus.filter(worker => worker.works.includes(categoryFilter))
+            setPrevListWorker([...workerStatus])
         }
 
-        console.log("verified: ", prevListWorker)
-        console.log("unverfied", prevListWorker)
+        if(barangayFilter){
+            console.log("verification has barangay filter")
+            workerStatus = workerStatus.filter(worker => worker.barangay === barangayFilter)
+        }
+        
+        setPrevListWorker([...workerStatus])
     }
 
     const handleResetFilter = () => {
@@ -191,8 +163,8 @@ const Workers = () => {
                         <TouchableOpacity style={styles.filterBtn}
                             onPress={() => setVerifiedViewModal(true)}
                         >
-                            <TText style={styles.filterText}>{verifiedFilter ? verifiedFilter :"All"}</TText>
-                            <Icon name="chevron-down" size={20} />
+                            <TText style={[styles.filterText, {paddingLeft: 5}]}>All</TText>
+                            <Icon name="chevron-down" size={20} color={'white'} />
 
                             <Modal
                                 transparent={true}
@@ -203,9 +175,8 @@ const Workers = () => {
                                 <ModalPicker 
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
-                                        setVerifiedFilter(filter)
-                                        filter === "All" ? getAllWorkers() : null
-                                        filterVerifiedList(filter)
+                                        setVerifiedFilter(filter === "Verified" ? true : false )
+                                        filter === "All" ? handleResetFilter() : filter === 'Verified' ? filterVerifiedList(true) : filterVerifiedList(false)
                                     }}
                                     verifiedFilter={true}
                                 />
@@ -216,8 +187,8 @@ const Workers = () => {
                                 setBarangayViewModal(true)
                             }}
                         >
-                            <TText style={styles.filterText}>{barangayFilter ? barangayFilter : "Barangay"}</TText>
-                            <Icon name="chevron-down" size={20} />
+                            <TText style={styles.filterText}>Barangay</TText>
+                            <Icon name="chevron-down" size={20} color={'white'} />
 
                             <Modal
                                 transparent={true}
@@ -228,7 +199,7 @@ const Workers = () => {
                                 <ModalPicker 
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
-                                        setBarangayFilter("")
+                                        // setBarangayFilter("")
                                         setBarangayFilter(filter)
                                         filterBarangayList(filter)
                                     }}
@@ -239,8 +210,8 @@ const Workers = () => {
                         <TouchableOpacity style={styles.filterBtn}
                             onPress={() => setCategoryViewModal(true)}
                         >
-                            <TText style={styles.filterText}>{categoryFilter ? categoryFilter : "Category"}</TText>
-                            <Icon name="chevron-down" size={20} />
+                            <TText style={styles.filterText}>Category</TText>
+                            <Icon name="chevron-down" size={20} color={'white'} />
 
                             <Modal
                                 transparent={true}
@@ -261,8 +232,8 @@ const Workers = () => {
                         <TouchableOpacity style={styles.filterBtn}
                             onPress={() => setRatingViewModal(true)}
                         >
-                            <TText style={styles.filterText}>{ ratingFilter ? ratingFilter : "Rating"}</TText>
-                            <Icon name="chevron-down" size={20} />
+                            <TText style={styles.filterText}>Rating</TText>
+                            <Icon name="chevron-down" size={20} color={'white'} />
 
                             <Modal
                                 transparent={true}
@@ -282,6 +253,32 @@ const Workers = () => {
                     {
                         hasFilter ? 
                         <View style={styles.resetFilterContainer}>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{paddingRight: 50}} style={{paddingLeft: 30}}>
+                                {
+                                    verifiedFilter && verifiedFilter !== 'All' &&
+                                    <View style={styles.filters}>
+                                        <TText style={styles.filtersText}>{verifiedFilter ? "Verified" : "Unverified"}</TText>
+                                    </View>
+                                }
+                                {
+                                    barangayFilter &&
+                                    <View style={styles.filters}>
+                                        <TText style={styles.filtersText}>{barangayFilter}</TText>
+                                    </View>
+                                }
+                                {
+                                    categoryFilter &&
+                                    <View style={styles.filters}>
+                                        <TText style={styles.filtersText}>{categoryFilter}</TText>
+                                    </View>
+                                }
+                                {
+                                    ratingFilter &&
+                                    <View style={styles.filters}>
+                                        <TText style={styles.filtersText}>{ratingFilter === '5' ? ratingFilter : `${ratingFilter} and up`}</TText>
+                                    </View>
+                                }
+                            </ScrollView>
                             <TouchableOpacity style={styles.resetFilterBtn} 
                                 onPress={() => handleResetFilter()}
                             >
@@ -302,7 +299,6 @@ const Workers = () => {
 
   const onRefresh = () => {
     setIsRefreshing(true)
-    getAllWorkers()
     handleResetFilter()
     setHasResults(true)
     wait(500).then(() => setIsRefreshing(false));
@@ -313,7 +309,7 @@ const Workers = () => {
 
         <View style={styles.box}>
         
-            <View style={styles.listContainer}>
+            {/* <View style={styles.listContainer}> */}
         
                 {/* List of workers */}
                                 {/* item.verification === verifiedFilter || item.barangay === barangayFilter || item || !hasFilter ? */}
@@ -326,6 +322,11 @@ const Workers = () => {
                         onRefresh={onRefresh}
                         refreshing={isRefreshing}
                         showsVerticalScrollIndicator={false}
+                        ListEmptyComponent={() => (
+                            <View style={{alignItems: 'center', marginTop: 10}}>
+                                <TText style={{fontSize: 18, color: 'gray'}}>No results found. Try again</TText>
+                            </View>
+                        )}
                         ListHeaderComponent={() => (
                             <ListHeaderComponent />
                         )}
@@ -337,8 +338,14 @@ const Workers = () => {
                             {
                                 hasResults ?
                                                  
-                            <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
-                                <TouchableOpacity style={styles.button}>
+                            <TouchableOpacity style={{width: '100%', paddingHorizontal: 30, height: 130, zIndex:10}}
+                                onPress={() => {
+                                    console.log("workers clicked")
+                                    navigation.navigate("WorkerProfileScreen", {workerID: item._id})
+                                }}
+                            >
+                                <View style={styles.button}
+                                >
                                     <View style={styles.buttonView}>
                                         {/* Profile Picture */}
                                         <View style={styles.imageContainer}>
@@ -378,20 +385,16 @@ const Workers = () => {
                                             </View>
                                         </View>
                                     </View>
-                                </TouchableOpacity>
-                            </View>
-                            :
-                            <View style={{backgroundColor: 'pink'}}>
-                                <TText>No results found. Try again</TText>
-                            </View>
+                                </View>
+                            </TouchableOpacity>
+                            : null
                             }
                             </>
                         )}
                     />
                     
-
                 </View>
-            </View>
+            {/* </View> */}
       </View>
     </SafeAreaView>
   )
@@ -428,24 +431,28 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent:'space-between',
-        backgroundColor: '#FAFAFA',
+        backgroundColor: ThemeDefaults.themeOrange,
         borderRadius: 10,
         width: '90%',
         elevation: 4,
     },
     filterBtn: {
-        flex: 1,
-        width: '25%',
+        // flex: 1,
+        // width: '25%',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         paddingVertical: 10,
         paddingHorizontal: 8,
     },
     filterText: {
+        marginRight: 2,
+        color: '#fff'
     },
     resetFilterContainer: {
-        alignItems: 'flex-end',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginTop: 15,
         width: '100%',
         paddingRight: 30,
@@ -457,7 +464,10 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         borderWidth: 1.2,
         borderColor: ThemeDefaults.themeDarkBlue,
-        borderRadius: 10
+        borderRadius: 10,
+        backgroundColor: '#FFF',
+        zIndex: 5,
+        elevation: 5
     },
     resetFilterTxt: {
         marginLeft: 5
@@ -547,5 +557,20 @@ const styles = StyleSheet.create({
     },
     serviceFeePrice: {
         fontFamily: 'LexendDeca_Medium'
+    },
+    filters: {
+        backgroundColor: '#FAFAFA',
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        marginRight: 5,
+        marginVertical: 3,
+        borderRadius: 10,
+        borderWidth: 1.5,
+        borderColor: '#F1F1F1',
+        elevation: 1,
+    },
+    filtersText: {
+        fontSize: 14, 
+        color: 'gray'
     },
 })

@@ -8,7 +8,10 @@ import Messaging from '../Screens/Messaging';
 import Notifications from '../Screens/Notifications';
 import PostRequests from '../Screens/PostRequests';
 import SubCategory from '../Screens/SubCategory';
+import UserProfile from '../Screens/UserProfile';
 import Workers from '../Screens/Workers';
+import UserProfileStack from './UserProfileStack';
+import WorkerProfile from '../Screens/WorkerProfile';
 
 
 const HomeStack = createNativeStackNavigator();
@@ -24,6 +27,7 @@ export default function HomeNavigationStack () {
           <HomeStack.Screen name="PostRequestScreen" component={PostRequests} />
           <HomeStack.Screen name="MessagingScreen" component={Messaging} />
           <HomeStack.Screen name="NotificationScreen" component={Notifications} />
+          <HomeStack.Screen name="WorkerProfileScreen" component={WorkerProfile} />
       </HomeStack.Navigator>
     )
 }

@@ -2,6 +2,7 @@ import { StyleSheet, Dimensions, View, Text, SafeAreaView, ActivityIndicator, Im
 import React, {useEffect, useState} from 'react'
 import Appbar from '../Components/Appbar'
 import { IPAddress } from '../global/global'
+import { useNavigation } from '@react-navigation/native'
 
 import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -16,6 +17,7 @@ const HEIGHT = Dimensions.get('window').height
 const ListSpecificWorkers = ({route}) => {
 
     const {chosenCategory} = route.params
+    const navigation = useNavigation()
 
     const [worker, setWorkers] = useState([])
 
@@ -47,7 +49,7 @@ const ListSpecificWorkers = ({route}) => {
             ListHeaderComponent={() => (
                 <View style={styles.headerContainer}>
                     <TText style={styles.headerTitle}>Available Workers</TText>
-                    <TText style={styles.headerSubTitle}>Please choose an available worker for {chosenCategory}</TText>
+                    <TText style={styles.headerSubTitle}>Please choose an available worker for <TText style={{color: ThemeDefaults.themeOrange}}>{chosenCategory}</TText></TText>
                 </View>
             )}
             ListFooterComponent={() => (
@@ -55,9 +57,14 @@ const ListSpecificWorkers = ({route}) => {
             )}
             // showsVerticalScrollIndicator={false}
             renderItem={({item}) => (
-                <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
+                <View style={{width: '100%', paddingHorizontal: 20, height: 130}}>
                     {/* <TText>{item.workerId.age}</TText> */}
-                    <TouchableOpacity style={styles.button}>
+                    <TouchableOpacity style={styles.button}
+                        onPress={() => {
+                            console.log(item.workerId._id)
+                            navigation.navigate("WorkerProfileScreen", {workerID: item.workerId._id})
+                        }}
+                    >
                         <View style={styles.buttonView}>
                             {/* Profile Picture */}
                             <View style={styles.imageContainer}>

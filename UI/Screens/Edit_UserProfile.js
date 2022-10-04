@@ -57,7 +57,6 @@ const Edit_UserProfile = () => {
     const [isPickerVisible, setPickerVisible] = useState(false)
     const [appIsSaving, setAppIsSaving] = useState(false)
 
-
     let arrayofImages = []
 
     useEffect(() => {
@@ -84,6 +83,9 @@ const Edit_UserProfile = () => {
         }).then((res) => res.json())
         .then((data) => {
             setWorkList([...data])
+            
+            console.log("worklist: ", data)
+
             // console.log("minPrice", data[0]._id)
             // console.log("sub_cat: ", data[0].ServiceSubId.ServiceSubCategory)
 
@@ -103,20 +105,21 @@ const Edit_UserProfile = () => {
     }, [])
 
 
+    // Place prev images of appointments to state to separate them to the new images
     useEffect(() => {
         setPrevArrayPrevWorks([])
 
-        if(global.userData.prevWorks > 0 && global.userData.role === "worker"){
+        if(global.userData.prevWorks && global.userData.role === "worker"){
             // console.log("not null")
             global.userData.prevWorks.map(image => arrayofImages.push(image))
             setPrevArrayPrevWorks([...arrayofImages])
+
+            // arrayofImages = []
         }
-        // console.log(prevArrayPrevWorks)
-        // global.userData.prevWorks !== null ? (
-        // ) : null
     }, [])
 
 
+    // Request permisson to access image gallery for uploading of images
     useEffect(() => {
         (async () => {
           if (Platform.OS !== "web") {
@@ -133,12 +136,8 @@ const Edit_UserProfile = () => {
 
 
     const handleBackButtonPressed = () => {
-        // console.log("worklist: ", workList)
-        
-        // console.log("gooooooo", editHasChanges)
         setBackBtnPressed(true)
         return true;
-        // editHasChanges ? setBackBtnPressed(true) : navigation.navigate("UserProfileScreen")
     }
 
     const setBarangay = (option) => {
@@ -161,27 +160,23 @@ const Edit_UserProfile = () => {
 
     const handleRemoveWorkItem = (index) => {
         const list = [...userWorkListEdit];
-        // console.log(list)
         list.splice(index, 1);
         setUserWorkListEdit(list)
-        // console.log(list)
         setEditHasChanges(true)
     }
 
     const handleServiceSelect = (val, index) => {
       const list = [...userWorkListEdit];
-    //   console.log("val handle service: ", val)
 
       if(val.sub_category === "unlisted"){
         list[index]['category'] = 'unlisted'
       } else {
-        // console.log("val cat: ", val.Category)
   
         list[index]['sub_category'] = val.ServiceSubCategory;
         list[index]['category'] = "";
         setUserWorkListEdit(list)
       }
-    //   console.log(workList)
+      
       setEditHasChanges(true)
     }
 
@@ -200,6 +195,10 @@ const Edit_UserProfile = () => {
     }
 
 
+
+
+
+    // Uploading and Picking of Images from device
     const pickImage = async () => {
 
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -252,6 +251,10 @@ const Edit_UserProfile = () => {
         // console.log("Image state: ", pastAppointmentImages)
       };
 
+    //   -----------------
+
+
+
     const handleRemoveImage = (index) => {
         const list = [...pastAppointmentImages];
         list.splice(index, 1);
@@ -261,10 +264,9 @@ const Edit_UserProfile = () => {
 
     const handleRemoveUploadedImage = () => {
         const list = [...prevArrayPrevWorks]
-        list.splice(indexToRemove, 1)
-        setPrevArrayPrevWorks(list)
-        setEditHasChanges(true)
-
+        console.log("image to be deleted: ", list[indexToRemove])
+        console.log("updated image list: ", list)
+        
         fetch("http://" + IPAddress + ":3000/prevWorks/" + global.userData._id, {
             method: "DELETE",
             headers: {
@@ -273,9 +275,15 @@ const Edit_UserProfile = () => {
             body: JSON.stringify({
                 "toDelete": prevArrayPrevWorks[indexToRemove],
             })
-        }).then((res) => console.log("Deleted Uploaded Image Successfully"))
+        })
+        .then((res) => console.log("Deleted Uploaded Image Successfully"))
         .catch((error) => console.log(error.image))
+        
+        list.splice(indexToRemove, 1)
+        console.log("list after remove: ", list)
+        setPrevArrayPrevWorks(list)
 
+        setEditHasChanges(true)
         setRemoveUploadedModal(false)
         // handleRemoveImage(indexToRemove)
     }
@@ -286,10 +294,6 @@ const Edit_UserProfile = () => {
                 <ActivityIndicator size='large' />
             </View>
         )
-    }
-
-    const handeRemovePrevWorksImage = () => {
-
     }
 
 
@@ -484,8 +488,8 @@ const Edit_UserProfile = () => {
                         <TouchableOpacity style={[styles.modalURBtn, styles.modalURYesBtn]}
                             onPress={() => {
                                 setConfirmRemoveUploaded(true)
-                                handleRemoveUploadedImage()
                                 setRemoveUploadedModal(false)
+                                handleRemoveUploadedImage()
                             }}
                         >
                             <TText style={[styles.modalURBtnText, styles.modalURYesText]}>Yes</TText>
@@ -795,8 +799,8 @@ const Edit_UserProfile = () => {
                                                 <TouchableOpacity style={{backgroundColor: '#fff', borderRadius: 20, position: 'absolute', top: 5, right: 5, zIndex: 5}}
                                                     onPress={()=> {
                                                         // show modal if sure to delete
-                                                        setRemoveUploadedModal(true)
                                                         setIndexToRemove(index)
+                                                        setRemoveUploadedModal(true)
                                                     }}
                                                 >
                                                     <Icon name='close-circle' size={28} color={"#FF5353"} />

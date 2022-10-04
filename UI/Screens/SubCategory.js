@@ -49,22 +49,19 @@ const SubCategory = ({route}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-        <Appbar hasPicture={true} backBtn={true} accTypeSelect={true} showLogo={true} />
+        <View style={{elevation: 4}}>
+            <Appbar hasPicture={true} backBtn={true} accTypeSelect={true} showLogo={true} />
+        </View>
 
         <View style={styles.buttonContainer}>
             <FlashList 
                 data={subCategories}
                 keyExtractor={item => item._id}
                 estimatedItemSize={50}
-                ListEmptyComponent={() => {
-                    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-                        <ActivityIndicator size={'large'}  />
-                    </View>
-                }}
                 ListHeaderComponent={() => (
                     <View style={styles.headerContainer}>
                         <TText style={styles.headerTitle}>{categoryNAME} Services</TText>
-                        <TText style={styles.headerSubTitle}>Please choose a specific {categoryNAME} service</TText>
+                        <TText style={styles.headerSubTitle}>Please choose a specific <TText style={{color: ThemeDefaults.themeOrange}}>{categoryNAME} service</TText></TText>
                     </View>
                 )}
                 ListFooterComponent={() => (
@@ -116,12 +113,13 @@ const styles = StyleSheet.create({
     headerContainer: {
         marginTop: 10,
         marginBottom: 30,
+        // marginLeft: 20,
         alignItems: 'center',
     },
     headerTitle: {
         fontSize: 20,
         fontFamily: 'LexendDeca_SemiBold',
-        marginBottom: 25
+        marginBottom: 10
     },
     headerSubTitle: {
 
@@ -135,7 +133,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         overflow: 'hidden',
         backgroundColor: '#fff',
-        marginHorizontal: 30,
+        marginHorizontal: 20,
         marginBottom: 20,
         elevation: 4,
     },
@@ -144,7 +142,7 @@ const styles = StyleSheet.create({
     },
     imageStyle: {
         width: '100%',
-        height: 180,
+        height: 160,
     },
     subCategoryDescriptionBox: {
         padding: 20
