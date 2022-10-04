@@ -1,15 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const Recruiter = require("../Models/Recruiters");
+const cloudinary = require("../Helpers/cloudinary");
 
 const multer = require("multer");
 
 //store photos
 const storage = multer.diskStorage({
   //destination for files
-  destination: function (request, file, callback) {
-    callback(null, "./Public/Uploads");
-  },
+  // destination: function (request, file, callback) {
+  //   callback(null, "./Public/Uploads");
+  // },
 
   //add back the extension
   filename: function (request, file, callback) {
@@ -43,7 +44,7 @@ router
       }
     });
   })
-  .put(upload.single("profilePic"), function (req, res) {
+  .put(upload.single("profilePic"), async function (req, res) {
     let recruiterObj = {
       username: req.body.username,
       firstname: req.body.firstname,
@@ -61,7 +62,10 @@ router
       emailAddress: req.body.emailAddress,
     };
     if (req.file !== undefined) {
-      recruiterObj.profilePic = req.file.filename;
+      const profilePic = await cloudinary.uploader.upload(req.file.path, {
+        folder: "HanapLingkod/profilePic",
+      });
+      recruiterObj.profilePic = profilePic.url;
     }
     Recruiter.findOneAndUpdate(
       { _id: req.params.id },
