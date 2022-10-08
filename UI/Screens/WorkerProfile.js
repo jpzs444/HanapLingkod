@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import { IPAddress } from '../global/global';
 import ViewImage from '../Components/ViewImage';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 import ImageView from "react-native-image-viewing";
 import Swiper from 'react-native-swiper'
@@ -16,6 +16,19 @@ const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
 const WorkerProfile = ({route}) => {
+
+    const screenFocused = useIsFocused()
+
+    useEffect(() => {
+        getUpdatedUserData()
+        getUpdatedWorkList()
+
+        return () => {
+            setworkerInformation({})
+            setWorkList([])
+        }
+        
+    }, [screenFocused])
 
     const {workerID} = route.params;
 
@@ -32,21 +45,8 @@ const WorkerProfile = ({route}) => {
     let imageList = []
 
     const [workerInformation, setworkerInformation] = useState({})
-    // let workk = []
-
-    // let workerID = workerInformation._id
-
-    useEffect(() => {
-        getUpdatedUserData()
-    }, [])
-    
-    // fetch data if role of user is worker
-    useEffect(() => {
-        getUpdatedWorkList()
-    }, [])
 
     const getUpdatedUserData = () => {
-        let userRoute = workerInformation.role === "recruiter" ? "Recruiter/" : "Worker/"
 
         fetch("http://" + IPAddress + ":3000/Worker/" + workerID, {
             method: "GET",
@@ -67,7 +67,7 @@ const WorkerProfile = ({route}) => {
         })
         .catch((error) => console.log(error.message))
 
-        console.log("workerInformation: ", workerInformation)
+        // console.log("workerInformation: ", workerInformation)
     }
 
     const getUpdatedWorkList = () => {
@@ -422,6 +422,6 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         borderWidth: 0.5,
         borderColor: "#000",
-        backgroundColor: 'pink'
+        backgroundColor: 'gray'
     }
 })

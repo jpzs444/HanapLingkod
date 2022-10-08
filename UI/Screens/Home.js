@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { SafeAreaView, RefreshControl, Text, View, Image, StatusBar, Dimensions, StyleSheet, TouchableOpacity, TextInput, ImageBackground, TouchableHighlight } from 'react-native';
+import { SafeAreaView, RefreshControl, Text, View, Image, StatusBar, 
+  Dimensions, StyleSheet, TouchableOpacity, TextInput, ImageBackground } from 'react-native';
 import TText from '../Components/TText'
 import { useNavigation } from '@react-navigation/native';
 import Appbar from '../Components/Appbar';
@@ -12,34 +13,7 @@ import { FlashList } from '@shopify/flash-list';
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
-const categoryBG = [
-  {
-    category: "Cleaning",
-    bg: require("../assets/images/cleaning.jpg")
-  },
-  {
-    category: "Plumbing",
-    bg: require("../assets/images/plumbing.jpg")
-  },
-  {
-    category: "Mounting",
-    bg: require('../assets/images/mounting.jpg')
-  },
-  {
-    category: "Electrical",
-    bg: require("../assets/images/electrical.jpg")
-  },
-  {
-    category: "Masonry",
-    bg: require("../assets/images/masonry.jpg")
-  },
-  {
-    category: "Painting Services",
-    bg: require("../assets/images/painting.jpg")
-  }
-]
-
-export default function Home({route}) {
+export default function Home() {
 
   const navigation = useNavigation();
   const [category, setCategory] = useState([])
@@ -49,9 +23,6 @@ export default function Home({route}) {
   let searchW;
 
   const [searchResults, setSearchResults] = useState([])
-  const [searchResultCategory, setSearchResultCategory] = useState([])
-  const [searchResultSubCategory, setSearchResultSubCategory] = useState([])
-  const [searchResultWorker, setSearchResultWorker] = useState([])
 
   const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -59,10 +30,6 @@ export default function Home({route}) {
 
   const searchInput = useRef();
 
-
-  // useEffect(() => {
-  //   setSearchWord(searchW)
-  // }, [searchW])
   
   useEffect(() => {
     // send pushtoken to backend
@@ -152,13 +119,8 @@ export default function Home({route}) {
       console.log("category search in 1: ", searchResults)
     })
 
-    // console.log("worker: ", searchResultWorker)
-    // printOutData()
   }
 
-  // const printOutData = () => {
-  //   console.log("worker search: ", searchResultWorker)
-  // }
 
   const wait = (timeout) => {
     return new Promise(resolve => setTimeout(resolve, timeout));
@@ -189,7 +151,9 @@ export default function Home({route}) {
 
         {/* Action bar Button */}
         <View style={styles.actionbar_container}>
-          <TouchableOpacity style={styles.actionbar_btn}>
+          <TouchableOpacity style={styles.actionbar_btn}
+            onPress={() => navigation.navigate("RequestsScreen")}
+          >
             <View style={styles.actionbar_iconContainer}>
               <Icon name="clipboard-text-multiple" size={50} color="#275A53" />
             </View>
@@ -276,9 +240,10 @@ export default function Home({route}) {
           
 
         </View>
-      </View>
+      </View>    
     )
   }
+  
 
   const Mainhomelist = () => {
     return(
@@ -292,9 +257,9 @@ export default function Home({route}) {
         // keyboardShouldPersistTaps={'always'}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={() => (<View style={{height: 120}}></View>)}
-        ListHeaderComponent={() => 
-          <ScreenHeaderComponent />            
-        }
+        ListHeaderComponent={() => (
+          <ScreenHeaderComponent />
+        )}
         renderItem={({item}) => (
           item.Category !== 'unlisted' ? 
               <TouchableOpacity style={styles.categoryBtn}
@@ -330,9 +295,9 @@ export default function Home({route}) {
           estimatedItemSize={70}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={() => (<View style={{height: 180}}></View>)}
-          ListHeaderComponent={() => 
-            <ScreenHeaderComponent />            
-          }
+          ListHeaderComponent={() => (
+            <ScreenHeaderComponent />     
+          )}
           renderItem={({item}) => (
             <View>
               {
