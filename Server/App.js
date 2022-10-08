@@ -22,6 +22,7 @@ const UsernotificationRoutes = require("./Routes/UserNotificationRoutes");
 const WorkerRoutes = require("./Routes/WorkerRoutes");
 const WorkRoutes = require("./Routes/WorkRoutes");
 const RecruiterRoutes = require("./Routes/RecruiterRoutes");
+const ServiceRequestRoutes = require("./Routes/ServiceRequestRoutes");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -60,30 +61,6 @@ const multipleFile = upload.fields([
   { name: "govId" },
   { name: "certificate" },
 ]);
-
-// notification(
-//   ["ExponentPushToken[SGLOLBPJ8RivZf4UtD8-TL]"],
-//   "HanapLingkod",
-//   "ang jologs ko sorry, i will be better"
-// );
-
-// app.post("/rere", upload.single("qqq"), async function (req, res) {
-//   try {
-//     // console.log(req.file);
-//     // const result = await cloudinary.uploader.upload(req.file.path, {
-//     //   folder: "HanapLingkod",
-//     // });
-//     // console.log(result);
-//     // const publicId = extractPublicId(result.url);
-//     const url =
-//       "https://res.cloudinary.com/de7wy4uvq/image/upload/v1664851180/HanapLingkod/certificate/vags0o1zxrm92mp6ljjo.jpg";
-//     const publicId = url.split("/").slice(7).join("/").split(".")[0];
-//     console.log(publicId);
-//     //sample
-//     // const getPublicId = result.url.split("/").pop().split(".")[0];
-//     // console.log(getPublicId);
-//   } catch {}
-// });
 
 app.get("/images/:filename", async function (req, res) {
   let path = "./Public/Uploads/" + req.params.filename;
@@ -413,6 +390,7 @@ app.use(UsernotificationRoutes);
 app.use(WorkerRoutes);
 app.use(RecruiterRoutes);
 app.use(WorkRoutes);
+app.use(ServiceRequestRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("listening on port 3000."));

@@ -5,6 +5,7 @@ const UserNotificationSchema = new Schema({
   to: { type: String, required: true },
   title: { type: String, required: true },
   body: { type: String, required: true },
+  userID: String,
   read: { type: Boolean, default: 0 },
   createdAt: {
     type: Date,

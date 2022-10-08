@@ -1,6 +1,6 @@
 const { Expo } = require("expo-server-sdk");
 const UserNotification = require("../Models/Notifications");
-function notification(pushID, title, body) {
+function notification(pushID, title, body, userID) {
   // Create a new Expo SDK client
   // optionally providing an access token if you have enabled push security
   let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
@@ -26,6 +26,7 @@ function notification(pushID, title, body) {
       title: title,
       body: body,
       data: { withSome: "data" },
+      userID: userID,
     });
   }
 
@@ -41,7 +42,7 @@ function notification(pushID, title, body) {
         let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
         console.log(ticketChunk);
         tickets.push(...ticketChunk);
-        // console.log(messages);
+        console.log(messages);
         const notification = await UserNotification.create(messages);
 
         // NOTE: If a ticket contains an error code in ticket.details.error, you

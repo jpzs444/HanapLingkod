@@ -6,9 +6,9 @@ const Worker = require("../Models/Workers");
 const Recruiter = require("../Models/Recruiters");
 
 router
-  .route("/notification/:pushtoken")
+  .route("/notification/:userId")
   .get(function (req, res) {
-    UserNotification.find({ to: req.params.pushtoken }, function (err, notif) {
+    UserNotification.find({ userID: req.params.userId }, function (err, notif) {
       if (notif) {
         res.send(notif);
       } else {
@@ -18,7 +18,7 @@ router
   })
   .put(async function (req, res) {
     await UserNotification.updateMany(
-      { to: req.params.pushtoken },
+      { userID: req.params.pushtoken },
       { $set: { read: 1 } }
     );
     res.send("Updated Successfully");
