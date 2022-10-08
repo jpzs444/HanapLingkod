@@ -140,9 +140,9 @@ export default function Appbar(props) {
         <TouchableOpacity style={styles.right}>
             {
                 props.hasPicture ? 
-                    <TouchableOpacity style={{borderRadius: 20, elevation: 7, alignSelf: 'flex-end'}} onPress={() => { navigation.navigate("UserProfileStack", {profile_id: global.userData._id}) }}>
+                    <TouchableOpacity style={{borderRadius: 20, elevation: 7, alignSelf: 'flex-end', width: 40, height: 40, borderRadius: 20,}} onPress={() => { navigation.navigate("UserProfileStack", {profile_id: global.userData._id}) }}>
                         <View>
-                            <Image source={global.userData.profilePic !== 'pic' ?{uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/default-profile.png")} style={[styles.userPicture, {width: 40, height: 40, borderRadius: 20, elevation: 4}]} />
+                            <Image source={global.userData.profilePic !== 'pic' ? {uri: global.userData.profilePic} : require("../assets/images/default-profile.png")} style={[styles.userPicture, {width: 40, height: 40, borderRadius: 20, elevation: 4}]} />
                         </View>
                     </TouchableOpacity>
                     : null

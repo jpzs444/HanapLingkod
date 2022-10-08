@@ -1,5 +1,5 @@
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import Home from '../Screens/Home';
@@ -12,14 +12,15 @@ import UserProfile from '../Screens/UserProfile';
 import Workers from '../Screens/Workers';
 import UserProfileStack from './UserProfileStack';
 import WorkerProfile from '../Screens/WorkerProfile';
+import RequestForm from '../Screens/RequestForm';
+import Requests from '../Screens/Requests';
 
 
 const HomeStack = createNativeStackNavigator();
 
-
 export default function HomeNavigationStack () {
     return(
-      <HomeStack.Navigator initialRouteName="HomeScreen" screenOptions={{headerShown: false}} >
+      <HomeStack.Navigator initialRouteName="HomeScreen" screenOptions={{headerShown: false, tabBarVisible: false}} >
           <HomeStack.Screen name="HomeScreen" component={Home} />
           <HomeStack.Screen name="SubCategoryScreen" component={SubCategory} />
           <HomeStack.Screen name="ListSpecificWorkerScreen" component={ListSpecificWorkers} />
@@ -27,7 +28,9 @@ export default function HomeNavigationStack () {
           <HomeStack.Screen name="PostRequestScreen" component={PostRequests} />
           <HomeStack.Screen name="MessagingScreen" component={Messaging} />
           <HomeStack.Screen name="NotificationScreen" component={Notifications} />
-          <HomeStack.Screen name="WorkerProfileScreen" component={WorkerProfile} />
+          <HomeStack.Screen name="RequestsScreen" component={Requests} />
+          {/* <HomeStack.Screen name="WorkerProfileScreen" component={WorkerProfile} /> */}
+          {/* <HomeStack.Screen name="RequestFormScreen" component={RequestForm} /> */}
       </HomeStack.Navigator>
     )
 }

@@ -27,6 +27,7 @@ const ModalPicker = (props) => {
     
     const [serviceList, setServiceList] = useState([]);
     const [categories, setCategories] = useState([])
+    const [workList, setWorkList] = useState([])
 
 
     // sub-categories
@@ -55,6 +56,19 @@ const ModalPicker = (props) => {
         }).catch((error) => console.log("error: ", error.message))
     }, [])
 
+    // worklist
+    useEffect(() => {
+        fetch(`http://${IPAddress}:3000/WorkList/${props.workerID}`, {
+            method: "GET",
+            headers: {
+                'content-type': 'application/json',
+            },
+        }).then((res) => res.json())
+        .then((data) => {
+            setWorkList([...data])
+        })
+    }, [])
+
 
     const onPressItem = (selected) => {
         props.changeModalVisibility(false)
@@ -64,7 +78,22 @@ const ModalPicker = (props) => {
     const onPressItemServices = (selected, index) => {
         props.changeModalVisibility(false)
         props.setData(selected)
+        console.log("Selected: ", selected)
     }
+
+    const workListSelection = workList.map(function(item ,index){
+        return(
+            <TouchableOpacity
+                key={index}
+                style={styles.option}
+                onPress={() => onPressItemServices(item, index)}
+            >   
+                <TText style={styles.text}>
+                    {item.ServiceSubId.ServiceSubCategory}
+                </TText>
+            </TouchableOpacity>
+        )
+    })
 
     const serviceListOptions = serviceList.map(function(item, index) {
         return(
@@ -171,6 +200,7 @@ const ModalPicker = (props) => {
                 {props.categoryFilter ? serviceListOptions : null}
                 {props.ratingFilter ? optionFilterRating : null}
                 {props.services ? serviceListOptions : null}
+                {props.workList ? workListSelection : null}
 
                 {
                     props.services ? 

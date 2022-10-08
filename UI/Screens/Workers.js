@@ -341,7 +341,7 @@ const Workers = () => {
                             <TouchableOpacity style={{width: '100%', paddingHorizontal: 30, height: 130, zIndex:10}}
                                 onPress={() => {
                                     console.log("workers clicked")
-                                    navigation.navigate("WorkerProfileScreen", {workerID: item._id})
+                                    navigation.navigate("RequestFormDrawer", {workerID: item._id, workerInformation: item, selectedJob: '', showMultiWorks: true})
                                 }}
                             >
                                 <View style={styles.button}

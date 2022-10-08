@@ -1,8 +1,8 @@
 import { StyleSheet, Dimensions, View, Text, SafeAreaView, ActivityIndicator, Image, StatusBar, TouchableOpacity } from 'react-native'
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useLayoutEffect} from 'react'
 import Appbar from '../Components/Appbar'
 import { IPAddress } from '../global/global'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 
 import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -14,15 +14,20 @@ import { FlatList } from 'react-native-gesture-handler'
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
-const ListSpecificWorkers = ({route}) => {
+const ListSpecificWorkers = ({route, navigation}) => {
 
     const {chosenCategory} = route.params
-    const navigation = useNavigation()
+    // const navigation = useNavigation()
 
     const [worker, setWorkers] = useState([])
 
     useEffect(() => {
         console.log("list spec:", chosenCategory)
+        loadWorkers()
+    }, [])
+
+
+    const loadWorkers = () => {
         fetch(`http://${IPAddress}:3000/Work/${chosenCategory}`, {
             method: 'GET',
             headers: {
@@ -34,7 +39,7 @@ const ListSpecificWorkers = ({route}) => {
             setWorkers([...data])
             console.log(data)
         }).catch((err) => console.log("error: ", err.message))
-    }, [])
+    }
 
 
   return (
@@ -44,6 +49,7 @@ const ListSpecificWorkers = ({route}) => {
     <View style={styles.workersContainer}>
     <FlashList 
             data={worker}
+            extraData={worker}
             keyExtractor={item => item._id}
             estimatedItemSize={50}
             ListHeaderComponent={() => (
@@ -62,7 +68,7 @@ const ListSpecificWorkers = ({route}) => {
                     <TouchableOpacity style={styles.button}
                         onPress={() => {
                             console.log(item.workerId._id)
-                            navigation.navigate("WorkerProfileScreen", {workerID: item.workerId._id})
+                            navigation.navigate("RequestFormDrawer", {workerID: item.workerId._id, workerInformation: item.workerId, selectedJob: chosenCategory, minPrice: item.minPrice, maxPrice: item.maxPrice, showMultiWorks: false})
                         }}
                     >
                         <View style={styles.buttonView}>
@@ -154,7 +160,8 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: '100%'
+        height: '100%',
+        // elevation: 3
     },
     descriptionBox: {
         flex: 1.9,

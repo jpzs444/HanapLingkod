@@ -165,7 +165,7 @@ const UserProfile = ({route}) => {
                 {/* Profile Picture */}
                 <View style={{alignItems: 'center', width: '100%', marginTop: 20}}>
                
-                    <Image source={global.userData.profilePic !== 'pic' ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/default-profile.png")} style={styles.profilePicture} />
+                    <Image source={global.userData.profilePic !== 'pic' ? {uri: global.userData.profilePic} : require("../assets/images/default-profile.png")} style={styles.profilePicture} />
                         
                     {/* <Image source={ global.userData.profilePic ? {uri: `http://${IPAddress}:3000/images/${global.userData.profilePic}`} : require("../assets/images/bg-welcome.png")} style={{width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: 'black'}} /> */}
                     {/* Name and role of User */}
@@ -241,7 +241,7 @@ const UserProfile = ({route}) => {
                     {/* works offered by the worker */}
                     <View style={{marginBottom: 15, marginHorizontal: 30, width: '100%', alignItems: 'center'}}>
                         {
-                            activeTab === "works" ?
+                            activeTab === "works" && global.userData.role === 'worker' ?
                             <>
                                 {
                                     workList.map(function (workItem, index) {
@@ -271,6 +271,11 @@ const UserProfile = ({route}) => {
                                 )
                             })
                                 }
+                                <View style={styles.viewScheduleContainer}>
+                                    <TouchableOpacity style={styles.viewScheduleBtn}>
+                                        <TText style={styles.viewScheduleText}>View Schedule</TText>
+                                    </TouchableOpacity>
+                                </View>
                             </>
                             :
                             <View style={{marginTop: 20}}>
@@ -429,5 +434,21 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: "#000",
         backgroundColor: 'pink'
-    }
+    },
+    viewScheduleContainer: {
+        marginTop: 15,
+        width: '100%',
+        paddingHorizontal: 40
+    },
+    viewScheduleBtn: {
+        backgroundColor: ThemeDefaults.themeDarkBlue,
+        borderRadius: 10,
+        paddingVertical: 12,
+        alignItems: 'center',
+        elevation: 4
+    },
+    viewScheduleText: {
+        fontSize: 18,
+        color: ThemeDefaults.themeWhite
+    },
 })
