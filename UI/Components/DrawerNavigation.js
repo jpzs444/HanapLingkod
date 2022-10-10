@@ -13,6 +13,9 @@ import CustomDrawer from './CustomDrawer';
 import Welcome from '../Screens/Welcome';
 import Login from '../Screens/Login';
 import UserProfile from '../Screens/UserProfile';
+import HomeNavigationStack from './HomeStack';
+import RequestForm from '../Screens/RequestForm';
+import WorkerProfile from '../Screens/WorkerProfile';
 
 
 const Drawer = createDrawerNavigator();
@@ -54,6 +57,18 @@ export default function DrawerNavigation(){
             }} />
 
             <Drawer.Screen name="LoginScreen" component={Login} options={{
+                drawerIcon: ({color}) => (
+                    <Icon name="clipboard-edit" size={25} color={color}  />
+                )
+            }} />
+
+            <Drawer.Screen name="RequestFormDrawer" component={RequestForm} options={{
+                drawerIcon: ({color}) => (
+                    <Icon name="clipboard-edit" size={25} color={color}  />
+                )
+            }} />
+
+            <Drawer.Screen name="WorkerProfileDrawer" component={WorkerProfile} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="clipboard-edit" size={25} color={color}  />
                 )

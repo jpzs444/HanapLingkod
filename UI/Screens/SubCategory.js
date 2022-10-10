@@ -35,7 +35,7 @@ const SubCategory = ({route}) => {
             // console.log("sub-category: ", data)
         }).catch((err) => console.log("error: ", err.message))
         setIsLoading(false)
-    }, [])
+    }, [categoryID])
     
     if(isLoading){
         return (

@@ -16,8 +16,12 @@ import Notifications from '../Screens/Notifications';
 import WorkerProfile from '../Screens/WorkerProfile';
 
 import { devicePushToken, IPAddress } from '../global/global';
-import HomeNavigationStack from './HomeStack';
+// import HomeNavigationStack from './HomeStack';
 import UserProfile from '../Screens/UserProfile';
+import RequestForm from '../Screens/RequestForm';
+import ListSpecificWorkers from '../Screens/ListSpecificWorkers';
+import SubCategory from '../Screens/SubCategory';
+import HomeNavigationStack from './HomeStack';
 
 const hiddenTabNavBtn = () => ({
     tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
@@ -117,6 +121,22 @@ const TabNavigation = () => {
                 ),
             }}
         />
+
+        {/* List of Specific Workers Tab */}
+        <Tab.Screen name="ListOfSpecificWorkersTab" component={ListSpecificWorkers} 
+            options={{
+                tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
+            }}
+        />
+
+        {/* List of Specific Workers Tab */}
+        <Tab.Screen name="SubCategoryTab" component={SubCategory} 
+            options={{
+                tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
+                
+            }}
+        />
+
 
         {/* <Tab.Screen name="UserProfileScreen" component={UserProfile} 
             options={hiddenTabNavBtn}
