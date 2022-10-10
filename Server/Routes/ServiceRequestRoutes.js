@@ -36,6 +36,7 @@ router
         serviceDate: req.body.serviceDate,
         startTime: req.body.startTime,
         description: req.body.description,
+        geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
         requestStatus: 1,
       });
       serviceRequest.save(function (err) {
