@@ -81,9 +81,13 @@ router
     );
   })
   .delete(async function (req, res) {
-    const query = await RequestPost.findByIdAndDelete({
-      _id: req.params.id,
-    });
+    const session = await conn.startSession();
+    const query = await RequestPost.findByIdAndDelete(
+      {
+        _id: req.params.id,
+      },
+      { session }
+    );
     const { comments } = query;
     Comment.deleteMany(
       {
@@ -95,7 +99,8 @@ router
         } else {
           console.log("comment succesfully deleted");
         }
-      }
+      },
+      { session }
     );
     res.send("success");
   });
