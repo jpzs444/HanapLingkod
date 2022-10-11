@@ -15,6 +15,16 @@ const ServiceRequestSchema = mongoose.Schema({
   description: String,
   requestStatus: Number,
   comment: String,
+  geometry: {
+    type: {
+      type: String,
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number],
+      index: "2dsphere",
+    },
+  },
   created_at: { type: Date, required: true, default: Date.now },
 });
 

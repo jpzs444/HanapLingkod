@@ -23,6 +23,7 @@ const WorkerRoutes = require("./Routes/WorkerRoutes");
 const WorkRoutes = require("./Routes/WorkRoutes");
 const RecruiterRoutes = require("./Routes/RecruiterRoutes");
 const ServiceRequestRoutes = require("./Routes/ServiceRequestRoutes");
+const RequestPostRoutes = require("./Routes/RequestPostRoutes");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,7 +33,7 @@ mongoose.connect(
   // "mongodb://localhost:27017/hanapLingkod"
 );
 
-const conn = mongoose.connection;
+global.conn = mongoose.connection;
 
 conn.on("error", () => console.error.bind(console, "connection error"));
 
@@ -391,6 +392,7 @@ app.use(WorkerRoutes);
 app.use(RecruiterRoutes);
 app.use(WorkRoutes);
 app.use(ServiceRequestRoutes);
+app.use(RequestPostRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("listening on port 3000."));
