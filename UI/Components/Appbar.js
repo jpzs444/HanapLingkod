@@ -55,7 +55,18 @@ export default function Appbar(props) {
             {
                 props.onlyBackBtn && 
                     <TouchableOpacity style={styles.left}
-                        onPress={() => { navigation.goBack() }}
+                        onPress={() => { 
+                            if(props.reqForm){
+                                navigation.navigate("RequestFormDrawer", {showCalendar: true})
+                            } else if(props.modalSchedule) {
+                                props.changeSchedModalState(false)
+                                props.changeCalendarModalState(true)
+                            } else if(props.modalCalendar){
+                                props.changeCalendarModalState(false)
+                            } else {
+                                navigation.goBack()
+                            }
+                        }}
                     >
                         <Icon name="arrow-left" size={30} color={props.light ? '#fff' : '#000'} />
                     </TouchableOpacity> 

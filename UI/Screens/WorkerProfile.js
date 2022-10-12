@@ -168,7 +168,7 @@ const WorkerProfile = ({route}) => {
                 {/* Profile Picture */}
                 <View style={{alignItems: 'center', width: '100%', marginTop: 20}}>
                
-                    <Image source={workerInformation.profilePic !== 'pic' ? {uri: `http://${IPAddress}:3000/images/${workerInformation.profilePic}`} : require("../assets/images/default-profile.png")} style={styles.profilePicture} />
+                    <Image source={workerInformation.profilePic !== 'pic' ? {uri: workerInformation.profilePic} : require("../assets/images/default-profile.png")} style={styles.profilePicture} />
                         
                     {/* <Image source={ workerInformation.profilePic ? {uri: `http://${IPAddress}:3000/images/${workerInformation.profilePic}`} : require("../assets/images/bg-welcome.png")} style={{width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: 'black'}} /> */}
                     {/* Name and role of User */}

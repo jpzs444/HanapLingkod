@@ -36,28 +36,29 @@ const ModalPicker = (props) => {
             method: "GET",
             headers: {
                 "content-type": "application/json",
-              },
+            },
         }).then((response)=> response.json())
-        .then((res) => {
-            setServiceList([...res])
+        .then((data) => {
+            setServiceList([...data])
         }).catch((error) => console.log("error: ", error.message))
     },[])
-
+    
     // categories
     useEffect(() => {
         fetch("http://"+ IPAddress +":3000/service-category", {
             method: "GET",
             headers: {
                 "content-type": "application/json",
-              },
+            },
         }).then((response)=> response.json())
-        .then((res) => {
-            setCategories([...res])
+        .then((data) => {
+            setCategories([...data])
         }).catch((error) => console.log("error: ", error.message))
     }, [])
 
     // worklist
     useEffect(() => {
+        props.workerID ?
         fetch(`http://${IPAddress}:3000/WorkList/${props.workerID}`, {
             method: "GET",
             headers: {
@@ -67,6 +68,7 @@ const ModalPicker = (props) => {
         .then((data) => {
             setWorkList([...data])
         })
+        : null
     }, [])
 
 
@@ -137,6 +139,7 @@ const ModalPicker = (props) => {
             </TouchableOpacity>
         )
     })
+
     const optionCategory = categories.map(function(item, index) {
         return(
             <TouchableOpacity
@@ -150,6 +153,7 @@ const ModalPicker = (props) => {
             </TouchableOpacity>
         )
     })
+
 
     const optionFilterVerified = FILTER_VERIFIED.map((item, index) => {
         return(
@@ -201,6 +205,7 @@ const ModalPicker = (props) => {
                 {props.ratingFilter ? optionFilterRating : null}
                 {props.services ? serviceListOptions : null}
                 {props.workList ? workListSelection : null}
+                {props.category ? optionCategory : null}
 
                 {
                     props.services ? 

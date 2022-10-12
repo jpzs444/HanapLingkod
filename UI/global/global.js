@@ -1,4 +1,4 @@
-export const IPAddress = "192.168.1.7"
+export const IPAddress = "192.168.68.124"
 
 global.userData = {};
 global.deviceExpoPushToken = "";
@@ -7,3 +7,4 @@ global.isPhoneNumVerified = false
 global.userProfilePic = ""
 global.userProfilePicturePath = ""
 global.selectedWorker = ""
+global.serviceRequestPosted = false

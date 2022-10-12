@@ -74,7 +74,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
                         <View style={styles.buttonView}>
                             {/* Profile Picture */}
                             <View style={styles.imageContainer}>
-                                <Image source={item.workerId.profilePic === "pic" ? require("../assets/images/default-profile.png") : {uri: `http://${IPAddress}:3000/images/${item.workerId.profilePic}`}} style={styles.image} />
+                                <Image source={item.workerId.profilePic === "pic" ? require("../assets/images/default-profile.png") : {uri: item.workerId.profilePic}} style={styles.image} />
                             </View>
                             {/* Worker Information */}
                             <View style={styles.descriptionBox}>
