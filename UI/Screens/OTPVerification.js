@@ -510,7 +510,7 @@ export default function OTPVerification({route}, props) {
         </View>
 
         <View>
-            <TText>{code}</TText>
+            {/* <TText>{code}</TText> */}
         </View>
 
     </SafeAreaView>
