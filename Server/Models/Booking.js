@@ -3,10 +3,11 @@ const Schema = require("mongoose").Schema;
 const ServiceSubCategory = require("../Models/SubCategory");
 const Worker = require("../Models/Workers");
 
-const ServiceRequestSchema = mongoose.Schema({
+const BookingSchema = mongoose.Schema({
   workerId: { type: Schema.Types.ObjectId, ref: "Worker" },
   recruiterId: { type: Schema.Types.ObjectId, ref: "Recruiter" },
   workId: { type: Schema.Types.ObjectId, ref: "Work" },
+  serviceRequestId: { type: Schema.Types.ObjectId, ref: "ServiceRequest" },
   subCategory: String,
   minPrice: Number,
   maxPrice: Number,
@@ -14,8 +15,7 @@ const ServiceRequestSchema = mongoose.Schema({
   startTime: Date,
   endTime: Date,
   description: String,
-  requestStatus: Number,
-  comment: String,
+  bookingStatus: Number,
   geometry: {
     type: {
       type: String,
@@ -30,11 +30,4 @@ const ServiceRequestSchema = mongoose.Schema({
   created_at: { type: Date, required: true, default: Date.now },
 });
 
-ServiceRequestSchema.pre("find", function (next) {
-  this.populate("workerId");
-  this.populate("recruiterId");
-
-  next();
-});
-
-module.exports = mongoose.model("ServiceRequest", ServiceRequestSchema);
+module.exports = mongoose.model("Booking", BookingSchema);

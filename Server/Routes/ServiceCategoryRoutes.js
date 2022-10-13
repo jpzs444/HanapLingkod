@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const ServiceCategory = require("../Models/ServiceCategory");
+const ServiceSubCategory = require("../Models/SubCategory");
+const Work = require("../Models/Work");
+const ServiceRequest = require("../Models/ServiceRequest");
+const Booking = require("../Models/Booking");
 
 router
   .route("/service-category")
@@ -47,14 +51,95 @@ router
       }
     });
   })
-  .delete(function (req, res) {
-    ServiceCategory.findOneAndDelete({ _id: req.params.id }, function (err) {
-      if (!err) {
-        res.send("Deleted Successfully ");
-      } else {
-        res.send(err);
+  .delete(async function (req, res) {
+    const subCatQuery = await ServiceSubCategory.find(
+      {
+        ServiceID: req.params.id,
+      },
+      { __v: 0, ServiceID: 0, ServiceSubCategory: 0, deleteflag: 0 }
+    ).lean();
+    const subCatId = subCatQuery.map((object) => object._id);
+
+    const workQuery = await Work.find(
+      {
+        ServiceSubId: { $in: subCatId },
+      },
+      {
+        __v: 0,
+        ServiceSubId: 0,
+        workerId: 0,
+        minPrice: 0,
+        maxPrice: 0,
+        deleteflag: 0,
       }
-    });
+    ).lean();
+    const workId = workQuery.map((object) => object._id);
+
+    const serviceRequestQuery = await ServiceRequest.find(
+      {
+        workId: { $in: workId },
+        requestStatus: 1,
+      },
+      {
+        workerId: 0,
+        recruiterId: 0,
+        workId: 0,
+        subCategory: 0,
+        minPrice: 0,
+        maxPrice: 0,
+        serviceDate: 0,
+        startTime: 0,
+        endTime: 0,
+        description: 0,
+        requestStatus: 0,
+        comment: 0,
+        deleteflag: 0,
+        created_at: 0,
+      }
+    ).lean();
+
+    const BookingQuery = await Booking.find(
+      {
+        workId: { $in: workId },
+        bookingStatus: 1,
+      },
+      {
+        workerId: 0,
+        recruiterId: 0,
+        workId: 0,
+        subCategory: 0,
+        minPrice: 0,
+        maxPrice: 0,
+        serviceDate: 0,
+        startTime: 0,
+        endTime: 0,
+        description: 0,
+        bookingStatus: 0,
+        comment: 0,
+        deleteflag: 0,
+        created_at: 0,
+        geometry: 0,
+      }
+    ).lean();
+
+    if (serviceRequestQuery == 0 && BookingQuery == 0) {
+      ServiceCategory.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          deleteflag: 1,
+        },
+        function (err) {
+          if (!err) {
+            res.send("Deleted Successfully ");
+          } else {
+            res.send(err);
+          }
+        }
+      );
+      console.log("asd");
+    } else {
+      res.send("A Request is on going cannot delete");
+    }
   });
 
 module.exports = router;

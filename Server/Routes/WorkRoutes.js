@@ -5,7 +5,8 @@ const ServiceCategory = require("../Models/ServiceCategory");
 const ServiceSubCategory = require("../Models/SubCategory");
 const Worker = require("../Models/Workers");
 const mongoose = require("mongoose");
-
+const ServiceRequest = require("../Models/ServiceRequest");
+const Booking = require("../Models/Booking");
 router
   .route("/Work")
   .get(async function (req, res) {
@@ -112,7 +113,7 @@ router
     res.send(queryResult);
   })
   .put(function (req, res) {
-    Work.findByIdAndUpdate(
+    Work.findOneAndUpdate(
       { _id: req.params.id },
       { minPrice: req.body.minPrice, maxPrice: req.body.maxPrice },
       function (err) {
@@ -124,14 +125,72 @@ router
       }
     );
   })
-  .delete(function (req, res) {
-    Work.deleteOne({ _id: req.params.id }, function (err) {
-      if (!err) {
-        res.send("Deleted Successfully ");
-      } else {
-        res.send(err);
+  .delete(async function (req, res) {
+    const serviceRequestQuery = await ServiceRequest.find(
+      {
+        workId: req.params.id,
+        requestStatus: 1,
+      },
+      {
+        workerId: 0,
+        recruiterId: 0,
+        workId: 0,
+        subCategory: 0,
+        minPrice: 0,
+        maxPrice: 0,
+        serviceDate: 0,
+        startTime: 0,
+        endTime: 0,
+        description: 0,
+        requestStatus: 0,
+        comment: 0,
+        deleteflag: 0,
+        created_at: 0,
       }
-    });
+    ).lean();
+
+    const BookingQuery = await Booking.find(
+      {
+        workId: req.params.id,
+        bookingStatus: 1,
+      },
+      {
+        workerId: 0,
+        recruiterId: 0,
+        workId: 0,
+        subCategory: 0,
+        minPrice: 0,
+        maxPrice: 0,
+        serviceDate: 0,
+        startTime: 0,
+        endTime: 0,
+        description: 0,
+        bookingStatus: 0,
+        comment: 0,
+        deleteflag: 0,
+        created_at: 0,
+        geometry: 0,
+      }
+    ).lean();
+
+    console.log(BookingQuery);
+    if (serviceRequestQuery == 0 && BookingQuery == 0) {
+      // Work.findByIdAndUpdate(
+      //   { _id: req.params.id },
+      //   {
+      //     deleteflag: 1,
+      //   },
+      //   function (err) {
+      //     if (!err) {
+      //       res.send("Deleted Successfully ");
+      //     } else {
+      //       res.send(err);
+      //     }
+      //   }
+      // );
+    } else {
+      res.send("A Request is on going cannot delete");
+    }
   });
 
 router.route("/WorkList/:UserId").get(function (req, res) {

@@ -5,6 +5,7 @@ const multer = require("multer");
 const bcrypt = require("bcrypt");
 const cloudinary = require("./Helpers/cloudinary");
 const fs = require("fs");
+const dayjs = require("dayjs");
 
 //models
 const Worker = require("./Models/Workers");
@@ -76,6 +77,11 @@ app.get("/images/:filename", async function (req, res) {
   } catch (err) {
     console.error(err);
   }
+});
+
+app.post("/r", async function (req, res) {
+  let yy = dayjs("2019-01-25T05:10").format("YYYY-MM-DDTHH:mm:ss");
+  console.log(yy);
 });
 
 app.get("/search", async function (req, res) {
