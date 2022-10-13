@@ -349,7 +349,7 @@ const Workers = () => {
                                     <View style={styles.buttonView}>
                                         {/* Profile Picture */}
                                         <View style={styles.imageContainer}>
-                                            <Image source={item.profilePic === "pic" ? require("../assets/images/default-profile.png") : {uri: `http://${IPAddress}:3000/images/${item.profilePic}`}} style={styles.image} />
+                                            <Image source={item.profilePic === "pic" ? require("../assets/images/default-profile.png") : {uri: item.profilePic}} style={styles.image} />
                                         </View>
                                         {/* Worker Information */}
                                         <View style={styles.descriptionBox}>
