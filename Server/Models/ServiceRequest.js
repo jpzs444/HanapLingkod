@@ -6,6 +6,7 @@ const Worker = require("../Models/Workers");
 const ServiceRequestSchema = mongoose.Schema({
   workerId: { type: Schema.Types.ObjectId, ref: "Worker" },
   recruiterId: { type: Schema.Types.ObjectId, ref: "Recruiter" },
+  workId: { type: Schema.Types.ObjectId, ref: "Work" },
   subCategory: String,
   minPrice: Number,
   maxPrice: Number,
@@ -26,6 +27,13 @@ const ServiceRequestSchema = mongoose.Schema({
     },
   },
   created_at: { type: Date, required: true, default: Date.now },
+});
+
+ServiceRequestSchema.pre("find", function (next) {
+  this.populate("workerId");
+  this.populate("recruiterId");
+
+  next();
 });
 
 module.exports = mongoose.model("ServiceRequest", ServiceRequestSchema);
