@@ -57,7 +57,7 @@ export default function App() {
         console.log(response);
 
         // turn notification.read to true 
-        fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+        fetch("http://" + IPAddress + ":3000/notification/" + global.userData._id, {
           method: "PUT",
           header: {
             'content-type': 'application/json',

@@ -272,7 +272,9 @@ const UserProfile = ({route}) => {
                             })
                                 }
                                 <View style={styles.viewScheduleContainer}>
-                                    <TouchableOpacity style={styles.viewScheduleBtn}>
+                                    <TouchableOpacity style={styles.viewScheduleBtn}
+                                        onPress={() => navigation.navigate("CalendarDrawer")}
+                                    >
                                         <TText style={styles.viewScheduleText}>View Schedule</TText>
                                     </TouchableOpacity>
                                 </View>
@@ -354,7 +356,7 @@ const UserProfile = ({route}) => {
                                                 setInitialIndex(index)
                                             }}
                                         >
-                                            <Image source={{uri: `http://${IPAddress}:3000/images/${item}`}} style={{width: '100%', height: '100%'}} />
+                                            <Image source={{uri: item}} style={{width: '100%', height: '100%'}} />
                                         </TouchableOpacity>
                                     )
                                 })
@@ -433,7 +435,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         borderWidth: 0.5,
         borderColor: "#000",
-        backgroundColor: 'pink'
+        backgroundColor: '#999'
     },
     viewScheduleContainer: {
         marginTop: 15,
