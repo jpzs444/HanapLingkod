@@ -3,6 +3,7 @@ const router = express.Router();
 const ServiceRequest = require("../Models/ServiceRequest");
 const Recruiter = require("../Models/Recruiters");
 const Worker = require("../Models/Workers");
+const Booking = require("../Models/Booking");
 const notification = require("../Helpers/PushNotification");
 
 router.route("/service-request/:user").get(async function (req, res) {
@@ -29,6 +30,7 @@ router.route("/service-request").post(async function (req, res) {
     const serviceRequest = new ServiceRequest({
       workerId: req.body.workerId,
       recruiterId: req.body.recruiterId,
+      workId: req.body.workId,
       subCategory: req.body.subCategory,
       minPrice: req.body.minPrice,
       maxPrice: req.body.maxPrice,
@@ -80,10 +82,39 @@ router
         { _id: recruiterId },
         { pushtoken: 1, _id: 0 }
       ).lean();
-      console.log(pushIDWorker, pushIDRecruiter);
+      // console.log(pushIDWorker, pushIDRecruiter);
 
       if (req.body.requestStatus == 2) {
-        console.log("asd");
+        //create booking
+        Booking.create({
+          workerId: result.workerId,
+          recruiterId: result.recruiterId,
+          workId: result.workId,
+          subCategory: result.subCategorys,
+          minPrice: result.minPrice,
+          maxPrice: result.maxPrice,
+          serviceDate: result.serviceDate,
+          startTime: result.startTime,
+          endTime: result.endTime,
+          description: result.description,
+          bookingStatus: 1,
+          geometry: {
+            type: "point",
+            coordinates: [
+              result.geometry.coordinates[0],
+              result.geometry.coordinates[1],
+            ],
+          },
+        });
+
+        //put delete flag to true
+        await ServiceRequest.findOneAndUpdate(
+          { _id: req.params.id },
+          {
+            deleteflag: true,
+          }
+        );
+        //notify recruiter
         notification(
           [pushIDRecruiter.pushtoken],
           "Accepted",
@@ -126,5 +157,20 @@ router
       }
     });
   });
+router.route("/service-request/:id").post(async function (req, res) {
+  ServiceRequest.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      comment: req.body.comment,
+    },
+    function (err) {
+      if (!err) {
+        res.send("Success");
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
 
 module.exports = router;
