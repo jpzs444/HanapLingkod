@@ -25,6 +25,8 @@ const WorkRoutes = require("./Routes/WorkRoutes");
 const RecruiterRoutes = require("./Routes/RecruiterRoutes");
 const ServiceRequestRoutes = require("./Routes/ServiceRequestRoutes");
 const RequestPostRoutes = require("./Routes/RequestPostRoutes");
+const Booking = require("./Routes/BookingRoutes");
+const Calendar = require("./Routes/CalendarRoutes");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -80,7 +82,7 @@ app.get("/images/:filename", async function (req, res) {
 });
 
 app.post("/r", async function (req, res) {
-  let yy = dayjs("2019-01-25T05:10").format("YYYY-MM-DDTHH:mm:ss");
+  let yy = dayjs("2019-01-25T23:10").format("YYYY-MM-DDTHH:mm:ss");
   console.log(yy);
 });
 
@@ -399,6 +401,8 @@ app.use(RecruiterRoutes);
 app.use(WorkRoutes);
 app.use(ServiceRequestRoutes);
 app.use(RequestPostRoutes);
+app.use(Booking);
+app.use(Calendar);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("listening on port 3000."));
