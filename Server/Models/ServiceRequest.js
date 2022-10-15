@@ -13,6 +13,7 @@ const ServiceRequestSchema = mongoose.Schema({
   serviceDate: Date,
   startTime: Date,
   endTime: Date,
+  address: String,
   description: String,
   requestStatus: Number,
   comment: String,

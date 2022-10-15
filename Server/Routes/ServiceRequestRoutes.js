@@ -5,6 +5,8 @@ const Recruiter = require("../Models/Recruiters");
 const Worker = require("../Models/Workers");
 const Booking = require("../Models/Booking");
 const notification = require("../Helpers/PushNotification");
+const dayjs = require("dayjs");
+const AddToCalendar = require("../Helpers/TimeAdder");
 
 router.route("/service-request/:user").get(async function (req, res) {
   console.log(req.params.user);
@@ -23,6 +25,13 @@ router.route("/service-request/:user").get(async function (req, res) {
 });
 router.route("/service-request").post(async function (req, res) {
   try {
+    console.log("asd");
+    // req.body.serviceDate + "T" + req.body.startTime;
+    let startTime = dayjs(
+      req.body.serviceDate + "T" + req.body.startTime
+    ).format("YYYY-MM-DDTHH:mm:ss");
+    console.log(startTime);
+
     const pushID = await Worker.findOne(
       { _id: req.body.workerId },
       { pushtoken: 1, _id: 0 }
@@ -32,10 +41,11 @@ router.route("/service-request").post(async function (req, res) {
       recruiterId: req.body.recruiterId,
       workId: req.body.workId,
       subCategory: req.body.subCategory,
+      address: req.body.address,
       minPrice: req.body.minPrice,
       maxPrice: req.body.maxPrice,
       serviceDate: req.body.serviceDate,
-      startTime: req.body.startTime,
+      startTime: startTime,
       description: req.body.description,
       geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
       requestStatus: 1,
@@ -63,14 +73,22 @@ router
   .route("/service-request/:user/:id")
   .put(async function (req, res) {
     try {
+      const reqObj = {
+        requestStatus: req.body.requestStatus,
+        // endTime: req.body.endTime,
+      };
+      if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
+        // console.log("asd");
+        let endTime = dayjs(req.body.endDate + "T" + req.body.endTime).format(
+          "YYYY-MM-DDTHH:mm:ss"
+        );
+        reqObj.endTime = endTime;
+      }
+      // console.log(reqObj);
       let result;
       result = await ServiceRequest.findOneAndUpdate(
         { _id: req.params.id },
-        {
-          requestStatus: req.body.requestStatus,
-          endTime: req.body.endTime,
-          comment: req.body.endTime,
-        },
+        reqObj,
         { new: true }
       );
       const { workerId, recruiterId } = result;
@@ -86,7 +104,7 @@ router
 
       if (req.body.requestStatus == 2) {
         //create booking
-        Booking.create({
+        const tr = await Booking.create({
           workerId: result.workerId,
           recruiterId: result.recruiterId,
           workId: result.workId,
@@ -106,6 +124,7 @@ router
             ],
           },
         });
+        AddToCalendar(tr);
 
         //put delete flag to true
         await ServiceRequest.findOneAndUpdate(
@@ -114,13 +133,13 @@ router
             deleteflag: true,
           }
         );
-        //notify recruiter
-        notification(
-          [pushIDRecruiter.pushtoken],
-          "Accepted",
-          "your request has been accepted",
-          recruiterId
-        );
+        // notify recruiter
+        // notification(
+        //   [pushIDRecruiter.pushtoken],
+        //   "Accepted",
+        //   "your request has been accepted",
+        //   recruiterId
+        // );
       } else if (req.body.requestStatus == 3) {
         notification(
           [pushIDRecruiter.pushtoken],
@@ -151,13 +170,17 @@ router
     }
   })
   .delete(async function (req, res) {
-    ServiceRequest.findByIdAndDelete({ _id: req.params.id }, function (err) {
-      if (!err) {
-        res.send("Deleted Succesfully");
+    ServiceRequest.findByIdAndUpdate(
+      { _id: req.params.id },
+      { deleteflag: true },
+      function (err) {
+        if (!err) {
+          res.send("Deleted Succesfully");
+        }
       }
-    });
+    );
   });
-router.route("/service-request/:id").post(async function (req, res) {
+router.route("/service-request-comment/:id").post(async function (req, res) {
   ServiceRequest.findOneAndUpdate(
     { _id: req.params.id },
     {
