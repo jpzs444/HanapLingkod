@@ -38,7 +38,10 @@ router
       },
       { new: true }
     );
-    const { statusWorker, statusRecruiter } = result;
+    const { statusWorker, statusRecruiter, workerId, recruiterId } = result;
+    if (req.body.statusRecruiter == 3) {
+      
+    }
     if (statusWorker == 3 && statusRecruiter == 3) {
       // console.log("");
       Booking.findOneAndUpdate(
@@ -54,10 +57,6 @@ router
           }
         }
       );
-
-        
-
-
     }
     if (req.body.statusWorker == 2) {
       Booking.findOneAndUpdate(

@@ -13,6 +13,7 @@ const Recruiter = require("./Models/Recruiters");
 const ServiceCategory = require("./Models/ServiceCategory");
 const ServiceSubCategory = require("./Models/SubCategory");
 const Work = require("./Models/Work");
+const Comment = require("./Models/Comment");
 
 //helper
 const notification = require("./Helpers/PushNotification");
