@@ -7,6 +7,7 @@ const Booking = require("../Models/Booking");
 const notification = require("../Helpers/PushNotification");
 const dayjs = require("dayjs");
 const AddToCalendar = require("../Helpers/TimeAdder");
+const checkConflict = require("../Helpers/ConflictChecker");
 
 router.route("/service-request/:user").get(async function (req, res) {
   console.log(req.params.user);
@@ -25,12 +26,12 @@ router.route("/service-request/:user").get(async function (req, res) {
 });
 router.route("/service-request").post(async function (req, res) {
   try {
-    console.log("asd");
-    // req.body.serviceDate + "T" + req.body.startTime;
     let startTime = dayjs(
-      req.body.serviceDate + "T" + req.body.startTime
-    ).format("YYYY-MM-DDTHH:mm:ss");
-    console.log(startTime);
+      req.body.serviceDate + " " + req.body.startTime
+    ).toISOString();
+    // console.log(req.body.serviceDate);
+
+    // console.log(startTime);
 
     const pushID = await Worker.findOne(
       { _id: req.body.workerId },
@@ -73,90 +74,96 @@ router
   .route("/service-request/:user/:id")
   .put(async function (req, res) {
     try {
-      const reqObj = {
-        requestStatus: req.body.requestStatus,
-        // endTime: req.body.endTime,
-      };
+      let endTime;
       if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
-        // console.log("asd");
-        let endTime = dayjs(req.body.endDate + "T" + req.body.endTime).format(
-          "YYYY-MM-DDTHH:mm:ss"
-        );
-        reqObj.endTime = endTime;
+        endTime = dayjs(
+          req.body.endDate + " " + req.body.endTime
+        ).toISOString();
       }
-      // console.log(reqObj);
-      let result;
-      result = await ServiceRequest.findOneAndUpdate(
-        { _id: req.params.id },
-        reqObj,
-        { new: true }
-      );
-      const { workerId, recruiterId } = result;
-      const pushIDWorker = await Worker.findOne(
-        { _id: workerId },
-        { pushtoken: 1, _id: 0 }
-      ).lean();
-      const pushIDRecruiter = await Recruiter.findOne(
-        { _id: recruiterId },
-        { pushtoken: 1, _id: 0 }
-      ).lean();
-      // console.log(pushIDWorker, pushIDRecruiter);
-
+      // console.log(endTime);
       if (req.body.requestStatus == 2) {
-        //create booking
-        const tr = await Booking.create({
-          workerId: result.workerId,
-          recruiterId: result.recruiterId,
-          workId: result.workId,
-          subCategory: result.subCategorys,
-          minPrice: result.minPrice,
-          maxPrice: result.maxPrice,
-          serviceDate: result.serviceDate,
-          startTime: result.startTime,
-          endTime: result.endTime,
-          description: result.description,
-          bookingStatus: 1,
-          geometry: {
-            type: "point",
-            coordinates: [
-              result.geometry.coordinates[0],
-              result.geometry.coordinates[1],
-            ],
-          },
-        });
-        AddToCalendar(tr);
-
-        //put delete flag to true
-        await ServiceRequest.findOneAndUpdate(
-          { _id: req.params.id },
-          {
-            deleteflag: true,
+        if (await checkConflict(req.params.user, req.params.id, endTime)) {
+          res.send("Error Conflict Schedule");
+        } else {
+          // else {
+          const reqObj = {
+            requestStatus: req.body.requestStatus,
+            endTime: req.body.endTime,
+          };
+          reqObj.endTime = endTime;
+          console.log(reqObj);
+          let result;
+          result = await ServiceRequest.findOneAndUpdate(
+            { _id: req.params.id },
+            reqObj,
+            { new: true }
+          );
+          const { workerId, recruiterId } = result;
+          const pushIDWorker = await Worker.findOne(
+            { _id: workerId },
+            { pushtoken: 1, _id: 0 }
+          ).lean();
+          const pushIDRecruiter = await Recruiter.findOne(
+            { _id: recruiterId },
+            { pushtoken: 1, _id: 0 }
+          ).lean();
+          // console.log(pushIDWorker, pushIDRecruiter);
+          if (req.body.requestStatus == 2) {
+            //create booking
+            const tr = await Booking.create({
+              workerId: result.workerId,
+              recruiterId: result.recruiterId,
+              workId: result.workId,
+              subCategory: result.subCategorys,
+              minPrice: result.minPrice,
+              maxPrice: result.maxPrice,
+              serviceDate: result.serviceDate,
+              startTime: result.startTime,
+              endTime: result.endTime,
+              description: result.description,
+              bookingStatus: 1,
+              geometry: {
+                type: "point",
+                coordinates: [
+                  result.geometry.coordinates[0],
+                  result.geometry.coordinates[1],
+                ],
+              },
+            });
+            AddToCalendar(tr);
+            //put delete flag to true
+            await ServiceRequest.findOneAndUpdate(
+              { _id: req.params.id },
+              {
+                deleteflag: true,
+              }
+            );
+            // notify recruiter
+            // notification(
+            //   [pushIDRecruiter.pushtoken],
+            //   "Accepted",
+            //   "your request has been accepted",
+            //   recruiterId
+            // );
+          } else if (req.body.requestStatus == 3) {
+            notification(
+              [pushIDRecruiter.pushtoken],
+              "Rejected",
+              "your request has been rejected",
+              recruiterId
+            );
+          } else if (req.body.requestStatus == 4) {
+            notification(
+              [pushIDWorker.pushtoken],
+              "Cancelled",
+              "Recruiter Cancelled the request",
+              workerId
+            );
           }
-        );
-        // notify recruiter
-        // notification(
-        //   [pushIDRecruiter.pushtoken],
-        //   "Accepted",
-        //   "your request has been accepted",
-        //   recruiterId
-        // );
-      } else if (req.body.requestStatus == 3) {
-        notification(
-          [pushIDRecruiter.pushtoken],
-          "Rejected",
-          "your request has been rejected",
-          recruiterId
-        );
-      } else if (req.body.requestStatus == 4) {
-        notification(
-          [pushIDWorker.pushtoken],
-          "Cancelled",
-          "Recruiter Cancelled the request",
-          workerId
-        );
+          res.send(result);
+          // }
+        }
       }
-
-      res.send(result);
     } catch (error) {
       res.send(error);
     }

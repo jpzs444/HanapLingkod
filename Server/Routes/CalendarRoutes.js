@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Worker = require("../Models/Workers");
 const dayjs = require("dayjs");
+var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
 
 router.route("/add-schedule/:user").post(async function (req, res) {
   let startTime = dayjs(req.body.inputDate + "T" + req.body.startTime).format(
@@ -30,6 +31,14 @@ router.route("/add-schedule/:user").post(async function (req, res) {
       }
     }
   );
+});
+
+router.route("/rr").post(function (req, res) {
+  console.log(
+    dayjs("2019-01-25 7:30:00")
+      // .format("YYYY-MM-DD HH:mm:ss")
+      .toISOString()
+  ); // '2019-01-25T02:00:00.000Z'
 });
 
 module.exports = router;
