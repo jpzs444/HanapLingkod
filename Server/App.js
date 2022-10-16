@@ -32,7 +32,11 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 mongoose.connect(
-  "mongodb+srv://admin-Patrick:test123@cluster0.2anjoo0.mongodb.net/?retryWrites=true&w=majority"
+  "mongodb+srv://" +
+    process.env.ATLAS_USERNAME +
+    ":" +
+    process.env.ATLAS_PASS +
+    "@cluster0.2anjoo0.mongodb.net/?retryWrites=true&w=majority"
   // "mongodb://localhost:27017/hanapLingkod"
 );
 

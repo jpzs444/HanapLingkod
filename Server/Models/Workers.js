@@ -34,7 +34,13 @@ const workerSchema = new mongoose.Schema({
   works: [String],
   pushtoken: { type: String, default: "" },
   unavailableTime: [
-    { title: String, startTime: Date, endTime: Date, wholeDay: Boolean },
+    {
+      title: String,
+      startTime: Date,
+      endTime: Date,
+      wholeDay: Boolean,
+      CannotDelete: Boolean,
+    },
   ],
   comments: [
     {

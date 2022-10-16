@@ -5,12 +5,12 @@ const dayjs = require("dayjs");
 var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
 
 router.route("/add-schedule/:user").post(async function (req, res) {
-  let startTime = dayjs(req.body.inputDate + "T" + req.body.startTime).format(
-    "YYYY-MM-DDTHH:mm:ss"
-  );
-  let endTime = dayjs(req.body.inputDate + "T" + req.body.endTime).format(
-    "YYYY-MM-DDTHH:mm:ss"
-  );
+  let startTime = dayjs(
+    req.body.inputDate + " " + req.body.startTime
+  ).toISOString();
+  let endTime = dayjs(
+    req.body.inputDate + " " + req.body.endTime
+  ).toISOString();
   Worker.findOneAndUpdate(
     { _id: req.params.user },
     {
@@ -20,25 +20,44 @@ router.route("/add-schedule/:user").post(async function (req, res) {
           startTime: startTime,
           endTime: endTime,
           wholeDay: req.body.wholeday,
+          CannotDelete: 0,
         },
       },
     },
     function (err) {
       if (!err) {
         console.log("Succesfully added schedule");
+        res.send("Succesfully added schedule");
       } else {
+        res.send("error");
         console.log(err);
       }
     }
   );
 });
 
-router.route("/rr").post(function (req, res) {
-  console.log(
-    dayjs("2019-01-25 7:30:00")
-      // .format("YYYY-MM-DD HH:mm:ss")
-      .toISOString()
-  ); // '2019-01-25T02:00:00.000Z'
+router.route("/add-schedule/:user/:id").delete(async function (req, res) {
+  let query = await Worker.findOne({ _id: req.params.user }).exec();
+  const { unavailableTime } = query;
+  console.log(req.params.id);
+  for (x of unavailableTime) {
+    // console.log(x);
+    if (x._id == req.params.id && x.CannotDelete == 0) {
+      Worker.findOneAndUpdate(
+        { _id: req.params.user },
+        { $pull: { unavailableTime: { _id: req.params.id } } }
+      ).exec();
+      res.send("Schedule deleted");
+    } else if (x._id == req.params.id && x.CannotDelete == 1) {
+      console.log("cannot delete");
+      // res.send("cannot delete");
+    } else {
+      console.log("Does Not Exist");
+      // res.send("Does Not Exist");
+    }
+  }
+
+  res.send("Cannot Delete or error has occured");
 });
 
 module.exports = router;

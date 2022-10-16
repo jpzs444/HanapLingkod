@@ -12,6 +12,7 @@ function AddToCalendar(BookingInfo) {
           startTime: startTime,
           endTime: endTime,
           wholeDay: 0,
+          CannotDelete: 1,
         },
       },
     },
