@@ -16,6 +16,7 @@ const BookingSchema = mongoose.Schema({
   endTime: Date,
   description: String,
   bookingStatus: Number,
+  otp: String,
   geometry: {
     type: {
       type: String,
@@ -26,6 +27,8 @@ const BookingSchema = mongoose.Schema({
       index: "2dsphere",
     },
   },
+  statusWorker: { type: Number, default: 0 },
+  statusRecruiter: { type: Number, default: 0 },
   deleteflag: { type: Boolean, default: 0 },
   created_at: { type: Date, required: true, default: Date.now },
 });

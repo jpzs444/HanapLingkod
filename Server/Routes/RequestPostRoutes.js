@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const notification = require("../Helpers/PushNotification");
 const RequestPost = require("../Models/RequestPost");
-const Comment = require("../Models/Comment");
 router
   .route("/request-post")
   .get(async function (req, res) {
