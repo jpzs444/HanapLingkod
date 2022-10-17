@@ -8,6 +8,7 @@ const notification = require("../Helpers/PushNotification");
 const dayjs = require("dayjs");
 const AddToCalendar = require("../Helpers/TimeAdder");
 const checkConflict = require("../Helpers/ConflictChecker");
+const generateOTP = require("../Helpers/OTP_Generator");
 
 router.route("/service-request/:user").get(async function (req, res) {
   console.log(req.params.user);
@@ -110,6 +111,8 @@ router
           // console.log(pushIDWorker, pushIDRecruiter);
           if (req.body.requestStatus == 2) {
             //create booking
+            const OTP = generateOTP(6);
+            console.log(OTP);
             const tr = await Booking.create({
               workerId: result.workerId,
               recruiterId: result.recruiterId,
@@ -121,6 +124,7 @@ router
               startTime: result.startTime,
               endTime: result.endTime,
               description: result.description,
+              otp: OTP,
               bookingStatus: 1,
               geometry: {
                 type: "point",

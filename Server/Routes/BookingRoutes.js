@@ -8,7 +8,6 @@ const notification = require("../Helpers/PushNotification");
 const dayjs = require("dayjs");
 const Recruitercomment = require("../Models/RecruiterComment");
 const Workercomment = require("../Models/WorkerComment");
-const notification = require("../Helpers/PushNotification");
 
 router.route("/booking/:user").get(async function (req, res) {
   try {

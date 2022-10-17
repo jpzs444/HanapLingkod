@@ -16,6 +16,7 @@ const BookingSchema = mongoose.Schema({
   endTime: Date,
   description: String,
   bookingStatus: Number,
+  otp: String,
   geometry: {
     type: {
       type: String,
