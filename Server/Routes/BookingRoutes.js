@@ -6,6 +6,9 @@ const Worker = require("../Models/Workers");
 const Booking = require("../Models/Booking");
 const notification = require("../Helpers/PushNotification");
 const dayjs = require("dayjs");
+const Recruitercomment = require("../Models/RecruiterComment");
+const Workercomment = require("../Models/WorkerComment");
+const notification = require("../Helpers/PushNotification");
 
 router.route("/booking/:user").get(async function (req, res) {
   try {
@@ -39,8 +42,79 @@ router
       { new: true }
     );
     const { statusWorker, statusRecruiter, workerId, recruiterId } = result;
+
+    //push token
+    const pushIDWorker = await Worker.findOne(
+      { _id: workerId },
+      { pushtoken: 1, _id: 0 }
+    ).lean();
+    const pushIDRecruiter = await Recruiter.findOne(
+      { _id: recruiterId },
+      { pushtoken: 1, _id: 0 }
+    ).lean();
+
     if (req.body.statusRecruiter == 3) {
-      
+      let newComment = await Workercomment.create([
+        {
+          bookingId: req.params.id,
+          reviewee: workerId,
+          reviewer: recruiterId,
+          rating: req.body.rating,
+          message: req.body.message,
+        },
+      ]);
+      console.log("workerId");
+      // console.log(newComment[0]._id);
+      Worker.findOneAndUpdate(
+        { _id: workerId },
+        {
+          $push: { comments: newComment[0]._id },
+        },
+        function (err) {
+          if (!err) {
+            console.log("added comment worker");
+          } else {
+            console.log(err);
+          }
+        }
+      );
+
+      notification(
+        [pushIDWorker.pushtoken],
+        "Recruiter mark the booking as done",
+        "lorem ipsum ",
+        workerId
+      );
+    }
+    if (req.body.statusWorker == 3) {
+      let newComment = await Recruitercomment.create([
+        {
+          bookingId: req.params.id,
+          reviewee: recruiterId,
+          reviewer: workerId,
+          rating: req.body.rating,
+          message: req.body.message,
+        },
+      ]);
+      Recruiter.findOneAndUpdate(
+        { _id: recruiterId },
+        {
+          $push: { comments: newComment[0]._id },
+        },
+        function (err) {
+          if (!err) {
+            console.log("added comment recruiter");
+          } else {
+            console.log(err);
+          }
+        }
+      );
+      notification(
+        [pushIDRecruiter.pushtoken],
+        "worker mark the booking as done",
+        "lorem ipsum ",
+        recruiterId
+      );
     }
     if (statusWorker == 3 && statusRecruiter == 3) {
       // console.log("");
@@ -72,6 +146,13 @@ router
           }
         }
       );
+      // notify recruiter
+      notification(
+        [pushIDRecruiter.pushtoken],
+        "On the Way",
+        "Worker is on the way",
+        recruiterId
+      );
     }
     if (req.body.statusWorker == 4 || result.statusRecruiter == 4) {
       Booking.findOneAndUpdate(
@@ -87,6 +168,22 @@ router
           }
         }
       );
+      if (req.body.statusWorker == 4) {
+        notification(
+          [pushIDRecruiter.pushtoken],
+          "Worker cancelled the booking",
+          "lorem ipsum ",
+          recruiterId
+        );
+      }
+      if (result.statusRecruiter == 4) {
+        notification(
+          [pushIDWorker.pushtoken],
+          "Worker cancelled the booking",
+          "lorem ipsum ",
+          workerId
+        );
+      }
     }
     res.send("updated Sucess");
   })
