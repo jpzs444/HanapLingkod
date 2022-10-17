@@ -8,8 +8,9 @@ function AddToCalendar(BookingInfo) {
     {
       $push: {
         unavailableTime: {
-          title: _id,
+          title: "Booking",
           startTime: startTime,
+          bookingId: _id,
           endTime: endTime,
           wholeDay: 0,
           CannotDelete: 1,

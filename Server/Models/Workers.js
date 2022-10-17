@@ -36,6 +36,7 @@ const workerSchema = new mongoose.Schema({
   unavailableTime: [
     {
       title: String,
+      bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking" },
       startTime: Date,
       endTime: Date,
       wholeDay: Boolean,

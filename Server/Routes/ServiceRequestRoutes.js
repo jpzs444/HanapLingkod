@@ -143,12 +143,12 @@ router
               }
             );
             // notify recruiter
-            // notification(
-            //   [pushIDRecruiter.pushtoken],
-            //   "Accepted",
-            //   "your request has been accepted",
-            //   recruiterId
-            // );
+            notification(
+              [pushIDRecruiter.pushtoken],
+              "Accepted",
+              "your request has been accepted",
+              recruiterId
+            );
           } else if (req.body.requestStatus == 3) {
             notification(
               [pushIDRecruiter.pushtoken],

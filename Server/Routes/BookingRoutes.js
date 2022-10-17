@@ -51,7 +51,7 @@ router
       { _id: recruiterId },
       { pushtoken: 1, _id: 0 }
     ).lean();
-
+    console.log(recruiterId);
     if (req.body.statusRecruiter == 3) {
       let newComment = await Workercomment.create([
         {
@@ -130,7 +130,14 @@ router
           }
         }
       );
+      //remove from user
+      console.log(req.params.id);
+      Worker.findOneAndUpdate(
+        { _id: req.params.user },
+        { $pull: { unavailableTime: { bookingId: req.params.id } } }
+      ).exec();
     }
+
     if (req.body.statusWorker == 2) {
       Booking.findOneAndUpdate(
         { _id: req.params.id },

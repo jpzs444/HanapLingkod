@@ -21,12 +21,15 @@ router
   })
   .post(async function (req, res) {
     try {
+      let startTime = dayjs(
+        req.body.inputDate + " " + req.body.startTime
+      ).toISOString();
       const requestPost = new RequestPost({
         recruiterId: req.body.recruiterId,
         ServiceID: req.body.ServiceID,
         postDescription: req.body.postDescription,
         serviceDate: req.body.serviceDate,
-        startTime: req.body.startTime,
+        startTime: startTime,
         minPrice: req.body.minPrice,
         maxPrice: req.body.maxPrice,
         geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
