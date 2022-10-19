@@ -11,9 +11,6 @@ const Workercomment = require("../Models/WorkerComment");
 
 router.route("/booking/:user").get(async function (req, res) {
   try {
-    // const endTime = dayjs(
-    //   req.body.endDate + " " + req.body.endTime
-    // ).toISOString();
     let queryResultWorker = await Booking.find({
       workerId: req.params.user,
     }).sort({ date: -1, bookingStatus: 1 });
@@ -51,7 +48,7 @@ router
       { _id: recruiterId },
       { pushtoken: 1, _id: 0 }
     ).lean();
-
+    console.log(recruiterId);
     if (req.body.statusRecruiter == 3) {
       let newComment = await Workercomment.create([
         {
@@ -130,7 +127,14 @@ router
           }
         }
       );
+      //remove from user
+      console.log(req.params.id);
+      Worker.findOneAndUpdate(
+        { _id: req.params.user },
+        { $pull: { unavailableTime: { bookingId: req.params.id } } }
+      ).exec();
     }
+
     if (req.body.statusWorker == 2) {
       Booking.findOneAndUpdate(
         { _id: req.params.id },
@@ -205,5 +209,31 @@ router
       }
     );
   });
+
+router.route("/completed-bookings/:user").get(async function (req, res) {
+  try {
+    let queryResultWorker = await Booking.find({
+      workerId: req.params.user,
+      bookingStatus: 3,
+    }).sort({ date: -1, bookingStatus: 1 });
+    let queryResultRecruiter = await Booking.find({
+      recruiterId: req.params.user,
+      bookingStatus: 3,
+    }).sort({ date: -1, bookingStatus: 1 });
+
+    res.send({ worker: queryResultWorker, recruiter: queryResultRecruiter });
+  } catch (error) {
+    res.send(error);
+  }
+});
+
+router.route("/completed-bookings/:user/:id").get(async function (req, res) {
+  try {
+    let queryResult = await Booking.find({ _id: req.params.id });
+    res.send(queryResult);
+  } catch (error) {
+    res.send(error);
+  }
+});
 
 module.exports = router;
