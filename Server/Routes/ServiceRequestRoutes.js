@@ -76,98 +76,154 @@ router
   .put(async function (req, res) {
     try {
       let endTime;
+      let result;
+
       if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
         endTime = dayjs(
           req.body.endDate + " " + req.body.endTime
         ).toISOString();
       }
+
+      result = await ServiceRequest.findOne({ _id: req.params.id });
+
+      const { workerId, recruiterId } = result;
+      const pushIDWorker = await Worker.findOne(
+        { _id: workerId },
+        { pushtoken: 1, _id: 0 }
+      ).lean();
+      const pushIDRecruiter = await Recruiter.findOne(
+        { _id: recruiterId },
+        { pushtoken: 1, _id: 0 }
+      ).lean();
+
+      // console.log(req.body.acceptMore === "false");
+      if (req.body.acceptMore === "false") {
+        console.log(workerId);
+        Worker.findOneAndUpdate(
+          { _id: workerId },
+          {
+            $push: {
+              unavailableTime: {
+                title: "Cannot Accept Anymore",
+                startTime: result.startTime,
+                wholeDay: 1,
+                CannotDelete: 0,
+              },
+            },
+          },
+          function (err) {
+            if (!err) {
+              console.log("Cannot accept more today");
+            } else {
+              console.log(err);
+            }
+          }
+        );
+      }
+
       // console.log(endTime);
       if (req.body.requestStatus == 2) {
         if (await checkConflict(req.params.user, req.params.id, endTime)) {
           res.send("Error Conflict Schedule");
         } else {
-          // else {
+          // console.log("ad");
           const reqObj = {
             requestStatus: req.body.requestStatus,
             endTime: req.body.endTime,
           };
           reqObj.endTime = endTime;
-          console.log(reqObj);
-          let result;
-          result = await ServiceRequest.findOneAndUpdate(
+          await ServiceRequest.findOneAndUpdate(
             { _id: req.params.id },
             reqObj,
-            { new: true }
+            {
+              new: true,
+            }
           );
-          const { workerId, recruiterId } = result;
-          const pushIDWorker = await Worker.findOne(
-            { _id: workerId },
-            { pushtoken: 1, _id: 0 }
-          ).lean();
-          const pushIDRecruiter = await Recruiter.findOne(
-            { _id: recruiterId },
-            { pushtoken: 1, _id: 0 }
-          ).lean();
-          // console.log(pushIDWorker, pushIDRecruiter);
-          if (req.body.requestStatus == 2) {
-            //create booking
-            const OTP = generateOTP(6);
-            console.log(OTP);
-            const tr = await Booking.create({
-              workerId: result.workerId,
-              recruiterId: result.recruiterId,
-              workId: result.workId,
-              subCategory: result.subCategorys,
-              minPrice: result.minPrice,
-              maxPrice: result.maxPrice,
-              serviceDate: result.serviceDate,
-              startTime: result.startTime,
-              endTime: result.endTime,
-              description: result.description,
-              otp: OTP,
-              bookingStatus: 1,
-              geometry: {
-                type: "point",
-                coordinates: [
-                  result.geometry.coordinates[0],
-                  result.geometry.coordinates[1],
-                ],
-              },
-            });
-            AddToCalendar(tr);
-            //put delete flag to true
-            await ServiceRequest.findOneAndUpdate(
-              { _id: req.params.id },
-              {
-                deleteflag: true,
-              }
-            );
-            // notify recruiter
-            notification(
-              [pushIDRecruiter.pushtoken],
-              "Accepted",
-              "your request has been accepted",
-              recruiterId
-            );
-          } else if (req.body.requestStatus == 3) {
-            notification(
-              [pushIDRecruiter.pushtoken],
-              "Rejected",
-              "your request has been rejected",
-              recruiterId
-            );
-          } else if (req.body.requestStatus == 4) {
-            notification(
-              [pushIDWorker.pushtoken],
-              "Cancelled",
-              "Recruiter Cancelled the request",
-              workerId
-            );
-          }
-          res.send(result);
-          // }
         }
       }
+      // console.log(pushIDWorker, pushIDRecruiter);
+      if (req.body.requestStatus == 2) {
+        //create booking
+        const OTP = generateOTP(6);
+        console.log(OTP);
+        console.log();
+        const newBooking = await Booking.create({
+          workerId: result.workerId,
+          recruiterId: result.recruiterId,
+          workId: result.workId,
+          subCategory: result.subCategorys,
+          minPrice: result.minPrice,
+          maxPrice: result.maxPrice,
+          serviceDate: result.serviceDate,
+          startTime: result.startTime,
+          endTime: result.endTime,
+          description: result.description,
+          otp: OTP,
+          bookingStatus: 1,
+          geometry: {
+            type: "point",
+            coordinates: [
+              result.geometry.coordinates[0],
+              result.geometry.coordinates[1],
+            ],
+          },
+        });
+        AddToCalendar(newBooking);
+        //put delete flag to true
+        await ServiceRequest.findOneAndUpdate(
+          { _id: req.params.id },
+          {
+            deleteflag: true,
+          }
+        );
+        console.log("tr");
+        // notify recruiter
+        notification(
+          [pushIDRecruiter.pushtoken],
+          "Accepted",
+          "your request has been accepted",
+          recruiterId
+        );
+      }
+
+      if (req.body.requestStatus == 3) {
+        console.log("asdscanel");
+        await ServiceRequest.findOneAndUpdate(
+          { _id: req.params.id },
+          {
+            requestStatus: req.body.requestStatus,
+          },
+          {
+            new: true,
+          }
+        );
+        notification(
+          [pushIDRecruiter.pushtoken],
+          "Rejected",
+          "your request has been rejected",
+          recruiterId
+        );
+      }
+      if (req.body.requestStatus == 4) {
+        console.log("ssss");
+        await ServiceRequest.findOneAndUpdate(
+          { _id: req.params.id },
+          {
+            requestStatus: req.body.requestStatus,
+          },
+          {
+            new: true,
+          }
+        );
+        notification(
+          [pushIDWorker.pushtoken],
+          "Cancelled",
+          "Recruiter Cancelled the request",
+          workerId
+        );
+      }
+      res.send(result);
+      // }
     } catch (error) {
       res.send(error);
     }
