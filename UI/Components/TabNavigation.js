@@ -22,6 +22,7 @@ import RequestForm from '../Screens/RequestForm';
 import ListSpecificWorkers from '../Screens/ListSpecificWorkers';
 import SubCategory from '../Screens/SubCategory';
 import HomeNavigationStack from './HomeStack';
+import ViewComments from '../Screens/ViewComments';
 
 const hiddenTabNavBtn = () => ({
     tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
@@ -136,6 +137,13 @@ const TabNavigation = () => {
                 
             }}
         />
+
+        {/* <Tab.Screen name="ViewCommentsTab" component={ViewComments} 
+            options={{
+                tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
+                
+            }}
+        /> */}
 
 
         {/* <Tab.Screen name="UserProfileScreen" component={UserProfile} 

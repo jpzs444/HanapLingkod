@@ -1,10 +1,14 @@
-export const IPAddress = "192.168.68.124"
+export const IPAddress = "192.168.68.120"
+export const Localhost = "http://" + IPAddress + ":3000"
+
+global.server = "http://" + IPAddress + ":3000/"
 
 global.userData = {};
 global.deviceExpoPushToken = "";
+
 global.notificationCount=0;
+
 global.isPhoneNumVerified = false
-global.userProfilePic = ""
-global.userProfilePicturePath = ""
+
 global.selectedWorker = ""
 global.serviceRequestPosted = false
