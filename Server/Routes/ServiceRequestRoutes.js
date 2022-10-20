@@ -79,6 +79,7 @@ router
       let result;
 
       if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
+        console.log("qq");
         endTime = dayjs(
           req.body.endDate + " " + req.body.endTime
         ).toISOString();
@@ -96,7 +97,6 @@ router
         { pushtoken: 1, _id: 0 }
       ).lean();
 
-      // console.log(req.body.acceptMore === "false");
       if (req.body.acceptMore === "false") {
         console.log(workerId);
         Worker.findOneAndUpdate(
@@ -145,8 +145,6 @@ router
       if (req.body.requestStatus == 2) {
         //create booking
         const OTP = generateOTP(6);
-        console.log(OTP);
-        console.log();
         const newBooking = await Booking.create({
           workerId: result.workerId,
           recruiterId: result.recruiterId,
@@ -160,6 +158,7 @@ router
           description: result.description,
           otp: OTP,
           bookingStatus: 1,
+          address: result.address,
           geometry: {
             type: "point",
             coordinates: [

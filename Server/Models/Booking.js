@@ -17,6 +17,7 @@ const BookingSchema = mongoose.Schema({
   description: String,
   bookingStatus: Number,
   otp: String,
+  address: String,
   geometry: {
     type: {
       type: String,
