@@ -7,6 +7,15 @@ import ThemeDefaults from '../Components/ThemeDefaults';
 import { useNavigation } from '@react-navigation/native';
 import SwitchWithIcons from "react-native-switch-with-icons";
 import { BlurView } from 'expo-blur';
+import dayjs from 'dayjs';
+import { FlashList } from '@shopify/flash-list'
+import { IPAddress, Localhost } from '../global/global';
+
+
+const relativeTime = require('dayjs/plugin/relativeTime')
+
+dayjs.extend(relativeTime)
+
 
 const PostRequests = () => {
   const navigation = useNavigation()
@@ -14,11 +23,68 @@ const PostRequests = () => {
   const [postVisible, setPostVisible] = useState(true)
   const [postHidden, setPostHidden] = useState(false)
 
+  const [postRequestList, setPostRequestList] = useState([])
+
   useEffect(() => {
-    if(!postVisible){
-      setPostHidden(true)
-    }
-  }, [postVisible])
+    fetchRequestPosts()
+
+  },[])
+
+  const fetchRequestPosts = () => {
+    fetch(`http://${IPAddress}:3000/request-post/`, {
+      method: "GET",
+      headers: {
+        'content-type': 'application/json'
+      }
+    }).then((res) => res.json())
+    .then((data) => {
+      console.log("request post1: ", data)
+      setPostRequestList([...data])
+    }).catch((err) => console.log('error post request list: ', err.message))
+  }
+
+  const handleVisisbleModal = () => {
+    console.log("handle visible")
+    setPostHidden(!postHidden)
+  }
+
+  // useEffect(() => {
+  //   if(!postVisible){
+  //     setPostHidden(true)
+  //   }
+  // }, [postVisible])
+
+  const handlePostToggle = (postID, postToggle) => {
+
+    setPostHidden(postToggle)
+    console.log("post toggle ", postHidden)
+
+  }
+
+  // const getTimePassed = () => {
+
+  // }
+
+  const handlePostToggleRequest = (postID, postToggle) => {
+
+    console.log("post toggle ", postHidden)
+    // setPostVisible(!postToggle)
+
+    fetch(`http://${IPAddress}:3000/request-post/${postID}`, {
+      method: "PUT",
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        postToggle: postToggle
+      })
+    }).then((res) => {
+      console.log("toggle success")
+      fetchRequestPosts()
+    })
+    .catch((err) => console.log("error toggle: ", err.message))
+  }
+
 
   const renderIfEmpty = () => {
     return(
@@ -34,224 +100,179 @@ const PostRequests = () => {
     )
   }
 
+  const ScreenHeaderComponent = () => {
+    return(
+      <>
+        <Appbar menuBtn={true} showLogo={true} hasPicture={true} />
+
+        <View style={styles.header}>
+          <TText style={styles.headerTitle}>Posted Requests</TText>
+        </View>
+      </>
+    )
+  }
+
   return (
     <View style={styles.container}>
-      <Appbar menuBtn={true} showLogo={true} hasPicture={true} />
+    
+      <View style={{flexGrow: 1,}}>
+        <FlashList 
+          data={postRequestList}
+          keyExtractor={item => item._id}
+          estimatedItemSize={60}
+          // ListEmptyComponent={() => (<renderIfEmpty />)}
+          ListHeaderComponent={() => (
+            <ScreenHeaderComponent />
+          )}
+          ListFooterComponent={() => (
+            <View style={{height: 150}}></View>
+          )}
+          renderItem={({item}) => (
+            <View style={styles.postCard}>
+              {
+                !postVisible && <View style={styles.grayOverlay} />
+              }
 
-      {/* Modals */}
-      <Modal
-          transparent={true}
-          animationType='fade'
-          visible={postHidden}
-          onRequestClose={() => setPostHidden(false)}
-      >
+              {/* Modals */}
+              <Modal
+                  transparent={true}
+                  animationType='fade'
+                  visible={postHidden}
+                  onRequestClose={() => setPostHidden(false)}
+              >
 
-          {/* Modal View */}
-          <View style={styles.modalDialogue}>
-              {/* Modal Container */}
-              <View style={styles.dialogueContainer}>
-                  {/* Modal Message/Notice */}
-                  <View style={styles.dialogueMessage}>
-                      <TText style={styles.dialogueMessageText}>Closing this post means you will not receive comments from workers anymore. Are you sure you want to close this post?</TText>
+                  {/* Modal View */}
+                  <View style={styles.modalDialogue}>
+                      {/* Modal Container */}
+                      <View style={styles.dialogueContainer}>
+                          {/* Modal Message/Notice */}
+                          <View style={styles.dialogueMessage}>
+                              <TText style={styles.dialogueMessageText}>Closing this post means you will not receive comments from workers anymore. Are you sure you want to close this post?</TText>
+                          </View>
+                          {/* Modal Buttons */}
+                          <View style={styles.modalDialogueBtnCont}>
+                              <TouchableOpacity
+                                  style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeOrange}]}
+                                  onPress={() => {
+                                      setPostHidden(false)
+                                      handlePostToggleRequest(item._id, item.postToggle)
+                                      // setPostVisible(true)
+                                  }}
+                              >
+                                  <TText style={styles.dialogueCancel}>No</TText>
+                              </TouchableOpacity>
+                              <TouchableOpacity 
+                                  style={styles.dialogueBtn}
+                                  onPress={() => {
+                                      // setConfirmPost(true)
+                                      setPostHidden(false)
+                                      handlePostToggleRequest(item._id, !item.postToggle)
+                                  }}
+                              >
+                                  <TText style={styles.dialogueConfirm}>Yes</TText>
+                              </TouchableOpacity>
+                          </View>
+                      </View>
                   </View>
-                  {/* Modal Buttons */}
-                  <View style={styles.modalDialogueBtnCont}>
-                      <TouchableOpacity
-                          style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeOrange}]}
-                          onPress={() => {
-                              setPostHidden(false)
-                              setPostVisible(true)
-                          }}
-                      >
-                          <TText style={styles.dialogueCancel}>No</TText>
-                      </TouchableOpacity>
-                      <TouchableOpacity 
-                          style={styles.dialogueBtn}
-                          onPress={() => {
-                              // setConfirmPost(true)
-                              setPostHidden(false)
-                          }}
-                      >
-                          <TText style={styles.dialogueConfirm}>Yes</TText>
-                      </TouchableOpacity>
+              </Modal>
+              <View style={styles.postCardNameRow}>
+                <Image source={item.recruiterId.profilePic === 'pic'? require("../assets/images/default-profile.png") : {uri: item.recruiterId.profilePic}} style={styles.profileImage} />
+                <View style={styles.postUserName}>
+                  <View style={styles.nameRow}>
+                    <Text style={styles.postUserNameText}>{item.recruiterId.firstname}{item.recruiterId.middlename !== 'undefined' ? ` ${item.recruiterId.middlename.charAt(0).toUpperCase()}` : ""} {item.recruiterId.lastname}</Text>
+                      {
+                        global.userData.role === "recruiter" &&
+                          <View style={[styles.switchContainer, {backgroundColor: !item.postToggle ? ThemeDefaults.themeOrange : "rgb(187, 194, 204)",}]}>
+                            <TText style={styles.swtichText}>{!item.postToggle ? "Open" : "Closed"}</TText>
+                            <SwitchWithIcons
+                              value={!item.postToggle}
+                              onValueChange={(bool) => handlePostToggle(item._id, bool)}
+                              trackColor={{true: ThemeDefaults.themeDarkerOrange, false: "rgb(187, 194, 204)"}}
+                              thumbColor={{true: ThemeDefaults.themeOrange, false: "rgb(255, 255, 255)"}}
+                              style={{zIndex: 8, marginLeft: 10}}
+                            />
+                          </View>
+                      }
                   </View>
-              </View>
-          </View>
-      </Modal>
-
-      <View style={styles.header}>
-        <TText style={styles.headerTitle}>Posted Requests</TText>
-      </View>
-
-      <View style={styles.posts}>
-
-        <View style={styles.postCard}>
-          {
-            !postVisible && <View style={styles.grayOverlay} />
-          }
-          <View style={styles.postCardNameRow}>
-            <Image source={global.userData.profilePic === 'pic'? require("../assets/images/default-profile.png") : {uri: global.userData.profilePic}} style={styles.profileImage} />
-            <View style={styles.postUserName}>
-              <View style={styles.nameRow}>
-                <Text style={styles.postUserNameText}>{global.userData.firstname}{global.userData.middlename !== 'undefined' ? ` ${global.userData.middlename.charAt(0).toUpperCase()}` : ""} {global.userData.lastname}</Text>
-                <View style={styles.switchContainer}>
-                  <TText style={styles.swtichText}>{postVisible ? "Open" : "Closed"}</TText>
-                  <SwitchWithIcons
-                    value={postVisible}
-                    onValueChange={setPostVisible}
-                    trackColor={{true: ThemeDefaults.themeDarkerOrange, false: "rgb(187, 194, 204)"}}
-                    thumbColor={{true: ThemeDefaults.themeOrange, false: "rgb(255, 255, 255)"}}
-                    style={{zIndex: 8}}
-                  />
+                  <View style={styles.timePosted}>
+                    <TText style={styles.timePostedText}>{dayjs(item.created_at).toNow(true)} ago</TText>
+                  </View>
                 </View>
               </View>
-              <View style={styles.timePosted}>
-                <TText style={styles.timePostedText}>16hrs</TText>
-              </View>
-            </View>
-          </View>
 
-          {/* Content */}
-          <View style={styles.contentContainer}>
-            <View style={styles.contentCategory}>
-              <View style={styles.contentCat}>
-                <TText style={styles.contentCategoryText}>Category</TText>
-              </View>
-            </View>
+              {/* Content */}
+              <View style={styles.contentContainer}>
+                <View style={styles.contentCategory}>
+                  <View style={styles.contentCat}>
+                    <TText style={styles.contentCategoryText}>{item.ServiceID.Category}</TText>
+                  </View>
+                </View>
 
-            {/* Request information */}
-            <View style={styles.contentRequest}>
-              <Text style={styles.contentRequestText}>Manicure/Pedicure</Text>
-            </View>
+                {/* Request information */}
+                <View style={styles.contentRequest}>
+                  <Text style={styles.contentRequestText}>{item.postDescription}</Text>
+                </View>
 
 
-            {/* Price */}
-            <View style={styles.contentRow}>
-            <Icon name='tag' size={20} style={{transform: [
-            {
-                scaleX: -1,
-            },
-        ]}} />
-              <TText style={styles.contentText}>P 100 - P 500</TText>
-            </View>
-            {/* Date & Time */}
-            <View style={styles.contentRow}>
-              <View style={styles.contentRowContent}>
-                <Icon name='calendar-month' size={20} />
-                <TText style={styles.contentText} >Date</TText>
-              </View>
-              <View style={styles.contentRowContent}>
-                <Icon name="clock-outline" size={20} />
-                <TText style={styles.contentText}>Time</TText>
-              </View>
-            </View>
-            {/* Address of request */}
-            <View style={styles.contentRow}>
-              <Icon name="map" size={20} />
-              <TText style={styles.contentText}>Bibirao, Daet, Camarines Norte</TText>
-            </View>
-          </View>
-
-          {/* Comments */}
-          <View style={styles.postCommentContainer}>
-            <TouchableOpacity style={styles.postShowCommentsBtn}>
-              <Icon name="comment-text" size={22} color={ThemeDefaults.themeLighterBlue} />
-              <TText style={styles.showCommentText}>Show Comments</TText>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.postCard}>
-          {
-            !postVisible && <View style={styles.grayOverlay} />
-          }
-          <View style={styles.postCardNameRow}>
-            <Image source={global.userData.profilePic === 'pic'? require("../assets/images/default-profile.png") : {uri: global.userData.profilePic}} style={styles.profileImage} />
-            <View style={styles.postUserName}>
-              <View style={styles.nameRow}>
-                <Text style={styles.postUserNameText}>{global.userData.firstname}{global.userData.middlename !== 'undefined' ? ` ${global.userData.middlename.charAt(0).toUpperCase()}` : ""} {global.userData.lastname}</Text>
-                <View style={styles.switchContainer}>
-                  <TText style={styles.swtichText}>{postVisible ? "Open" : "Closed"}</TText>
-                  <SwitchWithIcons
-                    value={postVisible}
-                    onValueChange={setPostVisible}
-                    trackColor={{true: ThemeDefaults.themeDarkerOrange, false: "rgb(187, 194, 204)"}}
-                    thumbColor={{true: ThemeDefaults.themeOrange, false: "rgb(255, 255, 255)"}}
-                    style={{zIndex: 8}}
-                  />
+                {/* Price */}
+                <View style={styles.contentRow}>
+                <Icon name='tag' size={20} style={{transform: [
+                {
+                    scaleX: -1,
+                },
+                ]}} />
+                  <TText style={styles.contentText}>₱{item.minPrice} - ₱{item.maxPrice}</TText>
+                </View>
+                {/* Date & Time */}
+                <View style={styles.contentRow}>
+                  <View style={styles.contentRowContent}>
+                    <Icon name='calendar-month' size={20} />
+                    <TText style={styles.contentText} >{dayjs(item.serviceDate).format("MMM DD")}</TText>
+                  </View>
+                  <View style={styles.contentRowContent}>
+                    <Icon name="clock-outline" size={20} />
+                    <TText style={styles.contentText}>{dayjs(item.startTime).format("hh:mm A")}</TText>
+                  </View>
+                </View>
+                {/* Address of request */}
+                <View style={styles.contentRow}>
+                  <Icon name="map" size={20} />
+                  <Text numberOfLines={1} ellipsizeMode="tail" style={styles.contentText}>{`${item.recruiterId.street}, ${item.recruiterId.purok}, ${item.recruiterId.barangay}, ${item.recruiterId.city}, ${item.recruiterId.province}`}</Text>
                 </View>
               </View>
-              <View style={styles.timePosted}>
-                <TText style={styles.timePostedText}>16hrs</TText>
+
+              {/* Comments */}
+              <View style={styles.postCommentContainer}>
+                <TouchableOpacity style={styles.postShowCommentsBtn}
+                  onPress={() => {
+                    //navigate
+                    navigation.navigate("ViewCommentsDrawer", {item: item})
+                  }}
+                >
+                  <Icon name="comment-text" size={22} color={ThemeDefaults.themeLighterBlue} />
+                  <TText style={styles.showCommentText}>{global.userData.role ==="recruiter" ? "Show Comments" : "Comments"}</TText>
+                </TouchableOpacity>
               </View>
-            </View>
-          </View>
-
-          {/* Content */}
-          <View style={styles.contentContainer}>
-            <View style={styles.contentCategory}>
-              <View style={styles.contentCat}>
-                <TText style={styles.contentCategoryText}>Category</TText>
-              </View>
-            </View>
-
-            {/* Request information */}
-            <View style={styles.contentRequest}>
-              <Text style={styles.contentRequestText}>Manicure/Pedicure</Text>
-            </View>
-
-
-            {/* Price */}
-            <View style={styles.contentRow}>
-            <Icon name='tag' size={20} style={{transform: [
-            {
-                scaleX: -1,
-            },
-        ]}} />
-              <TText style={styles.contentText}>P 100 - P 500</TText>
-            </View>
-            {/* Date & Time */}
-            <View style={styles.contentRow}>
-              <View style={styles.contentRowContent}>
-                <Icon name='calendar-month' size={20} />
-                <TText style={styles.contentText} >Date</TText>
-              </View>
-              <View style={styles.contentRowContent}>
-                <Icon name="clock-outline" size={20} />
-                <TText style={styles.contentText}>Time</TText>
-              </View>
-            </View>
-            {/* Address of request */}
-            <View style={styles.contentRow}>
-              <Icon name="map" size={20} />
-              <TText style={styles.contentText}>Bibirao, Daet, Camarines Norte</TText>
-            </View>
-          </View>
-
-          {/* Comments */}
-          <View style={styles.postCommentContainer}>
-            <TouchableOpacity style={styles.postShowCommentsBtn}>
-              <Icon name="comment-text" size={22} color={ThemeDefaults.themeLighterBlue} />
-              <TText style={styles.showCommentText}>Show Comments</TText>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        
-
+            </View>   
+          )}
+        />
       </View>
+
       
 
       {/* floating add button */}
-      <View style={{position: 'absolute', bottom: 120, right: 30}}>
-        <TouchableOpacity style={{}}
-          onPress={() => {
-            navigation.navigate("PostRequestFormDrawer")
-          }}
-        >
-          <Icon name="plus-circle" size={60} color={ThemeDefaults.themeOrange} />
-        </TouchableOpacity>
-      </View>
+      {
+        global.userData.role === "recruiter" &&
+          <View style={{position: 'absolute', bottom: 120, right: 40}}>
+            <TouchableOpacity style={{width: 60, height: 60, borderRadius: 30, backgroundColor: ThemeDefaults.themeOrange, alignItems: 'center', justifyContent: 'center', elevation: 3}}
+              onPress={() => {
+                navigation.navigate("PostRequestFormDrawer")
+              }}
+            >
+              <Icon name="plus" size={40} color={ThemeDefaults.themeWhite} />
+            </TouchableOpacity>
+          </View>
+      }
     </View>
   )
 }
@@ -260,12 +281,15 @@ export default PostRequests
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
+        // height: '100%',
+        // width: '100%',
         marginTop: StatusBar.currentHeight,
         backgroundColor: ThemeDefaults.themeWhite
     },
     header: {
-      alignItems: 'center'
+      alignItems: 'center',
+      marginVertical: 10
     },
     headerTitle: {
       fontFamily: 'LexendDeca_Medium',
@@ -288,13 +312,16 @@ const styles = StyleSheet.create({
     },
     posts: {
       paddingHorizontal: 20,
-      marginBottom: 15
+      marginBottom: 15,
+      width: '100%',
     },
     postCard: {
       backgroundColor: ThemeDefaults.themeWhite,
       elevation: 4,
       borderRadius: 15,
       padding: 15,
+      marginHorizontal: 15,
+      paddingBottom: 8,
       marginTop: 15,
     },
     postCardNameRow: {
@@ -329,13 +356,13 @@ const styles = StyleSheet.create({
       borderRadius: 20,
       paddingVertical: 3,
       paddingLeft: 8,
-      paddingRight: 5,
-      backgroundColor: '#f3f3f3',
+      // paddingRight: 5,
+      backgroundColor: ThemeDefaults.themeOrange,
       zIndex: 7
     },
     swtichText: {
-      marginRight: 10,
       fontSize: 12,
+      color: ThemeDefaults.themeWhite
     },
     timePosted: {
     
@@ -359,14 +386,15 @@ const styles = StyleSheet.create({
     },
     contentCat: {
       paddingHorizontal: 15,
-      paddingVertical: 5,
+      paddingVertical: 3,
       borderWidth: 1.3,
       borderColor: '#999',
-      borderRadius: 10
+      borderRadius: 20
 
     },
     contentCategoryText: {
-      color: '#999'
+      color: '#999',
+      fontSize: 14,
     },
     contentRequest: {
       marginBottom: 30,
@@ -378,6 +406,7 @@ const styles = StyleSheet.create({
     contentText: {
       marginLeft: 12,
       fontSize: 16,
+      fontFamily: "LexendDeca"
     },
     contentRowContent: {
       flexDirection: 'row',
