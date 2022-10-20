@@ -36,6 +36,7 @@ router
         startTime: startTime,
         minPrice: req.body.minPrice,
         maxPrice: req.body.maxPrice,
+        address: req.body.address,
         geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
         postToggle: 0,
       });
@@ -54,7 +55,7 @@ router
   .route("/request-post/:id")
   .get(async function (req, res) {
     try {
-      RequestPost.findOne({ _id: req.params.id }).exec(function (err, notif) {
+      RequestPost.find({ _id: req.params.id }).exec(function (err, notif) {
         if (notif) {
           res.send(notif);
         } else {

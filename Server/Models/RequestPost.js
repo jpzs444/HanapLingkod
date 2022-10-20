@@ -12,6 +12,7 @@ const requestPostSchema = new mongoose.Schema({
   minPrice: Number,
   maxPrice: Number,
   postToggle: Boolean,
+  address: String,
   comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   geometry: {
     type: {
@@ -23,6 +24,12 @@ const requestPostSchema = new mongoose.Schema({
       index: "2dsphere",
     },
   },
+});
+
+requestPostSchema.pre("find", function (next) {
+  this.populate("recruiterId");
+
+  next();
 });
 
 module.exports = mongoose.model("RequestPost", requestPostSchema);
