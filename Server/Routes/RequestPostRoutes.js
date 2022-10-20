@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const notification = require("../Helpers/PushNotification");
 const RequestPost = require("../Models/RequestPost");
+const dayjs = require("dayjs");
+
 router
   .route("/request-post")
   .get(async function (req, res) {
@@ -22,8 +24,10 @@ router
   .post(async function (req, res) {
     try {
       let startTime = dayjs(
-        req.body.inputDate + " " + req.body.startTime
+        req.body.serviceDate + " " + req.body.startTime
       ).toISOString();
+
+      console.log(startTime);
       const requestPost = new RequestPost({
         recruiterId: req.body.recruiterId,
         ServiceID: req.body.ServiceID,
