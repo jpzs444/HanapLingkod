@@ -273,7 +273,7 @@ const UserProfile = ({route}) => {
                                 }
                                 <View style={styles.viewScheduleContainer}>
                                     <TouchableOpacity style={styles.viewScheduleBtn}
-                                        onPress={() => navigation.navigate("CalendarDrawer")}
+                                        onPress={() => navigation.navigate("CalendarViewUserStack")}
                                     >
                                         <TText style={styles.viewScheduleText}>View Schedule</TText>
                                     </TouchableOpacity>

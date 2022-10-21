@@ -60,7 +60,11 @@ export default function Appbar(props) {
                                 navigation.navigate("RequestFormDrawer", {showCalendar: true})
                             } else if(props.modalSchedule) {
                                 props.changeSchedModalState(false)
-                                props.changeCalendarModalState(true)
+                                if(props.noCalendar){
+                                    return
+                                }else {
+                                    props.changeCalendarModalState(true)
+                                }
                             } else if(props.modalCalendar){
                                 props.changeCalendarModalState(false)
                             } else {

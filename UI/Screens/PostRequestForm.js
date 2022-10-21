@@ -8,11 +8,15 @@ import { TextInput } from 'react-native-gesture-handler';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import dayjs from 'dayjs';
 import { ModalPicker } from '../Components/ModalPicker';
+import { IPAddress } from '../global/global';
+import { useNavigation } from '@react-navigation/native';
 
 const PostRequestForm = () => {
 
+    const navigation = useNavigation()
+
     const [categoryModal, setCategoryModal] = useState(false)
-    const [requestCategory, setRequestCategory] = useState("")
+    const [requestCategory, setRequestCategory] = useState({})
 
     const [specificRequestText, setSpecificRequestText] = useState("")
     const [minPriceText, setMinPriceText] = useState(null)
@@ -39,11 +43,52 @@ const PostRequestForm = () => {
 
     let disabledBtn = !(requestCategory && specificRequestText && minPriceText && maxPriceText && dateSelected && timeSelected)
 
-    const handleDateConfirm = (date) => {
-        let dateString = dayjs(date).format("YYYY-MM-DD").toString()
-        setFormatedDate(...dateString);
+    useEffect(() => {
+        setRequestCategory(null)
+        setSpecificRequestText("")
+        setMinPriceText("")
+        setMaxPriceText("")
+        setFormatedDate(new Date())
+        setDisplayDate(new Date())
+        setFormatedTime(new Date())
+        setDisplayTime(new Date())
+        setMinPressed(false)
+        setMaxPressed(false)
+        setDateSelected(false)
+        setTimeSelected(false)
+        
+    }, [])
 
-        setDisplayDate(dayjs(date).format("MMM D, YYYY"));
+    const handlePostRequest = () => {
+        console.log("handlePost")
+        fetch(`http://${IPAddress}:3000/request-post`, {
+            method: "POST",
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                startTime: formatedTime,
+                recruiterId: global.userData._id,
+                ServiceID: requestCategory._id,
+                postDescription: specificRequestText,
+                serviceDate: formatedDate,
+                minPrice: minPriceText,
+                maxPrice: maxPriceText,
+                long: 80,
+                lat: 25
+            })
+        }).then((res) => {
+            console.log("Success: Added a request to your posts")
+            navigation.navigate("PostRequestsTab")
+        })
+        .catch((err) => console.log("error post request: ", err.message))
+    }
+
+    const handleDateConfirm = (date) => {
+        let dateString = dayjs(date).format("YYYY-MM-DD")
+        setFormatedDate(dateString);
+
+        setDisplayDate(dayjs(date).format("MMM D, YYYY").toString());
         setDatePickerVisibility(false);
         setDateSelected(true)
 
@@ -54,7 +99,7 @@ const PostRequestForm = () => {
         let timeString = dayjs(time).format("hh:mm A")
         setDisplayTime(timeString.toString())
 
-        setFormatedTime(timeString)
+        setFormatedTime(dayjs(time).format("HH:mm"))
         setTimePickerVisibility(false)
         setTimeSelected(true)
 
@@ -110,7 +155,7 @@ const PostRequestForm = () => {
             >
                 <Icon name='shape' size={20} />
                 <View style={styles.rowGrpTxt}>
-                    <TText style={styles.categoryText}>{requestCategory ? requestCategory === "unlisted" ? "Unlisted" : requestCategory : 'Select Category'}</TText>
+                    <TText style={styles.categoryText}>{requestCategory ? requestCategory === "unlisted" ? "Unlisted" : requestCategory.Category : 'Select Category'}</TText>
                     <TText style={styles.requirement}>{requestCategory ? "" : "*"}</TText>
                 </View>
                 <Icon name='chevron-down' size={20} />
@@ -124,7 +169,10 @@ const PostRequestForm = () => {
             >
                 <ModalPicker 
                     changeModalVisibility={changeModalVisibility}
-                    setData={(filter) => setRequestCategory(filter.Category)}
+                    setData={(filter) => {
+                        console.log(filter)
+                        setRequestCategory({...filter})
+                        }}
                     category={true}
                 />
             </Modal>
@@ -166,7 +214,7 @@ const PostRequestForm = () => {
                     />
                     {
                         !minPressed && 
-                        <View style={[styles.rowGrpTxt, {zIndex: 5, position: 'absolute', left: 40}]}>
+                        <View style={[styles.rowGrpTxt, {zIndex: 5, position: 'absolute', left: 30}]}>
                             <TText style={styles.priceText}>Min. Labor Price</TText>
                             <TText style={styles.requirement}>*</TText>
                         </View>
@@ -189,7 +237,7 @@ const PostRequestForm = () => {
                     />
                     {
                         !maxPressed && 
-                        <View style={[styles.rowGrpTxt, {zIndex: 5, position: 'absolute', left: 40}]}>
+                        <View style={[styles.rowGrpTxt, {zIndex: 5, position: 'absolute', left: 30}]}>
                             <TText style={styles.priceText}>Max. Labor Price</TText>
                             <TText style={styles.requirement}>*</TText>
                         </View>
@@ -244,7 +292,7 @@ const PostRequestForm = () => {
         {/* Post Button */}
         <View style={styles.buttonContainer}>
             <TouchableOpacity style={[styles.postBtn, {backgroundColor: disabledBtn ? 'gray' : ThemeDefaults.themeOrange}]}
-                disabled={!disabledBtn}
+                // disabled={!disabledBtn}
                 onPress={() => {
                     setPostBtnModal(true)
                 }}
@@ -281,6 +329,7 @@ const PostRequestForm = () => {
                                 onPress={() => {
                                     setConfirmPost(true)
                                     setPostBtnModal(false)
+                                    handlePostRequest()
                                 }}
                             >
                                 <TText style={styles.dialogueConfirm}>Confirm</TText>

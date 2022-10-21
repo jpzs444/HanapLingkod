@@ -7,6 +7,7 @@ import React, {useState, useEffect} from 'react'
 import ThemeDefaults from '../Components/ThemeDefaults';
 import { IPAddress } from '../global/global';
 import dayjs from 'dayjs';
+import { useNavigation } from '@react-navigation/native';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -15,13 +16,24 @@ const HEIGHT = Dimensions.get('window').height
 
 const Requests = () => {
 
+    const navigation = useNavigation()
+
     const [requestList, setRequestList] = useState({})
 
-    const [workerData, setWorkerData] = useState([])
-    const [recruiterData, setRecruiterData] = useState([])
+    const [declinedRequests, setDeclinedRequests] = useState([])
 
     useEffect(() => {
         fetchRequestList()
+
+        let refreshRequestList
+        navigation.addListener("focus", () => {
+            refreshRequestList = setInterval(fetchRequestList, 5000)
+        })
+        navigation.addListener("blur", () => {
+            clearInterval(refreshRequestList)
+            setDeclinedRequests([])
+        })
+        
     }, [])
 
     const fetchRequestList = () => {
@@ -35,23 +47,28 @@ const Requests = () => {
             return res.json()
             // console.log("res req: ", res)
         })
-        .then(data => {
-            console.log("request list data: ", data.recruiter)
+        .then((data) => {
+            // console.log("request list data: ", data)
+
+            // place to state all rejected/declined requests
+            let list = []
+            global.userData.role === 'recruiter' ?
+            list = [...data.recruiter]
+            :
+            list = [...data.worker]
+
+            list = list.filter(item => item.requestStatus == '3')
+            setDeclinedRequests([...list])
+
+            // place all request on a state for flashlist rendering
+            global.userData.role === 'recruiter' ?
             setRequestList([...data.recruiter])
+            :
+            setRequestList([...data.worker])
+
         })
         .catch((err) => console.log("Request List Error: ", err))
-    }
 
-    const fetchWorkerInfoForRequest = (wID) => {
-        fetch(`http://${IPAddress}:3000/Worker/${wID}`, {
-            method: 'GET',
-            headers: {
-                'content-type': 'application/type',
-            },
-        }).then((res) => res.json())
-        .then((data) => {
-            console.log("worker data: ", data)
-        }).catch((err) => console.log("Error wd: ", err))
     }
 
 
@@ -67,6 +84,84 @@ const Requests = () => {
         )
     }
 
+    const ScreenFooterComponent = () => {
+        return(
+            <View style={{minHeight: 150, marginTop: declinedRequests.length === 0 ? 30 : 0}}>
+                {
+                    declinedRequests.length !== 0 ?
+                    <>
+                        <View style={styles.lineBreaker}>
+                            <View style={{flex: 1, height: 1, backgroundColor: '#c2c2c2'}} />
+                            <TText style={styles.horizontalText}>Declined Requests</TText>
+                            <View style={{flex: 1, height: 1, backgroundColor: '#c2c2c2'}} />
+                        </View>
+
+                        <View>
+                            {
+                                declinedRequests.map(function(item, index){
+                                    return(
+                                        <View key={index} style={[styles.requestCard, styles.requestCanceledCard]}>
+                                            {/* View when card is clicked/opened */}
+
+                                            {/* card */}
+                                            <View style={[styles.cardUserImage, ]}>
+                                                <Image source={global.userData.profilePic ? {uri: global.userData.role === "recruiter" ? item.workerId.profilePic : item.recruiterId.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} />
+                                            </View>
+                                            <View style={styles.requestInformationContainer}>
+                                                <View style={styles.cardTop}>
+                                                    {
+                                                        global.userData.role === 'recruiter' ?
+                                                            <Text style={[styles.carUserNameTxt, {color: item.requestStatus != '1' ? ThemeDefaults.themeWhite : 'black'}]}>{item.workerId.firstname} {item.workerId.lastname}</Text>
+                                                            :
+                                                            <Text style={[styles.carUserNameTxt, {color: item.requestStatus != '1' ? ThemeDefaults.themeWhite : 'black'}]}>{item.recruiterId.firstname} {item.recruiterId.lastname}</Text>
+                                                    }
+                                                    <View style={styles.cardUserrating}>
+                                                        <Icon name='star' size={20} color="gold" />
+                                                        <TText style={[styles.cardUserRatingTxt, styles.requestDeclinedText]}>4.7</TText>
+                                                    </View>
+                                                </View>
+                                                <View style={styles.cardUserName}>
+                                                    <Text style={[styles.cardRequestCategoryTxt, styles.requestDeclinedText]}>{item.subCategory}</Text>
+                                                </View>
+                                                <View style={styles.cardBottom}>
+                                                    <View style={styles.requestDate}>
+                                                        <Icon name='calendar-multiselect' size={18} color={'white'} />
+                                                        <TText style={[styles.requestDateTxt, styles.requestDeclinedText]}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
+                                                    </View>
+                                                    <View style={styles.requestDate}>
+                                                        <Icon name='clock-time-five-outline' size={18} color={'white'} />
+                                                        <TText style={[styles.requestDateTxt, styles.requestDeclinedText]}>{dayjs(item.startTime).format("hh:mm A")}</TText>
+                                                    </View>
+                                                    <View style={styles.cardViewRequest}>
+                                                        <TouchableOpacity style={[styles.cardViewRequestBtn, styles.cardViewDeclined]}
+                                                            activeOpacity={0.5}
+                                                            onPress={() => {
+                                                                navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
+                                                            }}
+                                                        >
+                                                            <TText style={styles.cardViewRequestTxt}>View</TText>
+                                                            <Icon name='arrow-right' size={18} />
+                                                        </TouchableOpacity>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    )
+                                })
+                            }
+                        </View>
+                        
+                        {/* Deletion Notice */}
+                        <View style={styles.deleteNoticeContainer}>
+                            <TText style={styles.deleteNoticeText}>All declined requests will disappear after five (5) days.</TText>
+                        </View>
+                    </>
+                    : null
+                }
+            </View>
+        )
+    }
+
   return (
     <SafeAreaView style={styles.mainContainer}>
         {/* <ScreenHeaderComponent /> */}
@@ -77,118 +172,69 @@ const Requests = () => {
             data={requestList}
             keyExtractor={item => item._id}
             estimatedItemSize={60}
-            ListHeaderComponent={() => (
-                <ScreenHeaderComponent />
+            ListEmptyComponent={() => (
+                <View style={{alignItems: 'center', marginTop: 50}}>
+                    <TText style={{color: '#c2c2c2'}}>There is no pending request at the moment</TText>
+                </View>
             )}
-            ListFooterComponent={() => (<View style={{height: 120}}></View>)}
+            ListHeaderComponent={() => (<ScreenHeaderComponent />)}
+            ListFooterComponent={() => (<ScreenFooterComponent />)}
             renderItem={({item}) => (
-                <View style={styles.requestCard}>
-                    {/* View when card is clicked/opened */}
-                    {/* <Modal 
-                        transparent={true}
-                        animationType='fade'
-                        visible={isRemoveUploadedModal}
-                        onRequestClose={()=> setRemoveUploadedModal(false)}
-                    >
-                        
-                    </Modal> */}
+                <>
+                    {
+                    (item.requestStatus == '1' || item.requestStatus == '4') && ( item.requestStatus == '1' || item.requestStatus == '4' && global.userData.role === 'recruiter')  &&
+                    <View style={[styles.requestCard, {backgroundColor: item.requestStatus == '4' ? "#999" : ThemeDefaults.themeWhite }]}>
 
                     {/* card */}
-                    <View style={styles.cardUserImage}>
-                        <Image source={global.userData.profilePic ? {uri: global.userData.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} />
+                    <View style={[styles.cardUserImage]}>
+                        <Image source={global.userData.profilePic ? {uri: global.userData.role === "recruiter" ? item.workerId.profilePic : item.recruiterId.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} />
                     </View>
                     <View style={styles.requestInformationContainer}>
                         <View style={styles.cardTop}>
-                            <Text style={styles.carUserNameTxt}>Worker's Name</Text>
+                            {
+                                global.userData.role === 'recruiter' ?
+                                    <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.workerId.firstname} {item.workerId.lastname}</Text>
+                                    :
+                                    <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.recruiterId.firstname} {item.recruiterId.lastname}</Text>
+                            }
                             <View style={styles.cardUserrating}>
                                 <Icon name='star' size={20} color="gold" />
-                                <TText style={styles.cardUserRatingTxt}>4.7</TText>
+                                <TText style={[styles.cardUserRatingTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>4.7</TText>
                             </View>
                         </View>
                         <View style={styles.cardUserName}>
-                            <Text style={styles.cardRequestCategoryTxt}>{item.subCategory}</Text>
+                            <Text style={[styles.cardRequestCategoryTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.subCategory}</Text>
                         </View>
                         <View style={styles.cardBottom}>
                             <View style={styles.requestDate}>
-                                <Icon name='calendar-multiselect' size={22} />
-                                <TText style={styles.requestDateTxt}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
+                                <Icon name='calendar-multiselect' size={18} color={item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'} />
+                                <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
                             </View>
                             <View style={styles.requestDate}>
-                                <Icon name='clock-time-five-outline' size={22} />
-                                <TText style={styles.requestDateTxt}>{dayjs(item.startTime).format("hh:mm A")}</TText>
+                                <Icon name='clock-time-five-outline' size={18} color={item.requestStatus == '4' ? ThemeDefaults.themeWhite: 'black'} />
+                                <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{dayjs(item.startTime).format("hh:mm A")}</TText>
                             </View>
                             <View style={styles.cardViewRequest}>
-                                <TouchableOpacity style={styles.cardViewRequestBtn}>
+                                <TouchableOpacity style={[styles.cardViewRequestBtn, {borderWidth: item.requestStatus != '1' ? 0 : 1.3, paddingVertical: item.requestStatus != '1' ? 4 : 2}]}
+                                    activeOpacity={0.5}
+                                    onPress={() => {
+                                        navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
+                                    }}
+                                >
                                     <TText style={styles.cardViewRequestTxt}>View</TText>
-                                    <Icon name='arrow-right' size={20} />
+                                    <Icon name='arrow-right' size={18} />
                                 </TouchableOpacity>
                             </View>
                         </View>
                     </View>
                 </View>
+                }
+                </>
             )}
         />
 
-        {/* Declined Requests */}
-        <View>
-            {/* <View style={styles.lineBreaker}>
-                <View style={{flex: 1, height: 1, backgroundColor: '#c2c2c2'}} />
-                <TText style={styles.horizontalText}>Declined Requests</TText>
-                <View style={{flex: 1, height: 1, backgroundColor: '#c2c2c2'}} />
-            </View> */}
-
-            {/* <View style={[styles.requestCard, styles.requestCanceledCard]}> */}
-                {/* View when card is clicked/opened */}
-                {/* <Modal 
-                    transparent={true}
-                    animationType='fade'
-                    visible={isRemoveUploadedModal}
-                    onRequestClose={()=> setRemoveUploadedModal(false)}
-                >
-                    
-                </Modal> */}
-
-                {/* card */}
-                {/* <View style={[styles.cardUserImage, ]}>
-                    <Image source={global.userData.profilePic ? {uri: global.userData.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} />
-                </View>
-                <View style={styles.requestInformationContainer}>
-                    <View style={styles.cardTop}>
-                        <Text style={[styles.carUserNameTxt, styles.requestDeclinedText]}>Leah P. Olivar</Text>
-                        <View style={styles.cardUserrating}>
-                            <Icon name='star' size={20} color="gold" />
-                            <TText style={[styles.cardUserRatingTxt, styles.requestDeclinedText]}>4.7</TText>
-                        </View>
-                    </View>
-                    <View style={styles.cardUserName}>
-                        <Text style={[styles.cardRequestCategoryTxt, styles.requestDeclinedText]}>Deep Cleaning</Text>
-                    </View>
-                    <View style={styles.cardBottom}>
-                        <View style={styles.requestDate}>
-                            <Icon name='calendar-multiselect' size={22} color={'white'} />
-                            <TText style={[styles.requestDateTxt, styles.requestDeclinedText]}>July 11</TText>
-                        </View>
-                        <View style={styles.requestDate}>
-                            <Icon name='clock-time-five-outline' size={22} color={'white'} />
-                            <TText style={[styles.requestDateTxt, styles.requestDeclinedText]}>09:30 AM</TText>
-                        </View>
-                        <View style={styles.cardViewRequest}>
-                            <TouchableOpacity style={[styles.cardViewRequestBtn, styles.cardViewDeclined]}>
-                                <TText style={styles.cardViewRequestTxt}>View</TText>
-                                <Icon name='arrow-right' size={20} />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </View> */}
-
-            
-
-            {/* Deletion Notice */}
-            <View style={styles.deleteNoticeContainer}>
-                <TText style={styles.deleteNoticeText}>All declined requests will disappear after five (5) days.</TText>
-            </View>
-        </View>
+       
+        {/* </View> */}
     </SafeAreaView>
   )
 }
@@ -241,9 +287,9 @@ const styles = StyleSheet.create({
 
     },
     cardimageStyle: {
-        width: 80,
-        height: 80,
-        borderRadius: 20,
+        width: 60,
+        height: 60,
+        borderRadius: 15,
     },
     requestInformationContainer: {
         // backgroundColor: 'pink',
@@ -286,7 +332,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 8,
         marginRight: 15,
-        fontSize: 16
+        fontSize: HEIGHT * 0.0157
     },
     cardViewRequest: {
         flexGrow: 1,
@@ -296,7 +342,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1.2,
-        borderColor: ThemeDefaults.themeDarkBlue,
+        borderColor: ThemeDefaults.themeLighterBlue,
         borderRadius: 10,
         paddingVertical: 2,
         paddingHorizontal: 12,
@@ -304,7 +350,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     cardViewRequestTxt: {
-        fontSize: 14,
+        fontSize: HEIGHT * 0.015,
         marginRight: 8
     },
     lineBreaker: {
@@ -325,6 +371,7 @@ const styles = StyleSheet.create({
     },
     requestCanceledCard: {
         backgroundColor: ThemeDefaults.themeRed,
+        marginTop: 5,
         marginBottom: 15
     },
     requestDeclinedText: {
@@ -336,7 +383,8 @@ const styles = StyleSheet.create({
     },
     deleteNoticeContainer: {
         marginVertical: 40,
-        paddingHorizontal: 100
+        marginBottom: 150,
+        paddingHorizontal: '20%'
     },
     deleteNoticeText: {
         textAlign: 'center',

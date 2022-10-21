@@ -74,7 +74,7 @@ const SubCategory = ({route}) => {
                     <TouchableOpacity style={styles.button}
                         onPress={() => {
                             console.log("chosen cat:", item.ServiceSubCategory)
-                            navigation.navigate("ListSpecificWorkerScreen", {chosenCategory: item.ServiceSubCategory})
+                            navigation.navigate("ListSpecificWorkerScreen", {chosenCategory: item.ServiceSubCategory,})
                         }}
                     >
                         <View style={styles.imageContainer}>

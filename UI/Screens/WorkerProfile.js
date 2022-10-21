@@ -254,7 +254,12 @@ const WorkerProfile = ({route}) => {
                                         {
                                             global.userData.role === 'recruiter' &&
                                             <View style={{}}>
-                                                <TouchableOpacity style={{paddingVertical: 5, paddingHorizontal: 10, backgroundColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, elevation: 4}}>
+                                                <TouchableOpacity style={{paddingVertical: 5, paddingHorizontal: 10, backgroundColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, elevation: 4}}
+                                                    onPress={() => {
+                                                        navigation.navigate("RequestFormDrawer", {workerID: workerID, workID: workItem._id, workerInformation: workerInformation, selectedJob: workItem.ServiceSubId.ServiceSubCategory, minPrice: workItem.minPrice, maxPrice: workItem.maxPrice, showMultiWorks: false})
+
+                                                    }}
+                                                >
                                                     <TText style={{fontSize: 12, color: '#fff'}}>Request</TText>
                                                 </TouchableOpacity>
                                             </View>

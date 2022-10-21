@@ -15,13 +15,17 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import Schedule from './Schedule';
 
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
 const HEIGTH = Dimensions.get('window').height
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const RequestForm = ({route, navigation}) => {
 
     const screenFocused = useIsFocused()
 
-    const {workerID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks} = route.params;
+    const {workerID, workID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks} = route.params;
     console.log(workerInformation)
 
     const [loadedWorkerInfo, setLoadedWorkerInfo] = useState({})
@@ -30,10 +34,10 @@ const RequestForm = ({route, navigation}) => {
 
     const [workSelected, setWorkSelected] = useState("")
     
-    const [datePickerVisible, setDatePickerVisibility] = useState(false)
     const [timePickerVisible, setTimePickerVisibility] = useState(false)
+    const [datePickerVisible, setDatePickerVisibility] = useState(false)
 
-    const [formatedDate, setFormatedDate] = useState(new Date())
+    const [formatedDate, setFormatedDate] = useState(new Date)
     const [displayDate, setDisplayDate] = useState(new Date())
 
     const [dateSelected, setDateSelected] = useState(false)
@@ -52,6 +56,8 @@ const RequestForm = ({route, navigation}) => {
 
     const [viewCalendarModal, setViewCalendarModal] = useState(false)
     const [viewScheduleModal, setViewScheduleModal] = useState(false)
+
+    const [sameDateBookings, setSameDateBooking] = useState([])
 
     const [viewScheduleErrorModal, setViewScheduleErrorModal] = useState(false)
     const [requestpostedModal, setRequestPostedModal] = useState(false)
@@ -152,9 +158,11 @@ const RequestForm = ({route, navigation}) => {
     // calendar things -------
 
     const handleDateConfirm = (date) => {
-        let da = dayjs(date).format("YYYY-MM-DD")
-        let dateString = da.toString()
-        setFormatedDate(dateString);
+        
+        let da = new Date(date).toISOString()
+        let nn = dayjs(date).format("YYYY-MM-DD")
+        
+        setFormatedDate(dayjs(date).format("YYYY-MM-DD"));
 
         setDisplayDate(dayjs(date).format("MMM D, YYYY"));
         setDatePickerVisibility(false);
@@ -165,23 +173,58 @@ const RequestForm = ({route, navigation}) => {
         // set as date selected on calendar
         datesWithCustomization[da.toString()] = dateAppointmentStyles
 
-        // setUser((prev) => ({...prev, birthday: dateString}))
+        getSameDateBookings(date)
 
-        // haveBlanks()
-        console.log(dateString)
-        dateString = dayjs(date).format("MMMM DD").toString()
-        // navigation.navigate("ScheduleDrawer", {dateSelected: dateString})
+    }
+
+    const getSameDateBookings = (date) => {
+        fetch(`https://hanaplingkod.onrender.com/worker/${workerID}`, {
+            method: "GET",
+            headers: {
+                'content-type': 'application/json'
+            },
+        }).then((res) => res.json())
+        .then((data) => {
+            let fd = dayjs(date).utc(true).format()
+            
+            // // console.log("fd", fd)
+            // let list = data.worker.filter(e => {
+            //     let aa = dayjs(e.serviceDate).utc(true).format()
+            //     // console.log("aa", aa)
+            //     return aa === fd
+            // })
+            // setSameDateBooking([...list])
+
+            // unavailableTime from worker
+            console.log(data.unavailableTime)
+            let list = []
+
+            let startDate
+
+            list = data.unavailableTime.filter(e => {
+                dayjs(e.startTime).format("YYYY-MM-DD") === dayjs(fd).format("YYYY-MM-DD")
+            })
+
+            console.log("List of unvailable dates same time: ", list)
+
+            console.log("list same date accepted bookings - calendar", list)
+        }).catch((err) => console.log("get same dates error", err.message))
     }
 
     const handleTimeConfirm = (time) => {
-        let timeString = dayjs(time).format("hh:mm A")
-        setDisplayTime(timeString.toString())
+        let timeString = dayjs(time).format("YYYY-MM-DD hh:mm:ss")
+        let timetime = dayjs(time).format("hh:mm")
+        setDisplayTime(dayjs(time).format("hh:mm A"))
         
-        setFormatedTime(time)
+        setFormatedTime(timetime)
         setTimePickerVisibility(false)
         setTimeSelected(true)
 
+        let newDate = new Date(formatedDate.getFullYear(), formatedDate.getMonth(), formatedDate.getDate(),
+                                formatedTime.getHours(), formatedTime.getMinutes(), formatedTime.getSeconds())
+
         console.log(formatedTime)
+        console.log("new date: ", newDate)
 
     }
 
@@ -199,20 +242,26 @@ const RequestForm = ({route, navigation}) => {
         console.log(formatedDate)
         console.log(formatedTime)
 
+        let user = global.userData
+
         fetch(`http://${IPAddress}:3000/service-request`, {
             method: "POST",
             headers: {
-                'content-type': 'application/json',
+                "content-type": "application/json",
             },
             body: JSON.stringify({
                 "workerId": workerID,
-                "recruiterId": global.userData._id ,
+                "recruiterId": global.userData._id,
+                'workId': workID,
+                "address": `${user.street}, ${user.purok}, ${user.barangay} ${user.city}, ${user.province}`,
                 "subCategory": selectedJob ? selectedJob : workSelected.ServiceSubId.ServiceSubCategory,
                 "minPrice": minPrice ? minPrice : workSelected.minPrice,
                 "maxPrice": maxPrice ? maxPrice : workSelected.maxPrice,
                 "serviceDate": formatedDate,
                 "startTime": formatedTime,
-                "description": requestDescription ? requestDescription : "",
+                "description": requestDescription,
+                "lat": 85,
+                "long": 20,
             })
         }).then((res) => {
             console.log("Service Request Posted! ")
@@ -220,7 +269,7 @@ const RequestForm = ({route, navigation}) => {
             setRequestDescription("")
             setFormatedDate(new Date())
             setFormatedTime(new Date())
-            navigation.navigate("HomeScreen")
+            // navigation.navigate("HomeScreen")
         })
         .catch((err) => console.log("Service Request Error: ", err))
     }
@@ -251,10 +300,10 @@ const RequestForm = ({route, navigation}) => {
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
                                     setConfirmServiceRequest(true)
-                                    setPostBtnModal(false)
                                     setRequestPostedModal(true)
                                     // fetch post request
-                                    // postRequest()
+                                    postRequest()
+                                    setPostBtnModal(false)
                                     // navigation.navigate("HomeScreen")
                                 }}
                             >
@@ -316,41 +365,41 @@ const RequestForm = ({route, navigation}) => {
 
             {/* Service Request success || Request has been made */}
             <Modal
-            transparent={true}
-            animationType='fade'
-            visible={requestpostedModal}
-            onRequestClose={() => {
-            //   global.serviceRequestPosted = false
-              setRequestPostedModal(false)
-            }}
-        >
+                transparent={true}
+                animationType='fade'
+                visible={requestpostedModal}
+                onRequestClose={() => {
+                //   global.serviceRequestPosted = false
+                setRequestPostedModal(false)
+                }}
+            >
 
-            {/* Modal View */}
-            <View style={styles.modalDialogue}>
-                {/* Modal Container */}
-                <View style={styles.dialogueContainer}>
-                    {/* Modal Message/Notice */}
-                    <View style={styles.dialogueMessage}>
-                        <TText style={[styles.dialogueMessageText]}>Your request has been made.</TText>
-                        <TText style={[styles.dialogueMessageText, {marginTop: 20}]}>Kindly wait for the worker to respond.</TText>
-                    </View>
-                    {/* Modal Buttons */}
-                    <View style={styles.modalDialogueBtnCont}>
-                        
-                        <TouchableOpacity 
-                            style={styles.dialogueBtn}
-                            onPress={() => {
-                              setRequestPostedModal(false)
-                              navigation.navigate("HomeScreen")
-                            //   global.serviceRequestPosted = false
-                            }}
-                        >
-                            <TText style={styles.dialogueConfirm}>Got it</TText>
-                        </TouchableOpacity>
+                {/* Modal View */}
+                <View style={styles.modalDialogue}>
+                    {/* Modal Container */}
+                    <View style={styles.dialogueContainer}>
+                        {/* Modal Message/Notice */}
+                        <View style={styles.dialogueMessage}>
+                            <TText style={[styles.dialogueMessageText]}>Your request has been made.</TText>
+                            <TText style={[styles.dialogueMessageText, {marginTop: 20}]}>Kindly wait for the worker to respond.</TText>
+                        </View>
+                        {/* Modal Buttons */}
+                        <View style={styles.modalDialogueBtnCont}>
+                            
+                            <TouchableOpacity 
+                                style={styles.dialogueBtn}
+                                onPress={() => {
+                                setRequestPostedModal(false)
+                                navigation.navigate("HomeScreen")
+                                //   global.serviceRequestPosted = false
+                                }}
+                            >
+                                <TText style={styles.dialogueConfirm}>Got it</TText>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
-            </View>
-        </Modal>
+            </Modal>
 
 
             {/* Modal Calendar View */}
@@ -390,7 +439,7 @@ const RequestForm = ({route, navigation}) => {
                         onDayPress={day => {
                             datesWithCustomization[day.dateString] = dateAppointmentStyles
                             setCalendarSelectedDate({...datesWithCustomization})
-                            handleDateConfirm(day.dateString)
+                            handleDateConfirm(day.timestamp)
 
                             // navigation.navigate("ScheduleDrawer", {dateSelected: displayDate})
                         }}
@@ -412,7 +461,7 @@ const RequestForm = ({route, navigation}) => {
                     <View style={styles.legendContainer}>
                         <View style={styles.legendItem}>
                             <View style={{backgroundColor: ThemeDefaults.themeOrange, width: 25, height: 25, borderRadius: 8}} />
-                            <TText style={styles.legendTxt}>{global.userData.role === "recruiter" ? "Date Selected" : "Date with Appointments"}</TText>
+                            <TText style={styles.legendTxt}>{global.userData.role === "recruiter" ? "Date Selected" : "Available Date with Appointments"}</TText>
                         </View>
                         {/* <View style={styles.legendItem}>
                             <View style={{backgroundColor: ThemeDefaults.themeLighterBlue, width: 25, height: 25, borderRadius: 8}} />
@@ -439,13 +488,13 @@ const RequestForm = ({route, navigation}) => {
 
                     <View style={styles.headerContainer}>
                         <TText style={styles.headerTitle}>Worker's Schedule</TText>
-                        <TText style={styles.headerSchedSubTitle}>Shown below are the worker's appointments scheduled on <TText style={styles.headerSubTitleDate}>{dayjs(displayDate).format("MMM DD")}</TText></TText>
+                        <TText style={styles.headerSchedSubTitle}>{sameDateBookings.length > 0 ? "Shown below are the worker's appointments scheduled on " : "The worker you selected has no appointments scheduled on "}<TText style={styles.headerSubTitleDate}>{dayjs(formatedDate).format("MMMM D")}</TText></TText>
                     </View>
 
                     <View style={styles.timeBtnContainer}>
                         {/* Time Picker */}
                         <View>
-                            <TText>Choose Time</TText>
+                            <TText>Select Time</TText>
                         </View>
 
                         <TouchableOpacity 
@@ -465,17 +514,32 @@ const RequestForm = ({route, navigation}) => {
                             onConfirm={handleTimeConfirm}
                             onCancel={() => setTimePickerVisibility(false)}
                         />
+
+                        {/* show if time is taken */}
+                        <View style={{marginTop: 2, paddingLeft: 5}}>
+                            <TText style={{fontSize: 14, color: ThemeDefaults.themeOrange}}>Time is already taken by another recruiter</TText>
+                        </View>
                     </View>
 
                     <View style={styles.scheduleList}>
-                        <View style={styles.schedCard}>
+                        {/* <View style={styles.schedCard}>
                             <TText style={styles.schedTitle}>Booked: Carpet Cleaning</TText>
                             <TText style={styles.schedTime}>08:00 AM - 09:00 AM</TText>
                         </View>
                         <View style={[styles.schedCard, {paddingBottom: 20 * 3}]}>
                             <TText style={styles.schedTitle}>Booked: Carpet Cleaning</TText>
                             <TText style={styles.schedTime}>08:00 AM - 09:00 AM</TText>
-                        </View>
+                        </View> */}
+                        {
+                            sameDateBookings.map(function(item, index){
+                                return(
+                                    <View key={index} style={[styles.schedCard, {height: 'auto'}]}>
+                                        <TText style={styles.schedTitle}>Booked: {item.subCategory}</TText>
+                                        <TText style={styles.schedTime}>{dayjs(item.startTime).format("hh:mm A")} - {dayjs(item.endTime).format("hh:mm A")}</TText>
+                                    </View>
+                                )
+                            })
+                        }
                     </View>
 
                     
@@ -1165,7 +1229,8 @@ const styles = StyleSheet.create({
     scheduleList: {
         paddingHorizontal: 50,
         width: '100%',
-        marginVertical: 30
+        marginVertical: 30,
+        marginBottom: 150,
     },
     schedCard: {
         width: '100%',

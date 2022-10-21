@@ -37,7 +37,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
         .then((res) => res.json())
         .then((data) => {
             setWorkers([...data])
-            console.log(data)
+            console.log("Workrs list", data)
         }).catch((err) => console.log("error: ", err.message))
     }
 
@@ -67,8 +67,10 @@ const ListSpecificWorkers = ({route, navigation}) => {
                     {/* <TText>{item.workerId.age}</TText> */}
                     <TouchableOpacity style={styles.button}
                         onPress={() => {
-                            console.log(item.workerId._id)
-                            navigation.navigate("RequestFormDrawer", {workerID: item.workerId._id, workerInformation: item.workerId, selectedJob: chosenCategory, minPrice: item.minPrice, maxPrice: item.maxPrice, showMultiWorks: false})
+                            console.log("workerId._id: ", item.workerId._id)
+                            console.log("workId: ", item._id)
+
+                            navigation.navigate("RequestFormDrawer", {workerID: item.workerId._id, workID: item._id, workerInformation: item.workerId, selectedJob: chosenCategory, minPrice: item.minPrice, maxPrice: item.maxPrice, showMultiWorks: false})
                         }}
                     >
                         <View style={styles.buttonView}>
