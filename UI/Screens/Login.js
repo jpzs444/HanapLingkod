@@ -70,7 +70,7 @@ export default function Login({navigation}) {
         .then((response) => response.json())
         .then((user) => {
 
-          console.log("user data: ", user)
+          // console.log("user data: ", user)
 
           if(user._id){
             setIsLoading(true)

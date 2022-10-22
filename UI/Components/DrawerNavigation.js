@@ -19,6 +19,9 @@ import WorkerProfile from '../Screens/WorkerProfile';
 import CalendarView from '../Screens/CalendarView';
 import PostRequestForm from '../Screens/PostRequestForm';
 import Schedule from '../Screens/Schedule';
+import VIewServiceRequest from '../Screens/VIewServiceRequest';
+import AddEventCalendar from '../Screens/AddEventCalendar';
+import ViewComments from '../Screens/ViewComments';
 
 
 const Drawer = createDrawerNavigator();
@@ -77,12 +80,6 @@ export default function DrawerNavigation(){
                 )
             }} />
 
-            <Drawer.Screen name="CalendarDrawer" component={CalendarView} options={{
-                drawerIcon: ({color}) => (
-                    <Icon name="clipboard-edit" size={25} color={color}  />
-                )
-            }} />
-
             <Drawer.Screen name="PostRequestFormDrawer" component={PostRequestForm} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="clipboard-edit" size={25} color={color}  />
@@ -90,6 +87,18 @@ export default function DrawerNavigation(){
                 
             }} />
             <Drawer.Screen name="ScheduleDrawer" component={Schedule} options={{
+                drawerIcon: ({color}) => (
+                    <Icon name="clipboard-edit" size={25} color={color}  />
+                ),
+                
+            }} />
+            <Drawer.Screen name="ViewServiceRequestDrawer" component={VIewServiceRequest} options={{
+                drawerIcon: ({color}) => (
+                    <Icon name="clipboard-edit" size={25} color={color}  />
+                ),
+                
+            }} />
+            <Drawer.Screen name="ViewCommentsDrawer" component={ViewComments} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="clipboard-edit" size={25} color={color}  />
                 ),

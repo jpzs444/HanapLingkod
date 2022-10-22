@@ -5,19 +5,122 @@ import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import dayjs from 'dayjs';
 
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+
+
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import {LocaleConfig} from 'react-native-calendars';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import { RollInRight } from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
 
 const dayWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WIDTH = Dimensions.get('window').width
 const HEIGTH = Dimensions.get('window').height
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const CalendarView = () => {
 
+    const navigation = useNavigation()
+
     const [modalVisible, setModalVisible] = useState(false)
     const [dateItem, setDateItem] = useState({})
+
+    const [viewScheduleModal, setViewScheduleModal] = useState(false)
+    const [timePickerVisible, setTimePickerVisibility] =  useState(false)
+
+    const [datePickerVisible, setDatePickerVisibility] = useState(false)
+
+    const [formatedDate, setFormatedDate] = useState(new Date())
+    const [displayDate, setDisplayDate] = useState(new Date())
+
+    const [dateSelected, setDateSelected] = useState(false)
+    const [formatedTime, setFormatedTime] = useState(new Date())
+
+    const [displayTime, setDisplayTime] = useState(new Date())
+    const [timeSelected, setTimeSelected] = useState(false)
+
+    const [sameDateBookings, setSameDateBooking] = useState([])
+
+    const dateAppointmentsStyles = {
+        customStyles: {
+            container: {
+                backgroundColor: ThemeDefaults.dateAppointments,
+                borderRadius: 5,
+            },
+            text: {
+                color: ThemeDefaults.themeWhite
+            }
+        }
+    }
+
+    const handleDateConfirm = (date) => {
+        let da = dayjs(date).format("YYYY-MM-DD")
+        let dateString = da.toString()
+        setFormatedDate(da);
+
+        setDisplayDate(dayjs(date).format("MMM D, YYYY"));
+        // setDatePickerVisibility(false);
+        setDateSelected(true)
+        // setViewCalendarModal(false)
+        setViewScheduleModal(true)
+
+        // set as date selected on calendar
+        datesWithCustomization[da.toString()] = dateAppointmentsStyles
+
+        // setUser((prev) => ({...prev, birthday: dateString}))
+        getSameDateBookings(date)
+
+        // haveBlanks()
+        console.log(dateString)
+        dateString = dayjs(date).format("MMMM DD").toString()
+        // navigation.navigate("ScheduleDrawer", {dateSelected: dateString})
+    }
+
+    const handleTimeConfirm = (time) => {
+        let timeString = dayjs(time).format("YYYY-MM-DD hh:mm:ss")
+        let timetime = dayjs(time).format("hh:mm")
+        setDisplayTime(dayjs(time).format("hh:mm A"))
+        
+        setFormatedTime(timetime)
+        setTimePickerVisibility(false)
+        setTimeSelected(true)
+
+        let newDate = new Date(formatedDate.getFullYear(), formatedDate.getMonth(), formatedDate.getDate(),
+                                formatedTime.getHours(), formatedTime.getMinutes(), formatedTime.getSeconds())
+
+        console.log(formatedTime)
+        console.log("new date: ", newDate)
+
+    }
+
+    const getSameDateBookings = (date) => {
+        fetch(`https://hanaplingkod.onrender.com/booking/${global.userData._id}`, {
+            method: "GET",
+            headers: {
+                'content-type': 'application/json'
+            },
+        }).then((res) => res.json())
+        .then((data) => {
+            console.log(data)
+            let fd = dayjs(date).utc(true).toISOString()
+            console.log("fd", fd)
+            
+            // console.log("fd", fd)
+            let list = data.worker.filter(e => {
+                // let aa = dayjs(e.serviceDate).utc(true).format()
+                let aa = dayjs(e.serviceDate).toISOString()
+                console.log("aa", aa)
+                return aa == fd
+            })
+            setSameDateBooking([...list])
+
+            console.log("list same date accepted bookings - calendar", list)
+        }).catch((err) => console.log("get same dates error", err.message))
+    }
 
     const dateDisabledStyles = {
         disabled:true,
@@ -33,17 +136,6 @@ const CalendarView = () => {
         }
     }
 
-    const dateAppointmentsStyles = {
-        customStyles: {
-            container: {
-                backgroundColor: ThemeDefaults.dateAppointments,
-                borderRadius: 5,
-            },
-            text: {
-                color: ThemeDefaults.themeWhite
-            }
-        }
-    }
 
     const dateTodayStyles = {
         customStyles: {
@@ -66,7 +158,6 @@ const CalendarView = () => {
         [dateToday.toString()] : dateTodayStyles
     }
 
-
     const CalendarMonthArrow = (props) => {
         return(
             <Icon name={`arrow-${props.direction}`} size={22} color={ThemeDefaults.themeDarkBlue} />
@@ -83,109 +174,16 @@ const CalendarView = () => {
         '2022-10-29': [{time: '09:00 AM - 01:00 PM', service: "Deep Cleaning", estimatedTime: 3, }],
     }
 
-    const renderItem = (item) => {
-        return(
-            <TouchableOpacity style={{height: 50 + 30 * item.estimatedTime, borderRadius: 15, backgroundColor: '#fff', elevation: 3, marginBottom: 15, marginRight: 20, padding: 15}}>
-                <TText>{item.time}</TText>
-                <TText>Booked: {item.service}</TText>
-            </TouchableOpacity>
-        )
-    }
-
-    const renderEmpty = () => {
-        return(
-            <View style={{height: 30, flex: 1}}>
-                <TText>Open</TText>
-            </View>
-        )
-    }
-
-    {/* <Agenda
-        items={{
-            '2022-10-22': [{name: 'Time already booked', time: '09:00 AM', height: 140}],
-            '2022-10-23': [{name: 'Deep Cleaning', time: '09:00 AM', height: 80}],
-            '2022-10-24': [{name: 'Going back to the corner, where I first saw you', time: '09:00 AM', height: 140}],
-            '2022-10-25': [{name: 'worker unavailable', time: '09:00 AM', height: 80}, {name: 'any js object', time: '10:00 AM', height: 140}]
-        }}
-        minDate={dateToday}
-        pastScrollRange={0}
-        futureScrollRange={12}
-        showClosingKnob={true}
-        onDayPress={day => {
-            console.log(day)
-            return(
-                <View>
-                    <TText>Hello</TText>
-                </View>
-            )
-        }}
-        renderEmptyDate={() => {
-            return(
-                <View style={{flex: 1}}>
-                    <TText>No Data Available</TText>
-                </View>
-            )
-        }}
-        renderItem={item => {
-            // console.log(item.length > 0)
-            return(
-                item.length > 0 ? 
-                    (
-                        item.map(function(agenda, index){
-                            <View key={index} style={{marginTop: 10, marginBottom: 5, marginRight: 20, padding: 15, borderRadius: 10, backgroundColor: 'white', elevation: 3, height: agenda.height}}>
-                                <TText>{agenda.time}</TText>
-                                <TText>{agenda.name}</TText>
-                            </View>
-                        })
-                    )
-                    : 
-                    <View style={{marginTop: 20, marginRight: 20, marginBottom: 5, padding: 15, borderRadius: 10, backgroundColor: 'white', elevation: 3, height: item.height}}>
-                        <TText>{item.time}</TText>
-                        <TText>{item.name}</TText>
-                    </View>
-            )
-        }}
-        theme={{
-            selectedDayBackgroundColor: ThemeDefaults.themeOrange,
-            indicatorColor: ThemeDefaults.themeOrange,
-            todayTextColor: ThemeDefaults.themeOrange,
-            dotColor: ThemeDefaults.themeOrange,
-            textDayFontFamily: 'LexendDeca',
-            textMonthFontFamily: 'LexendDeca_Medium',
-            textMonthFontSize: 18,
-            agendaKnobColor: ThemeDefaults.themeDarkBlue,
-            backgroundColor: 'pink',
-            timelineContainer: {
-                backgroundColor: 'pink',
-
-            },
-            customStyles: {
-                container: {
-                    backgroundColor: 'pink'
-                }
-            }
-
-            // textDayHeaderFontFamily: 'monospace',
-        }}
-        style={{flexGrow: 1, marginBottom: 8}}
-    /> */}
 
   return (
     <View style={{flexGrow: 1, marginTop: StatusBar.currentHeight, backgroundColor: 'white'}}>
         <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} />
 
-        {
-            global.userData.role === "recruiter" ?
-                <View style={styles.header}>
-                    <TText style={styles.headerTitle}>Date Selection</TText>
-                    <TText style={styles.headerSubTitle}>Select and confirm date of appointment</TText>
-                </View>
-                :
-                <View style={styles.header}>
-                    <TText style={styles.headerTitle}>Calendar</TText>
-                    <TText style={styles.headerSubTitle}>Select dates where you will be unavailable</TText>
-                </View>
-        }
+        <View style={styles.header}>
+            <TText style={styles.headerTitle}>Calendar</TText>
+            <TText style={styles.headerSubTitle}>Select dates where you will be unavailable</TText>
+        </View>
+
         <Calendar 
             minDate={dateToday.toString()}
             enableSwipeMonths={true}
@@ -196,11 +194,9 @@ const CalendarView = () => {
             onDayPress={day => {
                 console.log(day)
                 console.log(dayWeek[dayjs(day.timestamp).day()])
-                return(
-                    <View style={{backgroundColor: 'rgba(255,255,255,0.6)', height: 500, width: '100%'}}>
 
-                    </View>
-                )
+                handleDateConfirm(day.dateString)
+                setViewScheduleModal(true)
             }}
             theme={{
                 indicatorColor: ThemeDefaults.themeDarkBlue,
@@ -222,13 +218,67 @@ const CalendarView = () => {
         <View style={styles.legendContainer}>
             <View style={styles.legendItem}>
                 <View style={{backgroundColor: ThemeDefaults.themeOrange, width: 25, height: 25, borderRadius: 8}} />
-                <TText style={styles.legendTxt}>{global.userData.role === "recruiter" ? "Date Selected" : "Date with Appointments"}</TText>
+                <TText style={styles.legendTxt}>{global.userData.role === "recruiter" ? "Date Selected" : "Available Date with Appointments"}</TText>
             </View>
             <View style={styles.legendItem}>
                 <View style={{backgroundColor: ThemeDefaults.themeLighterBlue, width: 25, height: 25, borderRadius: 8}} />
-                <TText style={styles.legendTxt}>Date Unavailable</TText>
+                <TText style={styles.legendTxt}>Unavailable Date</TText>
             </View>
         </View>
+
+        {/* Schedule Modal */}
+        <Modal
+            transparent={true}
+            animationType='slide'
+            visible={viewScheduleModal}
+            onRequestClose={() => setViewScheduleModal(false)}
+        >
+            <ScrollView contentContainerStyle={styles.modalCalendar}>
+                {/* screen header */}
+                <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} changeSchedModalState={setViewScheduleModal} noCalendar={true} modalSchedule={true} />
+
+                <View style={styles.headerContainer}>
+                    <TText style={styles.headerScheduleTitle}>Worker's Schedule</TText>
+                    <TText style={styles.headerSchedSubTitle}>Shown below are the worker's appointments scheduled on <TText style={styles.headerSubTitleDate}>{dayjs(displayDate).format("MMM DD")}</TText></TText>
+                </View>
+
+
+                <View style={styles.scheduleList}>
+                    {/* <View style={styles.schedCard}>
+                        <TText style={styles.schedTitle}>Booked: Carpet Cleaning</TText>
+                        <TText style={styles.schedTime}>08:00 AM - 09:00 AM</TText>
+                    </View>
+                    <View style={[styles.schedCard, {paddingBottom: 20 * 3}]}>
+                        <TText style={styles.schedTitle}>Booked: Carpet Cleaning</TText>
+                        <TText style={styles.schedTime}>08:00 AM - 09:00 AM</TText>
+                    </View> */}
+                    {
+                        sameDateBookings.map(function(item, index){
+                            return(
+                                <View key={index} style={[styles.schedCard, {height: 'auto'}]}>
+                                    <TText style={styles.schedTitle}>Booked: {item.subCategory}</TText>
+                                    <TText style={styles.schedTime}>{dayjs(item.startTime).format("hh:mm A")} - {dayjs(item.endTime).format("hh:mm A")}</TText>
+                                </View>
+                            )
+                        })
+                    }
+                </View>
+
+                
+
+                <View style={styles.addCustomEventBtn}>
+                    <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 35, padding: 15}}
+                        onPress={() => {
+                            navigation.navigate("AddEventCalendarUserStack", {selectedDate: formatedDate})
+                        }}
+                    >
+                        <Icon name="plus" size={40} color={ThemeDefaults.themeWhite} />
+                    </TouchableOpacity>
+                </View>
+                
+            </ScrollView>
+            
+        </Modal>
 
     </View>
   )
@@ -265,9 +315,6 @@ const styles = StyleSheet.create({
         fontSize: 18
     },
     legendContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
         paddingHorizontal: 30,
         marginTop: 50
     },
@@ -333,5 +380,126 @@ const styles = StyleSheet.create({
     notesTxt: {
         marginTop: 10 ,
         fontSize: 18
+    },
+    modalCalendar: {
+        flexGrow: 1,
+        backgroundColor: ThemeDefaults.themeWhite
+    },
+    calendarMonthHeader: {
+        width: 250,
+        alignItems: 'center',
+        paddingVertical: 3,
+        backgroundColor: '#D9D9D9',
+        borderRadius: 30,
+    },
+    calendarMonthHeaderTxt: {
+        fontSize: 18
+    },
+    legendTopRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15
+    },
+    legendColor: {
+        width: 30,
+        height: 30,
+        borderRadius: 5,
+    },
+    legendTxt: {
+        marginLeft: 15,
+        fontFamily: 'LexendDeca_Medium'
+    },
+    timeBtnContainer: {
+        paddingHorizontal: 50,
+        width: '100%',
+        marginTop: 30
+    },
+    timePickerBtn: {
+        borderWidth: 1.5,
+        borderColor: ThemeDefaults.themeDarkBlue,
+        borderRadius: 10,
+        padding: 12,
+        marginTop: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    timeTextContainer: {
+        flexGrow: 1,
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    timePickerText: {
+        marginLeft: 10
+    },
+    scheduleList: {
+        paddingHorizontal: 50,
+        width: '100%',
+        marginVertical: 30
+    },
+    schedCard: {
+        width: '100%',
+        backgroundColor: ThemeDefaults.themeFadedBlack,
+        borderRadius: 15,
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        marginBottom: 15,
+    },
+    schedTitle: {
+        color: ThemeDefaults.themeWhite
+    },
+    schedTime: {
+        color: ThemeDefaults.themeWhite
+    },
+    confirmBtnContainer: {
+        // flexGrow: 1,
+        // width: '100%',
+        position: 'absolute',
+        bottom: 60,
+        // left: 50,
+        righ: 50,
+        // backgroundColor: 'pink'
+    },
+    confirmBtn: {
+        // width: '100%',
+        flexGrow: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        borderRadius: 15,
+        backgroundColor: ThemeDefaults.themeOrange
+    },
+    confirmBtnText: {
+        color: ThemeDefaults.themeWhite,
+        fontSize: 18,
+        fontFamily: "LexendDeca_SemiBold"
+    },
+    headerContainer: {
+        width: '100%',
+        alignItems: 'center',
+        marginVertical: 10
+    },
+    headerScheduleTitle: {
+        fontSize: 20,
+        marginBottom: 10
+    },
+    headerSchedSubTitle: {
+        fontSize: 15,
+        marginHorizontal: 50,
+        textAlign: 'center'
+    },
+    headerSubTitleDate: {
+        fontFamily: 'LexendDeca_Medium'
+    },
+    addCustomEventBtn: {
+        position: 'absolute',
+        bottom: 60,
+        right: 40,
+        backgroundColor: 'white',
+        borderRadius: 35,
     },
 })

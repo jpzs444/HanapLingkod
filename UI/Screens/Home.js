@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { SafeAreaView, RefreshControl, Text, View, Image, StatusBar, 
-  Dimensions, StyleSheet, TouchableOpacity, TextInput, ImageBackground, Modal } from 'react-native';
+  Dimensions, StyleSheet, TouchableOpacity, TextInput, ImageBackground, Modal, Linking } from 'react-native';
 import TText from '../Components/TText'
 import { useNavigation } from '@react-navigation/native';
 import Appbar from '../Components/Appbar';
@@ -37,13 +37,13 @@ export default function Home() {
     // send pushtoken to backend
     fetch("http://" + IPAddress + ":3000/setToken/" + global.userData._id, {
       method: 'PUT',
-      body: JSON.stringify({
-        pushtoken: global.deviceExpoPushToken,
-      }),
       headers: {
         "content-type": "application/json",
       },
-    })
+      body: JSON.stringify({
+        "pushtoken": global.deviceExpoPushToken,
+      })
+    }).then((res) => console.log("Successfully placed notification token/userID"))
     .catch((err) => console.log("err : ", err.message))
   }, [])
 
@@ -169,7 +169,12 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionbar_btn}>
+          <TouchableOpacity style={styles.actionbar_btn}
+            onPress={() => {
+              // use Linking to dial phone number
+              // Linking.openURL(`tel:number`)
+            }}
+          >
             <View style={styles.actionbar_iconContainer}>
               <Icon name="bookmark-box-multiple" size={50} color={ThemeDefaults.themeOrange} />
             </View>
@@ -210,6 +215,7 @@ export default function Home() {
                 placeholder={"Search for a Service or Worker"}
                 placeholderTextColor="#8A8B97"
                 keyboardType="default"
+                returnKeyType='search'
                 // value={searchW ? searchW : searchWord}
                 enablesReturnKeyAutomatically={true}
                 // onChangeText={(val) => {
