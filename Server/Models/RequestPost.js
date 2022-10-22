@@ -3,7 +3,6 @@ const Schema = require("mongoose").Schema;
 
 const requestPostSchema = new mongoose.Schema({
   recruiterId: { type: Schema.Types.ObjectId, ref: "Recruiter" },
-
   ServiceID: { type: Schema.Types.ObjectId, ref: "ServiceCategory" },
   postDescription: String,
   created_at: { type: Date, required: true, default: Date.now },
@@ -13,7 +12,7 @@ const requestPostSchema = new mongoose.Schema({
   maxPrice: Number,
   postToggle: Boolean,
   address: String,
-  comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+  postCommentId: { type: Schema.Types.ObjectId, ref: "Postcomment" },
   geometry: {
     type: {
       type: String,
@@ -29,6 +28,7 @@ const requestPostSchema = new mongoose.Schema({
 requestPostSchema.pre("find", function (next) {
   this.populate("recruiterId");
   this.populate("ServiceID");
+  // this.populate("postCommentId");
 
   next();
 });
