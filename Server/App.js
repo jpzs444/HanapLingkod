@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const cloudinary = require("./Helpers/cloudinary");
 const fs = require("fs");
 const dayjs = require("dayjs");
+const { generateAccessToken, testt } = require("./Helpers/JWT");
 
 //models
 const Worker = require("./Models/Workers");
@@ -84,11 +85,6 @@ app.get("/images/:filename", async function (req, res) {
   } catch (err) {
     console.error(err);
   }
-});
-
-app.post("/r", async function (req, res) {
-  let yy = dayjs("2019-01-25T23:10").format("YYYY-MM-DDTHH:mm:ss");
-  console.log(yy);
 });
 
 app.get("/search", async function (req, res) {
@@ -214,17 +210,19 @@ app.post("/login", async (req, res) => {
     let ifRecruiterExist = await Recruiter.exists({ username: username });
     let user;
     if (ifWorkerExist) {
-      user = await Worker.findOne({ username: username });
+      user = await Worker.findOne({ username: username }).lean();
     } else {
-      user = await Recruiter.findOne({ username: username });
+      user = await Recruiter.findOne({ username: username }).lean();
     }
     if (!user) {
-      return res.status(400).json({ msg: "Invalid Username" });
+      return res.status(400).json({ msg: "Invalid Username" }).lean();
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid Password" });
     }
+    const token = generateAccessToken(username);
+    user["accessToken"] = token;
     res.send(user);
   } catch (error) {
     res.status(500).json({ err: error.message });

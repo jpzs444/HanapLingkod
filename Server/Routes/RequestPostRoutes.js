@@ -3,6 +3,12 @@ const router = express.Router();
 const notification = require("../Helpers/PushNotification");
 const RequestPost = require("../Models/RequestPost");
 const dayjs = require("dayjs");
+const PostComment = require("../Models/PostComment");
+
+router.route("/commentTry").get(async function (req, res) {
+  let rrr = await PostComment.find({}).exec();
+  console.log(rrr);
+});
 
 router
   .route("/request-post")
@@ -51,17 +57,19 @@ router
       res.send(error);
     }
   });
+
 router
   .route("/request-post/:id")
   .get(async function (req, res) {
     try {
-      RequestPost.find({ _id: req.params.id }).exec(function (err, notif) {
-        if (notif) {
-          res.send(notif);
-        } else {
-          res.send("No such data found");
-        }
-      });
+      let query = await RequestPost.find({ _id: req.params.id }).lean().exec();
+      let comments = await PostComment.find({
+        _id: {
+          $in: query[0].postCommentId,
+        },
+      }).exec();
+      console.log(comments);
+      res.send({ post: query, comment: comments });
     } catch (error) {
       res.send(error);
     }
@@ -121,11 +129,11 @@ router
       session.startTransaction();
       // console.log(req.body);
 
-      const comment = await Comment.create(
+      const comment = await PostComment.create(
         [
           {
             workerId: req.body.workerId,
-            comment: req.body.comment,
+            message: req.body.message,
           },
         ],
         { session }
@@ -134,7 +142,7 @@ router
       await RequestPost.findOneAndUpdate(
         { _id: req.params.id },
         {
-          $push: { comments: comment[0]._id },
+          $push: { postCommentId: comment[0]._id },
         },
         { session }
       );

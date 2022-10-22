@@ -154,7 +154,7 @@ router
           maxPrice: result.maxPrice,
           serviceDate: result.serviceDate,
           startTime: result.startTime,
-          endTime: result.endTime,
+          endTime: endTime,
           description: result.description,
           otp: OTP,
           bookingStatus: 1,

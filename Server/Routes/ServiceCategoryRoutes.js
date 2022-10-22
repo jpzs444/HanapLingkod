@@ -5,6 +5,25 @@ const ServiceSubCategory = require("../Models/SubCategory");
 const Work = require("../Models/Work");
 const ServiceRequest = require("../Models/ServiceRequest");
 const Booking = require("../Models/Booking");
+const multer = require("multer");
+const cloudinary = require("../Helpers/cloudinary");
+const { CategoryMiddleware } = require("../Helpers/DeleteMiddleware");
+
+//store photos
+const storage = multer.diskStorage({
+  //destination for files
+  // destination: function (request, file, callback) {
+  //   callback(null, "./Public/Uploads");
+  // },
+
+  //add back the extension
+  filename: function (request, file, callback) {
+    callback(null, Date.now() + file.originalname);
+  },
+});
+
+//upload the image
+const upload = multer({ storage: storage });
 
 router
   .route("/service-category")
@@ -17,9 +36,17 @@ router
       }
     });
   })
-  .post(function (req, res) {
+  .post(upload.single("image"), async function (req, res) {
+    let image;
+    if (req.file !== undefined) {
+      image = await cloudinary.uploader.upload(req.file.path, {
+        folder: "HanapLingkod/Category",
+      });
+    }
+
     const serviceCategory = new ServiceCategory({
       Category: req.body.Category,
+      image: image.url,
     });
     serviceCategory.save(function (err) {
       if (!err) {
@@ -42,6 +69,25 @@ router
 ///// specific /////
 router
   .route("/service-category/:id")
+  .put(upload.single("image"), async function (req, res) {
+    console.log("asdsad");
+    const image = await cloudinary.uploader.upload(req.file.path, {
+      folder: "HanapLingkod/Category",
+    });
+
+    ServiceCategory.findOneAndUpdate(
+      { _id: req.params.id },
+      { image: image.url },
+      function (err) {
+        if (!err) {
+          res.send("Updated Successfully");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  })
+
   .get(function (req, res) {
     ServiceCategory.find({ _id: req.params.id }, function (err, services) {
       if (services) {
@@ -128,8 +174,9 @@ router
         {
           deleteflag: 1,
         },
-        function (err) {
+        function (err, doc) {
           if (!err) {
+            CategoryMiddleware(doc);
             res.send("Deleted Successfully ");
           } else {
             res.send(err);
