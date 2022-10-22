@@ -4,6 +4,7 @@ const ServiceSubCategory = require("../Models/SubCategory");
 const Work = require("../Models/Work");
 const ServiceRequest = require("../Models/ServiceRequest");
 const Booking = require("../Models/Booking");
+const { SubCategoryMiddleware } = require("../Helpers/DeleteMiddleware");
 
 router
   .route("/service-sub-category")
@@ -120,8 +121,9 @@ router
         {
           deleteflag: 1,
         },
-        function (err) {
+        function (err, doc) {
           if (!err) {
+            SubCategoryMiddleware(doc);
             res.send("Deleted Successfully ");
           } else {
             res.send(err);

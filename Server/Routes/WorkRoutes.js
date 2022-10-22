@@ -7,6 +7,8 @@ const Worker = require("../Models/Workers");
 const mongoose = require("mongoose");
 const ServiceRequest = require("../Models/ServiceRequest");
 const Booking = require("../Models/Booking");
+const { WorkMiddleware } = require("../Helpers/DeleteMiddleware");
+
 router
   .route("/Work")
   .get(async function (req, res) {
@@ -175,19 +177,20 @@ router
 
     console.log(BookingQuery);
     if (serviceRequestQuery == 0 && BookingQuery == 0) {
-      // Work.findByIdAndUpdate(
-      //   { _id: req.params.id },
-      //   {
-      //     deleteflag: 1,
-      //   },
-      //   function (err) {
-      //     if (!err) {
-      //       res.send("Deleted Successfully ");
-      //     } else {
-      //       res.send(err);
-      //     }
-      //   }
-      // );
+      Work.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+          deleteflag: 1,
+        },
+        function (err, doc) {
+          if (!err) {
+            WorkMiddleware(doc);
+            res.send("Deleted Successfully ");
+          } else {
+            res.send(err);
+          }
+        }
+      );
     } else {
       res.send("A Request is on going cannot delete");
     }

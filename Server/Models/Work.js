@@ -18,35 +18,35 @@ workSchema.pre("find", function (next) {
 
   next();
 });
-workSchema.post("findOneAndUpdate", async function (docs, next) {
-  console.log("Work Middleware");
-  const serviceRequestId = await ServiceRequest.find(
-    {
-      workId: docs._id,
-    },
-    {
-      workerId: 0,
-      recruiterId: 0,
-      workId: 0,
-      subCategory: 0,
-      minPrice: 0,
-      maxPrice: 0,
-      serviceDate: 0,
-      startTime: 0,
-      endTime: 0,
-      description: 0,
-      requestStatus: 0,
-      comment: 0,
-      geometry: 0,
-      deleteflag: 0,
-      created_at: 0,
-    }
-  ).lean();
-  // console.log(serviceRequestId);
-  for (id of serviceRequestId) {
-    await ServiceRequest.findOneAndUpdate({ _id: id._id }, { deleteflag: 1 });
-  }
-  next();
-});
+// workSchema.post("findOneAndUpdate", async function (docs, next) {
+//   console.log("Work Middleware");
+//   const serviceRequestId = await ServiceRequest.find(
+//     {
+//       workId: docs._id,
+//     },
+//     {
+//       workerId: 0,
+//       recruiterId: 0,
+//       workId: 0,
+//       subCategory: 0,
+//       minPrice: 0,
+//       maxPrice: 0,
+//       serviceDate: 0,
+//       startTime: 0,
+//       endTime: 0,
+//       description: 0,
+//       requestStatus: 0,
+//       comment: 0,
+//       geometry: 0,
+//       deleteflag: 0,
+//       created_at: 0,
+//     }
+//   ).lean();
+//   // console.log(serviceRequestId);
+//   for (id of serviceRequestId) {
+//     await ServiceRequest.findOneAndUpdate({ _id: id._id }, { deleteflag: 1 });
+//   }
+//   next();
+// });
 
 module.exports = mongoose.model("Work", workSchema);
