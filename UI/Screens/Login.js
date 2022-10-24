@@ -57,7 +57,7 @@ export default function Login({navigation}) {
 
     // FETCH DATA FROM SERVER
     const login = () => {
-      fetch("http://" + IPAddress + ":3000/login?username="+user.username, {
+      fetch("http://" + IPAddress + ":3000/login", {
         method: "POST",
         body: JSON.stringify({
           username: user.username,

@@ -14,6 +14,9 @@ import SameDateBookings from '../Components/SameDateBookings';
 const HEIGHT = Dimensions.get('window').height
 const WIDTH = Dimensions.get('window').width
 
+const relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
+
 const declinedMessageSuggestions = ["I'm unavailable", "I've already accepted another service just now, sorry", "Sorry, it doesn't fit my schedule", "I have to attend something urgent, sorry"]
 
 const VIewServiceRequest = ({route}) => {
@@ -28,9 +31,9 @@ const VIewServiceRequest = ({route}) => {
         {label: 'No'},
     ]
 
-    const [radioBtn, setRadioBtn] = useState(null)
-
     const {requestItem, serviceRequestID} = route.params
+
+    const [radioBtn, setRadioBtn] = useState(null)
 
     const [viewCancelModal, setViewCancelModal] = useState(false)
     const [viewReplaceRequestModal, setReplaceRequestModal] = useState(false)
@@ -39,7 +42,11 @@ const VIewServiceRequest = ({route}) => {
     const [hasCancelledRequest, setHasCancelledRequest] = useState(false)
     const [hasDeclinedRequest, setHasDeclinedRequest] = useState(false)
     const [hasAcceptedRequest, setHasAcceptedRequest] = useState(false)
+    const [viewDeclineInput, setViewDeclineInput] = useState(false)
+    const [hasSentMessage, setHasSentMessage] = useState(false)
+    const [didCancelRequest, setDidCancelRequest] = useState(false)
 
+    const [declinationMessage, setDeclinationMessage] = useState("")
     const [datePickerVisible, setDatePickerVisibility] = useState(false)
     const [formatedDate, setFormatedDate] = useState(new Date())
     const [displayDate, setDisplayDate] = useState("")
@@ -47,10 +54,34 @@ const VIewServiceRequest = ({route}) => {
 
     const [sameDateBookings, setSameDateBooking] = useState([])
 
+    const [pastOneHour, setPastOneHour] = useState(false)
+    const [similarWorks, setSimilarWorks] = useState([])
+    const [messageFromWorker, setMessageFromWorker] = useState('')
+
     // resets all inputs on load
     useEffect(() => {
 
-        getSameDateBookings()
+        if(global.userData.role === "worker"){
+            getSameDateBookings()
+        }
+
+        console.log("request item: ", requestItem)
+
+        // if(dayjs(requestItem.created_at).toNow(true) > '1'){
+        //     // getSimilarWorks()
+        // }
+
+        // get
+        console.log(requestItem)
+        let postcreated = dayjs(requestItem.created_at)
+        let dateNow = dayjs(new Date())
+        let pastAnHour = dateNow.diff(postcreated, 'hour') > 1
+        console.log(pastAnHour)
+        if(true){
+            setPastOneHour(pastAnHour)
+            getServiceRequest()
+            getSimilarWorks()
+        }
 
         setDateSelected(false)
         setDisplayDate("")
@@ -65,7 +96,46 @@ const VIewServiceRequest = ({route}) => {
 
             setRadioBtn(-1)
         })
-    }, [])
+    }, [route])
+
+
+
+
+    const getSimilarWorks = async () => {
+        try {
+            await fetch(`http://${IPAddress}:3000/Work/${requestItem.subCategory}`,{
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json'
+                }
+            }).then((res) => res.json())
+            .then((data) => {
+                
+                let list = [...data]
+                list = list.filter(e => e.workerId._id !== requestItem.workerId._id && !e.deleteflag)
+                
+                setSimilarWorks([...list])
+                console.log("similar works: ", list)
+            })
+
+        } catch (error) {
+            
+        }
+    }
+
+    const getServiceRequest = () => {
+        fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}`, {
+            method: "GET",
+            headers: {
+                "content-type": 'application/json' 
+            }
+        }).then(res => res.json())
+        .then(data => {
+            console.log("fetching request service: ", data)
+            let item = data.recruiter.find(e => e._id === requestItem._id)
+            console.log("returned item: ", item)
+        }).catch(err => console.log("error fetch sr: ",err.msg))
+    }
 
 
 
@@ -155,6 +225,23 @@ const VIewServiceRequest = ({route}) => {
         setDateSelected(true)
     }
 
+    const handleSendReasonDeclination = async () => {
+        try {
+            await fetch(`http://${IPAddress}:3000/service-request-comment/${serviceRequestID}`, {
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    comment: declinationMessage
+                })
+            })
+            console.log("Sucess sending message to recruiter | decline reason")
+        } catch (error) {
+            console.log("Error sending decline message: ", error.message)
+        }
+    }
+
   return (
     <SafeAreaView style={styles.outermostContainer}>
         <ScrollView contentContainerStyle={styles.mainScrollContainer}>
@@ -229,9 +316,8 @@ const VIewServiceRequest = ({route}) => {
                             <TouchableOpacity
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
-                                    // navigation.navigate("RequestFormDrawer", {workerID: item.workerId._id, workID: item._id, workerInformation: item.workerId, selectedJob: chosenCategory, minPrice: item.minPrice, maxPrice: item.maxPrice, showMultiWorks: false})
-
                                     setReplaceRequestModal(false)
+                                    navigation.navigate("RequestFormDrawer", {workerID: requestItem.workerId._id, workID: requestItem.serviceRequestID, workerInformation: requestItem.workerId, selectedJob: requestItem.subCategory, minPrice: requestItem.minPrice, maxPrice: requestItem.maxPrice, showMultiWorks: false})
                                 }}
                             >
                                 <TText style={styles.dialogueCancel}>Yes</TText>
@@ -271,7 +357,7 @@ const VIewServiceRequest = ({route}) => {
                                 onPress={() => {
                                     setDeclineRequestModal(false)
                                     handleDeclineRequest(requestItem._id)
-                                    // setHasDeclinedRequest(true)
+                                    setHasDeclinedRequest(true)
                                 }}
                             >
                                 <TText style={styles.dialogueCancel}>Yes</TText>
@@ -350,7 +436,8 @@ const VIewServiceRequest = ({route}) => {
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
                                     setHasCancelledRequest(false)
-                                    navigation.navigate("RequestsScreen")
+                                    setDidCancelRequest(true)
+                                    // navigation.navigate("RequestsScreen")
                                 }}
                             >
                                 <TText style={styles.dialogueCancel}>Okay</TText>
@@ -413,7 +500,8 @@ const VIewServiceRequest = ({route}) => {
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
                                     setHasDeclinedRequest(false)
-                                    navigation.navigate("RequestsScreen")
+                                    setViewDeclineInput(true)
+                                    // navigation.navigate("RequestsScreen")
                                 }}
                             >
                                 <TText style={styles.dialogueCancel}>Okay</TText>
@@ -467,7 +555,7 @@ const VIewServiceRequest = ({route}) => {
                         </View>
                         <View style={styles.addressValueCont}>
                             <Icon name="map-marker" size={18} color={ThemeDefaults.themeLighterBlue} />
-                            <Text numberOfLines={2} style={styles.addressValueText}>address, for the current, request</Text>
+                            <Text numberOfLines={2} style={styles.addressValueText}>{requestItem.address}</Text>
                         </View>
                     </View>
                     <View style={styles.dateTimeStatusContainer}>
@@ -483,15 +571,15 @@ const VIewServiceRequest = ({route}) => {
                                 <Icon name="clock-outline" size={18} color={ThemeDefaults.themeLighterBlue} />
                                 <TText style={styles.timeText}>{dayjs(requestItem.startTime).format("hh:mm A")}</TText>
                             </View>
-                                    <View style={requestItem.requestStatus == '1' ? styles.pendingCont : requestItem.requestStatus == '3' ? styles.declinedServiceCont : styles.cancelledCont}>
-                                        <TText style={{color: requestItem.requestStatus == '4' || requestItem.requestStatus == '3' ? ThemeDefaults.themeWhite : 'black'}}>{requestItem.requestStatus == '1' ? "Pending" : requestItem.requestStatus == '3' ? "Declined" : "Cancelled"}</TText>
+                                    <View style={ didCancelRequest ? styles.cancelledCont : requestItem.requestStatus == '1' ? styles.pendingCont : requestItem.requestStatus == '3' || (requestItem.requestStatus == '1' && hasDeclinedRequest) ? styles.declinedServiceCont : styles.cancelledCont}>
+                                        <TText style={{color: requestItem.requestStatus == '4' || requestItem.requestStatus == '3' || hasDeclinedRequest || didCancelRequest ? ThemeDefaults.themeWhite : 'black'}}>{didCancelRequest ? "Cancelled" : requestItem.requestStatus == '1' ? "Pending" : requestItem.requestStatus == '3' || hasDeclinedRequest ? "Declined" : "Cancelled"}</TText>
                                     </View>
                             
                         </View>
                     </View>
                     
                     {
-                        global.userData.role === "worker" && requestItem.requestStatus == '1'  ?
+                        global.userData.role === "worker" && requestItem.requestStatus == '1' && hasDeclinedRequest  ?
                         <View style={styles.estimatedTimeContainer}>
                             <TouchableOpacity style={styles.estimatedTimeBtn}
                                 activeOpacity={0.5}
@@ -522,7 +610,7 @@ const VIewServiceRequest = ({route}) => {
 
             {/* <View style={styles.cancelBtnCont}> */}
                 {
-                    global.userData.role === "recruiter" && requestItem.requestStatus == '1' ?
+                    global.userData.role === "recruiter" && requestItem.requestStatus == '1' && !didCancelRequest ?
                     <TouchableOpacity style={styles.cancelBtn}
                         onPress={() => {
                             setViewCancelModal(true)
@@ -532,10 +620,95 @@ const VIewServiceRequest = ({route}) => {
                     </TouchableOpacity>
                     : null
                 }
+
+                {/* Display sent message by worker */}
+                {
+                    hasSentMessage  ? 
+                    <View style={{paddingHorizontal: 28, marginTop: 40,}}>
+                        <TText style={{fontSize: 14}}>{global.userData.role === "recruiter" ? "Message from Worker" : "Message to Recruiter"}</TText>
+                        <View style={{flexDirection: 'row', alignItems: "center", marginTop: 15}}>
+                            <Image source={{uri: global.userData.profilePic}} style={{width: 40, height: 40, borderRadius: 20, elevation: 3}} />
+                            <View style={{backgroundColor: '#eee', justifyContent: 'flex-start', marginLeft: 15, alignItems: 'center', paddingHorizontal: 30,paddingVertical: 7, borderRadius: 8}}>
+                                <TText>{requestItem.comment ? requestItem.comment : declinationMessage}</TText>
+                            </View>
+                        </View>
+                    </View>
+                    : null
+                }
+
+                {
+                    requestItem.requestStatus == '3' && requestItem.comment ? 
+                    <View style={{paddingHorizontal: 28, marginTop: 40,}}>
+                        <TText style={{fontSize: 14}}>{global.userData.role === "recruiter" ? "Message from Worker" : "Message to Recruiter"}</TText>
+                        <View style={{flexDirection: 'row', alignItems: "center", marginTop: 15}}>
+                            <Image source={{uri: global.userData.profilePic}} style={{width: 40, height: 40, borderRadius: 20, elevation: 3}} />
+                            <View style={{backgroundColor: '#eee', justifyContent: 'flex-start', marginLeft: 15, alignItems: 'center', paddingHorizontal: 30,paddingVertical: 7, borderRadius: 8}}>
+                                <TText>{requestItem.comment ? requestItem.comment : declinationMessage}</TText>
+                            </View>
+                        </View>
+                    </View>
+                    : null
+                }
+
+                {
+                    pastOneHour || didCancelRequest && global.userData.role === 'recruiter' && 
+                    <View style={{paddingHorizontal: 30, marginTop: 40, marginBottom: 150}}>
+                        <TText style={{fontFamily: 'LexendDeca_Medium'}}>Suggested Workers</TText>
+
+                        {
+                            similarWorks.length === 0 ?
+                            <View style={{ marginTop: 20, paddingHorizontal: 30}}>
+                                <View style={{paddingHorizontal: 30}}>
+                                    <TText style={{textAlign: 'center', marginBottom: 20, color: '#c2c2c2', fontSize: 15}}>There are now other available workers for {requestItem.subCategory}</TText>
+                                    <TText style={{textAlign: 'center', color: '#c2c2c2', fontSize: 15}}>You may post a request for this service by clicking the button below</TText>
+                                </View>
+
+                                <View style={{marginTop: 40}}>
+                                    <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 15, elevation: 4, paddingVertical: 12, alignItems: 'center'}}
+                                        activeOpacity={0.5}
+                                        onPress={() => {
+                                            console.log("Post a request")
+                                            navigation.navigate("PostRequestFormDrawer")
+                                        }}
+                                    >
+                                        <TText style={{color: ThemeDefaults.themeWhite, fontFamily: 'LexendDeca_Medium'}}>Post a Request</TText>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                            :
+                            <View style={{marginTop: 15}}>
+                                {
+                                    similarWorks.map((e, index) => (
+                                        <View key={index} style={{flexDirection: 'row', alignItems: 'center', marginBottom: 15, backgroundColor: '#fff', padding: 12, borderRadius: 10, elevation: 4}}>
+                                            <Image source={e.workerId.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: e.workerId.profilePic}} style={{width: 60, height: 60, borderRadius: 15}} />
+                                            <View style={{paddingLeft: 12}}>
+                                                <TText style={{fontSize: 16}}>{e.workerId.firstname} {e.workerId.lastname}</TText>
+                                                <View style={{flexDirection: 'row', alignItems: 'center',}}>
+                                                    <Icon name="star" size={18} color={"gold"} />
+                                                    <TText style={{marginLeft: 5, fontSize: 14}}>4.7</TText>
+                                                </View>
+                                            </View>
+                                            <TouchableOpacity style={{position: 'absolute', right: 12,top: 26, width: 120, backgroundColor: ThemeDefaults.themeLighterBlue, borderRadius: 10, elevation: 3, alignItems: 'center', justifyContent: 'center', paddingVertical: 8}}
+                                                activeOpacity={0.5}
+                                                onPress={() => {
+                                                    console.log("Suggested Worker")
+                                                    setReplaceRequestModal(true)
+                                                }}
+                                            >
+                                                <TText style={{color: ThemeDefaults.themeWhite,fontSize: 12}}>Send Request</TText>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))
+                                }
+                            </View>
+                        }
+                    </View>
+                }
+
             {/* </View> */}
 
             {
-                global.userData.role === "worker" && requestItem.requestStatus == '1' ?
+                global.userData.role === "worker" && requestItem.requestStatus == '1' && !viewDeclineInput ?
                     <>
                         <View style={styles.workerAvailabilityPropmt}>
                             <View style={styles.prompTextCont}>
@@ -625,8 +798,13 @@ const VIewServiceRequest = ({route}) => {
 
             {/* Chat / Message textInput */}
             {
-                global.userData.role === "worker" && requestItem.requestStatus == '3' ?
+                global.userData.role === "worker" && viewDeclineInput && !hasSentMessage ?
                     <View style={styles.bottomContainer}>
+                        <View style={{alignItems: 'center', marginBottom: 40, paddingHorizontal: 30,}}>
+                            <TText style={{marginBottom: 20, textAlign: 'center', color: '#c2c2c2'}}>Please provide your reason(s) for declining the request</TText>
+                            <TText style={{textAlign: 'center', color: '#c2c2c2'}}>You may select a message from the suggestions below and/or write your own message</TText>
+                        </View>
+
                         {/* Message suggestions */}
                         <ScrollView contentContainerStyle={styles.suggestedMsgsCont}
                             horizontal
@@ -635,9 +813,15 @@ const VIewServiceRequest = ({route}) => {
                             {
                                 declinedMessageSuggestions.map(function(item, index){
                                     return(
-                                        <View key={index} style={styles.msgTextContainer}>
+                                        <TouchableOpacity key={index} style={styles.msgTextContainer}
+                                            activeOpacity={0.4}
+                                            onPress={() => {
+                                                console.log(item)
+                                                setDeclinationMessage(item)
+                                            }}
+                                        >
                                             <TText style={styles.msgText}>{item}</TText>
-                                        </View>
+                                        </TouchableOpacity>
                                     )
                                 })
                             }
@@ -647,15 +831,22 @@ const VIewServiceRequest = ({route}) => {
                         <View style={styles.messagingContainer}>
                             <View style={styles.messagingTextInputContainer}>
                                 <TextInput 
+                                    value={declinationMessage ? declinationMessage : ""}
                                     numberOfLines={1}
                                     placeholder='Write a message'
                                     autoCorrect={false}
                                     cursorColor={ThemeDefaults.themeDarkBlue}
                                     style={styles.messagingTextInput}
+                                    onChangeText={(val) => {setDeclinationMessage(val)}}
                                 />
                             </View>
                             <TouchableOpacity style={styles.sendBtnContainer}
                                 activeOpacity={0.4}
+                                onPress={() => {
+                                    // setViewDeclineInput(false)
+                                    setHasSentMessage(true)
+                                    handleSendReasonDeclination()
+                                }}
                             >
                                 <Icon name="send" size={22} color={ThemeDefaults.themeOrange} style={styles.sendIcon} />
                                 <TText style={styles.sendBtnTxt}>Send</TText>
@@ -678,7 +869,7 @@ const styles = StyleSheet.create({
     mainScrollContainer: {
         flexGrow: 1,
         marginTop: StatusBar.currentHeight,
-        backgroundColor: ThemeDefaults.themeWhite
+        backgroundColor: ThemeDefaults.themeWhiteBG
     },
     headerContainer: {
         alignItems: 'center',

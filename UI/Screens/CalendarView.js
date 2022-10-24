@@ -1,5 +1,5 @@
 import { StyleSheet, Text, Modal, View, TouchableOpacity, ScrollView, StatusBar, Button, Dimensions } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Appbar from '../Components/Appbar'
 import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -44,6 +44,16 @@ const CalendarView = () => {
     const [timeSelected, setTimeSelected] = useState(false)
 
     const [sameDateBookings, setSameDateBooking] = useState([])
+
+    const [unavailableSchedule, setUnavailableSchedule] = useState([])
+
+    useEffect(() => {
+        loadUnavailableTime()
+
+        console.log("unavailable schedule: ", unavailableSchedule)
+        console.log("unavailable schedule: ", unavailableSchedule)
+        
+    }, []);
 
     const dateAppointmentsStyles = {
         customStyles: {
@@ -120,6 +130,13 @@ const CalendarView = () => {
 
             console.log("list same date accepted bookings - calendar", list)
         }).catch((err) => console.log("get same dates error", err.message))
+    }
+
+
+    const loadUnavailableTime = () => {
+        setUnavailableSchedule([...(global.userData.unavailableTime)])
+
+        
     }
 
     const dateDisabledStyles = {

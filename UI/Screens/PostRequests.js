@@ -20,8 +20,9 @@ dayjs.extend(relativeTime)
 const PostRequests = () => {
   const navigation = useNavigation()
 
-  const [postVisible, setPostVisible] = useState(true)
-  const [postHidden, setPostHidden] = useState(false)
+  const [postVisible, setPostVisible] = useState(false)
+  const [postHidden, setPostHidden] = useState("")
+  const [toggleSwitch, setToggleSwitch] = useState(false)
 
   const [postRequestList, setPostRequestList] = useState([])
 
@@ -39,7 +40,12 @@ const PostRequests = () => {
     }).then((res) => res.json())
     .then((data) => {
       console.log("request post1: ", data)
-      setPostRequestList([...data])
+
+      let list = [...data]
+      if(global.userData.role === 'worker'){
+        list = list.filter(e => e.postToggle)
+      }
+      setPostRequestList([...list])
     }).catch((err) => console.log('error post request list: ', err.message))
   }
 
@@ -48,41 +54,27 @@ const PostRequests = () => {
     setPostHidden(!postHidden)
   }
 
-  // useEffect(() => {
-  //   if(!postVisible){
-  //     setPostHidden(true)
-  //   }
-  // }, [postVisible])
 
-  const handlePostToggle = (postID, postToggle) => {
+  const handlePostToggle = async (postID, postToggle) => {
 
-    setPostHidden(postToggle)
-    console.log("post toggle ", postHidden)
+    try {
+        await fetch(
+          `http://${IPAddress}:3000/request-post/${postID}`, {
+            method: "PUT",
+            headers: {
+              'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+              postToggle: postToggle
+            })
+          }
+        )
 
-  }
+        fetchRequestPosts()
+    } catch {
+      console.log("error toggle")
+    }
 
-  // const getTimePassed = () => {
-
-  // }
-
-  const handlePostToggleRequest = (postID, postToggle) => {
-
-    console.log("post toggle ", postHidden)
-    // setPostVisible(!postToggle)
-
-    fetch(`http://${IPAddress}:3000/request-post/${postID}`, {
-      method: "PUT",
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        postToggle: postToggle
-      })
-    }).then((res) => {
-      console.log("toggle success")
-      fetchRequestPosts()
-    })
-    .catch((err) => console.log("error toggle: ", err.message))
   }
 
 
@@ -112,85 +104,40 @@ const PostRequests = () => {
     )
   }
 
-  return (
-    <View style={styles.container}>
-    
-      <View style={{flexGrow: 1,}}>
-        <FlashList 
-          data={postRequestList}
-          keyExtractor={item => item._id}
-          estimatedItemSize={60}
-          // ListEmptyComponent={() => (<renderIfEmpty />)}
-          ListHeaderComponent={() => (
-            <ScreenHeaderComponent />
-          )}
-          ListFooterComponent={() => (
-            <View style={{height: 150}}></View>
-          )}
-          renderItem={({item}) => (
-            <View style={styles.postCard}>
+  const MainComponent = ({item}) => {
+    return(
+      <View style={styles.postCard}>
               {
-                !postVisible && <View style={styles.grayOverlay} />
+                !item.postToggle && <View style={styles.grayOverlay} />
               }
 
-              {/* Modals */}
-              <Modal
-                  transparent={true}
-                  animationType='fade'
-                  visible={postHidden}
-                  onRequestClose={() => setPostHidden(false)}
-              >
-
-                  {/* Modal View */}
-                  <View style={styles.modalDialogue}>
-                      {/* Modal Container */}
-                      <View style={styles.dialogueContainer}>
-                          {/* Modal Message/Notice */}
-                          <View style={styles.dialogueMessage}>
-                              <TText style={styles.dialogueMessageText}>Closing this post means you will not receive comments from workers anymore. Are you sure you want to close this post?</TText>
-                          </View>
-                          {/* Modal Buttons */}
-                          <View style={styles.modalDialogueBtnCont}>
-                              <TouchableOpacity
-                                  style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeOrange}]}
-                                  onPress={() => {
-                                      setPostHidden(false)
-                                      handlePostToggleRequest(item._id, item.postToggle)
-                                      // setPostVisible(true)
-                                  }}
-                              >
-                                  <TText style={styles.dialogueCancel}>No</TText>
-                              </TouchableOpacity>
-                              <TouchableOpacity 
-                                  style={styles.dialogueBtn}
-                                  onPress={() => {
-                                      // setConfirmPost(true)
-                                      setPostHidden(false)
-                                      handlePostToggleRequest(item._id, !item.postToggle)
-                                  }}
-                              >
-                                  <TText style={styles.dialogueConfirm}>Yes</TText>
-                              </TouchableOpacity>
-                          </View>
-                      </View>
-                  </View>
-              </Modal>
+              
               <View style={styles.postCardNameRow}>
                 <Image source={item.recruiterId.profilePic === 'pic'? require("../assets/images/default-profile.png") : {uri: item.recruiterId.profilePic}} style={styles.profileImage} />
                 <View style={styles.postUserName}>
                   <View style={styles.nameRow}>
                     <Text style={styles.postUserNameText}>{item.recruiterId.firstname}{item.recruiterId.middlename !== 'undefined' ? ` ${item.recruiterId.middlename.charAt(0).toUpperCase()}` : ""} {item.recruiterId.lastname}</Text>
+                    
                       {
                         global.userData.role === "recruiter" &&
-                          <View style={[styles.switchContainer, {backgroundColor: !item.postToggle ? ThemeDefaults.themeOrange : "rgb(187, 194, 204)",}]}>
-                            <TText style={styles.swtichText}>{!item.postToggle ? "Open" : "Closed"}</TText>
+                          <View style={[styles.switchContainer, {backgroundColor: item.postToggle ? ThemeDefaults.themeOrange : "rgb(187, 194, 204)",}]}>
+                            <TText style={styles.swtichText}>{item.postToggle ? "Open" : "Closed"}</TText>
                             <SwitchWithIcons
-                              value={!item.postToggle}
-                              onValueChange={(bool) => handlePostToggle(item._id, bool)}
+                              value={item.postToggle}
+                              onValueChange={(bool) => {
+                                if(!item.postToggle){
+                                  handlePostToggle(item._id, !item.postToggle)
+                                } else {
+                                  setToggleSwitch(!item.postToggle)
+                                  setPostHidden(item._id)
+                                  setPostVisible(true)
+                                }
+                              }}
                               trackColor={{true: ThemeDefaults.themeDarkerOrange, false: "rgb(187, 194, 204)"}}
                               thumbColor={{true: ThemeDefaults.themeOrange, false: "rgb(255, 255, 255)"}}
                               style={{zIndex: 8, marginLeft: 10}}
                             />
+                                
                           </View>
                       }
                   </View>
@@ -246,20 +193,84 @@ const PostRequests = () => {
                 <TouchableOpacity style={styles.postShowCommentsBtn}
                   onPress={() => {
                     //navigate
-                    navigation.navigate("ViewCommentsDrawer", {item: item})
+                    navigation.navigate("ViewCommentsDrawer", {'item' : item, 'postID': item._id})
                   }}
                 >
                   <Icon name="comment-text" size={22} color={ThemeDefaults.themeLighterBlue} />
                   <TText style={styles.showCommentText}>{global.userData.role ==="recruiter" ? "Show Comments" : "Comments"}</TText>
                 </TouchableOpacity>
               </View>
-            </View>   
+            </View>
+    )
+  }
+
+  return (
+    <View style={styles.container}>
+
+      {/* Modals */}
+      <Modal
+          transparent={true}
+          animationType='fade'
+          visible={postVisible}
+          onRequestClose={() => setPostVisible(false)}
+      >
+
+          {/* Modal View */}
+          <View style={styles.modalDialogue}>
+              {/* Modal Container */}
+              <View style={styles.dialogueContainer}>
+                  {/* Modal Message/Notice */}
+                  <View style={styles.dialogueMessage}>
+                      <TText style={styles.dialogueMessageText}>Closing this post means you will not receive comments from workers anymore. Are you sure you want to close this post?</TText>
+                  </View>
+                  {/* Modal Buttons */}
+                  <View style={styles.modalDialogueBtnCont}>
+                      <TouchableOpacity
+                          style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeOrange}]}
+                          onPress={() => {
+                              setPostVisible(false)
+                              fetchRequestPosts()
+                          }}
+                      >
+                          <TText style={styles.dialogueCancel}>No</TText>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                          style={styles.dialogueBtn}
+                          onPress={() => {
+                              // setConfirmPost(true)
+                              handlePostToggle(postHidden, toggleSwitch)
+                              setPostVisible(false)
+                          }}
+                      >
+                          <TText style={styles.dialogueConfirm}>Yes</TText>
+                      </TouchableOpacity>
+                  </View>
+              </View>
+          </View>
+      </Modal>
+    
+    
+      <View style={{flexGrow: 1,}}>
+        <FlashList 
+          data={postRequestList}
+          keyExtractor={item => item._id}
+          estimatedItemSize={60}
+          // ListEmptyComponent={() => (<renderIfEmpty />)}
+          ListHeaderComponent={() => (
+            <ScreenHeaderComponent />
+          )}
+          ListFooterComponent={() => (
+            <View style={{height: 150}}></View>
+          )}
+          renderItem={({item}) => (
+            <>
+              <MainComponent item={item} />
+            </>   
           )}
         />
       </View>
 
       
-
       {/* floating add button */}
       {
         global.userData.role === "recruiter" &&
@@ -356,9 +367,10 @@ const styles = StyleSheet.create({
       borderRadius: 20,
       paddingVertical: 3,
       paddingLeft: 8,
-      // paddingRight: 5,
-      backgroundColor: ThemeDefaults.themeOrange,
-      zIndex: 7
+      paddingRight: 5,
+      // backgroundColor: ThemeDefaults.themeOrange,
+      zIndex: 7,
+      elevation: 4,
     },
     swtichText: {
       fontSize: 12,

@@ -6,6 +6,7 @@ import Appbar from '../Components/Appbar';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 
+import * as Location from 'expo-location';
 
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
@@ -14,6 +15,8 @@ import { ModalPicker } from '../Components/ModalPicker';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import Schedule from './Schedule';
+import MapView, {Geojson} from 'react-native-maps';
+
 
 const utc = require('dayjs/plugin/utc')
 const timezone = require('dayjs/plugin/timezone')
@@ -25,7 +28,7 @@ const RequestForm = ({route, navigation}) => {
 
     const screenFocused = useIsFocused()
 
-    const {workerID, workID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks} = route.params;
+    const {workerID, workID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks, dateService, timeService, fromPostReq} = route.params;
     console.log(workerInformation)
 
     const [loadedWorkerInfo, setLoadedWorkerInfo] = useState({})
@@ -62,6 +65,13 @@ const RequestForm = ({route, navigation}) => {
     const [viewScheduleErrorModal, setViewScheduleErrorModal] = useState(false)
     const [requestpostedModal, setRequestPostedModal] = useState(false)
 
+    const [location, setLocation] = useState(null);
+    const [coordLati, setCoordLati] = useState(null)
+    const [coordLongi, setCoordLongi] = useState(null)
+    const [currentCoords, setCurrentCoords] = useState({})
+
+    const [status, requestPermission] = Location.useBackgroundPermissions()
+
     const [calendarSelectedDate, setCalendarSelectedDate] = useState(
         {
             ...datesWithCustomization
@@ -84,6 +94,30 @@ const RequestForm = ({route, navigation}) => {
             setServiceSelected(true)
         }
 
+        (async () => {
+          
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            // if (status !== 'granted') {
+            //   setErrorMsg('Permission to access location was denied');
+            //   return;
+            // }
+      
+            let alocation = await Location.getCurrentPositionAsync({});
+            console.log(alocation)
+            setLocation({...alocation})
+
+            setCoordLati(alocation.coords.latitude)
+            setCoordLongi(alocation.coords.longitude)
+  
+            setCurrentCoords({
+                latitude: alocation.coords.latitude,
+                longitude: alocation.coords.longitude,
+                latitudeDelta: 0.0032,
+                longitudeDelta: 0.0141,
+            })
+        })();
+
+
         return () => {
             setLoadedWorkerInfo({...workerInformation})
             if(workSelected) setWorkSelected("")
@@ -91,7 +125,7 @@ const RequestForm = ({route, navigation}) => {
                 setServiceSelected(true)
             }
         }
-    }, [screenFocused])
+    }, [screenFocused, route])
     
     useEffect(() => {
         setLoadedWorkerInfo({...workerInformation})
@@ -99,6 +133,9 @@ const RequestForm = ({route, navigation}) => {
         // if(workSelected) setWorkSelected({})
 
         console.log("workerInformation: ", workerInformation)
+
+        console.log(coordLati)
+        console.log(coordLongi)
     }, [showMultiWorks])
 
     // calendar things
@@ -260,8 +297,8 @@ const RequestForm = ({route, navigation}) => {
                 "serviceDate": formatedDate,
                 "startTime": formatedTime,
                 "description": requestDescription,
-                "lat": 85,
-                "long": 20,
+                "lat": coordLati,
+                "long": coordLongi,
             })
         }).then((res) => {
             console.log("Service Request Posted! ")
@@ -273,6 +310,44 @@ const RequestForm = ({route, navigation}) => {
         })
         .catch((err) => console.log("Service Request Error: ", err))
     }
+
+    const customMapStyle = [
+        {
+          "featureType": "administrative.land_parcel",
+          "elementType": "labels",
+          "stylers": [
+            {
+              "visibility": "off"
+            }
+          ]
+        },
+        {
+          "featureType": "poi.business",
+          "stylers": [
+            {
+              "visibility": "off"
+            }
+          ]
+        },
+        {
+          "featureType": "poi.park",
+          "elementType": "labels.text",
+          "stylers": [
+            {
+              "visibility": "off"
+            }
+          ]
+        },
+        {
+          "featureType": "road.local",
+          "elementType": "labels",
+          "stylers": [
+            {
+              "visibility": "off"
+            }
+          ]
+        }
+    ]
 
   return (
         <ScrollView contentContainerStyle={{flexGrow: 1, backgroundColor: ThemeDefaults.themeWhite, paddingTop: StatusBar.currentHeight, paddingBottom: 50}}>
@@ -596,19 +671,38 @@ const RequestForm = ({route, navigation}) => {
                 {/* Form inputs */}
                 <View style={styles.inputsContainer}>
                     {/* Recruiter's Address */}
-                    <View style={styles.formAddressBar}>
-                        <View style={styles.formAddTxtContainer}>
-                            <Icon name='map' size={22} color={ThemeDefaults.themeLighterBlue} />
-                            <View style={styles.formAddTxt}>
-                                <Text numberOfLines={1} ellipsizeMode='tail' style={styles.addressInfo}>{global.userData.street}, Purok {global.userData.purok}, {global.userData.barangay}, {global.userData.city}, {global.userData.province}</Text>
-                                <TText style={styles.addressSubTitle}>Default Home Address</TText>
+                    <View style={{borderRadius: 10, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', overflow: 'hidden'}}>
+                        {/* <View style={{width: '100%', height: 200, }}>
+                            <MapView 
+                                style={{width: '100%', height: '100%'}}
+                                scrollEnabled={false}
+                                zoomEnabled={false}
+                                pitchEnabled={false}
+                                rotateEnabled={false}
+                                // initialRegion={{
+                                //     latitude: 14.0996,
+                                //     longitude: 122.9550,
+                                //     latitudeDelta: 0.0422,
+                                //     longitudeDelta: 0.0422
+                                // }}
+                                region={currentCoords}
+                                customMapStyle={customMapStyle}
+                            />
+                        </View> */}
+                        <View style={[styles.formAddressBar, {marginBottom:5}]}>
+                            <View style={styles.formAddTxtContainer}>
+                                <Icon name='map' size={22} color={ThemeDefaults.themeLighterBlue} />
+                                <View style={styles.formAddTxt}>
+                                    <Text numberOfLines={1} ellipsizeMode='tail' style={styles.addressInfo}>{global.userData.street}, Purok {global.userData.purok}, {global.userData.barangay}, {global.userData.city}, {global.userData.province}</Text>
+                                    <TText style={styles.addressSubTitle}>Default Home Address</TText>
+                                </View>
                             </View>
+                            <Icon name='map-marker' size={22} />
                         </View>
-                        <Icon name='map-marker' size={22} />
                     </View>
 
                     {/* Select Date */}
-                    <TouchableOpacity style={styles.formAddressBar}
+                    <TouchableOpacity style={[styles.formAddressBar, { paddingTop: 12, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', borderRadius: 10, marginTop: 10}]}
                         onPress={() => {
                             // setDatePickerVisibility(true)
                             setViewCalendarModal(true)
@@ -618,7 +712,7 @@ const RequestForm = ({route, navigation}) => {
                         <View style={styles.formAddTxtContainer}>
                             <Icon name='calendar-month' size={22} />
                             <View style={styles.formAddTxt}>
-                                <TText style={styles.addressInfo}>{dateSelected ? displayDate : "Date"}</TText>
+                                <TText style={styles.addressInfo}>{dateSelected ? displayDate : dateService ? dayjs(dateService).format("MMM DD").toString() : "Date"}</TText>
                             </View>
                         </View>
                         <Icon name='chevron-down' size={22} />
@@ -632,7 +726,7 @@ const RequestForm = ({route, navigation}) => {
                             <View style={styles.timeAddressContainer}>
                                 <Icon name='clock-outline' size={22} />
                                 <View style={styles.formTimeTxt}>
-                                    <TText style={styles.timeTxt}>{ timeSelected ? displayTime : "Time"}</TText>
+                                    <TText style={styles.timeTxt}>{ timeSelected ? displayTime : timeService ? dayjs(timeService).format("hh:mm A").toString() : "Time"}</TText>
                                 </View>
                             </View>
                             <Icon name='chevron-down' size={22} />
@@ -652,10 +746,10 @@ const RequestForm = ({route, navigation}) => {
                     </View>
 
                     {/* Selected Service */}
-                    <TouchableOpacity disabled={!showMultiWorks} style={styles.formAddressBar}
+                    <TouchableOpacity disabled={!showMultiWorks} style={[styles.formAddressBar, {paddingTop: 12, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', borderRadius: 10}]}
                         onPress={() => setWorkListModalOpened(true)}
                     >
-                        <View style={styles.formAddTxtContainer}>
+                        <View style={[styles.formAddTxtContainer, ]}>
                             <Icon name='briefcase' size={22} />
                             <View style={styles.formAddTxt}>
                                 <Text numberOfLines={1} ellipsizeMode="tail" style={styles.workSubCategory}>{workSelected ? workSelected.ServiceSubId.ServiceSubCategory : selectedJob ? selectedJob : "Select the service you need.."}</Text>
@@ -702,7 +796,7 @@ const RequestForm = ({route, navigation}) => {
                         numberOfLines={5}
                         style={styles.requestDescriptionTextInput}
                         placeholder='Additional service request description (Optional)'
-                        value={requestDescription && requestDescription}
+                        value={requestDescription ? requestDescription : null}
                         keyboardType='default'
                         onChangeText={(val) => setRequestDescription(val)}
                     />
@@ -777,8 +871,8 @@ const RequestForm = ({route, navigation}) => {
             {/* Submit Request Button */}
             <View style={styles.submitBtnContainer}>
                 <TouchableOpacity 
-                    style={[styles.submitBtn, {backgroundColor: dateSelected && timeSelected && serviceSelected ? ThemeDefaults.themeOrange : '#c2c2c2', elevation: 0}]}
-                    disabled={!dateSelected && !timeSelected && serviceSelected}
+                    style={[styles.submitBtn, {backgroundColor: dateSelected && timeSelected && serviceSelected || fromPostReq ? ThemeDefaults.themeOrange : '#c2c2c2', elevation: 0}]}
+                    disabled={!dateSelected && !timeSelected && serviceSelected && !fromPostReq}
                     onPress={() => {
                         setPostBtnModal(true)
 
@@ -844,10 +938,12 @@ const styles = StyleSheet.create({
 
         padding: 12,
         marginBottom: 10,
+        paddingTop: 15,
 
-        borderWidth: 1.8,
-        borderColor: 'rgba(0,0,0,0.4)',
-        borderRadius: 10,
+        // borderWidth: 1.8,
+        // borderTopWidth: 0,
+        // borderColor: 'rgba(0,0,0,0.4)',
+        // borderRadius: 10,
 
         backgroundColor: ThemeDefaults.themeWhite
     },

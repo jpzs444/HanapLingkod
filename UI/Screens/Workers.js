@@ -321,6 +321,7 @@ const Workers = () => {
                         estimatedItemSize={100}
                         onRefresh={onRefresh}
                         refreshing={isRefreshing}
+                        maxToRenderPerBatch={8}
                         showsVerticalScrollIndicator={false}
                         ListEmptyComponent={() => (
                             <View style={{alignItems: 'center', marginTop: 10}}>

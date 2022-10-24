@@ -47,7 +47,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
     <Appbar hasPicture={true} backBtn={true} accTypeSelect={true} showLogo={true} />
 
     <View style={styles.workersContainer}>
-    <FlashList 
+        <FlashList 
             data={worker}
             extraData={worker}
             keyExtractor={item => item._id}
@@ -61,7 +61,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
             ListFooterComponent={() => (
                 <View style={{height: 150}}></View>
             )}
-            // showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
             renderItem={({item}) => (
                 <View style={{width: '100%', paddingHorizontal: 20, height: 130}}>
                     {/* <TText>{item.workerId.age}</TText> */}
@@ -70,7 +70,10 @@ const ListSpecificWorkers = ({route, navigation}) => {
                             console.log("workerId._id: ", item.workerId._id)
                             console.log("workId: ", item._id)
 
-                            navigation.navigate("RequestFormDrawer", {workerID: item.workerId._id, workID: item._id, workerInformation: item.workerId, selectedJob: chosenCategory, minPrice: item.minPrice, maxPrice: item.maxPrice, showMultiWorks: false})
+                            global.userData.role === "recruiter" ? 
+                                navigation.navigate("RequestFormDrawer", {workerID: item.workerId._id, workID: item._id, workerInformation: item.workerId, selectedJob: chosenCategory, minPrice: item.minPrice, maxPrice: item.maxPrice, showMultiWorks: false})
+                                : navigation.navigate("WorkerProfileDrawer", {workerID: item.workerId._id})
+                            
                         }}
                     >
                         <View style={styles.buttonView}>

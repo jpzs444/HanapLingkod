@@ -6,6 +6,7 @@ export default {
     themeWhite: '#fff',
     themeBlack: '#000',
     themeRed: '#FF5353',
+    themeWhiteBG: '#FAFAFA', 
     appIcon: '#E3492B',
     themeDarkerOrange: '#D9672B',
     themefadedWhite: 'rgba(255,255,255,0.6)',

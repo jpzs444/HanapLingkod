@@ -45,6 +45,7 @@ export default function Home() {
       })
     }).then((res) => console.log("Successfully placed notification token/userID"))
     .catch((err) => console.log("err : ", err.message))
+
   }, [])
 
 
@@ -66,6 +67,7 @@ export default function Home() {
     }).then((res) => res.json())
     .then((data) => {
       setCategory([...data])
+      console.log(data)
     })
   }
 
@@ -77,19 +79,19 @@ export default function Home() {
       },
     }).then((res) => res.json())
     .then((data) => {
-      // console.log("notification list: ", data)
+      console.log("notification list: ", data)
       console.log("res length: ", data.length)
 
       let notifCount = 0
-      for(read of data){
-        if(!read.read){
+      for(let i = 0; i < data.length; i++){
+        if(data[i].read){
           notifCount = notifCount + 1
         }
       }
       global.notificationCount = notifCount
 
     }).catch((err) => {
-      console.log("error: ", err.message)
+      console.log("error notification: ", err.message)
     })
     // setTimeout(fetchNotificationList, 5000)
   }
@@ -173,6 +175,7 @@ export default function Home() {
             onPress={() => {
               // use Linking to dial phone number
               // Linking.openURL(`tel:number`)
+              navigation.navigate("MapsTab")
             }}
           >
             <View style={styles.actionbar_iconContainer}>
@@ -284,7 +287,7 @@ export default function Home() {
                       navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
                     }}
                   >
-                    <ImageBackground source={require("../assets/images/stock.jpg")} style={styles.category_imageBG}>
+                    <ImageBackground source={{uri: item.image}} style={styles.category_imageBG}>
                       <View style={styles.textWrapper}>
                         <TText style={styles.categoryTxt}>{item.Category}</TText>
                       </View>

@@ -7,4 +7,9 @@ const PostcommentSchema = new mongoose.Schema({
   created_at: { type: Date, required: true, default: Date.now },
 });
 
+PostcommentSchema.pre("find", function (next) {
+  this.populate("workerId");
+  next();
+});
+
 module.exports = mongoose.model("Postcomment", PostcommentSchema);
