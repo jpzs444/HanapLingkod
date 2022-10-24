@@ -22,6 +22,8 @@ import Schedule from '../Screens/Schedule';
 import VIewServiceRequest from '../Screens/VIewServiceRequest';
 import AddEventCalendar from '../Screens/AddEventCalendar';
 import ViewComments from '../Screens/ViewComments';
+import PostRequests from '../Screens/PostRequests';
+import PostRequestStack from './PostRequestStack';
 
 
 const Drawer = createDrawerNavigator();
@@ -81,6 +83,13 @@ export default function DrawerNavigation(){
             }} />
 
             <Drawer.Screen name="PostRequestFormDrawer" component={PostRequestForm} options={{
+                drawerIcon: ({color}) => (
+                    <Icon name="clipboard-edit" size={25} color={color}  />
+                ),
+                
+            }} />
+
+            <Drawer.Screen name="PostRequestPRRStack" component={PostRequestStack} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="clipboard-edit" size={25} color={color}  />
                 ),

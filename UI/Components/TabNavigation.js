@@ -23,6 +23,8 @@ import ListSpecificWorkers from '../Screens/ListSpecificWorkers';
 import SubCategory from '../Screens/SubCategory';
 import HomeNavigationStack from './HomeStack';
 import ViewComments from '../Screens/ViewComments';
+import Maps from '../Screens/Maps';
+import PostRequestStack from './PostRequestStack';
 
 const hiddenTabNavBtn = () => ({
     tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
@@ -92,7 +94,7 @@ const TabNavigation = () => {
         />
 
         {/* Tasks Tab */}
-        <Tab.Screen name="PostRequestsTab" component={PostRequests} 
+        <Tab.Screen name="PostRequestPRRStack" component={PostRequestStack} 
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="clipboard-text-multiple" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />
@@ -132,6 +134,20 @@ const TabNavigation = () => {
 
         {/* List of Specific Workers Tab */}
         <Tab.Screen name="SubCategoryTab" component={SubCategory} 
+            options={{
+                tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
+                
+            }}
+        />
+
+        <Tab.Screen name="MapsTab" component={Maps} 
+            options={{
+                tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
+                
+            }}
+        />
+
+        <Tab.Screen name="ViewCommentsTab" component={ViewComments} 
             options={{
                 tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
                 

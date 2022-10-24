@@ -23,10 +23,10 @@ const Requests = () => {
     const [declinedRequests, setDeclinedRequests] = useState([])
 
     useEffect(() => {
-        fetchRequestList()
-
+        
         let refreshRequestList
         navigation.addListener("focus", () => {
+            fetchRequestList()
             refreshRequestList = setInterval(fetchRequestList, 5000)
         })
         navigation.addListener("blur", () => {
@@ -53,12 +53,15 @@ const Requests = () => {
             // place to state all rejected/declined requests
             let list = []
             global.userData.role === 'recruiter' ?
-            list = [...data.recruiter]
+            list = [...data.recruiter.reverse()]
             :
-            list = [...data.worker]
+            list = [...data.worker.reverse()]
 
             list = list.filter(item => item.requestStatus == '3')
+            // let reversed = list.reverse()
             setDeclinedRequests([...list])
+
+            console.log(data.recruiter)
 
             // place all request on a state for flashlist rendering
             global.userData.role === 'recruiter' ?
@@ -136,6 +139,7 @@ const Requests = () => {
                                                         <TouchableOpacity style={[styles.cardViewRequestBtn, styles.cardViewDeclined]}
                                                             activeOpacity={0.5}
                                                             onPress={() => {
+                                                                console.log("reuqest id: ", item._id)
                                                                 navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
                                                             }}
                                                         >
@@ -182,7 +186,7 @@ const Requests = () => {
             renderItem={({item}) => (
                 <>
                     {
-                    (item.requestStatus == '1' || item.requestStatus == '4') && ( item.requestStatus == '1' || item.requestStatus == '4' && global.userData.role === 'recruiter')  &&
+                    (item.requestStatus == '1' || item.requestStatus == '4') &&
                     <View style={[styles.requestCard, {backgroundColor: item.requestStatus == '4' ? "#999" : ThemeDefaults.themeWhite }]}>
 
                     {/* card */}
