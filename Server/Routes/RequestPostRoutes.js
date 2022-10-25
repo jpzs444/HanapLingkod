@@ -5,24 +5,24 @@ const RequestPost = require("../Models/RequestPost");
 const dayjs = require("dayjs");
 const PostComment = require("../Models/PostComment");
 
-router.route("/commentTry").get(async function (req, res) {
-  let rrr = await PostComment.find({}).exec();
-  console.log(rrr);
-});
-
 router
   .route("/request-post")
   .get(async function (req, res) {
     try {
-      RequestPost.find({})
+      let page;
+      if (req.query.page) {
+        page = parseInt(req.query.page);
+      } else {
+        page = 1;
+      }
+      const limit = 10;
+
+      let result = await RequestPost.find({})
         .sort({ date: -1 })
-        .exec(function (err, notif) {
-          if (notif) {
-            res.send(notif);
-          } else {
-            res.send("No such data found");
-          }
-        });
+        .limit(limit * page)
+        .lean()
+        .exec();
+      res.send(result);
     } catch (error) {
       res.send(error);
     }
@@ -104,7 +104,7 @@ router
       { session }
     );
     const { comments } = query;
-    Comment.deleteMany(
+    PostComment.deleteMany(
       {
         _id: { $in: comments },
       },

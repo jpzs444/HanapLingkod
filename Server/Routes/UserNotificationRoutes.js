@@ -7,14 +7,20 @@ const Recruiter = require("../Models/Recruiters");
 
 router
   .route("/notification/:userId")
-  .get(function (req, res) {
-    UserNotification.find({ userID: req.params.userId }, function (err, notif) {
-      if (notif) {
-        res.send(notif);
-      } else {
-        res.send("No such data found");
-      }
-    });
+  .get(async function (req, res) {
+    let page;
+    if (req.query.page) {
+      page = parseInt(req.query.page);
+    } else {
+      page = 1;
+    }
+    const limit = 10;
+
+    let result = await UserNotification.find({ userID: req.params.userId })
+      .sort({ date: -1 })
+      .limit(limit * page)
+      .lean();
+    res.send(result);
   })
   .put(async function (req, res) {
     await UserNotification.updateMany(

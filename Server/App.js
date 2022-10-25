@@ -6,18 +6,17 @@ const bcrypt = require("bcrypt");
 const cloudinary = require("./Helpers/cloudinary");
 const fs = require("fs");
 const dayjs = require("dayjs");
-const { generateAccessToken, testt } = require("./Helpers/JWT");
-
+const { generateAccessToken, authenticateToken } = require("./Helpers/JWT");
 //models
 const Worker = require("./Models/Workers");
 const Recruiter = require("./Models/Recruiters");
 const ServiceCategory = require("./Models/ServiceCategory");
 const ServiceSubCategory = require("./Models/SubCategory");
 const Work = require("./Models/Work");
-// const Comment = require("./Models/Comment");
 
 //helper
 const notification = require("./Helpers/PushNotification");
+const WorkReminder = require("./Helpers/WorkReminder");
 //routes
 const ServiceCategoryRoutes = require("./Routes/ServiceCategoryRoutes");
 const ServiceSubCategoryRoutes = require("./Routes/ServiceSubCategory");
@@ -33,6 +32,7 @@ const Calendar = require("./Routes/CalendarRoutes");
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
 mongoose.connect(
   "mongodb+srv://" +
     process.env.ATLAS_USERNAME +
@@ -87,6 +87,8 @@ app.get("/images/:filename", async function (req, res) {
   }
 });
 
+// WorkReminder();
+
 app.get("/search", async function (req, res) {
   let keyword = req.query.keyword;
   let regex = new RegExp(`${keyword}`);
@@ -111,6 +113,10 @@ app.get("/search", async function (req, res) {
     category: CategoryResult,
     subCategory: SubCategoryResult,
   });
+});
+
+app.get("/pass", function (req, res) {
+  res.json({ msg: "success" });
 });
 
 //upload prev works
@@ -221,8 +227,8 @@ app.post("/login", async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid Password" });
     }
-    const token = generateAccessToken(username);
-    user["accessToken"] = token;
+    const token = generateAccessToken(String(user._id));
+    user["accessToken"] = "Bearer " + token;
     res.send(user);
   } catch (error) {
     res.status(500).json({ err: error.message });

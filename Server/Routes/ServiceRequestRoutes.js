@@ -13,12 +13,26 @@ const generateOTP = require("../Helpers/OTP_Generator");
 router.route("/service-request/:user").get(async function (req, res) {
   console.log(req.params.user);
   try {
+    let page;
+    if (req.query.page) {
+      page = parseInt(req.query.page);
+    } else {
+      page = 1;
+    }
+    const limit = 10;
+
     let queryResultWorker = await ServiceRequest.find({
       workerId: req.params.user,
-    }).sort({ date: -1, requestStatus: 1 });
+    })
+      .sort({ date: -1, requestStatus: 1 })
+      .limit(limit * page)
+      .lean();
     let queryResultRecruiter = await ServiceRequest.find({
       recruiterId: req.params.user,
-    }).sort({ date: -1, requestStatus: 1 });
+    })
+      .sort({ date: -1, requestStatus: 1 })
+      .limit(limit * page)
+      .lean();
 
     res.send({ worker: queryResultWorker, recruiter: queryResultRecruiter });
   } catch (error) {
