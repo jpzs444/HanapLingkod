@@ -7,6 +7,8 @@ const cloudinary = require("./Helpers/cloudinary");
 const fs = require("fs");
 const dayjs = require("dayjs");
 const { generateAccessToken, authenticateToken } = require("./Helpers/JWT");
+var cron = require("node-cron");
+
 //models
 const Worker = require("./Models/Workers");
 const Recruiter = require("./Models/Recruiters");
@@ -87,7 +89,9 @@ app.get("/images/:filename", async function (req, res) {
   }
 });
 
-// WorkReminder();
+cron.schedule("0 * * * *", () => {
+  WorkReminder();
+});
 
 app.get("/search", async function (req, res) {
   let keyword = req.query.keyword;
