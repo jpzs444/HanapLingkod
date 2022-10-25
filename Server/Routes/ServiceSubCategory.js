@@ -5,6 +5,24 @@ const Work = require("../Models/Work");
 const ServiceRequest = require("../Models/ServiceRequest");
 const Booking = require("../Models/Booking");
 const { SubCategoryMiddleware } = require("../Helpers/DeleteMiddleware");
+const multer = require("multer");
+const cloudinary = require("../Helpers/cloudinary");
+
+//store photos
+const storage = multer.diskStorage({
+  //destination for files
+  // destination: function (request, file, callback) {
+  //   callback(null, "./Public/Uploads");
+  // },
+
+  //add back the extension
+  filename: function (request, file, callback) {
+    callback(null, Date.now() + file.originalname);
+  },
+});
+
+//upload the image
+const upload = multer({ storage: storage });
 
 router
   .route("/service-sub-category")
@@ -52,6 +70,18 @@ router
       }
     });
   })
+  .put(upload.single("image"), async function (req, res) {
+    const image = await cloudinary.uploader.upload(req.file.path, {
+      folder: "HanapLingkod/Sub_Category",
+    });
+
+    ServiceSubCategory.findByIdAndUpdate(
+      { _id: req.params.id },
+      { image: image.url }
+    ).exec();
+    res.send("Updated success");
+  })
+
   .delete(async function (req, res) {
     console.log("asd");
     const workQuery = await Work.find(

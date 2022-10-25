@@ -24,14 +24,19 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.route("/Worker").get(async function (req, res) {
-  Worker.find({}, function (err, found) {
-    if (found) {
-      res.send(found);
-    } else {
-      res.send("No such data found");
-    }
-    
-  });
+  let page;
+  if (req.query.page) {
+    page = parseInt(req.query.page);
+  } else {
+    page = 1;
+  }
+  const limit = 10;
+
+  const result = await Worker.find({})
+    .limit(limit * page)
+    .lean()
+    .exec();
+  res.send(result);
 });
 
 //////specific///

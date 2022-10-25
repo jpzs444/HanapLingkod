@@ -9,14 +9,30 @@ const dayjs = require("dayjs");
 const Recruitercomment = require("../Models/RecruiterComment");
 const Workercomment = require("../Models/WorkerComment");
 
+
+
 router.route("/booking/:user").get(async function (req, res) {
   try {
+    let page;
+    if (req.query.page) {
+      page = parseInt(req.query.page);
+    } else {
+      page = 1;
+    }
+    const limit = 10;
+
     let queryResultWorker = await Booking.find({
       workerId: req.params.user,
-    }).sort({ date: -1, bookingStatus: 1 });
+    })
+      .sort({ date: -1, bookingStatus: 1 })
+      .limit(limit * page)
+      .lean();
     let queryResultRecruiter = await Booking.find({
       recruiterId: req.params.user,
-    }).sort({ date: -1, bookingStatus: 1 });
+    })
+      .sort({ date: -1, bookingStatus: 1 })
+      .limit(limit * page)
+      .lean();
 
     res.send({ worker: queryResultWorker, recruiter: queryResultRecruiter });
   } catch (error) {
@@ -187,6 +203,11 @@ router
           workerId
         );
       }
+      console.log(req.params.id);
+      Worker.findOneAndUpdate(
+        { _id: req.params.user },
+        { $pull: { unavailableTime: { bookingId: req.params.id } } }
+      ).exec();
     }
     res.send("updated Sucess");
   })
@@ -212,14 +233,28 @@ router
 
 router.route("/completed-bookings/:user").get(async function (req, res) {
   try {
+    let page;
+    if (req.query.page) {
+      page = parseInt(req.query.page);
+    } else {
+      page = 1;
+    }
+    const limit = 10;
+
     let queryResultWorker = await Booking.find({
       workerId: req.params.user,
       bookingStatus: 3,
-    }).sort({ date: -1, bookingStatus: 1 });
+    })
+      .sort({ date: -1, bookingStatus: 1 })
+      .limit(limit * page)
+      .lean();
     let queryResultRecruiter = await Booking.find({
       recruiterId: req.params.user,
       bookingStatus: 3,
-    }).sort({ date: -1, bookingStatus: 1 });
+    })
+      .sort({ date: -1, bookingStatus: 1 })
+      .limit(limit * page)
+      .lean();
 
     res.send({ worker: queryResultWorker, recruiter: queryResultRecruiter });
   } catch (error) {

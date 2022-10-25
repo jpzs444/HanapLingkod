@@ -5,6 +5,7 @@ const Work = require("./Work");
 const serviceSubCategorySchema = mongoose.Schema({
   ServiceID: { type: Schema.Types.ObjectId, ref: "ServiceCategory" },
   ServiceSubCategory: { type: String, required: true },
+  image: String,
   deleteflag: { type: Boolean, default: 0 },
 });
 

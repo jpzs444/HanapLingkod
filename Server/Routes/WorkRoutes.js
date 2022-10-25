@@ -12,6 +12,7 @@ const { WorkMiddleware } = require("../Helpers/DeleteMiddleware");
 router
   .route("/Work")
   .get(async function (req, res) {
+    console.log(req.CurrentuserId);
     let queryResult = await Work.find({}).exec();
     res.send(queryResult);
   })
@@ -96,14 +97,29 @@ router
 ////get works on specific category
 router.route("/Work/:category").get(async function (req, res) {
   try {
-    result = [];
-    let query = await Work.find({}).lean().exec();
-    for (var i = 0; i < query.length; i++) {
-      if (query[i].ServiceSubId.ServiceSubCategory === req.params.category) {
-        result.push(query[i]);
-      }
+    let page;
+    if (req.query.page) {
+      page = parseInt(req.query.page);
+    } else {
+      page = 1;
     }
-    res.send(result);
+    const limit = 10;
+    // const { page = 1 } = req.query;
+    let subId = await ServiceSubCategory.findOne({
+      ServiceSubCategory: req.params.category,
+    }).lean();
+
+    const count = await Work.countDocuments({
+      ServiceSubId: subId._id,
+    });
+
+    const query = await Work.find({
+      ServiceSubId: subId._id,
+    })
+      .limit(limit * page)
+      .lean()
+      .exec();
+    res.send(query);
   } catch (err) {
     res.send(err);
   }

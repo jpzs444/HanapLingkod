@@ -6,11 +6,9 @@ var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
 
 router.route("/add-schedule/:user").post(async function (req, res) {
   let startTime = dayjs(
-    req.body.inputDate + " " + req.body.startTime
+    req.body.startDate + " " + req.body.startTime
   ).toISOString();
-  let endTime = dayjs(
-    req.body.inputDate + " " + req.body.endTime
-  ).toISOString();
+  let endTime = dayjs(req.body.endDate + " " + req.body.endTime).toISOString();
   Worker.findOneAndUpdate(
     { _id: req.params.user },
     {
