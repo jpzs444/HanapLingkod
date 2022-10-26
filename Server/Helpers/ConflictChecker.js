@@ -2,8 +2,8 @@ const Worker = require("../Models/Workers");
 const ServiceRequest = require("../Models/ServiceRequest");
 const dayjs = require("dayjs");
 var isBetween = require("dayjs/plugin/isBetween");
+
 async function checkConflict(user, workId, endTime) {
-  //   console.log(workId);
   dayjs.extend(isBetween);
 
   const result = await ServiceRequest.findOne({ _id: workId });
@@ -11,8 +11,7 @@ async function checkConflict(user, workId, endTime) {
   const { startTime } = result;
   const { unavailableTime } = worker;
   for (item of unavailableTime) {
-    // console.log(item.startTime);
-    // console.log(endTime);
+    console.log(startTime, item.startTime);
 
     if (
       dayjs(startTime).isBetween(
@@ -31,12 +30,11 @@ async function checkConflict(user, workId, endTime) {
       dayjs(item.endTime).isBetween(startTime, dayjs(endTime), null, "[]")
     ) {
       console.log("conflict sched");
-      return true;
-    } else {
-      console.log("no conflict sched");
+      // return res.status(400).send("some text");
       return false;
     }
   }
+  console.log("no conflict sched");
   return false;
 }
 

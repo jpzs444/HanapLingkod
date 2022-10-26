@@ -1,14 +1,14 @@
 const Worker = require("../Models/Workers");
 
 function AddToCalendar(BookingInfo) {
-  const { _id, workerId, startTime, endTime } = BookingInfo;
-  console.log(_id, startTime, endTime);
+  const { _id, workerId, startTime, endTime, subCategory } = BookingInfo;
+  // console.log(_id, startTime, endTime, subCategory);
   Worker.findOneAndUpdate(
     { _id: workerId },
     {
       $push: {
         unavailableTime: {
-          title: "Booking",
+          title: subCategory,
           startTime: startTime,
           bookingId: _id,
           endTime: endTime,
