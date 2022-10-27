@@ -93,7 +93,7 @@ router
       let result;
 
       if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
-        console.log("qq");
+        // console.log("qq");
         endTime = dayjs(
           req.body.endDate + " " + req.body.endTime
         ).toISOString();
@@ -138,9 +138,8 @@ router
       // console.log(endTime);
       if (req.body.requestStatus == 2) {
         if (await checkConflict(req.params.user, req.params.id, endTime)) {
-          res.send("Error Conflict Schedule");
+          res.status(400).send("Conflict on Sched");
         } else {
-          // console.log("ad");
           const reqObj = {
             requestStatus: req.body.requestStatus,
             endTime: req.body.endTime,
@@ -153,50 +152,49 @@ router
               new: true,
             }
           );
+
+          //create booking
+          const OTP = generateOTP(6);
+          // console.log(result);
+          const newBooking = await Booking.create({
+            workerId: result.workerId,
+            recruiterId: result.recruiterId,
+            workId: result.workId,
+            subCategory: result.subCategory,
+            minPrice: result.minPrice,
+            maxPrice: result.maxPrice,
+            serviceDate: result.serviceDate,
+            startTime: result.startTime,
+            endTime: endTime,
+            description: result.description,
+            otp: OTP,
+            bookingStatus: 1,
+            address: result.address,
+            geometry: {
+              type: "point",
+              coordinates: [
+                result.geometry.coordinates[0],
+                result.geometry.coordinates[1],
+              ],
+            },
+          });
+          AddToCalendar(newBooking);
+          //put delete flag to true
+          await ServiceRequest.findOneAndUpdate(
+            { _id: req.params.id },
+            {
+              deleteflag: true,
+            }
+          );
+          // notify recruiter
+          notification(
+            [pushIDRecruiter.pushtoken],
+            "Accepted",
+            "your request has been accepted",
+            recruiterId
+          );
+          res.send("Successfully Updated status 2 ");
         }
-      }
-      // console.log(pushIDWorker, pushIDRecruiter);
-      if (req.body.requestStatus == 2) {
-        //create booking
-        const OTP = generateOTP(6);
-        const newBooking = await Booking.create({
-          workerId: result.workerId,
-          recruiterId: result.recruiterId,
-          workId: result.workId,
-          subCategory: result.subCategorys,
-          minPrice: result.minPrice,
-          maxPrice: result.maxPrice,
-          serviceDate: result.serviceDate,
-          startTime: result.startTime,
-          endTime: endTime,
-          description: result.description,
-          otp: OTP,
-          bookingStatus: 1,
-          address: result.address,
-          geometry: {
-            type: "point",
-            coordinates: [
-              result.geometry.coordinates[0],
-              result.geometry.coordinates[1],
-            ],
-          },
-        });
-        AddToCalendar(newBooking);
-        //put delete flag to true
-        await ServiceRequest.findOneAndUpdate(
-          { _id: req.params.id },
-          {
-            deleteflag: true,
-          }
-        );
-        console.log("tr");
-        // notify recruiter
-        notification(
-          [pushIDRecruiter.pushtoken],
-          "Accepted",
-          "your request has been accepted",
-          recruiterId
-        );
       }
 
       if (req.body.requestStatus == 3) {
@@ -216,7 +214,9 @@ router
           "your request has been rejected",
           recruiterId
         );
+        res.send("Successfully Updated to status 3 ");
       }
+
       if (req.body.requestStatus == 4) {
         console.log("ssss");
         await ServiceRequest.findOneAndUpdate(
@@ -234,13 +234,13 @@ router
           "Recruiter Cancelled the request",
           workerId
         );
+        res.send("Successfully Updated to status 4 ");
       }
-      res.send(result);
-      // }
     } catch (error) {
       res.send(error);
     }
   })
+
   .get(async function (req, res) {
     try {
       let queryResult = await ServiceRequest.find({ _id: req.params.id });
