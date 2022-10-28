@@ -22,7 +22,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
     const [worker, setWorkers] = useState([])
 
     useEffect(() => {
-        console.log("list spec:", chosenCategory)
+        // console.log("list spec:", chosenCategory)
         loadWorkers()
     }, [])
 
@@ -37,7 +37,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
         .then((res) => res.json())
         .then((data) => {
             setWorkers([...data])
-            console.log("Workrs list", data)
+            // console.log("Workrs list", data)
         }).catch((err) => console.log("error: ", err.message))
     }
 
@@ -67,8 +67,8 @@ const ListSpecificWorkers = ({route, navigation}) => {
                     {/* <TText>{item.workerId.age}</TText> */}
                     <TouchableOpacity style={styles.button}
                         onPress={() => {
-                            console.log("workerId._id: ", item.workerId._id)
-                            console.log("workId: ", item._id)
+                            // console.log("workerId._id: ", item.workerId._id)
+                            // console.log("workId: ", item._id)
 
                             global.userData.role === "recruiter" ? 
                                 navigation.navigate("RequestFormDrawer", {workerID: item.workerId._id, workID: item._id, workerInformation: item.workerId, selectedJob: chosenCategory, minPrice: item.minPrice, maxPrice: item.maxPrice, showMultiWorks: false})

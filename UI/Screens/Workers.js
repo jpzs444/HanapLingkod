@@ -34,6 +34,7 @@ const Workers = () => {
   const [filteredSubCatResults, setFilteredSubCatResults] = useState([])
   const [prevListWorker, setPrevListWorker] = useState([])
   const [hasResults, setHasResults] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const [barangayViewModal, setBarangayViewModal] = useState(false)
   const [verifiedViewModal, setVerifiedViewModal] = useState(false)
@@ -54,20 +55,24 @@ const Workers = () => {
 
     useEffect(() => {
         getAllWorkers()
-        setPrevListWorker([...listOfWorkers])
+        setCurrentPage(1)
+        // setPrevListWorker([...listOfWorkers])
     }, [])
 
     const getAllWorkers = () => {
-        fetch("http://" + IPAddress + ":3000/Worker", {
+        fetch("http://" + IPAddress + ":3000/Worker?page=" + currentPage.toString(), {
             method: "GET",
             headers: {
                 "content-type": "application/json"
             },
         }).then((response) => response.json())
         .then((data) => {
+            if(listOfWorkers && data === listOfWorkers){
+                return
+            }
             setListOfWorkers([...data])
             setPrevListWorker([...data])
-            console.log("list of workers: ")
+            console.log("list of workers: ", data[3].works.join(', '))
         })
     }
 
@@ -323,6 +328,11 @@ const Workers = () => {
                         refreshing={isRefreshing}
                         maxToRenderPerBatch={8}
                         showsVerticalScrollIndicator={false}
+                        onEndReachedThreshold={0.5}
+                        onEndReached={() => {
+                            setCurrentPage(prev => prev + 1)
+                            getAllWorkers()
+                        }}
                         ListEmptyComponent={() => (
                             <View style={{alignItems: 'center', marginTop: 10}}>
                                 <TText style={{fontSize: 18, color: 'gray'}}>No results found. Try again</TText>
@@ -334,7 +344,7 @@ const Workers = () => {
                         ListFooterComponent={() => (
                             <View style={{height: 200}}></View>
                         )}
-                        renderItem={({item}) => (
+                        renderItem={({item, index}) => (
                             <> 
                             {
                                 hasResults ?
@@ -374,16 +384,8 @@ const Workers = () => {
                                             </View>
                                             
                                                 <View style={styles.descriptionBottom}>
-                                                    <View style={[styles.serviceFeeText]}> 
-                                                        <Text numberOfLines={1} ellipsizeMode='tail' style={{fontSize: 13, width: '100%'}}>Services:
-                                                        {
-                                                            item.works.map(function(w, index){
-                                                                return(
-                                                                    w + ", "
-                                                                )
-                                                            })
-                                                        }
-                                                        </Text>
+                                                    <View style={[styles.serviceFeeText]}>
+                                                        <Text numberOfLines={1} ellipsizeMode='tail' style={{fontSize: 13, width: '100%'}}>Services: {item.works}</Text>
                                                     </View>
                                             </View>
                                         </View>
