@@ -579,7 +579,7 @@ const VIewServiceRequest = ({route}) => {
                     </View>
                     
                     {
-                        global.userData.role === "worker" && requestItem.requestStatus == '1' && hasDeclinedRequest  ?
+                        global.userData.role === "worker" && requestItem.requestStatus == '1' && !hasDeclinedRequest  ?
                         <View style={styles.estimatedTimeContainer}>
                             <TouchableOpacity style={styles.estimatedTimeBtn}
                                 activeOpacity={0.5}

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Modal, StatusBar } from 'react-native'
+import { StyleSheet, BackHandler, Text, View, TouchableOpacity, Modal, StatusBar, SafeAreaView } from 'react-native'
 import Appbar from '../Components/Appbar'
 import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -6,99 +6,322 @@ import ThemeDefaults from '../Components/ThemeDefaults';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import React, {useState, useEffect} from 'react'
 import dayjs from 'dayjs'
+import { IPAddress } from '../global/global';
+import { useNavigation } from '@react-navigation/native';
+
+import { FlashList } from '@shopify/flash-list';
 
 const Schedule = ({route}) => {
 
-    const {dateSelected} = route.params
+    const navigation = useNavigation()
+
+    const {selectedDate, workerInformation, selectedJob, fromRequestForm, minPrice, maxPrice} = route.params
 
     const [formatedTime, setFormatedTime] = useState(new Date())
 
     const [displayTime, setDisplayTime] = useState(new Date())
     const [timeSelected, setTimeSelected] = useState(false)
     const [timePickerVisible, setTimePickerVisibility] = useState(false)
+    const [confirmDeleteEventModal, setConfirmDeleteEventModal] = useState(false)
 
+    const [customEventID, setCustomEventID] = useState('')
+    const [sameDateBookings, setSameDateBookings] = useState([])
+    const [hasChanges, setHasChanges] = useState(false)
+
+    // system back button behavior
+    useEffect(() => {
+        // console.log("backbtn pressed");
+        BackHandler.addEventListener("hardwareBackPress", ()=>handleSystemBackButton())
+        
+        // componentwillunmount
+        return () => {
+          BackHandler.removeEventListener("hardwareBackPress", ()=>handleSystemBackButton())
+        }
+      }, []);
+  
+  
+      const handleSystemBackButton =()=> {
+        if(fromRequestForm) {
+            navigation.goBack()
+            navigation.navigate("RequestFormDrawer", {workerInformation: workerInformation, selectedDay: new Date(selectedDate).toString(), selectedTime: new Date(formatedTime).toString(), selectedJob: selectedJob})
+            console.log("Back pressed hnadlebacnbtn: fromrequest ", fromRequestForm)
+            return true
+        } else {
+            navigation.navigate("CalendarViewUserStack")
+            console.log("Back pressed hnadlebacnbtn")
+
+            return true
+        }
+
+        return false;
+      }
+    
+
+    useEffect(() => {
+        getUpdatedUserData()
+        getUnavailableSchedule()
+
+        navigation.addListener("focus", () => {
+            getUpdatedUserData()
+            getUnavailableSchedule()
+        })
+    }, [route, hasChanges])
+
+
+    const getUpdatedUserData = () => {
+        let userRoute = global.userData.role === "recruiter" ? "Recruiter/" : "Worker/"
+
+        fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
+            method: "GET",
+            header: {
+                "conten-type": "application/json"
+            },
+        }).then((res) => res.json())
+        .then((user) => {
+            // console.log("user new load: ", route)
+            global.userData = user
+
+            // let imageList = []
+            for(let i = 0; i < user.prevWorks.length; i++){
+                imageList.push("http://" + IPAddress + ":3000/images/" + user.prevWorks[i])
+            }
+            // setHasChanges(!hasChanges)
+            // console.log("imagelist: ", imageList)
+        })
+        .catch((error) => console.log(error.message))
+    }
+
+    const getUnavailableSchedule = () => {
+        let dddd = new Date(selectedDate)
+        let uunn = []
+        if(workerInformation){
+            uunn = workerInformation.unavailableTime.filter(e => {
+                let sst = new Date(e.startTime)
+                return (sst.getFullYear() === dddd.getFullYear() &&
+                sst.getMonth() === dddd.getMonth() &&
+                sst.getDate() === dddd.getDate())
+            })
+        } else {
+            uunn = global.userData.unavailableTime.filter(e => {
+                let sst = new Date(e.startTime)
+                return (sst.getFullYear() === dddd.getFullYear() &&
+                sst.getMonth() === dddd.getMonth() &&
+                sst.getDate() === dddd.getDate())
+            })
+        }
+
+        uunn = uunn.filter(e => dayjs(e.startTime).format("YYYY-MM-DD").toString() === dayjs(new Date(selectedDate)).format("YYYY-MM-DD").toString())
+        setSameDateBookings(prev => [...uunn])
+        // console.log("Filtered unv time to display: ", uunn)
+    }
 
     const handleTimeConfirm = (time) => {
-        let timeString = dayjs(time).format("hh:mm A")
-        setDisplayTime(timeString.toString())
+        let timeString = dayjs(time).format("YYYY-MM-DD hh:mm:ss")
+        let timetime = dayjs(time).format("hh:mm")
+        setDisplayTime(dayjs(time).format("hh:mm A"))
         
         setFormatedTime(time)
         setTimePickerVisibility(false)
         setTimeSelected(true)
 
-        console.log(formatedTime)
+        // let newDate = new Date(formatedDate.getFullYear(), formatedDate.getMonth(), formatedDate.getDate(),
+                                // formatedTime.getHours(), formatedTime.getMinutes(), formatedTime.getSeconds())
+
+        // console.log(formatedTime)
+        // console.log("new date: ", newDate)
 
     }
 
-    const ScreenHeaderComponent = () => {
-        return(
-            <View>
-                <Appbar onlyBackBtn={true} reqForm={true} showLogo={true} hasPicture={true} />
 
-                <View style={styles.headerContainer}>
-                    <TText style={styles.headerTitle}>Worker's Schedule</TText>
-                    <TText style={styles.headerSubTitle}>Shown below are the worker's appointments scheduled on <TText style={styles.headerSubTitleDate}>{dateSelected}</TText></TText>
-                </View>
 
-                <View style={styles.timeBtnContainer}>
-                    {/* Time Picker */}
-                    <View>
-                        <TText>Choose Time</TText>
-                    </View>
+    const handleRemoveCustomEvent = () => {
+        fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}/${customEventID}`, {
+            method: "DELETE",
+            headers: {
+                'content-type': 'application/json'
+            }
+        }).then(res => {
+            console.log("Successful removal of the custom event")
+            // setViewScheduleModal(false)
+            setHasChanges(bool => !bool)
+            getUpdatedUserData()
+            getUnavailableSchedule()
+        })
+        .catch(err => console.log("Error remove custom event: ", err.msg))
+    }
 
-                    <TouchableOpacity 
-                        style={styles.timePickerBtn}
-                        onPress={() => setTimePickerVisibility(true)}
-                    >
-                        <View style={styles.timeTextContainer}>
-                            <Icon name="clock-outline" size={20} />
-                            <TText style={styles.timePickerText}>{timeSelected ? displayTime.toString() : "Time"}</TText>
+    const ScreenHeaderComponent = () => (
+        <>
+            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromRequestForm={fromRequestForm} workerInformation={workerInformation} selectedDate={selectedDate} selectedTime={formatedTime} selectedJob={selectedJob} minPrice={minPrice} maxPrice={maxPrice} />
+
+            {/* Confirm Delete Custom Event */}
+            <Modal
+                transparent={true}
+                animationType='fade'
+                visible={confirmDeleteEventModal}
+                onRequestClose={() => setConfirmDeleteEventModal(false)}
+            >
+                {/* Modal View */}
+                <View style={styles.modalDialogue}>
+                    {/* Modal Container */}
+                    <View style={styles.dialogueContainer}>
+                        {/* Modal Message/Notice */}
+                        <View style={styles.dialogueMessage}>
+                            <TText style={[styles.dialogueMessageText,]}>Do you wish to remove the custom event?</TText>
+                            {/* <TText style={[styles.dialogueMessageText]}>You make check it by tapping the Bookings icon on the homepage.</TText> */}
                         </View>
-                        <Icon name="chevron-right" size={20} />
-                    </TouchableOpacity>
+                        {/* Modal Buttons */}
+                        <View style={styles.modalDialogueBtnCont}>
+                            <TouchableOpacity
+                                style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
+                                onPress={() => {
+                                    setConfirmDeleteEventModal(false)
+                                    // handleAcceptRequest(requestItem._id)
+                                    handleRemoveCustomEvent()
+                                    // getUpdatedUserData()
+                                    // setViewScheduleModal(false)
+                                }}
+                            >
+                                <TText style={styles.dialogueCancel}>Yes</TText>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                                style={styles.dialogueBtn}
+                                onPress={() => {
+                                    setConfirmDeleteEventModal(false)
+                                }}
+                            >
+                                <TText style={styles.dialogueConfirm}>No</TText>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
+            <View style={styles.headerContainer}>
+                <TText style={styles.headerScheduleTitle}>Worker's Schedule</TText>
+                <TText style={styles.headerSchedSubTitle}>{sameDateBookings.length > 0 ? "Shown below are the worker's appointments scheduled on" : global.userData.role === 'recruiter' ? "The worker you selected has no appointments scheduled on " : "There are no pending appointments scheduled on "} <TText style={styles.headerSubTitleDate}>{dayjs(new Date(selectedDate)).format("MMMM DD")}</TText></TText>
+            </View>
+
+            {
+                fromRequestForm &&
+                <View>
                     <DateTimePickerModal
                         isVisible={timePickerVisible}
                         mode="time"
                         onConfirm={handleTimeConfirm}
                         onCancel={() => setTimePickerVisibility(false)}
                     />
+                    <TouchableOpacity 
+                        style={styles.timePickerBtn}
+                        onPress={() => setTimePickerVisibility(true)}
+                    >
+                        <View style={styles.timeTextContainer}>
+                            <Icon name="clock-outline" size={20} />
+                            <TText style={styles.timePickerText}>{timeSelected ? displayTime.toString() : "Pick a Time"}</TText>
+                        </View>
+                        <Icon name="chevron-right" size={20} />
+                    </TouchableOpacity>
                 </View>
+            }
+        </>
+    )
 
-            </View>
-        )
-    }
 
 
   return (
-    <View style={styles.mainContainer}>
-        <ScreenHeaderComponent />
+    <SafeAreaView style={styles.mainContainer}>
+        {/* <ScrollView contentContainerStyle={styles.modalCalendar}> */}
+            {/* screen header */}
+            
+            <View style={styles.scheduleList}>
+                               
 
-        
+                <FlashList 
+                    data={sameDateBookings}
+                    extraData={sameDateBookings}
+                    keyExtractor={item => item._id}
+                    estimatedItemSize={200}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={() => (<View style={{paddingVertical: 20, alignItems: 'center', marginTop: 20, marginBottom: 40}}><TText style={{color: 'lightgray'}}>Schedule is clear for {dayjs(new Date(selectedDate)).format("MMMM d")}</TText></View>)}
+                    ListFooterComponent={() => (
+                        <View style={{height: 150}}>
+                            {
+                                global.userData.role === 'recruiter' &&
+                                <View>
+                                    <View style={styles.confirmBtnContainer}>
+                                        <TouchableOpacity style={styles.confirmBtn}
+                                            onPress={() => {
+                                                // navigation.goBack()
+                                                navigation.navigate("RequestFormDrawer", {workerInformation: workerInformation, selectedDay: new Date(selectedDate).toString(), selectedTime: new Date(formatedTime).toString(), selectedJob: selectedJob, minPrice: minPrice, maxPrice: maxPrice})
 
-        <View style={styles.scheduleList}>
-            <View style={styles.schedCard}>
-                <TText style={styles.schedTitle}>Booked: Carpet Cleaning</TText>
-                <TText style={styles.schedTime}>08:00 AM - 09:00 AM</TText>
+                                            }}
+                                        >
+                                            <TText style={styles.confirmBtnText}>Confirm Time</TText>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            }
+                        </View>
+                    )}
+                    ListHeaderComponent={() => (<ScreenHeaderComponent />)}
+                    renderItem={({item}) => {
+                        
+                        let dif = new Date(item.startTime).getHours()
+                        let di = new Date(item.endTime).getHours()
+                        let timeDiff = di - dif
+                        let hh
+                        if(timeDiff > 1.5) {hh = timeDiff * 50}
+
+                        return(
+                            <View>
+                                <View style={[styles.schedCard, {height: hh ? hh : 100, backgroundColor: item.wholeDay || !item.CannotDelete && global.userData.role === "worker" ? ThemeDefaults.themeFadedBlack : ThemeDefaults.themeOrange}]}>
+                                    {
+                                        !item.CannotDelete && global.userData.role === "worker" &&
+                                        <TouchableOpacity style={{position: 'absolute', top: 10, right: 15, padding: 4, zIndex: 10}}
+                                            activeOpacity={0.1}
+                                            onPress={() => {
+                                                setConfirmDeleteEventModal(true)
+                                                setCustomEventID(item._id)
+                                            }}
+                                        >
+                                            <Icon name='trash-can' size={22} color={'white'} />
+                                        </TouchableOpacity>
+                                    }
+                                    
+                                    <TText style={{color: 'white', fontSize: 12, marginBottom: 4}}>{!item.CannotDelete && global.userData.role === "worker" ? "Custom Event" : "Booking"}</TText>
+
+                                    <TText style={styles.schedTitle}>{item.title}</TText>
+                                    <TText style={styles.schedTime}>{ item.wholeDay ? "Whole Day" : `${dayjs(item.startTime).format("hh:mm A")} - ${dayjs(item.endTime).format("hh:mm A")}` }</TText>
+                                </View>
+                            </View>
+                        )
+                        
+                    }}
+                />
             </View>
-            <View style={[styles.schedCard, {paddingBottom: 20 * 3}]}>
-                <TText style={styles.schedTitle}>Booked: Carpet Cleaning</TText>
-                <TText style={styles.schedTime}>08:00 AM - 09:00 AM</TText>
+
+            
+
+            
+        {/* </ScrollView> */}
+        {
+            global.userData.role === "worker" &&
+            <View style={styles.addCustomEventBtn}>
+                <TouchableOpacity style={{backgroundColor: '#e87435', borderRadius: 35, padding: 15, elevation: 3}}
+                    onPress={() => {
+                        navigation.navigate("AddEventCalendarUserStack", {selectedDate: selectedDate})
+                        // setViewScheduleModal(false)
+                    }}
+                >
+                    <Icon name="plus" size={40} color={ThemeDefaults.themeWhite} />
+                </TouchableOpacity>
             </View>
-        </View>
-
-        
-
-        <View style={styles.confirmBtnContainer}>
-            <TouchableOpacity style={styles.confirmBtn}>
-                <TText style={styles.confirmBtnText}>Confirm Time</TText>
-            </TouchableOpacity>
-        </View>
-    </View>
+        }
+    </SafeAreaView>
   )
 }
 
-export default Schedule
+export default Schedule;
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -108,23 +331,44 @@ const styles = StyleSheet.create({
         backgroundColor: ThemeDefaults.themeWhite,
         marginTop: StatusBar.currentHeight
     },
-    headerContainer: {
-        alignItems: 'center'
+    
+    modalCalendar: {
+        flexGrow: 1,
+        backgroundColor: ThemeDefaults.themeWhite,
+        paddingBottom: 150
     },
-    headerTitle: {
-        fontFamily: 'LexendDeca_Medium',
-        fontSize: 18,
-        marginBottom: 10,
+    calendarMonthHeader: {
+        width: 250,
+        alignItems: 'center',
+        paddingVertical: 3,
+        backgroundColor: '#D9D9D9',
+        borderRadius: 30,
     },
-    headerSubTitle: {
-        textAlign: 'center',
-        paddingHorizontal: 50,
+    calendarMonthHeaderTxt: {
+        fontSize: 18
     },
-    headerSubTitleDate: {
+    legendTopRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15
+    },
+    legendColor: {
+        width: 30,
+        height: 30,
+        borderRadius: 5,
+    },
+    legendTxt: {
+        marginLeft: 15,
         fontFamily: 'LexendDeca_Medium'
     },
     timeBtnContainer: {
-        paddingHorizontal: 60,
+        paddingHorizontal: 50,
         width: '100%',
         marginTop: 30
     },
@@ -146,23 +390,141 @@ const styles = StyleSheet.create({
         marginLeft: 10
     },
     scheduleList: {
-        paddingHorizontal: 60,
+        // marginHorizontal: 50,
         width: '100%',
-        marginVertical: 30
+        // paddingBottom: 150,
+        // marginVertical: 30,
+        flex: 1,
     },
     schedCard: {
-        width: '100%',
+        // width: '100%',
         backgroundColor: ThemeDefaults.themeFadedBlack,
         borderRadius: 15,
         paddingVertical: 15,
         paddingHorizontal: 20,
+        marginHorizontal: 30,
         marginBottom: 15,
+        // elevation: 3
     },
     schedTitle: {
-        color: ThemeDefaults.themeWhite
+        color: ThemeDefaults.themeWhite,
+        fontSize: 18
     },
     schedTime: {
-        color: ThemeDefaults.themeWhite
+        color: ThemeDefaults.themeWhite,
+        fontSize: 14,
+        marginTop: 3,
+        // marginLeft: 3
+    },
+    confirmBtnContainer: {
+        // flexGrow: 1,
+        // width: '100%',
+        position: 'absolute',
+        bottom: 60,
+        // left: 50,
+        righ: 50,
+        // backgroundColor: 'pink'
+    },
+    confirmBtn: {
+        // width: '100%',
+        flexGrow: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        borderRadius: 15,
+        backgroundColor: ThemeDefaults.themeOrange
+    },
+    confirmBtnText: {
+        color: ThemeDefaults.themeWhite,
+        fontSize: 18,
+        fontFamily: "LexendDeca_SemiBold"
+    },
+    headerContainer: {
+        width: '100%',
+        alignItems: 'center',
+        marginVertical: 10,
+        marginBottom: 40
+    },
+    headerScheduleTitle: {
+        fontSize: 20,
+        marginBottom: 10
+    },
+    headerSchedSubTitle: {
+        fontSize: 15,
+        marginHorizontal: 50,
+        textAlign: 'center'
+    },
+    headerSubTitleDate: {
+        fontFamily: 'LexendDeca_Medium'
+    },
+    addCustomEventBtn: {
+        position: 'absolute',
+        bottom: 60,
+        right: 40,
+        backgroundColor: 'white',
+        borderRadius: 35,
+    },
+    modalDialogue: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 40,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    dialogueContainer: {
+        borderWidth: 1.5,
+        borderColor: ThemeDefaults.themeLighterBlue,
+        borderRadius: 15,
+        overflow: 'hidden',
+    },
+    dialogueMessage: {
+        paddingVertical: 40,
+        paddingHorizontal: 50,
+        backgroundColor: ThemeDefaults.themeLighterBlue,
+    },
+    dialogueMessageText: {
+        color: ThemeDefaults.themeWhite,
+        textAlign: 'center',
+        fontFamily: 'LexendDeca_Medium',
+    },
+    modalDialogueBtnCont: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
+        backgroundColor: ThemeDefaults.themeWhite,
+    },
+    dialogueBtn: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    dialogueCancel: {
+
+    },
+    dialogueConfirm: {
+        color: ThemeDefaults.themeDarkerOrange,
+        fontFamily: 'LexendDeca_Medium',
+    },
+    timePickerBtn: {
+        borderWidth: 1.5,
+        borderColor: ThemeDefaults.themeDarkBlue,
+        borderRadius: 10,
+        padding: 12,
+        marginHorizontal: 30,
+        marginTop: 5,
+        marginBottom: 30,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: ThemeDefaults.themeWhite,
+        elevation: 3
+    },
+    timeTextContainer: {
+        flexGrow: 1,
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    timePickerText: {
+        marginLeft: 10
     },
     confirmBtnContainer: {
         // flexGrow: 1,
@@ -177,10 +539,11 @@ const styles = StyleSheet.create({
     confirmBtn: {
         width: '100%',
         flexGrow: 1,
-        paddingVertical: 12,
+        paddingVertical: 15,
         alignItems: 'center',
         borderRadius: 15,
-        backgroundColor: ThemeDefaults.themeOrange
+        backgroundColor: ThemeDefaults.themeOrange,
+        elevation: 3
     },
     confirmBtnText: {
         color: ThemeDefaults.themeWhite,

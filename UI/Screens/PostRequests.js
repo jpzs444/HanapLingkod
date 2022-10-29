@@ -264,7 +264,10 @@ const PostRequests = () => {
           )}
           renderItem={({item}) => (
             <>
-              <MainComponent item={item} />
+              {
+                item.recruiterId._id === global.userData._id || global.userData.role === 'worker' ?
+                <MainComponent item={item} /> : null
+              }
             </>   
           )}
         />

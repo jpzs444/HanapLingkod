@@ -28,8 +28,8 @@ const RequestForm = ({route, navigation}) => {
 
     const screenFocused = useIsFocused()
 
-    const {workerID, workID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks, dateService, timeService, fromPostReq} = route.params;
-    console.log(workerInformation)
+    const {workerID, workID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks, dateService, timeService, fromPostReq, selectedDay, selectedTime} = route.params;
+    // console.log(workerInformation)
 
     const [loadedWorkerInfo, setLoadedWorkerInfo] = useState({})
     const [hasLoadedWorkerInfo, setHasLoadedWorkerInfo] = useState(showMultiWorks)
@@ -60,7 +60,7 @@ const RequestForm = ({route, navigation}) => {
     const [viewCalendarModal, setViewCalendarModal] = useState(false)
     const [viewScheduleModal, setViewScheduleModal] = useState(false)
 
-    const [sameDateBookings, setSameDateBooking] = useState([])
+    const [sameDateBookings, setSameDateBookings] = useState([])
 
     const [viewScheduleErrorModal, setViewScheduleErrorModal] = useState(false)
     const [requestpostedModal, setRequestPostedModal] = useState(false)
@@ -72,14 +72,27 @@ const RequestForm = ({route, navigation}) => {
 
     const [status, requestPermission] = Location.useBackgroundPermissions()
 
+    const [reloading, setReloading] = useState(false)
+
+    const [listUnavailableSched, setListUnavailableSched] = useState({
+        // '2022-10-20': dateAppointmentsStyles,
+        // '2022-10-29': dateDisabledStyles,
+        // [dayjs(new Date()).format("YYYY-MM-DD").toString()]: dateTodayStyles
+    })
+
     const [calendarSelectedDate, setCalendarSelectedDate] = useState(
         {
             ...datesWithCustomization
         }
     )
 
+    let uunn = []
+    let lll = []
+
     useEffect(() => {
+        console.log("Worker infromation: ", workerInformation)
         setLoadedWorkerInfo({...workerInformation})
+        loadUnavailableTime()
         
         setDateSelected(false)
         setTimeSelected(false)
@@ -89,8 +102,20 @@ const RequestForm = ({route, navigation}) => {
         setFormatedTime(new Date())
         setDisplayDate(new Date())
         setDisplayTime(new Date())
+
+        if(selectedDay){
+            setFormatedDate(selectedDay)
+            setDisplayDate(dayjs(new Date(selectedDay)).format("MMMM DD"))
+            setDateSelected(true)
+        }
+
+        if(selectedTime){
+            setFormatedTime(selectedTime)
+            setDisplayTime(dayjs(new Date(selectedTime)).format("hh:mm A"))
+            setTimeSelected(true)
+        }
         
-        if(selectedJob ){
+        if(selectedJob){
             setServiceSelected(true)
         }
 
@@ -103,7 +128,7 @@ const RequestForm = ({route, navigation}) => {
             // }
       
             let alocation = await Location.getCurrentPositionAsync({});
-            console.log(alocation)
+            // console.log(alocation)
             setLocation({...alocation})
 
             setCoordLati(alocation.coords.latitude)
@@ -121,9 +146,9 @@ const RequestForm = ({route, navigation}) => {
         return () => {
             setLoadedWorkerInfo({...workerInformation})
             if(workSelected) setWorkSelected("")
-            if(selectedJob){
-                setServiceSelected(true)
-            }
+            // if(selectedJob){
+            //     setServiceSelected(true)
+            // }
         }
     }, [screenFocused, route])
     
@@ -132,11 +157,68 @@ const RequestForm = ({route, navigation}) => {
         setCalendarSelectedDate({...datesWithCustomization})
         // if(workSelected) setWorkSelected({})
 
-        console.log("workerInformation: ", workerInformation)
+        // console.log("workerInformation: ", workerInformation)
 
-        console.log(coordLati)
-        console.log(coordLongi)
+        // console.log(coordLati)
+        // console.log(coordLongi)
     }, [showMultiWorks])
+
+
+    const loadUnavailableTime = () => {
+
+        uunn = [...(workerInformation.unavailableTime)]
+        console.log("listUnvSched uunn: ", uunn)
+
+        
+        uunn.forEach(e => {
+            if(dayjs(e.endDate).subtract){
+                
+            }
+            
+            let dif = new Date(e.startTime).getDate()
+            let di = new Date(e.endDate).getDate()
+            let timeDiff = di - dif
+            
+            if(timeDiff > 0) {
+                for(let i = 0; i <= timeDiff; i++){
+                    lll[dayjs(e.startTime).add(i, "day").toString()] = e.wholeDay ? dateDisabledStyles : dateAppointmentsStyles
+                }
+            } else {
+                let ff = dayjs(new Date(e.startTime)).format("YYYY-MM-DD")
+                let dn = dayjs(new Date())
+                // console.log(dn.diff(ff, 'day', true) > '0')
+
+                if(dayjs(e.startTime).format("YYYY-MM-DD").toString() === dayjs(new Date()).format("YYYY-MM-DD").toString()){
+                    // console.log("the same")
+                    lll[dayjs(e.startTime).format("YYYY-MM-DD").toString()] = e.wholeDay ? dateTodayDisabledStyles : null
+
+                } else if(dn.diff(ff, 'day', true) > '0'){
+                    lll[dayjs(e.startTime).format("YYYY-MM-DD").toString()] = pastDates
+
+                } else if(e.wholeDay){
+                    lll[dayjs(e.startTime).format("YYYY-MM-DD").toString()] = dateDisabledStyles
+
+                }
+                lll[dayjs(new Date()).format("YYYY-MM-DD")] = dateTodayStyles
+            }
+
+        })
+
+        getUnavailableSchedule()
+
+        // console.log("display lll: ", lll)
+        setListUnavailableSched({...lll})
+        
+    }
+
+    const pastDates = {
+        customStyles: {
+            text: {
+                color: '#e5e5e5'
+            }
+        }
+    }
+
 
     // calendar things
     const dateDisabledStyles = {
@@ -153,14 +235,45 @@ const RequestForm = ({route, navigation}) => {
         }
     }
 
-    const dateAppointmentStyles = {
+    const dateTodayDisabledStyles = {
+        // disabled:true,
+        // disableTouchEvent: true,
         customStyles: {
             container: {
-                backgroundColor: ThemeDefaults.dateAppointments,
+                borderColor: 'white',
+                borderWidth: 1.4,
+                backgroundColor: ThemeDefaults.dateDisabled,
+                borderRadius: 5,
+            },
+            text: {
+                color: 'lightgray'
+            }
+        }
+    }
+
+    const dateAppointmentsStyles = {
+        customStyles: {
+            container: {
+                backgroundColor: ThemeDefaults.themeOrange,
                 borderRadius: 5,
             },
             text: {
                 color: ThemeDefaults.themeWhite
+            }
+        }
+    }
+
+    const dateTodayAppointmentsStyles = {
+        customStyles: {
+            container: {
+                borderColor: 'black',
+                borderWidth: 1.2,
+                // backgroundColor: ThemeDefaults.themeOrange,
+                borderRadius: 7,
+            },
+            text: {
+                color: 'black',
+                // color: ThemeDefaults.themeWhite,
             }
         }
     }
@@ -195,23 +308,45 @@ const RequestForm = ({route, navigation}) => {
     // calendar things -------
 
     const handleDateConfirm = (date) => {
+        setReloading(true)
         
         let da = new Date(date).toISOString()
         let nn = dayjs(date).format("YYYY-MM-DD")
         
-        setFormatedDate(dayjs(date).format("YYYY-MM-DD"));
+        setFormatedDate(date);
 
-        setDisplayDate(dayjs(date).format("MMM D, YYYY"));
+        setDisplayDate(dayjs(date).format("MMMM D, YYYY"));
         setDatePickerVisibility(false);
         setDateSelected(true)
         setViewCalendarModal(false)
-        setViewScheduleModal(true)
-
+        
         // set as date selected on calendar
-        datesWithCustomization[da.toString()] = dateAppointmentStyles
-
-        getSameDateBookings(date)
-
+        datesWithCustomization[da.toString()] = dateAppointmentsStyles
+        
+        // getSameDateBookings(date)
+        loadUnavailableTime()
+        getUnavailableSchedule()
+        
+        // setViewScheduleModal(true)
+        navigation.navigate("ScheduleDrawer", {selectedDate: new Date(date).toString(), workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true, minPrice: minPrice, maxPrice: maxPrice })
+        setReloading(false)
+        // setViewScheduleModal(true)
+        
+    }
+    
+    const getUnavailableSchedule = () => {
+        let dddd = new Date(formatedDate)
+        let uunn = workerInformation.unavailableTime.filter(e => {
+            let sst = new Date(e.startTime)
+            return (sst.getFullYear() === dddd.getFullYear() &&
+            sst.getMonth() === dddd.getMonth() &&
+            sst.getDate() === dddd.getDate())
+        })
+        
+        uunn = uunn.filter(e => dayjs(e.startTime).format("YYYY-MM-DD").toString() === dayjs(new Date(formatedDate)).format("YYYY-MM-DD").toString())
+        setSameDateBookings(prev => [...uunn])
+        // setReloading(false)
+        // console.log("Filtered unv time to display: ", uunn)
     }
 
     const getSameDateBookings = (date) => {
@@ -233,7 +368,7 @@ const RequestForm = ({route, navigation}) => {
             // setSameDateBooking([...list])
 
             // unavailableTime from worker
-            console.log(data.unavailableTime)
+            // console.log(data.unavailableTime)
             let list = []
 
             let startDate
@@ -242,9 +377,9 @@ const RequestForm = ({route, navigation}) => {
                 dayjs(e.startTime).format("YYYY-MM-DD") === dayjs(fd).format("YYYY-MM-DD")
             })
 
-            console.log("List of unvailable dates same time: ", list)
+            // console.log("List of unvailable dates same time: ", list)
 
-            console.log("list same date accepted bookings - calendar", list)
+            // console.log("list same date accepted bookings - calendar", list)
         }).catch((err) => console.log("get same dates error", err.message))
     }
 
@@ -260,8 +395,8 @@ const RequestForm = ({route, navigation}) => {
         let newDate = new Date(formatedDate.getFullYear(), formatedDate.getMonth(), formatedDate.getDate(),
                                 formatedTime.getHours(), formatedTime.getMinutes(), formatedTime.getSeconds())
 
-        console.log(formatedTime)
-        console.log("new date: ", newDate)
+        // console.log(formatedTime)
+        // console.log("new date: ", newDate)
 
     }
 
@@ -270,8 +405,8 @@ const RequestForm = ({route, navigation}) => {
     }
 
     const postRequest = () => {
-        console.log(workerID)
-        console.log("user: ", global.userData._id)
+        console.log("worker id", workerInformation._id)
+        console.log("user id: ", global.userData._id)
         console.log(selectedJob)
         // console.log(workSelected.ServiceSubId.ServiceSubCategory)
         console.log(minPrice)
@@ -287,15 +422,15 @@ const RequestForm = ({route, navigation}) => {
                 "content-type": "application/json",
             },
             body: JSON.stringify({
-                "workerId": workerID,
+                "workerId": workerInformation._id,
                 "recruiterId": global.userData._id,
                 'workId': workID,
                 "address": `${user.street}, ${user.purok}, ${user.barangay} ${user.city}, ${user.province}`,
                 "subCategory": selectedJob ? selectedJob : workSelected.ServiceSubId.ServiceSubCategory,
                 "minPrice": minPrice ? minPrice : workSelected.minPrice,
                 "maxPrice": maxPrice ? maxPrice : workSelected.maxPrice,
-                "serviceDate": formatedDate,
-                "startTime": formatedTime,
+                "serviceDate": dayjs(formatedDate).format("YYYY-MM-DD"),
+                "startTime": dayjs(formatedTime).format("HH:mm"),
                 "description": requestDescription,
                 "lat": coordLati,
                 "long": coordLongi,
@@ -509,14 +644,20 @@ const RequestForm = ({route, navigation}) => {
                         enableSwipeMonths={true}
                         markingType={'custom'}
                         markedDates={
-                            calendarSelectedDate        
+                            listUnavailableSched        
                         }
                         onDayPress={day => {
-                            datesWithCustomization[day.dateString] = dateAppointmentStyles
+                            datesWithCustomization[day.dateString] = dateAppointmentsStyles
                             setCalendarSelectedDate({...datesWithCustomization})
+                            loadUnavailableTime()
+                            getUnavailableSchedule()
                             handleDateConfirm(day.timestamp)
 
-                            // navigation.navigate("ScheduleDrawer", {dateSelected: displayDate})
+                            // setViewScheduleModal(true)
+                            // setViewScheduleModal
+
+
+                            // navigation.navigate("ScheduleDrawer", {selectedDate: formatedDate.toString(), workerUT: workerInformation.unavailableTime})
                         }}
                         theme={{
                             indicatorColor: ThemeDefaults.themeDarkBlue,
@@ -563,13 +704,13 @@ const RequestForm = ({route, navigation}) => {
 
                     <View style={styles.headerContainer}>
                         <TText style={styles.headerTitle}>Worker's Schedule</TText>
-                        <TText style={styles.headerSchedSubTitle}>{sameDateBookings.length > 0 ? "Shown below are the worker's appointments scheduled on " : "The worker you selected has no appointments scheduled on "}<TText style={styles.headerSubTitleDate}>{dayjs(formatedDate).format("MMMM D")}</TText></TText>
+                        <TText style={styles.headerSchedSubTitle}>{sameDateBookings.length > 0 ? "Shown below are the worker's appointments scheduled on " : "The worker you selected has no appointments scheduled on "}<TText style={styles.headerSubTitleDate}>{dayjs(new Date(formatedDate)).format("MMMM D")}</TText></TText>
                     </View>
 
                     <View style={styles.timeBtnContainer}>
                         {/* Time Picker */}
                         <View>
-                            <TText>Select Time</TText>
+                            {/* <TText>Select Time</TText> */}
                         </View>
 
                         <TouchableOpacity 
@@ -578,7 +719,7 @@ const RequestForm = ({route, navigation}) => {
                         >
                             <View style={styles.timeTextContainer}>
                                 <Icon name="clock-outline" size={20} />
-                                <TText style={styles.timePickerText}>{timeSelected ? displayTime.toString() : "Time"}</TText>
+                                <TText style={styles.timePickerText}>{timeSelected ? displayTime.toString() : "Pick a Time"}</TText>
                             </View>
                             <Icon name="chevron-right" size={20} />
                         </TouchableOpacity>
@@ -591,9 +732,9 @@ const RequestForm = ({route, navigation}) => {
                         />
 
                         {/* show if time is taken */}
-                        <View style={{marginTop: 2, paddingLeft: 5}}>
+                        {/* <View style={{marginTop: 2, paddingLeft: 5}}>
                             <TText style={{fontSize: 14, color: ThemeDefaults.themeOrange}}>Time is already taken by another recruiter</TText>
-                        </View>
+                        </View> */}
                     </View>
 
                     <View style={styles.scheduleList}>
@@ -606,14 +747,39 @@ const RequestForm = ({route, navigation}) => {
                             <TText style={styles.schedTime}>08:00 AM - 09:00 AM</TText>
                         </View> */}
                         {
-                            sameDateBookings.map(function(item, index){
-                                return(
-                                    <View key={index} style={[styles.schedCard, {height: 'auto'}]}>
-                                        <TText style={styles.schedTitle}>Booked: {item.subCategory}</TText>
-                                        <TText style={styles.schedTime}>{dayjs(item.startTime).format("hh:mm A")} - {dayjs(item.endTime).format("hh:mm A")}</TText>
-                                    </View>
-                                )
-                            })
+                            !reloading && 
+                            <>
+                                {
+                                    sameDateBookings.map(function(item, index){
+                                        
+                                            let dif = new Date(item.startTime).getHours()
+                                            let di = new Date(item.endTime).getHours()
+                                            const timeDiff = (di - dif) * 50
+            
+                                            return(
+                                                <View key={index}>
+                                                    <View style={[styles.schedCard, {height: timeDiff ? timeDiff : 100}]}>
+                                                        {
+                                                            !item.CannotDelete && global.userData.role === "worker" &&
+                                                            <TouchableOpacity style={{position: 'absolute', top: 10, right: 15, padding: 4, zIndex: 10}}
+                                                                activeOpacity={0.1}
+                                                                onPress={() => {
+                                                                    setConfirmDeleteEventModal(true)
+                                                                    setCustomEventID(item._id)
+                                                                }}
+                                                            >
+                                                                <Icon name='trash-can' size={22} color={'white'} />
+                                                            </TouchableOpacity>
+                                                        }
+                                                        <TText style={styles.schedTitle}>{item.title}</TText>
+                                                        <TText style={styles.schedTime}>{ item.wholeDay ? "Whole Day" : `${dayjs(item.startTime).format("hh:mm A")} - ${dayjs(item.endTime).format("hh:mm A")}` }</TText>
+                                                    </View>
+                                                </View>
+                                            )
+                                        
+                                    })
+                                }
+                            </>
                         }
                     </View>
 
@@ -712,7 +878,7 @@ const RequestForm = ({route, navigation}) => {
                         <View style={styles.formAddTxtContainer}>
                             <Icon name='calendar-month' size={22} />
                             <View style={styles.formAddTxt}>
-                                <TText style={styles.addressInfo}>{dateSelected ? displayDate : dateService ? dayjs(dateService).format("MMM DD").toString() : "Date"}</TText>
+                                <TText style={styles.addressInfo}>{dateSelected ? displayDate : dateService ? dayjs(new Date(formatedDate)).format("MMMM D").toString() : "Date"}</TText>
                             </View>
                         </View>
                         <Icon name='chevron-down' size={22} />
@@ -736,7 +902,8 @@ const RequestForm = ({route, navigation}) => {
                                 disabled={!dateSelected}
                                 onPress={()=> {
                                     if(dateSelected){
-                                        setViewScheduleModal(true)
+                                        navigation.navigate("ScheduleDrawer", {selectedDate: new Date(formatedDate).toString(), workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true.valueOf, minPrice: minPrice, maxPrice: maxPrice})
+                                        // setViewScheduleModal(true)
                                     }
                                 }}
                             >
@@ -752,7 +919,7 @@ const RequestForm = ({route, navigation}) => {
                         <View style={[styles.formAddTxtContainer, ]}>
                             <Icon name='briefcase' size={22} />
                             <View style={styles.formAddTxt}>
-                                <Text numberOfLines={1} ellipsizeMode="tail" style={styles.workSubCategory}>{workSelected ? workSelected.ServiceSubId.ServiceSubCategory : selectedJob ? selectedJob : "Select the service you need.."}</Text>
+                                <Text numberOfLines={1} ellipsizeMode="tail" style={styles.workSubCategory}>{workSelected ? workSelected.ServiceSubId.ServiceSubCategory : serviceSelected ? selectedJob : "Select the service you need.."}</Text>
                                 {
                                     showMultiWorks && <TText style={styles.addressSubTitle}>Select one of the worker’s services here</TText>
                                 }
@@ -1301,7 +1468,7 @@ const styles = StyleSheet.create({
         fontFamily: 'LexendDeca_Medium'
     },
     timeBtnContainer: {
-        paddingHorizontal: 50,
+        paddingHorizontal: 30,
         width: '100%',
         marginTop: 30
     },
@@ -1313,6 +1480,8 @@ const styles = StyleSheet.create({
         marginTop: 5,
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: ThemeDefaults.themeWhite,
+        elevation: 3
     },
     timeTextContainer: {
         flexGrow: 1,
@@ -1323,14 +1492,14 @@ const styles = StyleSheet.create({
         marginLeft: 10
     },
     scheduleList: {
-        paddingHorizontal: 50,
+        paddingHorizontal: 30,
         width: '100%',
         marginVertical: 30,
-        marginBottom: 150,
+        marginBottom: 200,
     },
     schedCard: {
         width: '100%',
-        backgroundColor: ThemeDefaults.themeFadedBlack,
+        backgroundColor: ThemeDefaults.themeOrange,
         borderRadius: 15,
         paddingVertical: 15,
         paddingHorizontal: 20,
@@ -1345,7 +1514,7 @@ const styles = StyleSheet.create({
     confirmBtnContainer: {
         // flexGrow: 1,
         width: '100%',
-        paddingHorizontal: 50,
+        paddingHorizontal: 60,
         position: 'absolute',
         bottom: 60,
         // left: 50,
@@ -1355,10 +1524,11 @@ const styles = StyleSheet.create({
     confirmBtn: {
         width: '100%',
         flexGrow: 1,
-        paddingVertical: 12,
+        paddingVertical: 15,
         alignItems: 'center',
         borderRadius: 15,
-        backgroundColor: ThemeDefaults.themeOrange
+        backgroundColor: ThemeDefaults.themeOrange,
+        elevation: 3
     },
     confirmBtnText: {
         color: ThemeDefaults.themeWhite,

@@ -22,10 +22,10 @@ const AddEventCalendar = ({route}) => {
 
     const radioOptions = [
         {label: 'Time'},
-        {label: 'All Day'},
+        {label: 'Whole Day'},
     ]
 
-    const [radioBtn, setRadioBtn] = useState(null)
+    const [radioBtn, setRadioBtn] = useState(false)
     const [isChecked, setChecked] = useState(false);
 
     const [startTimePicker, setStartTimePicker] = useState(false)
@@ -34,6 +34,13 @@ const AddEventCalendar = ({route}) => {
 
     const [formatedStartTime, setFormatedStartTime] = useState(new Date())
     const [formatedEndTime, setFormatedEndTime] = useState(new Date())
+    const [datePickerVisible, setDatePickerVisibility] = useState(false)
+
+    const [formatedDate, setFormatedDate] = useState(new Date)
+    const [displayDate, setDisplayDate] = useState(new Date())
+
+    const [dateSelected, setDateSelected] = useState(false)
+
     const [startTimeSelected, setStartTimeSelected] = useState(false)
     const [endTimeSelected, setEndTimeSelected] = useState(false)
     
@@ -44,12 +51,36 @@ const AddEventCalendar = ({route}) => {
     const [hasCreatedAnEvent, setHasCreatedAnEvent] = useState(false)
 
 
+
+    const getUpdatedUserData = () => {
+        let userRoute = global.userData.role === "recruiter" ? "Recruiter/" : "Worker/"
+
+        fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
+            method: "GET",
+            header: {
+                "conten-type": "application/json"
+            },
+        }).then((res) => res.json())
+        .then((user) => {
+            // console.log("user new load: ", route)
+            global.userData = user
+
+            // let imageList = []
+            for(let i = 0; i < user.prevWorks.length; i++){
+                imageList.push("http://" + IPAddress + ":3000/images/" + user.prevWorks[i])
+            }
+            // console.log("imagelist: ", imageList)
+        })
+        .catch((error) => console.log(error.message))
+    }
+
+
     const handleTimeConfirm = (time) => {
         let timeString = dayjs(time).format("YYYY-MM-DD hh:mm:ss")
         let timetime = dayjs(time).format("HH:mm")
 
         if(startTimePicker){
-            setFormatedStartTime(timetime)
+            setFormatedStartTime(time)
             setStartTimePicker(false)
             setStartTimeSelected(true)
         } else if(endTimePicker){
@@ -57,30 +88,81 @@ const AddEventCalendar = ({route}) => {
                 console.log("end time lesser")
                 setEndTimeLesser(true)
             }
-            setFormatedEndTime(timetime)
+            setFormatedEndTime(time)
             setEndTimePicker(false)
             setEndTimeSelected(true)
         }
     }
 
+    const handleDateConfirm = (date) => {
+
+        let nn = dayjs(date).format("YYYY-MM-DD")
+        setDateSelected(true)
+        
+        if(nn < new Date(selectedDate)){
+            setDatePickerVisibility(false)
+            setEndTimeLesser(true)
+        } else {
+            let da = new Date(date).toISOString()
+            
+            setFormatedDate(dayjs(date).format("YYYY-MM-DD"));
+            
+            setDisplayDate(dayjs(date).format("MMM D, YYYY"));
+            setDatePickerVisibility(false);
+            setViewCalendarModal(false)
+
+            datesWithCustomization[da.toString()] = dateAppointmentStyles
+
+            getSameDateBookings(date)
+        }
+        // set as date selected on calendar
+
+
+    }
+
     const handleAddEvent = () => {
         console.log("add event")
-        fetch(`https://hanaplingkod.onrender.com/add-schedule/${global.userData._id}`, {
-            method: "POST",
-            headers: {
-                'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-                inputDate: selectedDate,
-                title: eventTitle ? eventTitle : '',
-                startTime: formatedStartTime,
-                endTime: formatedEndTime,
-                wholeDay: radioBtn.toString()
-            })
-        }).then(res => {
-            console.log("Successfull adding an event")
-            setHasCreatedAnEvent(true)
-        }).catch(err => console.log("error add event: ", err.message))
+        if(radioBtn){
+            fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}`, {
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json',
+                },
+                body: JSON.stringify({
+                    inputDate: dayjs(selectedDate).format("YYYY-MM-DD"),
+                    title: eventTitle ? eventTitle : 'untitled event',
+                    startDate: dayjs(selectedDate).format("YYYY-MM-DD"),
+                    endDate: dayjs(formatedDate).format("YYYY-MM-DD"),
+                    startTime: dayjs(new Date()).format("HH:mm"),
+                    endTime: dayjs(new Date()).format("HH:mm"),
+                    wholeday: "1" // radioBtn
+                })
+            }).then(res => {
+                console.log("Successfull adding an event")
+                getUpdatedUserData()
+                setHasCreatedAnEvent(true)
+            }).catch(err => console.log("error add event: ", err.message))
+        } else {
+            fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}`, {
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json',
+                },
+                body: JSON.stringify({
+                    inputDate: dayjs(selectedDate).format("YYYY-MM-DD"),
+                    title: eventTitle ? eventTitle : 'untitled event',
+                    startDate: dayjs(new Date(selectedDate)).format("YYYY-MM-DD"),
+                    endDate: dayjs(new Date(selectedDate)).format("YYYY-MM-DD"),
+                    startTime: dayjs(formatedStartTime).format("HH:mm"),
+                    endTime: dayjs(formatedEndTime).format("HH:mm"),
+                    wholeday: isChecked ? "1" : "0",
+                })
+            }).then(res => {
+                console.log("Successfull adding an event")
+                getUpdatedUserData()
+                setHasCreatedAnEvent(true)
+            }).catch(err => console.log("error add event: ", err.message))
+        }
     }
 
   return (
@@ -118,7 +200,7 @@ const AddEventCalendar = ({route}) => {
                 <View style={styles.dialogueContainer}>
                     {/* Modal Message/Notice */}
                     <View style={styles.dialogueMessage}>
-                        <TText style={[styles.dialogueMessageText]}>End Time should be set on a later time than the Start Time. Please try again</TText>
+                        <TText style={[styles.dialogueMessageText]}>End Date/Time should be set on a later time than the Start Date/Time. Please try again</TText>
                     </View>
                     {/* Modal Buttons */}
                     <View style={styles.modalDialogueBtnCont}>
@@ -126,7 +208,12 @@ const AddEventCalendar = ({route}) => {
                             style={[styles.dialogueBtn]}
                             onPress={() => {
                                 setEndTimeLesser(false)
-                                setEndTimePicker(true)
+                                if(dateSelected){
+                                    
+                                    setDatePickerVisibility(true)
+                                } else {
+                                    setEndTimePicker(true)
+                                }
                             }}
                         >
                             <TText style={styles.dialogueCancel}>Okay</TText>
@@ -227,9 +314,13 @@ const AddEventCalendar = ({route}) => {
                     activeColor={ThemeDefaults.themeOrange}
                     selectedBtn={(e) => {
                         console.log(e.label)
+                        setDateSelected(false)
+                        setStartTimeSelected(false)
+                        setEndTimeSelected(false)
+
                         if(e.label === "Time"){
                             setRadioBtn(false)
-                        } else if(e.label === "All Day") {
+                        } else if(e.label === "Whole Day") {
                             setRadioBtn(true)
                         } else {
                             setRadioBtn(null)
@@ -240,51 +331,83 @@ const AddEventCalendar = ({route}) => {
                 />
             </View>
 
-            <View style={styles.timeSelectionContainer}>
-                <View style={[styles.startTimeBtn, {borderRadius: 10, backgroundColor: radioBtn ? '#f1f1f1' : null, borderColor: radioBtn ? '#c2c2c2' : ThemeDefaults.themeDarkBlue}]}>
-                    <TouchableOpacity style={styles.btnbtn}
-                        disabled={radioBtn}
-                        onPress={() => {
-                            setStartTimePicker(true)
-                        }}
-                    >
-                        <View style={styles.timeTextContainer}>
-                            <Icon name="clock-outline" size={20} color={!radioBtn ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
-                            <TText style={[styles.timeText, {color:!radioBtn ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue}]}>{startTimeSelected ? dayjs(formatedStartTime).format("hh:mm A").toString() : "Start Time"}</TText>
-                        </View>
-                        <Icon name="chevron-right" size={20} color={!radioBtn ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
-                    </TouchableOpacity>
+            {
+                radioBtn &&
+                <View>
+                    <DateTimePickerModal
+                        isVisible={datePickerVisible}
+                        mode="date"
+                        minimumDate={new Date(selectedDate)}
+                        onConfirm={handleDateConfirm}
+                        onCancel={() => setDatePickerVisibility(false)}
+                    />
+                    <View style={[{marginTop: 40, borderWidth: 1.4, borderColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, padding: 10}]}>
+                        <TouchableOpacity style={styles.btnbtn}
+                            onPress={() => {
+                                setDatePickerVisibility(true)
+                            }}
+                        >
+                            <View style={styles.timeTextContainer}>
+                                <Icon name="calendar-month" size={20} color={!dateSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
+                                <TText style={[styles.timeText, {color: !dateSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue}]}>{dateSelected ? dayjs(formatedDate).format("MMMM DD").toString() : "End Date"}</TText>
+                            </View>
+                            <Icon name="chevron-right" size={20} color={!radioBtn ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                <View style={[styles.startTimeBtn, {borderRadius: 10, backgroundColor: radioBtn ? '#f1f1f1' : null, borderColor: radioBtn ? '#c2c2c2' : ThemeDefaults.themeDarkBlue}]}>
-                    <TouchableOpacity style={styles.btnbtn}
-                        disabled={radioBtn}
-                         onPress={() => {
-                            setEndTimePicker(true)
-                        }}
-                    >
-                        <View style={styles.timeTextContainer}>
-                            <Icon name="clock-outline" size={20} color={!radioBtn ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
-                            <TText style={[styles.timeText, {color:!radioBtn ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue}]}>{endTimeSelected ? dayjs(formatedEndTime).format("hh:mm A").toString() : "End Time"}</TText>
-                        </View>
-                        <Icon name="chevron-right" size={20} color={!radioBtn ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
-                    </TouchableOpacity>
-                </View>
-            </View>
+            }
 
-            <View style={styles.checkboxContainer}>
-                <Checkbox
-                    style={{}}
-                    value={isChecked}
-                    onValueChange={setChecked}
-                    color={isChecked ? ThemeDefaults.themeOrange : undefined}
-                />
-                <TText style={styles.checkboxMessage}>Make the remaining time slots unavailable</TText>
-            </View>
+            {
+                !radioBtn &&
+                <View style={styles.timeSelectionContainer}>
+                    <View style={[styles.startTimeBtn, {borderRadius: 10, backgroundColor: radioBtn ? '#f1f1f1' : null, borderColor: radioBtn ? '#c2c2c2' : ThemeDefaults.themeDarkBlue}]}>
+                        <TouchableOpacity style={styles.btnbtn}
+                            disabled={radioBtn}
+                            onPress={() => {
+                                setStartTimePicker(true)
+                            }}
+                        >
+                            <View style={styles.timeTextContainer}>
+                                <Icon name="clock-outline" size={20} color={!startTimeSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
+                                <TText style={[styles.timeText, {color: !startTimeSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue}]}>{startTimeSelected ? dayjs(formatedStartTime).format("hh:mm A").toString() : "Start Time"}</TText>
+                            </View>
+                            <Icon name="chevron-right" size={20} color={!startTimeSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={[styles.startTimeBtn, {borderRadius: 10, backgroundColor: radioBtn ? '#f1f1f1' : null, borderColor: radioBtn ? '#c2c2c2' : ThemeDefaults.themeDarkBlue}]}>
+                        <TouchableOpacity style={styles.btnbtn}
+                            disabled={radioBtn}
+                            onPress={() => {
+                                setEndTimePicker(true)
+                            }}
+                        >
+                            <View style={styles.timeTextContainer}>
+                                <Icon name="clock-outline" size={20} color={!endTimeSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
+                                <TText style={[styles.timeText, {color: !endTimeSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue}]}>{endTimeSelected ? dayjs(formatedEndTime).format("hh:mm A").toString() : "End Time"}</TText>
+                            </View>
+                            <Icon name="chevron-right" size={20} color={!endTimeSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            }
+
+            {
+                !radioBtn &&
+                <View style={styles.checkboxContainer}>
+                    <Checkbox
+                        style={{}}
+                        value={isChecked}
+                        onValueChange={setChecked}
+                        color={isChecked ? ThemeDefaults.themeOrange : undefined}
+                    />
+                    <TText style={styles.checkboxMessage}>Make the remaining time slots unavailable</TText>
+                </View>
+            }
         </View>
 
         <View style={styles.saveBtnContainer}>
-            <TouchableOpacity style={[styles.saveBtn, {backgroundColor: !startTimeSelected || !endTimeSelected || radioBtn === null ? '#c2c2c2' : ThemeDefaults.themeOrange}]} activeOpacity={0.5}
-                disabled={!startTimeSelected || !endTimeSelected || radioBtn === null }
+            <TouchableOpacity style={[styles.saveBtn, {backgroundColor: (startTimeSelected && endTimeSelected && eventTitle) || (dateSelected && eventTitle) ? ThemeDefaults.themeOrange : '#c2c2c2', elevation: (startTimeSelected && endTimeSelected && eventTitle) || (dateSelected && eventTitle) ? 4 : 0}]} activeOpacity={0.5}
+                disabled={(!startTimeSelected && !endTimeSelected && !eventTitle) || (!dateSelected && !eventTitle) }
                 onPress={() => {
                     handleAddEvent()
                 }}

@@ -33,6 +33,7 @@ const ViewComments = ({route}) => {
             fetchCommentsFromPost()
 
             let fetchCommnetsInterval = setInterval(fetchCommentsFromPost, 5000)
+            // setTimeout()
     
             return () => {
                 setCommentList([])
@@ -43,6 +44,7 @@ const ViewComments = ({route}) => {
 
     const fetchCommentsFromPost = async () => {
         try {
+            setIsLoading(true)
             await fetch(`http://${IPAddress}:3000/request-post/${postID}`, {
                 method: "GET",
                 headers: {
@@ -54,7 +56,8 @@ const ViewComments = ({route}) => {
                 setCommentList(prev => [...data.comment])
                 setPostInformation([...data.post])
                 
-                setIsLoading(false)
+                // let io = setTimeout(setIsLoading(false), 1000)
+                // clearTimeout(io)
             }).catch((err) => console.log("error fetch post comments", err.msg))
 
         } catch (error) {
