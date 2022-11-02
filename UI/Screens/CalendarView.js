@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import dayjs from 'dayjs';
 
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-
+import { FlashList } from '@shopify/flash-list'
 
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import {LocaleConfig} from 'react-native-calendars';
@@ -14,13 +14,17 @@ import ThemeDefaults from '../Components/ThemeDefaults';
 import { RollInRight } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 
+import { IPAddress } from '../global/global';
+
 const dayWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const WIDTH = Dimensions.get('window').width
 const HEIGTH = Dimensions.get('window').height
 const utc = require('dayjs/plugin/utc')
 const timezone = require('dayjs/plugin/timezone')
+const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(utc)
 dayjs.extend(timezone)
+dayjs.extend(relativeTime)
 
 const CalendarView = () => {
 
@@ -47,13 +51,63 @@ const CalendarView = () => {
 
     const [unavailableSchedule, setUnavailableSchedule] = useState([])
 
-    useEffect(() => {
-        loadUnavailableTime()
+    const [listUnavailableSched, setListUnavailableSched] = useState({
+        // '2022-10-20': dateAppointmentsStyles,
+        // '2022-10-29': dateDisabledStyles,
+        // [dayjs(new Date()).format("YYYY-MM-DD").toString()]: dateTodayStyles
+    })
 
-        console.log("unavailable schedule: ", unavailableSchedule)
-        console.log("unavailable schedule: ", unavailableSchedule)
+    const [customEventID, setCustomEventID] = useState('')
+    const [confirmDeleteEventModal, setConfirmDeleteEventModal] = useState(false)
+    const [hasChanges, setHasChanges] = useState(false)
+
+    let uunn = {}
+    let lll = {}
+
+    useEffect(() => {
+        getUpdatedUserData()
+        loadUnavailableTime()
+        getSameDateBookings()
+
+        navigation.addListener("focus", () => {
+            getUpdatedUserData()
+            getUpdatedUserData()
+            loadUnavailableTime()
+            // getSameDateBookings()
+        })
         
-    }, []);
+        navigation.addListener("blur", () => {
+            loadUnavailableTime()
+            setFormatedDate(new Date())
+            setDateSelected(false)
+            // setViewScheduleModal(false)
+        })
+        
+    }, [hasChanges]);
+
+
+    const getUpdatedUserData = () => {
+        let userRoute = global.userData.role === "recruiter" ? "Recruiter/" : "Worker/"
+
+        fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
+            method: "GET",
+            header: {
+                "conten-type": "application/json"
+            },
+        }).then((res) => res.json())
+        .then((user) => {
+            // console.log("user new load: ", route)
+            global.userData = user
+
+            // let imageList = []
+            for(let i = 0; i < user.prevWorks.length; i++){
+                imageList.push("http://" + IPAddress + ":3000/images/" + user.prevWorks[i])
+            }
+            // setHasChanges(!hasChanges)
+            // console.log("imagelist: ", imageList)
+        })
+        .catch((error) => console.log(error.message))
+    }
 
     const dateAppointmentsStyles = {
         customStyles: {
@@ -63,6 +117,19 @@ const CalendarView = () => {
             },
             text: {
                 color: ThemeDefaults.themeWhite
+            }
+        }
+    }
+    const dateTodayAppointmentsStyles = {
+        customStyles: {
+            container: {
+                borderColor: 'black',
+                borderWidth: 1.2,
+                backgroundColor: ThemeDefaults.dateAppointments,
+                borderRadius: 7,
+            },
+            text: {
+                color: ThemeDefaults.themeWhite,
             }
         }
     }
@@ -76,18 +143,35 @@ const CalendarView = () => {
         // setDatePickerVisibility(false);
         setDateSelected(true)
         // setViewCalendarModal(false)
-        setViewScheduleModal(true)
-
+        
         // set as date selected on calendar
         datesWithCustomization[da.toString()] = dateAppointmentsStyles
-
+        
         // setUser((prev) => ({...prev, birthday: dateString}))
-        getSameDateBookings(date)
-
+        
+        // filter unavailable list
+        uunn = []
+        let dddd = new Date(date)
+        uunn = global.userData.unavailableTime.filter(e => {
+            let sst = new Date(e.startTime)
+            return (sst.getFullYear() === dddd.getFullYear() &&
+            sst.getMonth() === dddd.getMonth() &&
+            sst.getDate() === dddd.getDate())
+        })
+        setSameDateBooking([...uunn])
+        console.log("Filtered unv time to display: ", uunn)
+        
         // haveBlanks()
         console.log(dateString)
         dateString = dayjs(date).format("MMMM DD").toString()
         // navigation.navigate("ScheduleDrawer", {dateSelected: dateString})
+        
+        
+        // getSchedules()
+        getSameDateBookings(date)
+        // setViewScheduleModal(true)
+        navigation.navigate("ScheduleUserStack", {'selectedDate': new Date(date).toString()})
+
     }
 
     const handleTimeConfirm = (time) => {
@@ -98,6 +182,8 @@ const CalendarView = () => {
         setFormatedTime(timetime)
         setTimePickerVisibility(false)
         setTimeSelected(true)
+        
+
 
         let newDate = new Date(formatedDate.getFullYear(), formatedDate.getMonth(), formatedDate.getDate(),
                                 formatedTime.getHours(), formatedTime.getMinutes(), formatedTime.getSeconds())
@@ -107,8 +193,27 @@ const CalendarView = () => {
 
     }
 
+    const handleRemoveCustomEvent = () => {
+        fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}/${customEventID}`, {
+            method: "DELETE",
+            headers: {
+                'content-type': 'application/json'
+            }
+        }).then(res => {
+            console.log("Successful removal of the custom event")
+            // setViewScheduleModal(false)
+        })
+        .catch(err => console.log("Error remove custom event: ", err.msg))
+    }
+
+
+    // const getSchedules = () => {
+    //     let uL = [...(global.userData.unavailableTime)]
+    //     console.log("uL: ", uL)
+    // }
+
     const getSameDateBookings = (date) => {
-        fetch(`https://hanaplingkod.onrender.com/booking/${global.userData._id}`, {
+        fetch(`http://${IPAddress}:3000/booking/${global.userData._id}`, {
             method: "GET",
             headers: {
                 'content-type': 'application/json'
@@ -126,24 +231,98 @@ const CalendarView = () => {
                 console.log("aa", aa)
                 return aa == fd
             })
-            setSameDateBooking([...list])
-
+            // setSameDateBooking([...list])
             console.log("list same date accepted bookings - calendar", list)
+            // navigation.navigate("ScheduleUserStack", {'selectedDate': new Date(formatedDate).toString(), 'sameDateBookings': sameDateBookings})
+
         }).catch((err) => console.log("get same dates error", err.message))
     }
 
 
     const loadUnavailableTime = () => {
-        setUnavailableSchedule([...(global.userData.unavailableTime)])
 
+        uunn = [...(global.userData.unavailableTime)]
+        console.log("listUnvSched uunn: ", uunn)
+        // let lll = {}
+
+
+        // format unavailable datesD
+        // let jk = uunn.filter(e => {
+
+        // })
+
+
+        
+        uunn.forEach(e => {
+            if(dayjs(e.endDate).subtract){
+                
+            }
+            
+            let dif = new Date(e.startTime).getDate()
+            let di = new Date(e.endDate).getDate()
+            let timeDiff = di - dif
+
+            let dateWholeDay = []
+            
+            if(timeDiff > 0) {
+                for(let i = 0; i <= timeDiff; i++){
+                    lll[dayjs(e.startTime).add(i, "day").toString()] = e.wholeDay ? dateDisabledStyles : dateAppointmentsStyles
+                }
+            } else {
+                let ff = dayjs(new Date(e.startTime)).format("YYYY-MM-DD")
+                let dn = dayjs(new Date())
+                console.log(dn.diff(ff, 'day', true) > '0')
+
+                
+
+                lll[dayjs(new Date()).format("YYYY-MM-DD").toString()] = dateTodayStyles 
+
+                if(dayjs(e.startTime).format("YYYY-MM-DD").toString() === dayjs(new Date()).format("YYYY-MM-DD").toString()){
+                    console.log("the same")
+                    lll[dayjs(e.startTime).format("YYYY-MM-DD").toString()] = e.wholeDay ? dateDisabledStyles : dateAppointmentsStyles
+
+                } else if(dn.diff(ff, 'day', true) > '0'){
+                    lll[dayjs(e.startTime).format("YYYY-MM-DD").toString()] = pastDates
+
+                } else{
+                    lll[dayjs(e.startTime).format("YYYY-MM-DD").toString()] = e.wholeDay ? dateDisabledStyles : dateAppointmentsStyles
+                }
+            }
+        })
+
+        console.log("display lll: ", lll)
+        setListUnavailableSched({...lll})
         
     }
 
+    const pastDates = {
+        customStyles: {
+            text: {
+                color: 'lightgray'
+            }
+        }
+    }
+
     const dateDisabledStyles = {
-        disabled:true,
-        disableTouchEvent: true,
+        // disabled:true,
+        // disableTouchEvent: true,
         customStyles: {
             container: {
+                backgroundColor: ThemeDefaults.dateDisabled,
+                borderRadius: 5,
+            },
+            text: {
+                color: 'lightgray'
+            }
+        }
+    }
+    const dateTodayDisabledStyles = {
+        // disabled:true,
+        // disableTouchEvent: true,
+        customStyles: {
+            container: {
+                borderColor: 'white',
+                borderWidth: 1.4,
                 backgroundColor: ThemeDefaults.dateDisabled,
                 borderRadius: 5,
             },
@@ -181,15 +360,6 @@ const CalendarView = () => {
         )
     }
 
-    const itemDays = {
-        '2022-10-22': [{time: '09:00 AM - 11:00 AM', service: "Deep Cleaning", estimatedTime: 2, }, {time: '01:00 PM - 02:00 PM', service: "Deep Cleaning", estimatedTime: 1}, {time: '03:00 PM - 04:00 PM', service: "Deep Cleaning", estimatedTime: 1}],
-        '2022-10-23': [{time: '09:00 AM - 10:00 AM', service: "Deep Cleaning", estimatedTime: 1, }],
-        '2022-10-24': [{time: '09:00 AM - 01:00 PM', service: "Deep Cleaning", estimatedTime: 3, }],
-        '2022-10-25': [{time: '09:00 AM - 11:00 AM', service: "Deep Cleaning", estimatedTime: 2, }, {time: '01:00 PM - 02:00 PM', service: "Deep Cleaning", estimatedTime: 1}, {time: '03:00 PM - 04:00 PM', service: "Deep Cleaning", estimatedTime: 1}],
-        '2022-10-26': [],
-        '2022-10-27': [{time: '09:00 AM - 01:00 PM', service: "Deep Cleaning", estimatedTime: 3, }],
-        '2022-10-29': [{time: '09:00 AM - 01:00 PM', service: "Deep Cleaning", estimatedTime: 3, }],
-    }
 
 
   return (
@@ -206,14 +376,19 @@ const CalendarView = () => {
             enableSwipeMonths={true}
             markingType={'custom'}
             markedDates={
-                datesWithCustomization        
+                listUnavailableSched        
             }
             onDayPress={day => {
                 console.log(day)
                 console.log(dayWeek[dayjs(day.timestamp).day()])
 
+                console.log("")
+
+                getUpdatedUserData()
                 handleDateConfirm(day.dateString)
-                setViewScheduleModal(true)
+
+                // navigation.navigate("ScheduleUserStack", {'selectedDate': new Date(formatedDate).toString(), 'sameDateBookings': sameDateBookings})
+                // setViewScheduleModal(true)
             }}
             theme={{
                 indicatorColor: ThemeDefaults.themeDarkBlue,
@@ -243,6 +418,55 @@ const CalendarView = () => {
             </View>
         </View>
 
+        {/* Confirm Delete Custom Event */}
+        <Modal
+            transparent={true}
+            animationType='fade'
+            visible={confirmDeleteEventModal}
+            onRequestClose={() => setConfirmDeleteEventModal(false)}
+        >
+            {/* Modal View */}
+            <View style={styles.modalDialogue}>
+                {/* Modal Container */}
+                <View style={styles.dialogueContainer}>
+                    {/* Modal Message/Notice */}
+                    <View style={styles.dialogueMessage}>
+                        <TText style={[styles.dialogueMessageText,]}>Do you wish to remove the custom event?</TText>
+                        {/* <TText style={[styles.dialogueMessageText]}>You make check it by tapping the Bookings icon on the homepage.</TText> */}
+                    </View>
+                    {/* Modal Buttons */}
+                    <View style={styles.modalDialogueBtnCont}>
+                        <TouchableOpacity
+                            style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
+                            onPress={() => {
+                                setConfirmDeleteEventModal(false)
+                                // handleAcceptRequest(requestItem._id)
+                                handleRemoveCustomEvent()
+                                // getUpdatedUserData()
+                                // loadUnavailableTime()
+                                // getSameDateBookings()
+                                // setHasChanges(prev => !prev)
+
+                                // setViewScheduleModal(false)
+                                // setViewScheduleModal(true)
+                            }}
+                        >
+                            <TText style={styles.dialogueCancel}>Yes</TText>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={styles.dialogueBtn}
+                            onPress={() => {
+                                setConfirmDeleteEventModal(false)
+                            }}
+                        >
+                            <TText style={styles.dialogueConfirm}>No</TText>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+
+
         {/* Schedule Modal */}
         <Modal
             transparent={true}
@@ -261,39 +485,54 @@ const CalendarView = () => {
 
 
                 <View style={styles.scheduleList}>
-                    {/* <View style={styles.schedCard}>
-                        <TText style={styles.schedTitle}>Booked: Carpet Cleaning</TText>
-                        <TText style={styles.schedTime}>08:00 AM - 09:00 AM</TText>
-                    </View>
-                    <View style={[styles.schedCard, {paddingBottom: 20 * 3}]}>
-                        <TText style={styles.schedTitle}>Booked: Carpet Cleaning</TText>
-                        <TText style={styles.schedTime}>08:00 AM - 09:00 AM</TText>
-                    </View> */}
                     {
                         sameDateBookings.map(function(item, index){
-                            return(
-                                <View key={index} style={[styles.schedCard, {height: 'auto'}]}>
-                                    <TText style={styles.schedTitle}>Booked: {item.subCategory}</TText>
-                                    <TText style={styles.schedTime}>{dayjs(item.startTime).format("hh:mm A")} - {dayjs(item.endTime).format("hh:mm A")}</TText>
-                                </View>
-                            )
+                            if(dayjs(item.startTime).format("YYYY-MM-DD").toString() === dayjs(new Date(formatedDate)).format("YYYY-MM-DD").toString()){
+                                let dif = new Date(item.startTime).getHours()
+                                let di = new Date(item.endTime).getHours()
+                                const timeDiff = (di - dif) * 60
+
+                                return(
+                                    <View key={index}>
+                                    <View style={[styles.schedCard, {height: timeDiff ? timeDiff : 'auto', backgroundColor: item.wholeDay ? ThemeDefaults.themeFadedBlack : ThemeDefaults.themeOrange}]}>
+                                        {
+                                            !item.CannotDelete &&
+                                            <TouchableOpacity style={{position: 'absolute', top: 10, right: 15, padding: 4, zIndex: 10}}
+                                                activeOpacity={0.1}
+                                                onPress={() => {
+                                                    setConfirmDeleteEventModal(true)
+                                                    setCustomEventID(item._id)
+                                                }}
+                                            >
+                                                <Icon name='trash-can' size={22} color={'white'} />
+                                            </TouchableOpacity>
+                                        }
+                                        <TText style={styles.schedTitle}>{item.title}</TText>
+                                        <TText style={styles.schedTime}>{ item.wholeDay ? "Whole Day" : `${dayjs(item.startTime).format("hh:mm A")} - ${dayjs(item.endTime).format("hh:mm A")}` }</TText>
+                                    </View>
+                                    </View>
+                                )
+                            }
                         })
                     }
+
+                    
                 </View>
 
                 
 
-                <View style={styles.addCustomEventBtn}>
-                    <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 35, padding: 15}}
-                        onPress={() => {
-                            navigation.navigate("AddEventCalendarUserStack", {selectedDate: formatedDate})
-                        }}
-                    >
-                        <Icon name="plus" size={40} color={ThemeDefaults.themeWhite} />
-                    </TouchableOpacity>
-                </View>
                 
             </ScrollView>
+            <View style={styles.addCustomEventBtn}>
+                <TouchableOpacity style={{backgroundColor: '#e87435', borderRadius: 35, padding: 15, elevation: 3}}
+                    onPress={() => {
+                        navigation.navigate("AddEventCalendarUserStack", {selectedDate: formatedDate})
+                        setViewScheduleModal(false)
+                    }}
+                >
+                    <Icon name="plus" size={40} color={ThemeDefaults.themeWhite} />
+                </TouchableOpacity>
+            </View>
             
         </Modal>
 
@@ -400,7 +639,8 @@ const styles = StyleSheet.create({
     },
     modalCalendar: {
         flexGrow: 1,
-        backgroundColor: ThemeDefaults.themeWhite
+        backgroundColor: ThemeDefaults.themeWhite,
+        paddingBottom: 150
     },
     calendarMonthHeader: {
         width: 250,
@@ -457,7 +697,8 @@ const styles = StyleSheet.create({
     scheduleList: {
         paddingHorizontal: 50,
         width: '100%',
-        marginVertical: 30
+        marginVertical: 30,
+        // flex: 1,
     },
     schedCard: {
         width: '100%',
@@ -466,12 +707,16 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         paddingHorizontal: 20,
         marginBottom: 15,
+        elevation: 3
     },
     schedTitle: {
         color: ThemeDefaults.themeWhite
     },
     schedTime: {
-        color: ThemeDefaults.themeWhite
+        color: ThemeDefaults.themeWhite,
+        fontSize: 14,
+        marginTop: 3,
+        // marginLeft: 3
     },
     confirmBtnContainer: {
         // flexGrow: 1,
@@ -518,5 +763,47 @@ const styles = StyleSheet.create({
         right: 40,
         backgroundColor: 'white',
         borderRadius: 35,
+    },
+    modalDialogue: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 40,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    dialogueContainer: {
+        borderWidth: 1.5,
+        borderColor: ThemeDefaults.themeLighterBlue,
+        borderRadius: 15,
+        overflow: 'hidden',
+    },
+    dialogueMessage: {
+        paddingVertical: 40,
+        paddingHorizontal: 50,
+        backgroundColor: ThemeDefaults.themeLighterBlue,
+    },
+    dialogueMessageText: {
+        color: ThemeDefaults.themeWhite,
+        textAlign: 'center',
+        fontFamily: 'LexendDeca_Medium',
+    },
+    modalDialogueBtnCont: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
+        backgroundColor: ThemeDefaults.themeWhite,
+    },
+    dialogueBtn: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    dialogueCancel: {
+
+    },
+    dialogueConfirm: {
+        color: ThemeDefaults.themeDarkerOrange,
+        fontFamily: 'LexendDeca_Medium',
     },
 })

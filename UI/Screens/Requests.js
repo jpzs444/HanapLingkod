@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     requestCanceledCard: {
         backgroundColor: ThemeDefaults.themeRed,
         marginTop: 5,
-        marginBottom: 15
+        marginBottom: 10
     },
     requestDeclinedText: {
         color: ThemeDefaults.themeWhite

@@ -67,7 +67,7 @@ export default function Home() {
     }).then((res) => res.json())
     .then((data) => {
       setCategory([...data])
-      console.log(data)
+      // console.log(data)
     })
   }
 
