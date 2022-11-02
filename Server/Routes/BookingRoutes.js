@@ -9,8 +9,6 @@ const dayjs = require("dayjs");
 const Recruitercomment = require("../Models/RecruiterComment");
 const Workercomment = require("../Models/WorkerComment");
 
-
-
 router.route("/booking/:user").get(async function (req, res) {
   try {
     let page;
@@ -23,18 +21,33 @@ router.route("/booking/:user").get(async function (req, res) {
 
     let queryResultWorker = await Booking.find({
       workerId: req.params.user,
+      bookingStatus: { $ne: 2 },
     })
-      .sort({ date: -1, bookingStatus: 1 })
+      .sort({ serviceDate: -1 })
       .limit(limit * page)
       .lean();
     let queryResultRecruiter = await Booking.find({
       recruiterId: req.params.user,
+      bookingStatus: { $ne: 2 },
     })
-      .sort({ date: -1, bookingStatus: 1 })
+      .sort({ serviceDate: -1 })
       .limit(limit * page)
       .lean();
+    let Status2_worker = await Booking.find({
+      workerId: req.params.user,
+      bookingStatus: 2,
+    }).lean();
 
-    res.send({ worker: queryResultWorker, recruiter: queryResultRecruiter });
+    let Status2_recruiter = await Booking.find({
+      recruiterId: req.params.user,
+      bookingStatus: 2,
+    }).lean();
+    res.send({
+      worker: queryResultWorker,
+      recruiter: queryResultRecruiter,
+      Status2_worker: Status2_worker,
+      Status2_recruiter: Status2_recruiter,
+    });
   } catch (error) {
     res.send(error);
   }
@@ -208,6 +221,22 @@ router
         { _id: req.params.user },
         { $pull: { unavailableTime: { bookingId: req.params.id } } }
       ).exec();
+    }
+
+    if (result.statusRecruiter == 5) {
+      Booking.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          bookingStatus: 5,
+        },
+        function (err) {
+          if (!err) {
+            console.log("booking updated to confirmed OTP");
+          } else {
+            console.log(err);
+          }
+        }
+      );
     }
     res.send("updated Sucess");
   })
