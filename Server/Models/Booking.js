@@ -34,4 +34,11 @@ const BookingSchema = mongoose.Schema({
   created_at: { type: Date, required: true, default: Date.now },
 });
 
+BookingSchema.pre("find", function (next) {
+  this.populate("workerId");
+  this.populate("recruiterId");
+
+  next();
+});
+
 module.exports = mongoose.model("Booking", BookingSchema);

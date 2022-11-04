@@ -24,13 +24,13 @@ router.route("/service-request/:user").get(async function (req, res) {
     let queryResultWorker = await ServiceRequest.find({
       workerId: req.params.user,
     })
-      .sort({ date: -1, requestStatus: 1 })
+      .sort({ serviceDate: -1 })
       .limit(limit * page)
       .lean();
     let queryResultRecruiter = await ServiceRequest.find({
       recruiterId: req.params.user,
     })
-      .sort({ date: -1, requestStatus: 1 })
+      .sort({ serviceDate: -1 })
       .limit(limit * page)
       .lean();
 
