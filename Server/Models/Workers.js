@@ -43,12 +43,13 @@ const workerSchema = new mongoose.Schema({
       CannotDelete: Boolean,
     },
   ],
-  comments: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Workercomment",
-    },
-  ],
+  // comments: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: "Workercomment",
+  //   },
+  // ],
+  rating: Number,
 });
 
 module.exports = mongoose.model("Worker", workerSchema);

@@ -35,8 +35,14 @@ const BookingSchema = mongoose.Schema({
 });
 
 BookingSchema.pre("find", function (next) {
-  this.populate("workerId");
-  this.populate("recruiterId");
+  this.populate(
+    "workerId",
+    "_id firstname lastname middlename age sex street purok barangay city province phoneNumber profilePic verification"
+  );
+  this.populate(
+    "recruiterId",
+    "_id firstname lastname middlename age sex street purok barangay city province phoneNumber profilePic verification"
+  );
 
   next();
 });
