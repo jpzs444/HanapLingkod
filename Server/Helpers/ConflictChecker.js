@@ -11,8 +11,6 @@ async function checkConflict(user, workId, endTime) {
   const { startTime } = result;
   const { unavailableTime } = worker;
   for (item of unavailableTime) {
-    console.log(startTime, item.startTime);
-
     if (
       dayjs(startTime).isBetween(
         item.startTime,
@@ -31,7 +29,7 @@ async function checkConflict(user, workId, endTime) {
     ) {
       console.log("conflict sched");
       // return res.status(400).send("some text");
-      return false;
+      return true;
     }
   }
   console.log("no conflict sched");
