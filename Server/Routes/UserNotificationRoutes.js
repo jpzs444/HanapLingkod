@@ -24,7 +24,7 @@ router
   })
   .put(async function (req, res) {
     await UserNotification.updateMany(
-      { userID: req.params.pushtoken },
+      { userID: req.params.userId },
       { $set: { read: 1 } }
     );
     res.send("Updated Successfully");

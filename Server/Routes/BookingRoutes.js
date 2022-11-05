@@ -8,6 +8,10 @@ const notification = require("../Helpers/PushNotification");
 const dayjs = require("dayjs");
 const Recruitercomment = require("../Models/RecruiterComment");
 const Workercomment = require("../Models/WorkerComment");
+const {
+  RatingAverageWorker,
+  RatingAverageRecruiter,
+} = require("../Helpers/RatingAverage");
 
 router.route("/booking/:user").get(async function (req, res) {
   try {
@@ -88,21 +92,22 @@ router
           message: req.body.message,
         },
       ]);
-      console.log("workerId");
+      RatingAverageWorker(workerId);
+
       // console.log(newComment[0]._id);
-      Worker.findOneAndUpdate(
-        { _id: workerId },
-        {
-          $push: { comments: newComment[0]._id },
-        },
-        function (err) {
-          if (!err) {
-            console.log("added comment worker");
-          } else {
-            console.log(err);
-          }
-        }
-      );
+      // Worker.findOneAndUpdate(
+      //   { _id: workerId },
+      //   {
+      //     $push: { comments: newComment[0]._id },
+      //   },
+      //   function (err) {
+      //     if (!err) {
+      //       console.log("added comment worker");
+      //     } else {
+      //       console.log(err);
+      //     }
+      //   }
+      // );
 
       notification(
         [pushIDWorker.pushtoken],
@@ -121,19 +126,20 @@ router
           message: req.body.message,
         },
       ]);
-      Recruiter.findOneAndUpdate(
-        { _id: recruiterId },
-        {
-          $push: { comments: newComment[0]._id },
-        },
-        function (err) {
-          if (!err) {
-            console.log("added comment recruiter");
-          } else {
-            console.log(err);
-          }
-        }
-      );
+      RatingAverageRecruiter(recruiterId);
+      // Recruiter.findOneAndUpdate(
+      //   { _id: recruiterId },
+      //   {
+      //     $push: { comments: newComment[0]._id },
+      //   },
+      //   function (err) {
+      //     if (!err) {
+      //       console.log("added comment recruiter");
+      //     } else {
+      //       console.log(err);
+      //     }
+      //   }
+      // );
       notification(
         [pushIDRecruiter.pushtoken],
         "worker mark the booking as done",

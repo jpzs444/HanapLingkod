@@ -23,12 +23,13 @@ const recruiterSchema = new mongoose.Schema({
   pushtoken: { type: String, default: "" },
 
   role: String,
-  comments: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Recruitercomment",
-    },
-  ],
+  // comments: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: "Recruitercomment",
+  //   },
+  // ],
+  rating: Number,
 });
 
 module.exports = mongoose.model("Recruiter", recruiterSchema);

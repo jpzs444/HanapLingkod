@@ -6,6 +6,8 @@ const Work = require("../Models/Work");
 const { Router } = require("express");
 const multer = require("multer");
 const cloudinary = require("../Helpers/cloudinary");
+const ServiceRequest = require("../Models/ServiceRequest");
+const Booking = require("../Models/Booking");
 
 //store photos
 const storage = multer.diskStorage({
@@ -24,6 +26,20 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.route("/Worker").get(async function (req, res) {
+  let filter = {};
+  if (req.query.verified != undefined) {
+    filter["verification"] = req.query.verified;
+  }
+  if (req.query.barangay != undefined) {
+    filter["barangay"] = req.query.barangay;
+  }
+  if (req.query.category != undefined) {
+    filter["works"] = req.query.category;
+  }
+  if (req.query.rating != undefined) {
+    filter["rating"] = { $gte: parseFloat(req.query.rating) };
+  }
+  console.log(filter);
   let page;
   if (req.query.page) {
     page = parseInt(req.query.page);
@@ -32,7 +48,7 @@ router.route("/Worker").get(async function (req, res) {
   }
   const limit = 10;
 
-  const result = await Worker.find({})
+  const result = await Worker.find(filter)
     .limit(limit * page)
     .lean()
     .exec();
@@ -89,14 +105,8 @@ router
 
   .delete(function (req, res) {
     Worker.findOneAndDelete({ _id: req.params.id }).exec();
-    Work.deleteMany({ workerId: req.params.id }, function (err) {
-      if (!err) {
-        res.send("Deleted Successfully ");
-      } else {
-        res.send(err);
-      }
-    });
-    // res.send("DeleteDone");
+    Work.deleteMany({ workerId: req.params.id }).exec();
+    ServiceRequest.deleteMany({ workerId: req.params.id }).exec();
+    Booking.deleteMany({ workerId: req.params.id }).exec();
   });
-
 module.exports = router;

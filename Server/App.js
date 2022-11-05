@@ -19,6 +19,10 @@ const Work = require("./Models/Work");
 //helper
 const notification = require("./Helpers/PushNotification");
 const WorkReminder = require("./Helpers/WorkReminder");
+const {
+  RatingAverageWorker,
+  RatingAverageRecruiter,
+} = require("./Helpers/RatingAverage");
 //routes
 const ServiceCategoryRoutes = require("./Routes/ServiceCategoryRoutes");
 const ServiceSubCategoryRoutes = require("./Routes/ServiceSubCategory");
@@ -30,6 +34,8 @@ const ServiceRequestRoutes = require("./Routes/ServiceRequestRoutes");
 const RequestPostRoutes = require("./Routes/RequestPostRoutes");
 const Booking = require("./Routes/BookingRoutes");
 const Calendar = require("./Routes/CalendarRoutes");
+const WorkerComment = require("./Routes/WorkerCommentRoutes");
+const RecruiterCommentRoutes = require("./Routes/RecruiterCommentRoutes");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -73,7 +79,6 @@ const multipleFile = upload.fields([
   { name: "govId" },
   { name: "certificate" },
 ]);
-
 app.get("/images/:filename", async function (req, res) {
   let path = "./Public/Uploads/" + req.params.filename;
   console.log(path);
@@ -117,10 +122,6 @@ app.get("/search", async function (req, res) {
     category: CategoryResult,
     subCategory: SubCategoryResult,
   });
-});
-
-app.get("/pass", function (req, res) {
-  res.json({ msg: "success" });
 });
 
 //upload prev works
@@ -406,6 +407,8 @@ app.post(
 );
 
 //routes
+app.use(RecruiterCommentRoutes);
+app.use(WorkerComment);
 app.use(ServiceCategoryRoutes);
 app.use(ServiceSubCategoryRoutes);
 app.use(UsernotificationRoutes);
