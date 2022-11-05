@@ -138,7 +138,8 @@ router
       // console.log(endTime);
       if (req.body.requestStatus == 2) {
         if (await checkConflict(req.params.user, req.params.id, endTime)) {
-          res.status(400).send("Conflict on Sched");
+          console.log("Conflict Scheadule");
+          res.status(400).send({ success: false });
         } else {
           const reqObj = {
             requestStatus: req.body.requestStatus,
@@ -193,7 +194,8 @@ router
             "your request has been accepted",
             recruiterId
           );
-          res.send("Successfully Updated status 2 ");
+          console.log("Successfully Updated status 2");
+          res.status(200).send({ success: true });
         }
       }
 
