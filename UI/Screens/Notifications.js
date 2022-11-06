@@ -3,6 +3,7 @@ import { SafeAreaView, View, Image, Text, StatusBar, ScrollView, StyleSheet, Tou
 import TText from '../Components/TText'
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import * as NotificationsL from "expo-notifications";
+import { FlashList } from '@shopify/flash-list';
 
 import { IPAddress, role, userID } from '../global/global';
 import Appbar from '../Components/Appbar';
@@ -10,47 +11,46 @@ import Appbar from '../Components/Appbar';
 
 export default function Notifications({route}) {
   
-  const navigation = useNavigation();
-  // const {user, role} = route.params;
-  const [notifications, setNotifications] = useState([])
-  const [notificationIDClicked, setNotificationIDClick] = useState(null)
-  const notificationListener = useRef();
-  const scrollToTop = useRef()
-  // useScrollToTop(scrollToTop)
+    const navigation = useNavigation();
+    // const {user, role} = route.params;
+    const [notifications, setNotifications] = useState([])
+    const [notificationIDClicked, setNotificationIDClick] = useState(null)
+    const [currentPage, setCurrentPage] = useState(1)
+    const notificationListener = useRef();
+    const scrollToTop = useRef()
+    // useScrollToTop(scrollToTop)
 
-  let notificationListEndIndex = notifications.length - 1
+    let notificationListEndIndex = notifications.length - 1
 
-  let listViewRef;
+    let listViewRef;
 
-  // use useEffect for componentDidMount or for when the page loads
-  useEffect(() => {
-    fetchNotificationList()
+    // use useEffect for componentDidMount or for when the page loads
+    useEffect(() => {
+      fetchNotificationList()
+      
+      let ff = setInterval(() => {fetchNotificationList()}, 5000)
 
-    // still load notification even when page is not in focus
-      // return () => {
-      //   fetchNotificationList()
-      // }
-  }, [])
+      return () => {
+        clearInterval(ff)
+      };
 
+    }, [currentPage])
 
-  // update notification page within receiving of the notification
-  // notificationListener.current =
-  //   NotificationsL.addNotificationReceivedListener(() => {
-  //     fetchNotificationList()    
-  // });
 
   function fetchNotificationList () {
-    fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+    fetch("http://" + IPAddress + ":3000/notification/" + global.userData._id + "?page=" + currentPage, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
     }).then((res) => res.json())
     .then((data) => {
-      // console.log("notification list: ", data)
-      console.log("res length: ", data.length)
+      console.log("notification list: ", data)
+      // console.log("res length: ", data.length)
       
-      setNotifications([...data])
+      let list = [...data]
+      list = list.reverse()
+      setNotifications([...list])
 
       let notifCount = 0
       for(read of data){
@@ -61,9 +61,8 @@ export default function Notifications({route}) {
       global.notificationCount = notifCount
 
     }).catch((err) => {
-      console.log("error: ", err.message)
+      console.log("error notif page: ", err.message)
     })
-    setTimeout(fetchNotificationList, 5000)
   }
 
   // useEffect(() => {
@@ -75,10 +74,10 @@ export default function Notifications({route}) {
   // }, [notifications])
 
 
-  const listHeaderComponent = () => {
+  const ListHeaderComponent = () => {
     return(
       <View style={styles.header}>
-        <Appbar hasPicture={true} menuBtn={true} />
+        <Appbar hasPicture={true} showLogo={true} menuBtn={true} />
 
         <View>
           <TText style={styles.headerTitle}>Notifications</TText>
@@ -127,15 +126,14 @@ export default function Notifications({route}) {
               <View style={styles.btnContainer}>
 
                   {/* pang render ng notification */}
-                  <FlatList 
-                    showsVerticalScrollIndicator ={false}
-                    showsHorizontalScrollIndicator={false}
-                    // ref={scrollToTop.current?.scrollToIndex({index: notifications.length - 1, animated: true})}
-                    // initialScrollIndex={1}
-                    // inverted={true}
-                    ListHeaderComponent={listHeaderComponent}
-                    data={notifications.reverse()}
+                  <FlashList 
+                    data={notifications}
                     keyExtractor={(item) => item._id}
+                    estimatedItemSize={80}
+                    showsVerticalScrollIndicator ={true}
+                    onEndReachedThreshold={0.2}
+                    onEndReached={() => setCurrentPage(prev => prev + 1)}
+                    ListHeaderComponent={() => (<ListHeaderComponent />)}
                     renderItem={({item}) => (
                       <View style={styles.btnItemContainer} >
                         <TouchableOpacity style={ item.read ? styles.btnRead : styles.btnUnread}
@@ -143,14 +141,16 @@ export default function Notifications({route}) {
                           setNotificationIDClick(item._id)
                           console.log(item)
 
-                          fetchNotificationList()
                           // turn notification.read to true 
                           fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
                             method: "PUT",
-                            header: {
+                            headers: {
                               'content-type': 'application/json',
                             }
-                          }).then(() => console.log("all notification read"))
+                          }).then(() => {
+                            console.log("all notification read")
+                            fetchNotificationList()
+                          })
                           .catch((error) => console.log("error: ", error.message))
 
                           // {
@@ -181,7 +181,7 @@ export default function Notifications({route}) {
                       )
                     }
                     ListFooterComponent={() => (
-                      <View style={{height: 350, marginTop: 20, alignItems: 'center'}}>
+                      <View style={{height: 200, marginTop: 20, alignItems: 'center'}}>
                         <TText style={styles.footerTitle}>---- End of List ----</TText>
                       </View>
                     )}
@@ -206,20 +206,23 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
       fontFamily: 'LexendDeca_SemiBold',
+      fontSize: 18,
       marginTop: 20,
       marginBottom: 10,
     },
     btnContainer: {
-      width: "100%",
+      flexGrow: 1,
       marginTop: 40,
       // paddingHorizontal: 30,
     },
     btnContent: {
-      flexDirection: 'row', padding: "5%",
+      flexDirection: 'row', 
+      padding: 15,
     },
     btnItemContainer: {
       width: '100%', 
-      paddingHorizontal: 35,
+      paddingHorizontal: 20,
+      alignItems: 'center'
     },
     btnUnread: {
       elevation: 4, 
@@ -228,7 +231,7 @@ const styles = StyleSheet.create({
       height: 120, 
       borderWidth: 1, 
       borderColor: 'rgba(217, 103, 43, 0.85)', 
-      marginTop: 25, 
+      marginTop: 15, 
       borderRadius: 15, 
     },
     btnRead: {

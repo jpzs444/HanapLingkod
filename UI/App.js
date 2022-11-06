@@ -42,6 +42,17 @@ export default function App() {
     registerForPushNotificationsAsync().then((token) =>{
       setExpoPushToken(token)
       global.deviceExpoPushToken = token;
+
+      fetch("http://" + IPAddress + ":3000/setToken/" + global.userData._id, {
+          method: "PUT",
+          header: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            pushtoken: token
+          })
+        }).then(() => console.log("all notification read"))
+        .catch((error) => console.log("notification app js error: ", error.message))
     });
 
     // This listener is fired whenever a notification is received while the app is foregrounded
@@ -57,11 +68,11 @@ export default function App() {
         console.log(response);
 
         // turn notification.read to true 
-        fetch("http://" + IPAddress + ":3000/setToken/" + global.userData._id, {
+        fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
           method: "PUT",
           header: {
             'content-type': 'application/json',
-          }
+          },
         }).then(() => console.log("all notification read"))
         .catch((error) => console.log("notification app js error: ", error.message))
 
@@ -148,10 +159,6 @@ async function registerForPushNotificationsAsync() {
           <AppStack.Screen name="DrawerNavigation" component={DrawerNavigator} /> 
           <AppStack.Screen name="UserProfileStack" component={UserProfileStack} /> 
         </AppStack.Navigator>
-
-        {/* <LoginNavigationStack /> */}
-        {/* <DrawerNavigator /> */}
-
       </NavigationContainer>
   );
 }

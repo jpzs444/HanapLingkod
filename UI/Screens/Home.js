@@ -19,16 +19,12 @@ export default function Home() {
   const [category, setCategory] = useState([])
   const [searchBtnPressed, setSearchBtnPressed] = useState(false)
 
-  const [searchWord, setSearchWord] = useState("")
   let searchW;
-
+  const [searchWord, setSearchWord] = useState("")
   const [searchResults, setSearchResults] = useState([])
-
-  const [isRefreshing, setIsRefreshing] = useState(false)
-
   const [userHasSearched, setuserHasSearched] = useState(false)
-
-  const [requestpostedModal, setRequestPostedModal] = useState(global.serviceRequestPosted)
+  
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const searchInput = useRef();
 
@@ -41,7 +37,7 @@ export default function Home() {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        "pushtoken": global.deviceExpoPushToken,
+        pushtoken: global.deviceExpoPushToken,
       })
     }).then((res) => console.log("Successfully placed notification token/userID"))
     .catch((err) => console.log("err : ", err.message))
@@ -49,14 +45,19 @@ export default function Home() {
   }, [])
 
 
-  // useEffect(() => {
-  //   fetchNotificationList()
-  // },[])
+  useEffect(() => {
+    fetchNotificationList()
+  },[])
+
 
   // fetch service category
   useEffect(() => {
-    getAllCategory()
+    navigation.addListener("focus", () => {
+      getAllCategory()
+      onRefresh()
+    })
   }, [])
+
 
   const getAllCategory = () => {
     fetch("http://" + IPAddress + ":3000/service-category", {
@@ -79,7 +80,6 @@ export default function Home() {
       },
     }).then((res) => res.json())
     .then((data) => {
-      console.log("notification list: ", data)
       console.log("res length: ", data.length)
 
       let notifCount = 0
@@ -175,7 +175,7 @@ export default function Home() {
             onPress={() => {
               // use Linking to dial phone number
               // Linking.openURL(`tel:number`)
-              navigation.navigate("MapsTab")
+              navigation.navigate("BookingsScreen")
             }}
           >
             <View style={styles.actionbar_iconContainer}>

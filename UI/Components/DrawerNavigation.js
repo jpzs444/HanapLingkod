@@ -24,6 +24,7 @@ import AddEventCalendar from '../Screens/AddEventCalendar';
 import ViewComments from '../Screens/ViewComments';
 import PostRequests from '../Screens/PostRequests';
 import PostRequestStack from './PostRequestStack';
+import BookingInformation from '../Screens/BookingInformation';
 
 
 const Drawer = createDrawerNavigator();
@@ -44,74 +45,71 @@ export default function DrawerNavigation(){
             <Drawer.Screen name="Home_Drawer" component={TabNavigation} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="home" size={25} color={color}  />
-                )
+                ),
+                drawerLabelStyle: {
+                    fontFamily: "LexendDeca_Medium",
+                    fontSize: 15
+                }
             }} />
 
             <Drawer.Screen name="RUT" component={RegisterUserAccountType} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="clipboard-edit" size={25} color={color}  />
-                )
+                ),
+                drawerLabelStyle: {
+                    fontFamily: "LexendDeca_Medium",
+                    fontSize: 15
+                }
             }} />
             <Drawer.Screen name="Home2" component={TabNavigation} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="home" size={25} color={color}  />
-                )
+                ),
+                drawerLabelStyle: {
+                    fontFamily: "LexendDeca_Medium",
+                    fontSize: 15
+                }
             }} />
 
             <Drawer.Screen name="RUT2" component={RegisterUserAccountType} options={{
                 drawerIcon: ({color}) => (
                     <Icon name="clipboard-edit" size={25} color={color}  />
-                )
+                ),
+                drawerLabelStyle: {
+                    fontFamily: "LexendDeca_Medium",
+                    fontSize: 15
+                },
             }} />
 
-            <Drawer.Screen name="LoginScreen" component={Login} options={{
-                drawerIcon: ({color}) => (
-                    <Icon name="clipboard-edit" size={25} color={color}  />
-                )
-            }} />
 
             <Drawer.Screen name="RequestFormDrawer" component={RequestForm} options={{
-                drawerIcon: ({color}) => (
-                    <Icon name="clipboard-edit" size={25} color={color}  />
-                )
-            }} />
+                  drawerItemStyle: { display: 'none' }
+            }}/>
 
             <Drawer.Screen name="WorkerProfileDrawer" component={WorkerProfile} options={{
-                drawerIcon: ({color}) => (
-                    <Icon name="clipboard-edit" size={25} color={color}  />
-                )
+                  drawerItemStyle: { display: 'none' }
             }} />
 
             <Drawer.Screen name="PostRequestFormDrawer" component={PostRequestForm} options={{
-                drawerIcon: ({color}) => (
-                    <Icon name="clipboard-edit" size={25} color={color}  />
-                ),
-                
+                  drawerItemStyle: { display: 'none' }
             }} />
 
             <Drawer.Screen name="PostRequestPRRStack" component={PostRequestStack} options={{
-                drawerIcon: ({color}) => (
-                    <Icon name="clipboard-edit" size={25} color={color}  />
-                ),
-                
-            }} />
+                  drawerItemStyle: { display: 'none' }
+            }}/>
             <Drawer.Screen name="ScheduleDrawer" component={Schedule} options={{
-                drawerIcon: ({color}) => (
-                    <Icon name="clipboard-edit" size={25} color={color}  />
-                ),
-                
-            }} />
+                  drawerItemStyle: { display: 'none' }
+            }}/>
             <Drawer.Screen name="ViewServiceRequestDrawer" component={VIewServiceRequest} options={{
-                drawerIcon: ({color}) => (
-                    <Icon name="clipboard-edit" size={25} color={color}  />
-                ),
-                
-            }} />
+                  drawerItemStyle: { display: 'none' }
+            }}/>
             <Drawer.Screen name="ViewCommentsDrawer" component={ViewComments} options={{
-                drawerIcon: ({color}) => (
-                    <Icon name="clipboard-edit" size={25} color={color}  />
-                ),
-                
+                  drawerItemStyle: { display: 'none' }
+            }} />
+
+            <Drawer.Screen name="BookingInformationDrawer" component={BookingInformation} 
+                options={{
+                  drawerItemStyle: { display: 'none' }
             }} />
 
 

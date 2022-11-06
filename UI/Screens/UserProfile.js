@@ -37,7 +37,10 @@ const UserProfile = ({route}) => {
     let workerID = global.userData._id
 
     useEffect(() => {
-        getUpdatedUserData()
+        navigation.addListener("focus", () => {
+            getUpdatedUserData()
+            refreshFunc()
+        })
     }, [])
     
     // fetch data if role of user is worker

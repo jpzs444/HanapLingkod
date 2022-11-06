@@ -15,7 +15,7 @@ const Schedule = ({route}) => {
 
     const navigation = useNavigation()
 
-    const {selectedDate, workerInformation, selectedJob, fromRequestForm, minPrice, maxPrice} = route.params
+    const {selectedDate, workerInformation, selectedJob, fromRequestForm, minPrice, maxPrice, } = route.params
 
     const [formatedTime, setFormatedTime] = useState(new Date())
 
@@ -40,11 +40,10 @@ const Schedule = ({route}) => {
       }, []);
   
   
-      const handleSystemBackButton =()=> {
+      const handleSystemBackButton = () => {
         if(fromRequestForm) {
             navigation.goBack()
             navigation.navigate("RequestFormDrawer", {workerInformation: workerInformation, selectedDay: new Date(selectedDate).toString(), selectedTime: new Date(formatedTime).toString(), selectedJob: selectedJob})
-            console.log("Back pressed hnadlebacnbtn: fromrequest ", fromRequestForm)
             return true
         } else {
             navigation.navigate("CalendarViewUserStack")
@@ -65,7 +64,7 @@ const Schedule = ({route}) => {
             getUpdatedUserData()
             getUnavailableSchedule()
         })
-    }, [route, hasChanges])
+    }, [route, hasChanges, global.userData])
 
 
     const getUpdatedUserData = () => {
@@ -81,10 +80,6 @@ const Schedule = ({route}) => {
             // console.log("user new load: ", route)
             global.userData = user
 
-            // let imageList = []
-            for(let i = 0; i < user.prevWorks.length; i++){
-                imageList.push("http://" + IPAddress + ":3000/images/" + user.prevWorks[i])
-            }
             // setHasChanges(!hasChanges)
             // console.log("imagelist: ", imageList)
         })
@@ -152,7 +147,7 @@ const Schedule = ({route}) => {
 
     const ScreenHeaderComponent = () => (
         <>
-            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromRequestForm={fromRequestForm} workerInformation={workerInformation} selectedDate={selectedDate} selectedTime={formatedTime} selectedJob={selectedJob} minPrice={minPrice} maxPrice={maxPrice} />
+            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromRequestForm={fromRequestForm} workerInformation={workerInformation} selectedDate={selectedDate} selectedTime={formatedTime.toString()} selectedJob={selectedJob} minPrice={minPrice} maxPrice={maxPrice} />
 
             {/* Confirm Delete Custom Event */}
             <Modal
@@ -223,8 +218,49 @@ const Schedule = ({route}) => {
                     </TouchableOpacity>
                 </View>
             }
+            {/* <ScreenFooterComponent /> */}
+
+            {
+                sameDateBookings.length !== 0 && global.userData.role === "recruiter" &&
+                <View style={{marginVertical: 15, marginHorizontal: 30}}>
+                    <TText>Scheduled Bookings by the Worker:</TText>
+                </View>
+            }
         </>
     )
+
+    const ScreenFooterComponent = () => {
+        return(
+            <View style={{}}>
+                {
+                    global.userData.role === 'recruiter' &&
+                    <View>
+                        <View style={styles.confirmBtnContainer}>
+                            <TouchableOpacity style={styles.confirmBtn}
+                                onPress={() => {
+                                    // navigation.goBack()
+                                    navigation.navigate("RequestFormDrawer", {workerInformation: workerInformation, selectedDay: new Date(selectedDate).toString(), selectedTime: new Date(formatedTime).toString(), selectedJob: selectedJob, minPrice: minPrice, maxPrice: maxPrice})
+
+                                }}
+                            >
+                                <TText style={styles.confirmBtnText}>Confirm Time</TText>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                }
+            </View>
+        )
+    }
+
+    const ScreenEmptyComponent = () => {
+        return(
+            <View style={{paddingVertical: 20, alignItems: 'center', marginTop: 20, marginBottom: 40}}>
+                <TText style={{color: 'lightgray'}}>
+                    Schedule is clear for {dayjs(new Date(selectedDate)).format("MMMM DD")}
+                </TText>
+            </View>
+        )
+    }
 
 
 
@@ -235,34 +271,14 @@ const Schedule = ({route}) => {
             
             <View style={styles.scheduleList}>
                                
-
                 <FlashList 
                     data={sameDateBookings}
                     extraData={sameDateBookings}
                     keyExtractor={item => item._id}
                     estimatedItemSize={200}
                     showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={() => (<View style={{paddingVertical: 20, alignItems: 'center', marginTop: 20, marginBottom: 40}}><TText style={{color: 'lightgray'}}>Schedule is clear for {dayjs(new Date(selectedDate)).format("MMMM d")}</TText></View>)}
-                    ListFooterComponent={() => (
-                        <View style={{height: 150}}>
-                            {
-                                global.userData.role === 'recruiter' &&
-                                <View>
-                                    <View style={styles.confirmBtnContainer}>
-                                        <TouchableOpacity style={styles.confirmBtn}
-                                            onPress={() => {
-                                                // navigation.goBack()
-                                                navigation.navigate("RequestFormDrawer", {workerInformation: workerInformation, selectedDay: new Date(selectedDate).toString(), selectedTime: new Date(formatedTime).toString(), selectedJob: selectedJob, minPrice: minPrice, maxPrice: maxPrice})
-
-                                            }}
-                                        >
-                                            <TText style={styles.confirmBtnText}>Confirm Time</TText>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            }
-                        </View>
-                    )}
+                    ListEmptyComponent={() => (<ScreenEmptyComponent />)}
+                    ListFooterComponent={() => (<ScreenFooterComponent />)}
                     ListHeaderComponent={() => (<ScreenHeaderComponent />)}
                     renderItem={({item}) => {
                         
@@ -274,17 +290,21 @@ const Schedule = ({route}) => {
 
                         return(
                             <View>
-                                <View style={[styles.schedCard, {height: hh ? hh : 100, backgroundColor: item.wholeDay || !item.CannotDelete && global.userData.role === "worker" ? ThemeDefaults.themeFadedBlack : ThemeDefaults.themeOrange}]}>
+                                <View style={[styles.schedCard, {
+                                    height: hh ? hh : 100, 
+                                    backgroundColor: item.wholeDay || !item.CannotDelete && global.userData.role === "worker" ? ThemeDefaults.themeFadedBlack : ThemeDefaults.themeOrange
+                                }]}>
                                     {
                                         !item.CannotDelete && global.userData.role === "worker" &&
                                         <TouchableOpacity style={{position: 'absolute', top: 10, right: 15, padding: 4, zIndex: 10}}
                                             activeOpacity={0.1}
                                             onPress={() => {
-                                                setConfirmDeleteEventModal(true)
+                                                // setConfirmDeleteEventModal(true)
+                                                navigation.navigate("AddEventCalendarUserStack", {selectedDate: selectedDate, eventItem: item})
                                                 setCustomEventID(item._id)
                                             }}
                                         >
-                                            <Icon name='trash-can' size={22} color={'white'} />
+                                            <Icon name='calendar-edit' size={22} color={'white'} />
                                         </TouchableOpacity>
                                     }
                                     
@@ -416,15 +436,6 @@ const styles = StyleSheet.create({
         marginTop: 3,
         // marginLeft: 3
     },
-    confirmBtnContainer: {
-        // flexGrow: 1,
-        // width: '100%',
-        position: 'absolute',
-        bottom: 60,
-        // left: 50,
-        righ: 50,
-        // backgroundColor: 'pink'
-    },
     confirmBtn: {
         // width: '100%',
         flexGrow: 1,
@@ -530,8 +541,9 @@ const styles = StyleSheet.create({
         // flexGrow: 1,
         width: '100%',
         paddingHorizontal: 50,
-        position: 'absolute',
-        bottom: 60,
+        marginTop: 50
+        // position: 'absolute',
+        // bottom: 60,
         // left: 50,
         // righ: 50,
         // backgroundColor: 'pink'
@@ -542,7 +554,7 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         alignItems: 'center',
         borderRadius: 15,
-        backgroundColor: ThemeDefaults.themeOrange,
+        backgroundColor: ThemeDefaults.themeLighterBlue,
         elevation: 3
     },
     confirmBtnText: {
