@@ -55,12 +55,12 @@ const Workers = () => {
 
     useEffect(() => {
         getAllWorkers()
-        setCurrentPage(1)
+        navigation.addListener("focus", () => setCurrentPage(1))
         // setPrevListWorker([...listOfWorkers])
-    }, [])
+    }, [currentPage])
 
     const getAllWorkers = () => {
-        fetch("http://" + IPAddress + ":3000/Worker?page=" + currentPage.toString(), {
+        fetch("http://" + IPAddress + ":3000/Worker?page=" + currentPage, {
             method: "GET",
             headers: {
                 "content-type": "application/json"
@@ -80,9 +80,6 @@ const Workers = () => {
         setHasFilter(barangayFilter || verifiedFilter || categoryFilter || ratingFilter)
     },[barangayFilter, verifiedFilter, categoryFilter, ratingFilter])
 
-    useEffect(() => {
-        getAllWorkers()
-    }, [])
 
     
     const filterCategoryList = (fil) => {
@@ -151,6 +148,7 @@ const Workers = () => {
         setVerifiedFilter("")
         setCategoryFilter("")
         setRatingFilter("")
+        setCurrentPage(1)
         getAllWorkers()
         setHasResults(true)
         setPrevListWorker([...listOfWorkers])
@@ -329,10 +327,7 @@ const Workers = () => {
                         maxToRenderPerBatch={8}
                         showsVerticalScrollIndicator={false}
                         onEndReachedThreshold={0.5}
-                        onEndReached={() => {
-                            setCurrentPage(prev => prev + 1)
-                            getAllWorkers()
-                        }}
+                        onEndReached={() => {setCurrentPage(prev => prev + 1)}}
                         ListEmptyComponent={() => (
                             <View style={{alignItems: 'center', marginTop: 10}}>
                                 <TText style={{fontSize: 18, color: 'gray'}}>No results found. Try again</TText>
@@ -349,7 +344,8 @@ const Workers = () => {
                             {
                                 hasResults ?
                                                  
-                            <TouchableOpacity style={{width: '100%', paddingHorizontal: 30, height: 130, zIndex:10}}
+                            <TouchableOpacity style={{width: '100%', paddingHorizontal: 30, height: 130, zIndex:10, backgroundColor: ThemeDefaults.themeWhite}}
+                                activeOpacity={0.5}
                                 onPress={() => {
                                     console.log("workers clicked")
                                     // navigation.navigate("RequestFormDrawer", {workerID: item._id, workerInformation: item, selectedJob: '', showMultiWorks: true})

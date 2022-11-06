@@ -15,6 +15,7 @@ import WorkerProfile from '../Screens/WorkerProfile';
 import RequestForm from '../Screens/RequestForm';
 import Requests from '../Screens/Requests';
 import ViewComments from '../Screens/ViewComments';
+import Bookings from '../Screens/Bookings';
 
 
 const HomeStack = createNativeStackNavigator();
@@ -30,6 +31,7 @@ export default function HomeNavigationStack () {
           <HomeStack.Screen name="MessagingScreen" component={Messaging} />
           <HomeStack.Screen name="NotificationScreen" component={Notifications} />
           <HomeStack.Screen name="RequestsScreen" component={Requests} />
+          <HomeStack.Screen name="BookingsScreen" component={Bookings} />
           {/* <HomeStack.Screen name="ViewCommentsScreen" component={ViewComments} /> */}
           {/* <HomeStack.Screen name="WorkerProfileScreen" component={WorkerProfile} /> */}
           {/* <HomeStack.Screen name="RequestFormScreen" component={RequestForm} /> */}

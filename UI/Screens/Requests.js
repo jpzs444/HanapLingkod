@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image, SafeAreaView, Modal, StatusBar, Dimensions } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Image, SafeAreaView, Modal, StatusBar, BackHandler, Dimensions } from 'react-native'
 import { FlashList } from '@shopify/flash-list'
 import Appbar from '../Components/Appbar'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -21,6 +21,20 @@ const Requests = () => {
     const [requestList, setRequestList] = useState({})
 
     const [declinedRequests, setDeclinedRequests] = useState([])
+
+    useEffect(() => {
+        BackHandler.addEventListener("hardwareBackPress", () => {
+            navigation.navigate("HomeScreen")
+            return true
+        })
+
+        // componentDismount
+        return () => {
+            BackHandler.removeEventListener("hardwareBackPress", () => {
+                return true
+            })
+        };
+    }, []);
 
     useEffect(() => {
         
@@ -52,22 +66,20 @@ const Requests = () => {
 
             // place to state all rejected/declined requests
             let list = []
-            global.userData.role === 'recruiter' ?
-            list = [...data.recruiter.reverse()]
-            :
-            list = [...data.worker.reverse()]
+            if (global.userData.role === 'recruiter') {
+                list = [...data.recruiter.reverse()]
+                setRequestList([...list])
+            } else {
+                list = [...data.worker.reverse()]
+                let rlist = list.filter(e => e.requestStatus == '1')
+                setRequestList([...rlist])
+            }
 
+            // segregate request that are declined
             list = list.filter(item => item.requestStatus == '3')
-            // let reversed = list.reverse()
             setDeclinedRequests([...list])
 
             console.log(data.recruiter)
-
-            // place all request on a state for flashlist rendering
-            global.userData.role === 'recruiter' ?
-            setRequestList([...data.recruiter])
-            :
-            setRequestList([...data.worker])
 
         })
         .catch((err) => console.log("Request List Error: ", err))

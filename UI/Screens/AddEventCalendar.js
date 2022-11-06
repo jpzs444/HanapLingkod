@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const AddEventCalendar = ({route}) => {
 
-    const {selectedDate} = route.params
+    const {selectedDate, eventItem} = route.params
 
     const navigation = useNavigation()
 
@@ -26,7 +26,8 @@ const AddEventCalendar = ({route}) => {
     ]
 
     const [radioBtn, setRadioBtn] = useState(false)
-    const [isChecked, setChecked] = useState(false);
+    const [isChecked, setChecked] = useState(false)
+    const [initialRB, setInitialRB] = useState(1)
 
     const [startTimePicker, setStartTimePicker] = useState(false)
     const [endTimePicker, setEndTimePicker] = useState(false)
@@ -50,9 +51,33 @@ const AddEventCalendar = ({route}) => {
 
     const [hasCreatedAnEvent, setHasCreatedAnEvent] = useState(false)
 
+    const [confirmDeleteEventModal, setConfirmDeleteEventModal] = useState(false)
 
+
+    useEffect(() => {
+        console.log("Event item: ", eventItem)
+        
+        if(eventItem){
+            setInitialRB(2)
+            setEventTitle(eventItem.title)
+
+            if (eventItem.startTime) {
+                setFormatedStartTime(eventItem.startTime)
+                setStartTimeSelected(true)
+            }
+            if (eventItem.endTime) {
+                setFormatedEndTime(eventItem.endTime)
+                setEndTimeSelected(true)
+
+                setFormatedDate(dayjs(eventItem.endTime).format("YYYY-MM-DD"))
+                setDateSelected(true)
+            }
+            
+        }
+    }, [route]);
 
     const getUpdatedUserData = () => {
+        console.log("getUpdatedUserData")
         let userRoute = global.userData.role === "recruiter" ? "Recruiter/" : "Worker/"
 
         fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
@@ -62,16 +87,8 @@ const AddEventCalendar = ({route}) => {
             },
         }).then((res) => res.json())
         .then((user) => {
-            // console.log("user new load: ", route)
             global.userData = user
-
-            // let imageList = []
-            for(let i = 0; i < user.prevWorks.length; i++){
-                imageList.push("http://" + IPAddress + ":3000/images/" + user.prevWorks[i])
-            }
-            // console.log("imagelist: ", imageList)
-        })
-        .catch((error) => console.log(error.message))
+        }).catch((error) => console.log(error.message))
     }
 
 
@@ -122,9 +139,14 @@ const AddEventCalendar = ({route}) => {
 
     const handleAddEvent = () => {
         console.log("add event")
+        let API = eventItem ?
+            `http://${IPAddress}:3000/add-schedule/${global.userData._id}/${eventItem._id}`
+            :
+            `http://${IPAddress}:3000/add-schedule/${global.userData._id}`
+
         if(radioBtn){
-            fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}`, {
-                method: "POST",
+            fetch(API, {
+                method: eventItem ? "PUT" : "POST",
                 headers: {
                     'content-type': 'application/json',
                 },
@@ -138,13 +160,13 @@ const AddEventCalendar = ({route}) => {
                     wholeday: "1" // radioBtn
                 })
             }).then(res => {
-                console.log("Successfull adding an event")
+                console.log("Successfull adding/updating an event: ", res.body)
                 getUpdatedUserData()
                 setHasCreatedAnEvent(true)
             }).catch(err => console.log("error add event: ", err.message))
         } else {
-            fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}`, {
-                method: "POST",
+            fetch(API, {
+                method: eventItem ? "PUT" : "POST",
                 headers: {
                     'content-type': 'application/json',
                 },
@@ -158,12 +180,33 @@ const AddEventCalendar = ({route}) => {
                     wholeday: isChecked ? "1" : "0",
                 })
             }).then(res => {
-                console.log("Successfull adding an event")
+                if(res === 'conflict sched'){
+                    console.log('has conflicting schedule')
+                }
+                console.log("Successfull adding/updating an event: ", res.json())
                 getUpdatedUserData()
                 setHasCreatedAnEvent(true)
             }).catch(err => console.log("error add event: ", err.message))
         }
     }
+
+
+    const handleRemoveCustomEvent = () => {
+        fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}/${eventItem._id}`, {
+            method: "DELETE",
+            headers: {
+                'content-type': 'application/json'
+            }
+        }).then(res => {
+            console.log("Successful removal of the custom event")
+            // setHasCreatedAnEvent(true)
+            getUpdatedUserData()
+            navigation.navigate("CalendarViewUserStack")
+        })
+        .catch(err => console.log("Error remove custom event: ", err.msg))
+    }
+
+
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -236,13 +279,14 @@ const AddEventCalendar = ({route}) => {
                 <View style={styles.dialogueContainer}>
                     {/* Modal Message/Notice */}
                     <View style={styles.dialogueMessage}>
-                        <TText style={[styles.dialogueMessageText]}>You have successfully added a custom event!</TText>
+                        <TText style={[styles.dialogueMessageText]}>You have successfully {eventItem ? "updated" : "added"} a custom event!</TText>
                     </View>
                     {/* Modal Buttons */}
                     <View style={styles.modalDialogueBtnCont}>
                         <TouchableOpacity
                             style={[styles.dialogueBtn]}
                             onPress={() => {
+                                getUpdatedUserData()
                                 setHasCreatedAnEvent(false)
                                 // setEndTimePicker(true)
                                 navigation.navigate("CalendarViewUserStack")
@@ -286,6 +330,49 @@ const AddEventCalendar = ({route}) => {
             </View>
         </Modal>
 
+        {/* Confirm delete custom event/schedule */}
+        <Modal
+            transparent={true}
+            animationType='fade'
+            visible={confirmDeleteEventModal}
+            onRequestClose={() => setConfirmDeleteEventModal(false)}
+        >
+            {/* Modal View */}
+            <View style={styles.modalDialogue}>
+                {/* Modal Container */}
+                <View style={styles.dialogueContainer}>
+                    {/* Modal Message/Notice */}
+                    <View style={styles.dialogueMessage}>
+                        <TText style={[styles.dialogueMessageText,]}>Do you wish to remove the custom event?</TText>
+                        {/* <TText style={[styles.dialogueMessageText]}>You make check it by tapping the Bookings icon on the homepage.</TText> */}
+                    </View>
+                    {/* Modal Buttons */}
+                    <View style={styles.modalDialogueBtnCont}>
+                        <TouchableOpacity
+                            style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
+                            onPress={() => {
+                                setConfirmDeleteEventModal(false)
+                                // handleAcceptRequest(requestItem._id)
+                                handleRemoveCustomEvent()
+                                // getUpdatedUserData()
+                                // setViewScheduleModal(false)
+                            }}
+                        >
+                            <TText style={styles.dialogueCancel}>Yes</TText>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={styles.dialogueBtn}
+                            onPress={() => {
+                                setConfirmDeleteEventModal(false)
+                            }}
+                        >
+                            <TText style={styles.dialogueConfirm}>No</TText>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+
         <View style={styles.screenHeader}>
             <TText style={styles.screenHeaderTitle}>Edit Event</TText>
             <TText style={styles.screenHeaderSubTitle}>Please specifiy the details of the event. This will appear in your calendar</TText>
@@ -298,6 +385,9 @@ const AddEventCalendar = ({route}) => {
             <View style={styles.textInputContainer}>
                 <Icon name="text" size={20} />
                 <TextInput 
+                    editable={eventItem ? false : true}
+
+                    defaultValue={eventItem ? eventItem.title : null}
                     placeholder='Event title'
                     style={styles.textInputStyle}
                     onChangeText={text => setEventTitle(text)}
@@ -310,7 +400,7 @@ const AddEventCalendar = ({route}) => {
                     box={false}
                     circleSize={14}
                     duration={200}
-                    initial={1}
+                    initial={eventItem ? initialRB : 1}
                     activeColor={ThemeDefaults.themeOrange}
                     selectedBtn={(e) => {
                         console.log(e.label)
@@ -333,7 +423,7 @@ const AddEventCalendar = ({route}) => {
 
             {
                 radioBtn &&
-                <View>
+                <View style={{marginTop: 40}}>
                     <DateTimePickerModal
                         isVisible={datePickerVisible}
                         mode="date"
@@ -341,15 +431,16 @@ const AddEventCalendar = ({route}) => {
                         onConfirm={handleDateConfirm}
                         onCancel={() => setDatePickerVisibility(false)}
                     />
-                    <View style={[{marginTop: 40, borderWidth: 1.4, borderColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, padding: 10}]}>
+                    <TText>Set the end date of the event</TText>
+                    <View style={[{marginTop: 10, borderWidth: 1.4, borderColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, padding: 10}]}>
                         <TouchableOpacity style={styles.btnbtn}
                             onPress={() => {
                                 setDatePickerVisibility(true)
                             }}
                         >
                             <View style={styles.timeTextContainer}>
-                                <Icon name="calendar-month" size={20} color={!dateSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
-                                <TText style={[styles.timeText, {color: !dateSelected ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue}]}>{dateSelected ? dayjs(formatedDate).format("MMMM DD").toString() : "End Date"}</TText>
+                                <Icon name="calendar-month" size={20} color={!dateSelected || !eventItem ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
+                                <TText style={[styles.timeText, {color: !dateSelected || !eventItem ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue}]}>{dateSelected ? dayjs(formatedDate).format("MMMM DD").toString() : eventItem ? dayjs(eventItem.endTime).format("MMMM DD").toString() : "End Date"}</TText>
                             </View>
                             <Icon name="chevron-right" size={20} color={!radioBtn ? 'rgba(0,0,0,0.4)' : ThemeDefaults.themeDarkBlue} />
                         </TouchableOpacity>
@@ -405,8 +496,25 @@ const AddEventCalendar = ({route}) => {
             }
         </View>
 
+        {
+            eventItem &&
+            <View style={styles.deleteContainer}>
+                <TouchableOpacity
+                    style={styles.deleteEventBtn}
+                    activeOpacity={0.5}
+                    onPress={() => {
+                        console.log("deleted")
+                        setConfirmDeleteEventModal(true)
+                        // handleRemoveCustomEvent()
+                    }}
+                >
+                    <TText style={styles.deleteEventBtnText}>Delete Event</TText>
+                </TouchableOpacity>
+            </View>
+        }
+
         <View style={styles.saveBtnContainer}>
-            <TouchableOpacity style={[styles.saveBtn, {backgroundColor: (startTimeSelected && endTimeSelected && eventTitle) || (dateSelected && eventTitle) ? ThemeDefaults.themeOrange : '#c2c2c2', elevation: (startTimeSelected && endTimeSelected && eventTitle) || (dateSelected && eventTitle) ? 4 : 0}]} activeOpacity={0.5}
+            <TouchableOpacity style={[styles.saveBtn, {backgroundColor: (startTimeSelected && endTimeSelected && eventTitle) || (dateSelected && eventTitle) || eventItem ? ThemeDefaults.themeOrange : '#c2c2c2', elevation: (startTimeSelected && endTimeSelected && eventTitle) || (dateSelected && eventTitle) ? 4 : 0}]} activeOpacity={0.5}
                 disabled={(!startTimeSelected && !endTimeSelected && !eventTitle) || (!dateSelected && !eventTitle) }
                 onPress={() => {
                     handleAddEvent()
@@ -570,5 +678,23 @@ const styles = StyleSheet.create({
     dialogueConfirm: {
         color: ThemeDefaults.themeDarkerOrange,
         fontFamily: 'LexendDeca_Medium',
+    },
+    deleteContainer: {
+        marginTop: 40,
+        paddingHorizontal: 40
+    },
+    deleteEventBtn: {
+        paddingVertical: 12,
+        alignItems: 'center',
+        backgroundColor: ThemeDefaults.themeWhite,
+        borderWidth: 1.5,
+        borderColor: "#d7d7d7",
+        borderRadius: 15,
+        elevation: 2
+    },
+    deleteEventBtnText: {
+        fontFamily: 'LexendDeca_Medium',
+        fontSize: 16,
+        color: ThemeDefaults.themeDarkBlue,
     },
 })

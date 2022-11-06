@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, Image, TouchableOpacity, Dimensions, StatusBar, Modal, TextInput } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, Image, ActivityIndicator, TouchableOpacity, Dimensions, StatusBar, Modal, TextInput } from 'react-native'
 import Appbar from '../Components/Appbar'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import TText from '../Components/TText';
@@ -45,9 +45,11 @@ const VIewServiceRequest = ({route}) => {
     const [viewDeclineInput, setViewDeclineInput] = useState(false)
     const [hasSentMessage, setHasSentMessage] = useState(false)
     const [didCancelRequest, setDidCancelRequest] = useState(false)
+    const [viewScheduleErrorModal, setViewScheduleErrorModal] = useState(false)
 
     const [declinationMessage, setDeclinationMessage] = useState("")
     const [datePickerVisible, setDatePickerVisibility] = useState(false)
+    const [scheduleConflicting, setScheduleConflicting] = useState(false)
     const [formatedDate, setFormatedDate] = useState(new Date())
     const [displayDate, setDisplayDate] = useState("")
     const [dateSelected, setDateSelected] = useState(false)
@@ -58,44 +60,44 @@ const VIewServiceRequest = ({route}) => {
     const [similarWorks, setSimilarWorks] = useState([])
     const [messageFromWorker, setMessageFromWorker] = useState('')
 
+    const [loading, setLoading] = useState(false)
+
     // resets all inputs on load
     useEffect(() => {
-
+        setLoading(true)
         if(global.userData.role === "worker"){
             getSameDateBookings()
-        }
+        } else {
+            console.log(requestItem)
+            let postcreated = dayjs(requestItem.created_at)
+            let dateNow = dayjs(new Date())
+            let pastAnHour = dateNow.diff(postcreated, 'hour') > 1
+            console.log(pastAnHour)
 
-        console.log("request item: ", requestItem)
+            if(pastAnHour){
+                getServiceRequest()
+                getSimilarWorks()
+                setPastOneHour(pastAnHour)
+            }
 
-        // if(dayjs(requestItem.created_at).toNow(true) > '1'){
-        //     // getSimilarWorks()
-        // }
-
-        // get
-        console.log(requestItem)
-        let postcreated = dayjs(requestItem.created_at)
-        let dateNow = dayjs(new Date())
-        let pastAnHour = dateNow.diff(postcreated, 'hour') > 1
-        console.log(pastAnHour)
-        if(true){
-            setPastOneHour(pastAnHour)
-            getServiceRequest()
-            getSimilarWorks()
-        }
-
-        setDateSelected(false)
-        setDisplayDate("")
-        setFormatedDate(new Date())
-
-        setRadioBtn(null)
-
-        navigation.addListener("blur", () => {
             setDateSelected(false)
             setDisplayDate("")
             setFormatedDate(new Date())
 
+            setRadioBtn(null)
+        }
+        
+        setLoading(false)
+
+        return () => {
+            setPastOneHour(false)
+            setDateSelected(false)
+            setSimilarWorks([])
+            setDisplayDate("")
+            setFormatedDate(new Date())
+
             setRadioBtn(-1)
-        })
+        }
     }, [route])
 
 
@@ -161,7 +163,7 @@ const VIewServiceRequest = ({route}) => {
                 'content-type': 'application/json'
             },
             body: JSON.stringify({
-                requestStatus: 3
+                requestStatus: 4
             })
         }).then((res) => {
             console.log("Success - Cancelled Request Complete")
@@ -206,14 +208,23 @@ const VIewServiceRequest = ({route}) => {
                 endTime: dayjs(formatedDate).format("HH:mm:ss"),
                 acceptMore: radioBtn.toString()
             })
-        }).then((res) => {
-            console.log("Success - Accepted Request Complete")
-            setAcceptRequestModal(false)
+        }).then(res => res.json())
+        .then((res) => {
+            console.log("res obj: ", res)
 
-            global.userData.role === "worker" ?
-            setHasAcceptedRequest(true)
-            :
-            null
+            if(res.success){
+                console.log("Success - Accepted Request Complete")
+                setAcceptRequestModal(false)
+                setScheduleConflicting(true)
+    
+                global.userData.role === "worker" ?
+                setHasAcceptedRequest(true)
+                :
+                null
+            } else {
+                // display warning alert for schedule conflict
+                setViewScheduleErrorModal(true)
+            }
         }).catch((err) => console.log("Error cancelling request: ", err))
     }
 
@@ -240,6 +251,19 @@ const VIewServiceRequest = ({route}) => {
         } catch (error) {
             console.log("Error sending decline message: ", error.message)
         }
+    }
+
+    const handleScheduleChecker = () => {
+        fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}/`)
+    }
+
+    const ViewActivityIndicator = () => {
+        return(
+            <ActivityIndicator 
+                size={40}
+                style={{width: '100%', height: 150}}
+            />
+        )
     }
 
   return (
@@ -396,6 +420,7 @@ const VIewServiceRequest = ({route}) => {
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
                                     setAcceptRequestModal(false)
+                                    // handleScheduleChecker()
                                     handleAcceptRequest(requestItem._id)
                                 }}
                             >
@@ -506,6 +531,49 @@ const VIewServiceRequest = ({route}) => {
                             >
                                 <TText style={styles.dialogueCancel}>Okay</TText>
                             </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Schedule error modal */}
+            <Modal
+                transparent={true}
+                animationType='fade'
+                visible={viewScheduleErrorModal}
+                onRequestClose={() => setViewScheduleErrorModal(false)}
+            >
+                {/* Modal View */}
+                <View style={styles.modalDialogue}>
+                    {/* Modal Container */}
+                    <View style={styles.dialogueContainer}>
+                        {/* Modal Message/Notice */}
+                        <View style={styles.dialogueMessage}>
+                            <TText style={[styles.dialogueMessageText, {marginBottom: 15}]}>The time you picked conflicts with othered scheduled requests. Check the schedule of your booked services and try again.</TText>
+                            <TText style={[styles.dialogueMessageText]}>You may Decline the request and leave a message to the Recruiter of why you declined their request</TText>
+                        </View>
+                        {/* Modal Buttons */}
+                        <View style={styles.modalDialogueBtnCont}>
+                            <TouchableOpacity
+                                style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
+                                onPress={() => {
+                                    // fetch post request
+                                    // navigation.navigate("HomeScreen")
+
+                                    setViewScheduleErrorModal(false)
+                                    // setDatePickerVisibility(true)
+                                }}
+                            >
+                                <TText style={styles.dialogueCancel}>Okay</TText>
+                            </TouchableOpacity>
+                            {/* <TouchableOpacity 
+                                style={styles.dialogueBtn}
+                                onPress={() => {
+                                    setPostBtnModal(false)
+                                }}
+                            >
+                                <TText style={styles.dialogueConfirm}>No</TText>
+                            </TouchableOpacity> */}
                         </View>
                     </View>
                 </View>
@@ -623,7 +691,7 @@ const VIewServiceRequest = ({route}) => {
 
                 {/* Display sent message by worker */}
                 {
-                    hasSentMessage  ? 
+                    hasSentMessage || (requestItem.requestStatus == '3' && requestItem.comment) ? 
                     <View style={{paddingHorizontal: 28, marginTop: 40,}}>
                         <TText style={{fontSize: 14}}>{global.userData.role === "recruiter" ? "Message from Worker" : "Message to Recruiter"}</TText>
                         <View style={{flexDirection: 'row', alignItems: "center", marginTop: 15}}>
@@ -636,7 +704,7 @@ const VIewServiceRequest = ({route}) => {
                     : null
                 }
 
-                {
+                {/* {
                     requestItem.requestStatus == '3' && requestItem.comment ? 
                     <View style={{paddingHorizontal: 28, marginTop: 40,}}>
                         <TText style={{fontSize: 14}}>{global.userData.role === "recruiter" ? "Message from Worker" : "Message to Recruiter"}</TText>
@@ -648,16 +716,19 @@ const VIewServiceRequest = ({route}) => {
                         </View>
                     </View>
                     : null
-                }
+                } */}
 
                 {
-                    pastOneHour || didCancelRequest && global.userData.role === 'recruiter' && 
+                    didCancelRequest || pastOneHour && global.userData.role === 'recruiter' && 
                     <View style={{paddingHorizontal: 30, marginTop: 40, marginBottom: 150}}>
                         <TText style={{fontFamily: 'LexendDeca_Medium'}}>Suggested Workers</TText>
 
                         {
                             similarWorks.length === 0 ?
                             <View style={{ marginTop: 20, paddingHorizontal: 30}}>
+                                {
+                                    loading && <ViewActivityIndicator />
+                                }
                                 <View style={{paddingHorizontal: 30}}>
                                     <TText style={{textAlign: 'center', marginBottom: 20, color: '#c2c2c2', fontSize: 15}}>There are now other available workers for {requestItem.subCategory}</TText>
                                     <TText style={{textAlign: 'center', color: '#c2c2c2', fontSize: 15}}>You may post a request for this service by clicking the button below</TText>
@@ -680,6 +751,9 @@ const VIewServiceRequest = ({route}) => {
                                 {
                                     similarWorks.map((e, index) => (
                                         <View key={index} style={{flexDirection: 'row', alignItems: 'center', marginBottom: 15, backgroundColor: '#fff', padding: 12, borderRadius: 10, elevation: 4}}>
+                                            {
+                                                loading && <ViewActivityIndicator />
+                                            }
                                             <Image source={e.workerId.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: e.workerId.profilePic}} style={{width: 60, height: 60, borderRadius: 15}} />
                                             <View style={{paddingLeft: 12}}>
                                                 <TText style={{fontSize: 16}}>{e.workerId.firstname} {e.workerId.lastname}</TText>

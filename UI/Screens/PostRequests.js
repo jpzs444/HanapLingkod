@@ -10,6 +10,7 @@ import { BlurView } from 'expo-blur';
 import dayjs from 'dayjs';
 import { FlashList } from '@shopify/flash-list'
 import { IPAddress, Localhost } from '../global/global';
+import { color } from 'react-native-reanimated';
 
 
 const relativeTime = require('dayjs/plugin/relativeTime')
@@ -42,6 +43,7 @@ const PostRequests = () => {
       console.log("request post1: ", data)
 
       let list = [...data]
+      list = list.reverse()
       if(global.userData.role === 'worker'){
         list = list.filter(e => e.postToggle)
       }
@@ -184,7 +186,12 @@ const PostRequests = () => {
                 {/* Address of request */}
                 <View style={styles.contentRow}>
                   <Icon name="map" size={20} />
-                  <Text numberOfLines={1} ellipsizeMode="tail" style={styles.contentText}>{`${item.recruiterId.street}, ${item.recruiterId.purok}, ${item.recruiterId.barangay}, ${item.recruiterId.city}, ${item.recruiterId.province}`}</Text>
+                  {
+                    global.userData.role === 'recruiter' ? 
+                    <Text numberOfLines={1} ellipsizeMode="tail" style={styles.contentText}>{`${item.recruiterId.street}, ${item.recruiterId.purok}, ${item.recruiterId.barangay}, ${item.recruiterId.city}`}</Text>
+                    :
+                    <Text numberOfLines={1} ellipsizeMode="tail" style={styles.contentText}>{`${item.recruiterId.barangay}, ${item.recruiterId.city}`}</Text>
+                  }
                 </View>
               </View>
 
@@ -198,6 +205,7 @@ const PostRequests = () => {
                 >
                   <Icon name="comment-text" size={22} color={ThemeDefaults.themeLighterBlue} />
                   <TText style={styles.showCommentText}>{global.userData.role ==="recruiter" ? "Show Comments" : "Comments"}</TText>
+                  {/* <View><TText>1</TText></View> */}
                 </TouchableOpacity>
               </View>
             </View>
@@ -334,7 +342,7 @@ const styles = StyleSheet.create({
       elevation: 4,
       borderRadius: 15,
       padding: 15,
-      marginHorizontal: 15,
+      marginHorizontal: 25,
       paddingBottom: 8,
       marginTop: 15,
     },
@@ -362,7 +370,8 @@ const styles = StyleSheet.create({
     },
     postUserNameText: {
       fontFamily: 'LexendDeca_Medium',
-      fontSize: 18
+      fontSize: 16,
+      color: "#3e3e3e"
     },
     switchContainer: {
       flexDirection: 'row',
@@ -383,8 +392,8 @@ const styles = StyleSheet.create({
     
     },
     timePostedText: {
-      fontSize: 14
-
+      fontSize: 12,
+      color: '#b2b2b2'
     },
     contentRow: {
       flexDirection: 'row',
@@ -416,7 +425,7 @@ const styles = StyleSheet.create({
     },
     contentRequestText: {
       fontFamily: 'LexendDeca',
-      fontSize: 16,
+      fontSize: 18,
     },
     contentText: {
       marginLeft: 12,

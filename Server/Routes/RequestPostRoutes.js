@@ -179,7 +179,7 @@ router
       console.log("success");
       res.send("Succesfully Deleted");
     } catch (error) {
-      console.log(err);
+      console.log(error);
       await session.abortTransaction();
       res.status(500).send();
     }

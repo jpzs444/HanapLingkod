@@ -83,7 +83,7 @@ const CalendarView = () => {
             // setViewScheduleModal(false)
         })
         
-    }, [hasChanges]);
+    }, [global.userData]);
 
 
     const getUpdatedUserData = () => {
@@ -96,7 +96,6 @@ const CalendarView = () => {
             },
         }).then((res) => res.json())
         .then((user) => {
-            // console.log("user new load: ", route)
             global.userData = user
 
             // let imageList = []
@@ -159,10 +158,8 @@ const CalendarView = () => {
             sst.getDate() === dddd.getDate())
         })
         setSameDateBooking([...uunn])
-        console.log("Filtered unv time to display: ", uunn)
         
         // haveBlanks()
-        console.log(dateString)
         dateString = dayjs(date).format("MMMM DD").toString()
         // navigation.navigate("ScheduleDrawer", {dateSelected: dateString})
         
@@ -188,8 +185,6 @@ const CalendarView = () => {
         let newDate = new Date(formatedDate.getFullYear(), formatedDate.getMonth(), formatedDate.getDate(),
                                 formatedTime.getHours(), formatedTime.getMinutes(), formatedTime.getSeconds())
 
-        console.log(formatedTime)
-        console.log("new date: ", newDate)
 
     }
 
@@ -220,19 +215,15 @@ const CalendarView = () => {
             },
         }).then((res) => res.json())
         .then((data) => {
-            console.log(data)
             let fd = dayjs(date).utc(true).toISOString()
-            console.log("fd", fd)
             
             // console.log("fd", fd)
             let list = data.worker.filter(e => {
                 // let aa = dayjs(e.serviceDate).utc(true).format()
                 let aa = dayjs(e.serviceDate).toISOString()
-                console.log("aa", aa)
                 return aa == fd
             })
             // setSameDateBooking([...list])
-            console.log("list same date accepted bookings - calendar", list)
             // navigation.navigate("ScheduleUserStack", {'selectedDate': new Date(formatedDate).toString(), 'sameDateBookings': sameDateBookings})
 
         }).catch((err) => console.log("get same dates error", err.message))
@@ -240,6 +231,9 @@ const CalendarView = () => {
 
 
     const loadUnavailableTime = () => {
+
+        lll = {}
+        setListUnavailableSched({})
 
         uunn = [...(global.userData.unavailableTime)]
         console.log("listUnvSched uunn: ", uunn)
@@ -271,14 +265,14 @@ const CalendarView = () => {
             } else {
                 let ff = dayjs(new Date(e.startTime)).format("YYYY-MM-DD")
                 let dn = dayjs(new Date())
-                console.log(dn.diff(ff, 'day', true) > '0')
+                // console.log(dn.diff(ff, 'day', true) > '0')
 
                 
 
-                lll[dayjs(new Date()).format("YYYY-MM-DD").toString()] = dateTodayStyles 
+                // lll[dayjs(new Date()).format("YYYY-MM-DD").toString()] = dateTodayStyles
 
                 if(dayjs(e.startTime).format("YYYY-MM-DD").toString() === dayjs(new Date()).format("YYYY-MM-DD").toString()){
-                    console.log("the same")
+                    // console.log("the same")
                     lll[dayjs(e.startTime).format("YYYY-MM-DD").toString()] = e.wholeDay ? dateDisabledStyles : dateAppointmentsStyles
 
                 } else if(dn.diff(ff, 'day', true) > '0'){
@@ -376,7 +370,7 @@ const CalendarView = () => {
             enableSwipeMonths={true}
             markingType={'custom'}
             markedDates={
-                listUnavailableSched        
+                listUnavailableSched      
             }
             onDayPress={day => {
                 console.log(day)

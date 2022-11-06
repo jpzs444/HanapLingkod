@@ -32,7 +32,7 @@ const ViewComments = ({route}) => {
         React.useCallback(() => {
             fetchCommentsFromPost()
 
-            let fetchCommnetsInterval = setInterval(fetchCommentsFromPost, 5000)
+            let fetchCommnetsInterval = setInterval(fetchCommentsFromPost, 2000)
             // setTimeout()
     
             return () => {
@@ -42,16 +42,17 @@ const ViewComments = ({route}) => {
         }, [route])
       );
 
-    const fetchCommentsFromPost = async () => {
-        try {
+    const fetchCommentsFromPost = () => {
+
             setIsLoading(true)
-            await fetch(`http://${IPAddress}:3000/request-post/${postID}`, {
+            fetch(`http://${IPAddress}:3000/request-post/${postID}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json'
                 }
             }).then((res) => res.json())
             .then(data => {
+                setIsLoading(false)
                 console.log('posts: ', data.post[0].maxPrice)
                 setCommentList(prev => [...data.comment])
                 setPostInformation([...data.post])
@@ -60,9 +61,6 @@ const ViewComments = ({route}) => {
                 // clearTimeout(io)
             }).catch((err) => console.log("error fetch post comments", err.msg))
 
-        } catch (error) {
-            console.log("log HI")
-        }
     }
 
     const handleSubmitComment = () => {
@@ -83,6 +81,20 @@ const ViewComments = ({route}) => {
         }).catch((err) => console.log("error submittion:"))
 
         // commentInput.current.value = ""
+    }
+
+    const handleDeleteComment = (item) => {
+        console.log("waddup")
+        fetch(`http://${IPAddress}:3000/request-post-comment/${postID}`, {
+            method: 'DELETE',
+            headers: {
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                commentId: item
+            })
+        }).then(res => console.log("success delete comment"))
+        .catch(err => console.log("error delete comment: ", err.msg))
     }
 
     const handleCreatedAge = (createdAt) => {
@@ -197,7 +209,7 @@ const ViewComments = ({route}) => {
                 keyExtractor={item => item._id}
                 estimatedItemSize={80}
                 maxToRenderPerBatch
-                ListEmptyComponent={() => (<ActivityIndicator size={'large'} style={{flex: 1, paddingTop: 50}} />)}
+                // ListEmptyComponent={() => (<ActivityIndicator size={'large'} style={{flex: 1, paddingTop: 50}} />)}
                 ListFooterComponent={() => (<View style={{height: 150}}></View>)}
                 ListHeaderComponent={() => (
                     <ScreenHeaderComponent />
@@ -206,7 +218,7 @@ const ViewComments = ({route}) => {
                     <>
                         {
                         isLoading ?
-                        null
+                        <ActivityIndicator size={'large'} style={{flex: 1, paddingTop: 50}} />
                         :
                         <View style={styles.commentItem}>
                         <View style={{flex: 1, flexDirection: 'row', width:'100%'}}>
@@ -246,7 +258,12 @@ const ViewComments = ({route}) => {
                                         </View>
                                         : global.userData.role === "worker" && item.workerId._id === global.userData._id ?
                                         <View style={{flex: 1, alignItems: 'flex-end'}}>
-                                            <TouchableOpacity style={styles.deleteCommentBtn}>
+                                            <TouchableOpacity style={styles.deleteCommentBtn}
+                                                onPress={() => {
+                                                    console.log("item comment id: ", item._id)
+                                                    handleDeleteComment(item._id)
+                                                }}
+                                            >
                                                 <Icon name="trash-can" size={20} color={ThemeDefaults.themeWhite} />
                                             </TouchableOpacity>
                                         </View> : null
@@ -279,7 +296,7 @@ const ViewComments = ({route}) => {
                     <View style={styles.messagingContainer}>
                         <View style={styles.messagingTextInputContainer}>
                             <TextInput 
-                                val={commentText ? commentText : null}
+                                val={commentText ? commentText : ""}
                                 numberOfLines={1}
                                 placeholder='Write a comment'
                                 autoCorrect={false}
@@ -292,6 +309,8 @@ const ViewComments = ({route}) => {
                         <TouchableOpacity style={styles.sendBtnContainer}
                             activeOpacity={0.4}
                             onPress={() => {
+                                commentInput.current.clear()
+                                commentInput.current.blur()
                                 handleSubmitComment()
                             }}
                         >

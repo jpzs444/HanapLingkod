@@ -94,7 +94,7 @@ const TabNavigation = () => {
         />
 
         {/* Tasks Tab */}
-        <Tab.Screen name="PostRequestPRRStack" component={PostRequestStack} 
+        <Tab.Screen name="PostRequestPRRStack" component={PostRequests} 
             options={{
                 tabBarIcon: ({focused}) => (
                     <Icon name="clipboard-text-multiple" size={28} color={focused ? ThemeDefaults.themeWhite : ThemeDefaults.themefadedWhite} />

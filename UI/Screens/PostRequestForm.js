@@ -44,18 +44,20 @@ const PostRequestForm = () => {
     let disabledBtn = !(requestCategory && specificRequestText && minPriceText && maxPriceText && dateSelected && timeSelected)
 
     useEffect(() => {
-        setRequestCategory(null)
-        setSpecificRequestText("")
-        setMinPriceText("")
-        setMaxPriceText("")
-        setFormatedDate(new Date())
-        setDisplayDate(new Date())
-        setFormatedTime(new Date())
-        setDisplayTime(new Date())
-        setMinPressed(false)
-        setMaxPressed(false)
-        setDateSelected(false)
-        setTimeSelected(false)
+        navigation.addListener("focus", () => {
+            setRequestCategory(null)
+            setSpecificRequestText("")
+            setMinPriceText("")
+            setMaxPriceText("")
+            setFormatedDate(new Date())
+            setDisplayDate(new Date())
+            setFormatedTime(new Date())
+            setDisplayTime(new Date())
+            setMinPressed(false)
+            setMaxPressed(false)
+            setDateSelected(false)
+            setTimeSelected(false)
+        })
         
     }, [])
 
@@ -75,11 +77,11 @@ const PostRequestForm = () => {
                 minPrice: minPriceText,
                 maxPrice: maxPriceText,
                 long: 80,
-                lat: 25
+                lat: 25,
             })
         }).then((res) => {
             console.log("Success: Added a request to your posts")
-            navigation.navigate("PostRequestsTab")
+            navigation.navigate("PostRequestPRRStack")
         })
         .catch((err) => console.log("error post request: ", err.message))
     }

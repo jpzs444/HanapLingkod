@@ -1,4 +1,4 @@
-import { StyleSheet, SafeAreaView, Text, View, TouchableOpacity, TextInput, StatusBar, Image, Modal, ScrollView, Dimensions  } from 'react-native'
+import { StyleSheet, SafeAreaView, Text, View, TouchableOpacity, TextInput, StatusBar, Image, Modal, ScrollView, Dimensions, ActivityIndicator  } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import TText from '../Components/TText';
@@ -31,6 +31,7 @@ const RequestForm = ({route, navigation}) => {
     const {workerID, workID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks, dateService, timeService, fromPostReq, selectedDay, selectedTime} = route.params;
     // console.log(workerInformation)
 
+    const [loading, setIsLoading] = useState(false)
     const [loadedWorkerInfo, setLoadedWorkerInfo] = useState({})
     const [hasLoadedWorkerInfo, setHasLoadedWorkerInfo] = useState(showMultiWorks)
     const [workListModalOpened, setWorkListModalOpened] = useState(false)
@@ -60,6 +61,8 @@ const RequestForm = ({route, navigation}) => {
     const [viewCalendarModal, setViewCalendarModal] = useState(false)
     const [viewScheduleModal, setViewScheduleModal] = useState(false)
 
+    const [hasPendingRequest, sethasPendingRequest] = useState(false)
+
     const [sameDateBookings, setSameDateBookings] = useState([])
 
     const [viewScheduleErrorModal, setViewScheduleErrorModal] = useState(false)
@@ -69,6 +72,9 @@ const RequestForm = ({route, navigation}) => {
     const [coordLati, setCoordLati] = useState(null)
     const [coordLongi, setCoordLongi] = useState(null)
     const [currentCoords, setCurrentCoords] = useState({})
+
+    const [customAddress, setCustomAddress] = useState("")
+    const [useCustomAddress, setUseCustomAddress] = useState(false)
 
     const [status, requestPermission] = Location.useBackgroundPermissions()
 
@@ -93,6 +99,7 @@ const RequestForm = ({route, navigation}) => {
         console.log("Worker infromation: ", workerInformation)
         setLoadedWorkerInfo({...workerInformation})
         loadUnavailableTime()
+        setIsLoading(false)
         
         setDateSelected(false)
         setTimeSelected(false)
@@ -102,6 +109,9 @@ const RequestForm = ({route, navigation}) => {
         setFormatedTime(new Date())
         setDisplayDate(new Date())
         setDisplayTime(new Date())
+
+        setUseCustomAddress(false)
+        setCustomAddress("")
 
         if(selectedDay){
             setFormatedDate(selectedDay)
@@ -404,6 +414,28 @@ const RequestForm = ({route, navigation}) => {
         setWorkListModalOpened(bool)
     }
 
+    const handlePendingRequestChecker = () => {
+        setIsLoading(true)
+        fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}`, {
+            method: "GET",
+            headers: {
+                'content-type': 'application/json'
+            },
+        }).then(res => res.json())
+        .then(data => {
+            console.log("pending checker: ", data)
+            let list = [...data.recruiter]
+            list = list.filter(e => e.requestStatus == '1')
+            if(list.length > 0){
+                // has a pending request
+                sethasPendingRequest(true)
+            } else {
+                setPostBtnModal(true)
+                // postRequest()
+            }
+        })
+    }
+
     const postRequest = () => {
         console.log("worker id", workerInformation._id)
         console.log("user id: ", global.userData._id)
@@ -425,7 +457,7 @@ const RequestForm = ({route, navigation}) => {
                 "workerId": workerInformation._id,
                 "recruiterId": global.userData._id,
                 'workId': workID,
-                "address": `${user.street}, ${user.purok}, ${user.barangay} ${user.city}, ${user.province}`,
+                "address": useCustomAddress ? customAddress : `${user.street}, ${user.purok}, ${user.barangay} ${user.city}, ${user.province}`,
                 "subCategory": selectedJob ? selectedJob : workSelected.ServiceSubId.ServiceSubCategory,
                 "minPrice": minPrice ? minPrice : workSelected.minPrice,
                 "maxPrice": maxPrice ? maxPrice : workSelected.maxPrice,
@@ -511,6 +543,8 @@ const RequestForm = ({route, navigation}) => {
                                 onPress={() => {
                                     setConfirmServiceRequest(true)
                                     setRequestPostedModal(true)
+                                    // check if recruiter has a pending request
+                                    // handlePendingRequestChecker()
                                     // fetch post request
                                     postRequest()
                                     setPostBtnModal(false)
@@ -601,10 +635,42 @@ const RequestForm = ({route, navigation}) => {
                                 onPress={() => {
                                 setRequestPostedModal(false)
                                 navigation.navigate("HomeScreen")
+                                // navigation.navigate("RequestsScreen")
                                 //   global.serviceRequestPosted = false
                                 }}
                             >
                                 <TText style={styles.dialogueConfirm}>Got it</TText>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                transparent={true}
+                animationType='fade'
+                visible={hasPendingRequest}
+                onRequestClose={() => sethasPendingRequest(false)}
+            >
+                {/* Modal View */}
+                <View style={styles.modalDialogue}>
+                    {/* Modal Container */}
+                    <View style={styles.dialogueContainer}>
+                        {/* Modal Message/Notice */}
+                        <View style={styles.dialogueMessage}>
+                            <TText style={[styles.dialogueMessageText, {marginBottom: 20}]}>Sorry, you currently have a pending service request</TText>
+                            <TText style={[styles.dialogueMessageText, {fontSize: 14,}]}>Create a service request once the active request has been completed</TText>
+                        </View>
+                        {/* Modal Buttons */}
+                        <View style={styles.modalDialogueBtnCont}>
+                            <TouchableOpacity
+                                style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
+                                onPress={() => {
+                                    setIsLoading(false)
+                                    navigation.navigate("HomeScreen")
+                                }}
+                            >
+                                <TText style={styles.dialogueCancel}>Okay</TText>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -736,6 +802,20 @@ const RequestForm = ({route, navigation}) => {
                             <TText style={{fontSize: 14, color: ThemeDefaults.themeOrange}}>Time is already taken by another recruiter</TText>
                         </View> */}
                     </View>
+                    <View style={styles.confirmBtnContainer}>
+                        <TouchableOpacity style={styles.confirmBtn}
+                            onPress={() => {
+                                setViewCalendarModal(false)
+                                setViewScheduleModal(false)
+
+                                //---
+                                setViewScheduleErrorModal(true)
+                            }}
+                        >
+                            <TText style={styles.confirmBtnText}>Confirm Time</TText>
+                        </TouchableOpacity>
+                    </View>
+
 
                     <View style={styles.scheduleList}>
                         {/* <View style={styles.schedCard}>
@@ -785,7 +865,7 @@ const RequestForm = ({route, navigation}) => {
 
                     
 
-                    <View style={styles.confirmBtnContainer}>
+                    {/* <View style={styles.confirmBtnContainer}>
                         <TouchableOpacity style={styles.confirmBtn}
                             onPress={() => {
                                 setViewCalendarModal(false)
@@ -797,7 +877,7 @@ const RequestForm = ({route, navigation}) => {
                         >
                             <TText style={styles.confirmBtnText}>Confirm Time</TText>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                     
                 </ScrollView>
                 
@@ -837,7 +917,7 @@ const RequestForm = ({route, navigation}) => {
                 {/* Form inputs */}
                 <View style={styles.inputsContainer}>
                     {/* Recruiter's Address */}
-                    <View style={{borderRadius: 10, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', overflow: 'hidden'}}>
+                    <View style={{borderRadius: 10, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', overflow: 'hidden',}}>
                         {/* <View style={{width: '100%', height: 200, }}>
                             <MapView 
                                 style={{width: '100%', height: '100%'}}
@@ -867,8 +947,35 @@ const RequestForm = ({route, navigation}) => {
                         </View>
                     </View>
 
+                    {/* Custom address */}
+                    <TText style={{marginTop: 15, fontSize: 15}}>Use a different address for the service?</TText>
+                    <View style={{flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 10, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', overflow: 'hidden', marginTop: 5}}>
+                        <Icon name="map-plus" size={22} color={ThemeDefaults.themeLighterBlue}  />
+                        <TextInput 
+                            value={useCustomAddress ? customAddress : ""}
+                            placeholder='Write the address'
+                            multiline
+                            onChangeText={(val) => {
+                                if(val.length > 0){
+                                    setCustomAddress(val)
+                                    setUseCustomAddress(true)
+                                } else {
+                                    setCustomAddress("")
+                                    setUseCustomAddress(false)
+                                }
+                            }}
+                            style={{
+                                fontFamily: "LexendDeca",
+                                fontSize: 16,
+                                marginLeft: 10,
+                                flex: 1
+                            }}
+                        />
+
+                    </View>
+
                     {/* Select Date */}
-                    <TouchableOpacity style={[styles.formAddressBar, { paddingTop: 12, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', borderRadius: 10, marginTop: 10}]}
+                    <TouchableOpacity style={[styles.formAddressBar, { paddingTop: 12, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', borderRadius: 10, marginTop: 20}]}
                         onPress={() => {
                             // setDatePickerVisibility(true)
                             setViewCalendarModal(true)
@@ -902,7 +1009,9 @@ const RequestForm = ({route, navigation}) => {
                                 disabled={!dateSelected}
                                 onPress={()=> {
                                     if(dateSelected){
-                                        navigation.navigate("ScheduleDrawer", {selectedDate: new Date(formatedDate).toString(), workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true.valueOf, minPrice: minPrice, maxPrice: maxPrice})
+                                        // navigation.navigate("ScheduleDrawer", {selectedDate: new Date(formatedDate).toString(), workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true.valueOf, minPrice: minPrice, maxPrice: maxPrice})
+                                        navigation.navigate("ScheduleDrawer", {selectedDate: new Date(formatedDate).toString(), workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true, minPrice: minPrice, maxPrice: maxPrice })
+
                                         // setViewScheduleModal(true)
                                     }
                                 }}
@@ -1041,11 +1150,11 @@ const RequestForm = ({route, navigation}) => {
                     style={[styles.submitBtn, {backgroundColor: dateSelected && timeSelected && serviceSelected || fromPostReq ? ThemeDefaults.themeOrange : '#c2c2c2', elevation: 0}]}
                     disabled={!dateSelected && !timeSelected && serviceSelected && !fromPostReq}
                     onPress={() => {
-                        setPostBtnModal(true)
-
+                        // setIsLoading(true)
+                        handlePendingRequestChecker()
                     }}
                 >
-                    <TText style={styles.submitBtnTxt}>Submit Request</TText>
+                    <TText style={styles.submitBtnTxt}>{ loading ? <ActivityIndicator size={'large'} style={{width: '100%', height: '100%'}} /> :"Submit Request"}</TText>
                 </TouchableOpacity>
 
 
@@ -1515,8 +1624,9 @@ const styles = StyleSheet.create({
         // flexGrow: 1,
         width: '100%',
         paddingHorizontal: 60,
-        position: 'absolute',
-        bottom: 60,
+        marginVertical: 20,
+        // position: 'absolute',
+        // bottom: 60,
         // left: 50,
         // righ: 50,
         // backgroundColor: 'pink'
