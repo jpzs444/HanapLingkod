@@ -36,6 +36,7 @@ const Booking = require("./Routes/BookingRoutes");
 const Calendar = require("./Routes/CalendarRoutes");
 const WorkerComment = require("./Routes/WorkerCommentRoutes");
 const RecruiterCommentRoutes = require("./Routes/RecruiterCommentRoutes");
+const deleteCancelled = require("./Helpers/deleteCancelled");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -96,6 +97,10 @@ app.get("/images/:filename", async function (req, res) {
 
 cron.schedule("0 * * * *", () => {
   WorkReminder();
+});
+
+cron.schedule("0 0 * * *", () => {
+  deleteCancelled();
 });
 
 app.get("/search", async function (req, res) {
@@ -221,9 +226,15 @@ app.post("/login", async (req, res) => {
     let ifRecruiterExist = await Recruiter.exists({ username: username });
     let user;
     if (ifWorkerExist) {
-      user = await Worker.findOne({ username: username }).lean();
+      user = await Worker.findOne({ username: username })
+        .select(
+          "-GovId -accountStatus -licenseCertificate -works -prevWorks -unavailableTime -pushtoken"
+        )
+        .lean();
     } else {
-      user = await Recruiter.findOne({ username: username }).lean();
+      user = await Recruiter.findOne({ username: username })
+        .select("-pushtoken -accountStatus -GovId ")
+        .lean();
     }
     if (!user) {
       return res.status(400).json({ msg: "Invalid Username" }).lean();
@@ -234,6 +245,8 @@ app.post("/login", async (req, res) => {
     }
     const token = generateAccessToken(String(user._id));
     user["accessToken"] = "Bearer " + token;
+    delete user.password;
+    console.log(user);
     res.send(user);
   } catch (error) {
     res.status(500).json({ err: error.message });
@@ -277,7 +290,7 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
       phoneNumber: req.body.phoneNumber,
       emailAddress: req.body.emailAddress,
       profilePic: "pic",
-      GovId: "GovIdURL.url",
+      GovId: GovIdURL.url,
       workDescription: req.body.workDescription,
       works: SubCategory,
       role: "worker",

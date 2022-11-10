@@ -29,6 +29,7 @@ const ServiceRequestSchema = mongoose.Schema({
   },
   deleteflag: { type: Boolean, default: 0 },
   created_at: { type: Date, required: true, default: Date.now },
+  updated_at: { type: Date, required: true, default: Date.now },
 });
 
 ServiceRequestSchema.pre("find", function (next) {
