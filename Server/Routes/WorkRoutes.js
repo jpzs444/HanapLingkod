@@ -12,9 +12,13 @@ const { WorkMiddleware } = require("../Helpers/DeleteMiddleware");
 router
   .route("/Work")
   .get(async function (req, res) {
-    console.log(req.CurrentuserId);
-    let queryResult = await Work.find({}).exec();
+    console.time("Work Routes");
+
+    let queryResult = await Work.find({
+      deleteflag: false,
+    }).exec();
     res.send(queryResult);
+    console.timeEnd("Work Routes");
   })
   .post(async function (req, res) {
     // console.log(req.body);
@@ -115,6 +119,7 @@ router.route("/Work/:category").get(async function (req, res) {
 
     const query = await Work.find({
       ServiceSubId: subId._id,
+      deleteflag: false,
     })
       .limit(limit * page)
       .lean()
@@ -213,14 +218,17 @@ router
   });
 
 router.route("/WorkList/:UserId").get(function (req, res) {
-  Work.find({ workerId: req.params.UserId }, function (err, found) {
-    if (found) {
-      res.send(found);
-      console.log(res);
-    } else {
-      res.send("No such data found");
+  Work.find(
+    { workerId: req.params.UserId, deleteflag: false },
+    function (err, found) {
+      if (found) {
+        res.send(found);
+        console.log(res);
+      } else {
+        res.send("No such data found");
+      }
     }
-  });
+  );
 });
 
 module.exports = router;

@@ -39,11 +39,13 @@ router.route("/service-request/:user").get(async function (req, res) {
     let status3_Worker = await ServiceRequest.find({
       workerId: req.params.user,
       requestStatus: 3,
+      deleteflag: false,
     }).lean();
 
     let status3_Recruiter = await ServiceRequest.find({
       recruiterId: req.params.user,
       requestStatus: 3,
+      deleteflag: false,
     });
 
     res.send({

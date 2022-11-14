@@ -26,7 +26,7 @@ const requestPostSchema = new mongoose.Schema({
 });
 
 requestPostSchema.pre("find", function (next) {
-  this.populate("recruiterId");
+  this.populate("recruiterId", "-GovId -password");
   this.populate("ServiceID");
   // this.populate("postCommentId");
 

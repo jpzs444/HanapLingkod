@@ -1,14 +1,14 @@
-export const IPAddress = "192.168.1.7"
-export const Localhost = "http://" + IPAddress + ":3000"
+export const IPAddress = "192.168.0.197";
+export const Localhost = "http://" + IPAddress + ":3000";
 
-global.server = "http://" + IPAddress + ":3000/"
+global.server = "http://" + IPAddress + ":3000/";
 
 global.userData = {};
 global.deviceExpoPushToken = "";
 
-global.notificationCount=0;
+global.notificationCount = 0;
 
-global.isPhoneNumVerified = false
+global.isPhoneNumVerified = false;
 
-global.selectedWorker = ""
-global.serviceRequestPosted = false
+global.selectedWorker = "";
+global.serviceRequestPosted = false;

@@ -306,4 +306,21 @@ router.route("/completed-bookings/:user/:id").get(async function (req, res) {
   }
 });
 
+router.route("/booking-comment/:id").post(async function (req, res) {
+  console.log(req.body.comment);
+  Booking.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      comment: req.body.comment,
+    },
+    function (err) {
+      if (!err) {
+        res.send("Success");
+      } else {
+        console.log(err);
+      }
+    }
+  );
+});
+
 module.exports = router;
