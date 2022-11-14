@@ -12,6 +12,8 @@ const {
   RatingAverageWorker,
   RatingAverageRecruiter,
 } = require("../Helpers/RatingAverage");
+const WorkerComment = require("../Models/WorkerComment");
+const RecruiterComment = require("../Models/RecruiterComment");
 
 router.route("/booking/:user").get(async function (req, res) {
   try {
@@ -321,6 +323,22 @@ router.route("/booking-comment/:id").post(async function (req, res) {
       }
     }
   );
+});
+
+router.route("/reviews/:bookingId").get(async function (req, res) {
+  console.log(req.params.bookingId);
+  const workerCommentResult = await WorkerComment.find({
+    bookingId: req.params.bookingId,
+  })
+    .lean()
+    .exec();
+  const recruiterCommentResult = await RecruiterComment.find({
+    bookingId: req.params.bookingId,
+  })
+    .lean()
+    .exec();
+
+  res.send({ worker: workerCommentResult, recruiter: recruiterCommentResult });
 });
 
 module.exports = router;
