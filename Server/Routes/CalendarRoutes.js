@@ -5,6 +5,14 @@ const dayjs = require("dayjs");
 var isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
 var isBetween = require("dayjs/plugin/isBetween");
 
+router.route("/schedule/:user").get(async function (req, res) {
+  const user = await Worker.find(
+    { _id: req.params.user },
+    { unavailableTime: 1 }
+  ).exec();
+  res.send(user);
+});
+
 router.route("/add-schedule/:user").post(async function (req, res) {
   dayjs.extend(isBetween);
 

@@ -8,7 +8,7 @@ const PostcommentSchema = new mongoose.Schema({
 });
 
 PostcommentSchema.pre("find", function (next) {
-  this.populate("workerId");
+  this.populate("workerId", "-pushtoken -works -unavailableTime");
   next();
 });
 

@@ -23,18 +23,37 @@ router.route("/service-request/:user").get(async function (req, res) {
 
     let queryResultWorker = await ServiceRequest.find({
       workerId: req.params.user,
+      requestStatus: { $ne: 3 },
     })
       .sort({ serviceDate: -1 })
       .limit(limit * page)
       .lean();
     let queryResultRecruiter = await ServiceRequest.find({
       recruiterId: req.params.user,
+      requestStatus: { $ne: 3 },
     })
       .sort({ serviceDate: -1 })
       .limit(limit * page)
       .lean();
 
-    res.send({ worker: queryResultWorker, recruiter: queryResultRecruiter });
+    let status3_Worker = await ServiceRequest.find({
+      workerId: req.params.user,
+      requestStatus: 3,
+      deleteflag: false,
+    }).lean();
+
+    let status3_Recruiter = await ServiceRequest.find({
+      recruiterId: req.params.user,
+      requestStatus: 3,
+      deleteflag: false,
+    });
+
+    res.send({
+      worker: queryResultWorker,
+      recruiter: queryResultRecruiter,
+      status3_Worker: status3_Worker,
+      status3_Recruiter: status3_Recruiter,
+    });
   } catch (error) {
     res.send(error);
   }
@@ -98,7 +117,6 @@ router
           req.body.endDate + " " + req.body.endTime
         ).toISOString();
       }
-
       result = await ServiceRequest.findOne({ _id: req.params.id });
 
       const { workerId, recruiterId } = result;
@@ -106,6 +124,7 @@ router
         { _id: workerId },
         { pushtoken: 1, _id: 0 }
       ).lean();
+      console.log(pushIDWorker);
       const pushIDRecruiter = await Recruiter.findOne(
         { _id: recruiterId },
         { pushtoken: 1, _id: 0 }
@@ -205,6 +224,7 @@ router
           { _id: req.params.id },
           {
             requestStatus: req.body.requestStatus,
+            updated_at: Date.now(),
           },
           {
             new: true,
@@ -239,6 +259,7 @@ router
         res.send("Successfully Updated to status 4 ");
       }
     } catch (error) {
+      console.log(error);
       res.send(error);
     }
   })

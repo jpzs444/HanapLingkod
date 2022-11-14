@@ -161,8 +161,8 @@ router
     try {
       //initialize transactions
       session.startTransaction();
-
-      await Comment.deleteOne(
+      console.log("asd");
+      await PostComment.deleteOne(
         {
           _id: req.body.commentId,
         },

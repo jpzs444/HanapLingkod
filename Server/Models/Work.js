@@ -14,7 +14,10 @@ const workSchema = mongoose.Schema({
 
 workSchema.pre("find", function (next) {
   this.populate("ServiceSubId");
-  this.populate("workerId");
+  this.populate(
+    "workerId",
+    "-password -GovId -licenseCertificate -unavailableTime -prevWorks"
+  );
 
   next();
 });

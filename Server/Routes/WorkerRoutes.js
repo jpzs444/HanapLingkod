@@ -26,6 +26,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.route("/Worker").get(async function (req, res) {
+  console.log("aa");
   let filter = {};
   if (req.query.verified != undefined) {
     filter["verification"] = req.query.verified;
@@ -49,6 +50,7 @@ router.route("/Worker").get(async function (req, res) {
   const limit = 10;
 
   const result = await Worker.find(filter)
+    .select("-unavailableTime -licenseCertificate -GovId -pushtoken -password -accountStatus")
     .limit(limit * page)
     .lean()
     .exec();
