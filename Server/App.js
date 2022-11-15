@@ -41,7 +41,7 @@ const deleteCancelled = require("./Helpers/deleteCancelled");
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+app.use(require("express-status-monitor")());
 mongoose.connect(
   "mongodb+srv://" +
     process.env.ATLAS_USERNAME +
