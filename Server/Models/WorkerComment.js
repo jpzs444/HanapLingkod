@@ -10,4 +10,17 @@ const WorkercommentSchema = new mongoose.Schema({
   created_at: { type: Date, required: true, default: Date.now },
 });
 
+WorkercommentSchema.pre("find", function (next) {
+  this.populate(
+    "reviewee",
+    "_id firstname lastname middlename age sex street purok barangay city province phoneNumber profilePic verification"
+  );
+  this.populate(
+    "reviewer",
+    "_id firstname lastname middlename age sex street purok barangay city province phoneNumber profilePic verification"
+  );
+
+  next();
+});
+
 module.exports = mongoose.model("Workercomment", WorkercommentSchema);
