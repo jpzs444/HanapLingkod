@@ -12,12 +12,12 @@ const WorkercommentSchema = new mongoose.Schema({
 
 WorkercommentSchema.pre("find", function (next) {
   this.populate(
-    "reviewee",
-    "_id firstname lastname middlename age sex street purok barangay city province phoneNumber profilePic verification"
+    "reviewee"
+    // "_id firstname lastname middlename age sex street purok barangay city province phoneNumber profilePic verification"
   );
   this.populate(
-    "reviewer",
-    "_id firstname lastname middlename age sex street purok barangay city province phoneNumber profilePic verification"
+    "reviewer"
+    // "_id firstname lastname middlename age sex street purok barangay city province phoneNumber profilePic verification"
   );
 
   next();
