@@ -28,13 +28,14 @@ router.route("/booking/:user").get(async function (req, res) {
     let queryResultWorker = await Booking.find({
       workerId: req.params.user,
       bookingStatus: { $ne: 2 },
+      $and: [{ bookingStatus: { $ne: 2 } }, { bookingStatus: { $ne: 3 } }],
     })
       .sort({ serviceDate: -1 })
       .limit(limit * page)
       .lean();
     let queryResultRecruiter = await Booking.find({
       recruiterId: req.params.user,
-      bookingStatus: { $ne: 2 },
+      $and: [{ bookingStatus: { $ne: 2 } }, { bookingStatus: { $ne: 3 } }],
     })
       .sort({ serviceDate: -1 })
       .limit(limit * page)
@@ -50,9 +51,9 @@ router.route("/booking/:user").get(async function (req, res) {
     }).lean();
     res.send({
       worker: queryResultWorker,
-      recruiter: queryResultRecruiter,
-      Status2_worker: Status2_worker,
-      Status2_recruiter: Status2_recruiter,
+      // recruiter: queryResultRecruiter,
+      // Status2_worker: Status2_worker,
+      // Status2_recruiter: Status2_recruiter,
     });
   } catch (error) {
     res.send(error);
