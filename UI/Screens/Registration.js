@@ -81,7 +81,7 @@ export default function Registration({route}) {
     const [datePickerVisible, setDatePickerVisibility] = useState(false);
     
     const [isUsernameAvailable, setUsernameAvailable] = useState(false)
-    const [isUsernameUnique, setIsUsernameUnique] = useState(false)
+    const [isUsernameUnique, setIsUsernameUnique] = useState(true)
 
     const [gobtnNext, setgobtnNext] = useState(true)
 
@@ -234,7 +234,7 @@ export default function Registration({route}) {
       let arrUser2 = Object.values(arrUser)
       let userJ = 1, job;
 
-      console.log("arr: ", arr)
+      console.log("arr services: ", arr)
       console.log("arrUser: ", Object.values(arrUser2))
 
       for(let el of arrUser){
@@ -323,23 +323,6 @@ export default function Registration({route}) {
       console.log(dateString)
     };
 
-    // const handleUsernameAvailable = (val) => {
-    //   fetch('http://' + IPAddress + ':3000/isUsernameUnique', {
-    //     method: "POST",
-    //     headers: {
-    //       'accept': 'application/json',
-    //       'content-type': 'application/json'
-    //     },
-    //     body: JSON.stringify({
-    //       "username": val,
-    //     }),
-    //   }).then((response) => response.json())
-    //   .then((isUnique) => {
-    //     setIsUsernameUnique(isUnique)
-    //   })
-    //   .catch((error) => console.log(error.message))
-    // }
-
     // OPEN IMAGE PICKER
     // multi ID images
     const [image, setImage] = useState([]);
@@ -426,7 +409,25 @@ export default function Registration({route}) {
     
     if (!loaded) {
       return null;
-    }    
+    }
+
+
+    const handleUsernameAvailable = (val) => {
+      fetch(`http:/${IPAddress}:3000/isUsernameUnique`, {
+        method: "POST",
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: val,
+        }),
+      }).then((response) => response.json())
+      .then((isUnique) => {
+        console.log("username taken: ", isUnique)
+        setIsUsernameUnique(isUnique)
+      })
+      .catch((error) => console.log(error.message))
+    }
   
       
     return (
@@ -648,7 +649,7 @@ export default function Registration({route}) {
                       onPress={() => {
                         console.log("confirm from worker information work description")
                         haveBlanks()
-                        if(hasBlanks ){
+                        if(hasBlanks){
                           setShowDialog(true)
                         }
                         
@@ -1045,13 +1046,14 @@ export default function Registration({route}) {
                   returnKeyType={"next"}
                   textContentType={'username'}
                   onChangeText={ (val) => {
+                    handleUsernameAvailable(val)
                     setUser((prev) => ({...prev, username: val}))
                     // username availability checker
-                    // handleUsernameAvailable(val)
                     haveBlanks()
                     } }
                   onSubmitEditing={ () => ref_pw.current.focus() } />
               </View>
+
               {
                 isUsernameUnique ? null : 
                   <View style={{ alignSelf: 'flex-start', marginLeft: 0, marginBottom: 5}}>

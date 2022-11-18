@@ -18,6 +18,8 @@ import "./global/global";
 import { IPAddress } from "./global/global";
 import UserProfileStack from "./Components/UserProfileStack";
 
+import 'react-native-console-time-polyfill';
+
 
 const AppStack = createNativeStackNavigator();
 

@@ -25,6 +25,7 @@ import ViewComments from '../Screens/ViewComments';
 import PostRequests from '../Screens/PostRequests';
 import PostRequestStack from './PostRequestStack';
 import BookingInformation from '../Screens/BookingInformation';
+import CompletedRequests from '../Screens/CompletedRequests';
 
 
 const Drawer = createDrawerNavigator();
@@ -43,6 +44,7 @@ export default function DrawerNavigation(){
             }}
         >
             <Drawer.Screen name="Home_Drawer" component={TabNavigation} options={{
+                drawerLabel: "Home",
                 drawerIcon: ({color}) => (
                     <Icon name="home" size={25} color={color}  />
                 ),
@@ -52,7 +54,8 @@ export default function DrawerNavigation(){
                 }
             }} />
 
-            <Drawer.Screen name="RUT" component={RegisterUserAccountType} options={{
+            <Drawer.Screen name="CompletedBookingsDrawer" component={CompletedRequests} options={{
+                drawerLabel: "Completed Bookings",
                 drawerIcon: ({color}) => (
                     <Icon name="clipboard-edit" size={25} color={color}  />
                 ),

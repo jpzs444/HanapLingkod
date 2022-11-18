@@ -72,7 +72,7 @@ const Workers = () => {
             }
             setListOfWorkers([...data])
             setPrevListWorker([...data])
-            console.log("list of workers: ", data[3].works.join(', '))
+            // console.log("list of workers: ", data[3].works.join(', '))
         })
     }
 
@@ -381,7 +381,11 @@ const Workers = () => {
                                             
                                                 <View style={styles.descriptionBottom}>
                                                     <View style={[styles.serviceFeeText]}>
-                                                        <Text numberOfLines={1} ellipsizeMode='tail' style={{fontSize: 13, width: '100%'}}>Services: {item.works}</Text>
+                                                        <Text numberOfLines={1} ellipsizeMode='tail' style={{fontSize: 13, width: '100%'}}>Services: {
+                                                            item.works.map(function(subcat){
+                                                                return subcat + ", "
+                                                            })
+                                                        }</Text>
                                                     </View>
                                             </View>
                                         </View>

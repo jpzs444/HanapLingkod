@@ -186,7 +186,11 @@ export default function Home() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionbar_btn}>
+          <TouchableOpacity style={styles.actionbar_btn}
+            onPress={() => {
+              navigation.navigate("CompletedBookingsDrawer")
+            }}
+          >
             <View style={styles.actionbar_iconContainer}>
               <Icon name="clipboard-check-multiple" size={50} color={ThemeDefaults.appIcon} />
             </View>

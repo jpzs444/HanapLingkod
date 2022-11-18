@@ -227,6 +227,7 @@ const Edit_UserProfile = () => {
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsMultipleSelection: true,
           quality: 0.5,
+          selectionLimit: 10,
         });
   
         // console.log("selected", result.selected);

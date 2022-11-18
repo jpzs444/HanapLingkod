@@ -120,7 +120,12 @@ const Requests = () => {
 
                                             {/* card */}
                                             <View style={[styles.cardUserImage, ]}>
-                                                <Image source={global.userData.profilePic ? {uri: global.userData.role === "recruiter" ? item.workerId.profilePic : item.recruiterId.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} />
+                                                {
+                                                    global.userData.role === 'recruiter' ?
+                                                        <Image style={styles.cardimageStyle} source={item.workerId.profilePic == "pic" ? require('../assets/images/default-profile.png') : {uri: item.workerId.profilePic}} />
+                                                        :
+                                                        <Image style={styles.cardimageStyle} source={item.recruiterId.profilePic == "pic" ? require('../assets/images/default-profile.png') : {uri: item.workerId.profilePic}} />
+                                                }
                                             </View>
                                             <View style={styles.requestInformationContainer}>
                                                 <View style={styles.cardTop}>
@@ -203,15 +208,21 @@ const Requests = () => {
 
                     {/* card */}
                     <View style={[styles.cardUserImage]}>
-                        <Image source={global.userData.profilePic ? {uri: global.userData.role === "recruiter" ? item.workerId.profilePic : item.recruiterId.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} />
+                        {/* <Image source={global.userData.profilePic ? {uri: global.userData.role === "recruiter" ? item.workerId.profilePic : item.recruiterId.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} /> */}
+                        {
+                            global.userData.role === 'recruiter' ?
+                                <Image style={styles.cardimageStyle} source={item.workerId.profilePic == "pic" ? require('../assets/images/default-profile.png') : {uri: item.workerId.profilePic}} />
+                                :
+                                <Image style={styles.cardimageStyle} source={item.recruiterId.profilePic == "pic" ? require('../assets/images/default-profile.png') : {uri: item.workerId.profilePic}} />
+                        }
                     </View>
                     <View style={styles.requestInformationContainer}>
                         <View style={styles.cardTop}>
                             {
                                 global.userData.role === 'recruiter' ?
-                                    <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.workerId.firstname} {item.workerId.lastname}</Text>
-                                    :
-                                    <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.recruiterId.firstname} {item.recruiterId.lastname}</Text>
+                                <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.workerId.firstname} {item.workerId.lastname}</Text>
+                                :
+                                <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.recruiterId.firstname} {item.recruiterId.lastname}</Text>
                             }
                             <View style={styles.cardUserrating}>
                                 <Icon name='star' size={20} color="gold" />
@@ -306,6 +317,8 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 15,
+        zIndex: 5,
+        backgroundColor: 'pink'
     },
     requestInformationContainer: {
         // backgroundColor: 'pink',
@@ -366,7 +379,7 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     cardViewRequestTxt: {
-        fontSize: HEIGHT * 0.015,
+        fontSize: 12,
         marginRight: 8
     },
     lineBreaker: {
@@ -392,7 +405,7 @@ const styles = StyleSheet.create({
     },
     requestDeclinedText: {
         color: ThemeDefaults.themeWhite
-    },
+    }, 
     cardViewDeclined: {
         borderWidth: 0,
         paddingVertical: 3
@@ -405,6 +418,5 @@ const styles = StyleSheet.create({
     deleteNoticeText: {
         textAlign: 'center',
         color: '#c2c2c2'
-
     },
 })
