@@ -19,18 +19,7 @@ const WorkerProfile = ({route}) => {
 
     const screenFocused = useIsFocused()
 
-    useEffect(() => {
-        getUpdatedUserData()
-        getUpdatedWorkList()
-
-        return () => {
-            setworkerInformation({})
-            setWorkList([])
-        }
-        
-    }, [screenFocused])
-
-    const {workerID} = route.params;
+    const {workerID, userRole} = route.params;
 
     const navigation = useNavigation()
     const isFocused = navigation.isFocused();
@@ -46,9 +35,26 @@ const WorkerProfile = ({route}) => {
 
     const [workerInformation, setworkerInformation] = useState({})
 
+    useEffect(() => {
+        // console.log('worker profile screen: ', userRole)
+        getUpdatedUserData()
+
+        if(!userRole){
+            getUpdatedWorkList()
+        }
+
+        return () => {
+            setworkerInformation({})
+            setWorkList([])
+        }
+        
+    }, [screenFocused])
+
     const getUpdatedUserData = () => {
 
-        fetch("http://" + IPAddress + ":3000/Worker/" + workerID, {
+        let userRoute = userRole ? "Recruiter/" : "Worker/"
+        
+        fetch("http://" + IPAddress + ":3000/" + userRoute + workerID, {
             method: "GET",
             header: {
                 "conten-type": "application/json"
@@ -232,7 +238,7 @@ const WorkerProfile = ({route}) => {
                     {/* works offered by the worker */}
                     <View style={{marginBottom: 15, marginHorizontal: 30, width: '100%', alignItems: 'center'}}>
                         {
-                            activeTab === "works" ?
+                            activeTab === "works" && workerInformation.role === 'worker' ?
                             <>
                                 {
                                     workList.map(function (workItem, index) {

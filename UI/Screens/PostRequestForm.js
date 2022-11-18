@@ -80,6 +80,7 @@ const PostRequestForm = () => {
                 lat: 25,
             })
         }).then((res) => {
+            console.log("res: ", res)
             console.log("Success: Added a request to your posts")
             navigation.navigate("PostRequestPRRStack")
         })

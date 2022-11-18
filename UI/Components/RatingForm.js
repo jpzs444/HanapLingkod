@@ -6,42 +6,50 @@ import ThemeDefaults from '../Components/ThemeDefaults'
 import { IPAddress } from '../global/global'
 
 import StarRating from 'react-native-star-rating-widget';
+import DialogueModal from './DialogueModal'
 
-const RatingForm = ({item}) => {
+const RatingForm = ({item, handleUpdate}) => {
 
     const [rating, setRating] = useState(0);
     const [feedbackMessage, setFeedbackMessage] = useState("")
+    const [viewRatingModal, setViewRatingModal] = useState(false)
+    const [viewSubmitReviewModal, setSubmitReviewModal] = useState(false)
 
-    const handleOnSubmit = () => {
+    const handleOnSubmitRatingFeedback = () => {
         // submit review
+
+        let submitBy = global.userData.role === 'recruiter' ? 
+            {statusRecruiter: 3, rating: rating, message: feedbackMessage ? feedbackMessage : ""} 
+            : {statusWorker: 3, rating: rating, message: feedbackMessage ? feedbackMessage : ""}
+
         fetch(`http://${IPAddress}:3000/booking/${global.userData._id}/${item._id}`, {
             method: "PUT",
             headers: {
                 'content-type': 'application/json',
             },
-            body: JSON.stringify(global.userData.role === 'recruiter' ? {
-                statusRecruiter: 3,
-                rating: "",
-                message: feedbackMessage ? feedbackMessage : "",
-            } : {
-                statusWorker: 3,
-                rating: "",
-                message: feedbackMessage ? feedbackMessage : "",
+            body: JSON.stringify({
+                ...submitBy
             })
         })
     }
 
+    const handleOnSubmit = () => {
+        handleOnSubmitRatingFeedback()
+        handleUpdate()
+    }
+
+
     return (
         <View>
             <View style={styles.requestFormContainer}>
-                <View style={[styles.flexRow, styles.clientCard]}>
+                {/* <View style={[styles.flexRow, styles.clientCard]}>
                     <Image style={styles.profilePic} source={{uri: global.userData.role === 'recruiter' ? item.workerId.profilePic : item.recruiterId.profilePic}} />
                     <View style={styles.requestInfo}>
                         <TText style={styles.requestInfoNameText}>{global.userData.role === 'recruiter' ? `${item.workerId.firstname} ${item.workerId.lastname}` : `${item.recruiterId.firstname} ${item.recruiterId.lastname}`}</TText>
                         <TText style={styles.requestInfoSubCatText}>{item.subCategory}</TText>
                         <TText style={styles.requestInfoAddressText}>{item.address}</TText>
                     </View>
-                </View>
+                </View> */}
 
                 <View style={[styles.feedbackHeader]}>
                     <Icon name="comment-quote" size={18} color={ThemeDefaults.themeDarkBlue} style={{paddingTop: 3}} />
@@ -67,7 +75,8 @@ const RatingForm = ({item}) => {
                     <TextInput 
                         multiline
                         numberOfLines={5}
-                        placeholder='Write a review'
+                        placeholder='Write a review (Optional)'
+                        placeholderTextColor={'rgba(0,0,0,0.35)'}
                         onChangeText={(val) => setFeedbackMessage(val)}
                         style={styles.textInputStyles}
                     />
@@ -80,13 +89,36 @@ const RatingForm = ({item}) => {
                     activeOpacity={0.5}
                     onPress={() => {
                         console.log("hi review")
+                        if(rating > 0) {
+                            setSubmitReviewModal(true)
+                        } else {
+                            setViewRatingModal(true)
+                        }
                     }}
                 >
                     <TText style={styles.submitBtnText}>Submit Review (Service is Finished)</TText>
                 </TouchableOpacity>
             </View>
 
-            <TText>{rating}</TText>
+            <DialogueModal 
+                firstMessage={"Invalid rating value. Please input a rating either from 1 to 5"}
+                secondMessage={false}
+                visible={viewRatingModal}
+                warning={true}
+                numBtn={1}
+                // onAccept={handleOnSubmit}
+                onDecline={setViewRatingModal}
+            />
+
+            <DialogueModal 
+                firstMessage={"Are you sure you want to submit your review?"}
+                secondMessage={"By clicking 'Yes', your review will be submitted and you agree that the service is already finished."}
+                thirdMessage={"This process is irrevocable."}
+                visible={viewSubmitReviewModal}
+                numBtn={2}
+                onAccept={handleOnSubmit}
+                onDecline={setSubmitReviewModal}
+            />
 
         </View>
     )
@@ -97,11 +129,8 @@ export default RatingForm
 const styles = StyleSheet.create({
     requestFormContainer: {
         marginHorizontal: 30,
-        marginTop: 30,
+        marginTop: 10,
         padding: 15,
-        borderWidth: 1.5,
-        borderColor: '#d7d7d7',
-        borderRadius: 15,
         backgroundColor: ThemeDefaults.themeWhite
     },
     profilePic: {
@@ -133,19 +162,21 @@ const styles = StyleSheet.create({
     feedbackHeader: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        marginVertical: 20,
+        marginTop: 20,
+        marginBottom: 30,
         padding: 0
     },
     headerText: {
-        marginLeft: 10
+        marginLeft: 10,
+        fontSize: 18
     },
     headerSubText: {
         fontSize: 14,
         marginLeft: 10,
-        color: "#ccc"
+        color: "rgba(0,0,0,0.56)"
     },
     textInputContainer: {
-        backgroundColor: '#eee',
+        backgroundColor: '#f1f1f1',
         borderRadius: 10,
         padding: 12,
         paddingTop: 15,
@@ -163,15 +194,15 @@ const styles = StyleSheet.create({
     },
     submitBtn: {
         alignItems: 'center',
-        marginHorizontal: 30,
+        marginHorizontal: 50,
         paddingVertical: 12,
-        backgroundColor: ThemeDefaults.themeLighterBlue,
+        backgroundColor: ThemeDefaults.themeOrange,
         borderRadius: 15,
         elevation: 2
     },
     submitBtnText: {
         fontFamily: "LexendDeca_SemiBold",
-        fontSize: 14,
+        fontSize: 16,
         color: ThemeDefaults.themeWhite
     },
     ratingContainer: {

@@ -9,6 +9,8 @@ import ThemeDefaults from '../Components/ThemeDefaults'
 import dayjs from 'dayjs'
 import { useNavigation } from '@react-navigation/native'
 
+// import 'react-native-console-time-polyfill';
+
 const Bookings = ({navigation}) => {
 
     // const navigation = useNavigation()
@@ -17,13 +19,18 @@ const Bookings = ({navigation}) => {
     const [bookings, setBookings] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
     const [isRefreshing, setIsRefreshing] = useState(false)
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         fetchBookings()
-
         // navigation.addListener("focus", () => {fetchBookings()})
+        let fetchInterval = setInterval(() => {
+            setLoading(true)
+            fetchBookings()
+            setLoading(false)
+        }, 10000)
 
-        let fetchInterval = setInterval(() => {fetchBookings()}, 10000)
+        console.log("user data: ", global.userData)
 
 
         return () => {
@@ -31,23 +38,25 @@ const Bookings = ({navigation}) => {
         };
     }, [currentPage]);
 
-    const fetchBookings = () => {
-            fetch(`http://${IPAddress}:3000/booking/${global.userData._id}?page=${currentPage}`, {
-                method: "GET",
-                headers: {
-                    'content-type': "application/json"
-                }
-            }).then(res => res.json())
-            .then(data => {
-                console.log("Bookings data: ")
-                console.log("Bookings data: ", data)
-                // console.log("Bookings data: ", data.worker.workerId)
-                // console.log("fetched")
+    const fetchBookings = async () => {
+        // setLoading(true)
+        const gg = await fetch(`http://${IPAddress}:3000/booking/${global.userData._id}?page=${currentPage}`, {
+            method: "GET",
+            headers: {
+                'content-type': "application/json"
+            }
+        }).then(res => res.json())
+        .then(data => {
+            console.log("Bookings data: ", data)
+            // console.log("Bookings data: ", data.worker.workerId)
+            // console.log("fetched")
 
-                // grab bookings which have the status of active(1) and ongoing(2)
-                global.userData.role === "recruiter" ? setBookings([...data.recruiter]) : setBookings([...data.worker])
-    
-            })
+            // grab bookings which have the status of active(1) and ongoing(2)
+            global.userData.role === "recruiter" ? setBookings([...data.Status2_recruiter, ...data.recruiter]) : setBookings([...data.Status2_worker, ...data.worker])
+            // global.userData.role === "recruiter" ? setBookings(curr => [...curr, ...data.recruiter]) : setBookings(curr => [...curr, ...data.worker])
+            
+        })
+        // setLoading(false)
     }
 
 
@@ -59,44 +68,101 @@ const Bookings = ({navigation}) => {
         setIsRefreshing(true)
 
         setCurrentPage(1)
-        fetchBookings()
+        fetchBookings() 
 
         wait(500).then(() => setIsRefreshing(false));
     }
 
 
-    const BookingItem = ({ item }) => (
-        <TouchableOpacity style={[styles.bookingItem, {borderWidth: item.bookingStatus == '2' ? 1.5 : 0, borderColor: item.bookingStatus == '2' ? ThemeDefaults.themeLighterBlue : 'none' }]}
-            onPress={() => {
-                console.log("Item ID: ", item._id)
-                navigation.navigate("BookingInformationDrawer", {bookingID: item._id, bookingItem: item})
-            }}
-        >
-            {/* {
-                global.userData.role === "recruiter" ? 
-                <Image style={styles.image} source={ bookings.workerId.profilePic === "pic" ? require("../assets/images/default-profile.png") : { uri: bookings.workerId.profilePic }} />
-                :
-                <Image style={styles.image} source={ bookings.recruiterId.profilePic === "pic" ? require("../assets/images/default-profile.png") : { uri: bookings.recruiterId.profilePic }} />
-            } */}
-
-            <Image style={styles.image} source={ global.userData.profilePic === "pic" ? require("../assets/images/default-profile.png") : { uri: global.userData.profilePic }} />
-
-            <View style={styles.requestInformation}>
-                <TText style={styles.name}>Leah Olivar</TText>
-                <TText style={styles.subCategory}>{item.subCategory}</TText>
-                <View style={styles.dateTime}>
-                    <View style={styles.dateTimeItem}>
-                        <Icon name="calendar-month" size={20} color={ThemeDefaults.themeOrange} />
-                        <TText style={styles.dateTimeInfo}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
+    const BookingItem = ({ item }) => {
+        return (
+            <>
+                {
+                    loading ? 
+                    <View style={{flex: 1, width: '100%', marginTop: 50}}>
+                        <ActivityIndicator size={'large'} style={{width: '100%', alignItems: 'center'}} />
                     </View>
-                    <View style={styles.dateTimeItem}>
-                        <Icon name="clock-outline" size={20} color={ThemeDefaults.themeOrange} />
-                        <TText style={styles.dateTimeInfo}>{dayjs(item.startTime).format("hh:mm A")}</TText>
-                    </View>
-                </View>
-            </View>
-        </TouchableOpacity>
-    )
+                    :
+                    <TouchableOpacity style={[styles.bookingItem, item.bookingStatus != '1' && item.bookingStatus != '4' && {borderWidth: 1.5, borderColor: ThemeDefaults.themeLighterBlue }, item.bookingStatus == 4 && {backgroundColor: 'rgba(153,153,153,1)'}, item.bookingStatus == '5' && styles.serviceOngoing]}
+                        onPress={() => {
+                            console.log("Item ID: ", item._id)
+                            navigation.navigate("BookingInformationDrawer", {bookingID: item._id, bookingItem: item})
+                        }}
+                    >
+                        <View style={{flexDirection: 'row',}}>
+                            {
+                                global.userData.role === "recruiter" ? 
+                                <Image style={styles.image} source={ item.workerId.profilePic === "pic" ? require("../assets/images/default-profile.png") : { uri: item.workerId.profilePic }} />
+                                :
+                                <Image style={styles.image} source={ item.recruiterId.profilePic === "pic" ? require("../assets/images/default-profile.png") : { uri: item.recruiterId.profilePic }} />
+                            }
+
+                            <View style={styles.requestInformation}>
+                                <TText style={[styles.name, item.bookingStatus == '4' ? {color: ThemeDefaults.themeWhite} : null]}>
+                                    {
+                                        global.userData.role === 'recruiter' ?
+                                        `${item.workerId.firstname} ${item.workerId.lastname}` : `${item.recruiterId.firstname} ${item.recruiterId.lastname}`
+                                    }
+                                </TText>
+                                <TText style={[styles.subCategory, item.bookingStatus == '4' ? {color: ThemeDefaults.themeWhite}: null]}>{item.subCategory}</TText>
+                                <View style={[styles.dateTime,]}>
+                                    <View style={styles.dateTimeItem}>
+                                        <Icon name="calendar-month" size={20} color={item.bookingStatus == '4' ? ThemeDefaults.themeWhite : "black"} />
+                                        <TText style={[styles.dateTimeInfo, item.bookingStatus == '4' ? {color: ThemeDefaults.themeWhite} : null]}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
+                                    </View>
+                                    <View style={styles.dateTimeItem}>
+                                        <Icon name="clock-outline" size={20} color={item.bookingStatus == '4' ? ThemeDefaults.themeWhite : 'black'} />
+                                        <TText style={[styles.dateTimeInfo, item.bookingStatus == '4' ? {color: ThemeDefaults.themeWhite}: null]}>{dayjs(item.startTime).format("hh:mm A")}</TText>
+                                    </View>
+                                    {
+                                        (item.statusRecruiter != '3' && item.statusWorker != '3') ?
+                                        <TouchableOpacity style={[styles.viewItemBtn, item.bookingStatus != '4' && {borderWidth: 1.3, borderColor: 'black'}]}
+                                            activeOpacity={0.5}
+                                            onPress={() => {
+                                                navigation.navigate("BookingInformationDrawer", {bookingID: item._id, bookingItem: item})
+                                            }}
+                                        >
+                                            <TText style={[styles.viewBtnText,]}>View</TText>
+                                            <Icon name="arrow-right" color={"black"} size={18} />
+                                        </TouchableOpacity>
+                                        :
+                                        null
+                                    }
+                                </View>
+                            </View>
+                        </View>
+                        {
+                            item.statusRecruiter == '3' || item.statusWorker == '3' ?
+                            <TouchableOpacity style={[styles.viewItemBtn, {borderWidth: 1.3, borderColor: ThemeDefaults.themeOrange, marginTop: 15}]}
+                                activeOpacity={0.5}
+                                onPress={() => {
+                                    navigation.navigate("BookingInformationDrawer", {bookingID: item._id, bookingItem: item})
+                                }}
+                            >
+                                {/* <TText style={[styles.viewBtnText,{marginRight: 'auto', maxWidth: '90%'}]}>{item.statusRecruiter == '3' ? "Recruiter" : "Worker"} set service as finished. Confirm service completion and send a review</TText> */}
+                                <TText style={[styles.viewBtnText,{marginRight: 'auto', maxWidth: '90%'}]}>
+                                    {
+                                        item.statusRecruiter == '3' && global.userData.role === 'recruiter' ? 
+                                            "Please wait for the Worker to submit their feedback and rating" 
+                                            : 
+                                            item.statusWorker == '3' && global.userData.role === 'worker' ?
+                                            "Please wait for the Recruiter to submit their feedback and rating"
+                                            :
+                                            item.statusRecruiter == '3' && global.userData.role === 'worker' ?
+                                            "Recruiter set service as finished. Confirm service completion and send a review"
+                                            :
+                                            "Worker set service as finished. Confirm service completion and send a review"
+                                    } 
+                                </TText>
+                                <Icon name="arrow-right" color={"black"} size={22} />
+                            </TouchableOpacity>
+                            : null
+                        }
+                    </TouchableOpacity>
+                }
+            </>
+        )
+    }
 
     return (
         <SafeAreaView style={styles.mainContainer}>
@@ -112,12 +178,13 @@ const Bookings = ({navigation}) => {
                     estimatedItemSize={100}
                     onEndReachedThreshold={0.5}
                     onEndReached={() => setCurrentPage(page => page + 1)}
-                    ListEmptyComponent={() => ( <View style={{paddingVertical: 25, alignItems: 'center'}}><TText style={{color: 'lightgray'}}>Find and request a service for it to appear here</TText></View> )}
+                    // ListEmptyComponent={() => ( <View style={{paddingVertical: 25, alignItems: 'center'}}><TText style={{color: 'lightgray'}}>Find and request a service for it to appear here</TText></View> )}
                     ListHeaderComponent={() => (<TText style={styles.headerText}>Bookings</TText>)}
-                    renderItem={({item}) => ( <BookingItem item={item} /> )}
+                    renderItem={({item}) => (<BookingItem item={item} />)}
                     ListFooterComponent={() => (<View style={{height: 150}}></View>)}
                 />
             </View>
+
         </SafeAreaView>
     )
 }
@@ -143,8 +210,8 @@ const styles = StyleSheet.create({
         // paddingTop: 20
     },
     bookingItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        // flexDirection: 'row',
+        // alignItems: 'center',
         padding: 15,
         marginHorizontal: 30,
         marginBottom: 15,
@@ -164,6 +231,7 @@ const styles = StyleSheet.create({
     },
     name: {
         fontSize: 14,
+        color: '#888'
     },
     subCategory: {
         fontSize: 18,
@@ -178,11 +246,30 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: 30
+        marginRight: 15
     },
     dateTimeInfo: {
         fontSize: 17,
         fontFamily: 'LexendDeca_Medium',
         marginLeft: 5,
+    },
+    viewItemBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: ThemeDefaults.themeWhite,
+        borderRadius: 15,
+        paddingHorizontal: 15, 
+        paddingVertical: 5,
+        marginLeft: 5,
+        elevation: 3
+    },
+    viewBtnText: {
+        marginRight: 5,
+        fontSize: 14
+    },
+    serviceOngoing: {
+        // borderWidth: 2,
+        // borderColor: ThemeDefaults.themeGreen,
+        backgroundColor: ThemeDefaults.themeWhite
     },
 })

@@ -125,28 +125,30 @@ const UserProfile = ({route}) => {
                 </TouchableOpacity>
             </View>
             <Swiper index={initialIndex} 
-            showsPagination
-            paginationStyle={{backgroundColor: 'pink'}}
-            renderPagination={renderPagination}
-            activeDot={
-                <View style={{backgroundColor: ThemeDefaults.appIcon, width: 8, height: 8, borderRadius: 4, marginLeft: 3, marginRight: 3, marginTop: 3, marginBottom: 3,}} />
-            }
-            nextButton={
-                    <TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>›</TText>
-            }
-            prevButton={
-                    <TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>‹</TText>
-            }
-            style={{backgroundColor: 'rgba(0,0,0,0.8)', alignItems: 'center',}}>
-                { 
-                    global.userData.prevWorks.map(function(image, index){
-                        return(
-                            <View key={index} style={{flex:1, alignItems: 'center', justifyContent: 'center', width: WIDTH, }}>
-                                <Image source={{uri: `http://${IPAddress}:3000/images/${image}`}} style={{width: WIDTH - 50, height: HEIGHT / 2}} />
-                            </View>
-                        )
-                    })
+                showsPagination
+                paginationStyle={{backgroundColor: 'pink'}}
+                renderPagination={renderPagination}
+                activeDot={
+                    <View style={{backgroundColor: ThemeDefaults.appIcon, width: 8, height: 8, borderRadius: 4, marginLeft: 3, marginRight: 3, marginTop: 3, marginBottom: 3,}} />
                 }
+                nextButton={
+                        <TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>›</TText>
+                }
+                prevButton={
+                        <TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>‹</TText>
+                }
+                style={{backgroundColor: 'rgba(0,0,0,0.8)', alignItems: 'center',}}
+            >
+                    { 
+                        (global.userData).hasOwnProperty('prevWorks') ? global.userData.prevWorks.map(function(image, index){
+                            return(
+                                <View key={index} style={{flex:1, alignItems: 'center', justifyContent: 'center', width: WIDTH, }}>
+                                    <Image source={{uri: `http://${IPAddress}:3000/images/${image}`}} style={{width: WIDTH - 50, height: HEIGHT / 2}} />
+                                </View>
+                            )
+                        })
+                        : null
+                    }
             </Swiper>
         </Modal> : null
         }
@@ -349,9 +351,16 @@ const UserProfile = ({route}) => {
                             <TText style={{fontSize: 18}}>Gallery from previous appointments</TText>
                         </View>
 
+                        {
+                            global.userData.hasOwnProperty("prevWorks") || global.userData.prevWorks.length === 0 ? 
+                            <View style={{alignItems: 'center'}}>
+                                <TText style={{color: '#ccc'}}>Picture of previous works are not available</TText>
+                            </View>: null
+                        }
+
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 30, paddingLeft: 30,}}>
                             {
-                                global.userData.role !== "recruiter" && global.userData.prevWorks.map(function(item, index, {length}){
+                                global.userData.role !== "recruiter" && global.userData.hasOwnProperty("prevWorks") && global.userData.prevWorks.map(function(item, index, {length}){
                                     return(
                                         <TouchableOpacity key={index} style={{ width: 220, height: 220, elevation: 4, marginRight: 20, marginRight: index + 1 === length ? 70 : 20}}
                                             onPress={() => {

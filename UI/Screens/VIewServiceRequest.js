@@ -187,7 +187,7 @@ const VIewServiceRequest = ({route}) => {
                 acceptMore: radioBtn.toString()
             })
         }).then((res) => {
-            console.log("Success - Cancelled Request Complete")
+            console.log("Success - Cancelled Request Complete: ", res)
             setHasDeclinedRequest(true)
             setDeclineRequestModal(false)
 
@@ -379,9 +379,7 @@ const VIewServiceRequest = ({route}) => {
                             <TouchableOpacity
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
-                                    setDeclineRequestModal(false)
                                     handleDeclineRequest(requestItem._id)
-                                    setHasDeclinedRequest(true)
                                 }}
                             >
                                 <TText style={styles.dialogueCancel}>Yes</TText>
@@ -586,7 +584,13 @@ const VIewServiceRequest = ({route}) => {
             {/* Card | Request Information */}
             <View style={styles.requestCard}>
                 <View style={styles.cardTopRow}>
-                    <Image source={global.userData.profilePic ? {uri: global.userData.role === "recruiter" ? requestItem.workerId.profilePic : requestItem.recruiterId.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} />
+                    {
+                        global.userData.role === 'recruiter' ? 
+                            <Image source={requestItem.workerId.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: requestItem.workerId.profilePic }} style={styles.cardimageStyle} />
+                            :
+                            <Image source={requestItem.recruiterId.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: requestItem.recruiterId.profilePic }} style={styles.cardimageStyle} />
+
+                    }
                     <View style={styles.rightSection}>
                         <View style={styles.nameRatingContainer}>
                             <View style={styles.workerNameContainer}>
@@ -611,7 +615,7 @@ const VIewServiceRequest = ({route}) => {
                 {
                     requestItem.description !== "" ?
                     <View style={styles.requestDescriptionCont}>
-                        <TText style={styles.requestDescriptionText}>Note: {requestItem.description}</TText>
+                        <TText style={styles.requestDescriptionText}>{requestItem.description}</TText>
                     </View>
                     : null
                 }
@@ -670,6 +674,7 @@ const VIewServiceRequest = ({route}) => {
                                 </View>
                                 <Icon name="chevron-down" size={20} />
                             </TouchableOpacity>
+                            <TText style={{fontSize: 14, width: '95%', marginTop: 3, color: '#999'}}>(Leave this portion blank if request is to be declined *)</TText>
                         </View>
                     : null
                     }
@@ -839,12 +844,13 @@ const VIewServiceRequest = ({route}) => {
                         <View>
                             <View style={styles.lineBreaker}>
                                 <View style={{flex: 0.6, height: 1.5, backgroundColor: '#c2c2c2'}} />
-                                <TText style={styles.horizontalText}>Bookings Scheduled on {dayjs(requestItem.serviceDate).format("MMM DD")}</TText>
+                                <TText style={styles.horizontalText}>Bookings scheduled on {dayjs(requestItem.serviceDate).format("MMM DD")}</TText>
                                 <View style={{flex: 0.6, height: 1.5, backgroundColor: '#c2c2c2'}} />
                             </View>
 
                             {
-                                sameDateBookings.map(function(item, index){
+                                sameDateBookings.length > 0 ?
+                                (sameDateBookings.map(function(item, index){
                                     return(
                                         <View key={index} style={styles.bookingItem}>
                                             <Image source={item.profilePic === "pic" ? require("../assets/images/default-profile.png") : {uri: item.recruiterId.profilePic}} style={styles.bookingItemImage} />
@@ -863,7 +869,13 @@ const VIewServiceRequest = ({route}) => {
                                             </View>
                                         </View>
                                     )
-                                })
+                                }))
+                                : 
+                                (
+                                    <View style={{marginTop: 30, alignItems: 'center'}}>
+                                        <TText style={{fontSize: 14, color: '#999'}}>There are no bookings scheduled on {dayjs(requestItem.serviceDate).format("MMMM DD")}</TText>
+                                    </View>
+                                )
                             }
                         </View>
                     </>
@@ -1011,16 +1023,17 @@ const styles = StyleSheet.create({
     },
     addressTitleText: {
         fontSize: 14,
-        color: '#333'
+        color: '#999'
     },
     addressValueCont: {
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'flex-start'
     },
     addressValueText: {
         marginLeft: 5,
         fontFamily: "LexendDeca",
-        fontSize: 16
+        fontSize: 16,
+        width: '94%'
     },
     dateTimeStatusContainer: {
 
@@ -1031,7 +1044,7 @@ const styles = StyleSheet.create({
     },
     dateTimeTitleText: {
         fontSize: 14,
-        color: '#333'
+        color: '#999'
     },
     dtsContainer: {
         flexDirection: 'row',
@@ -1137,13 +1150,14 @@ const styles = StyleSheet.create({
         marginVertical: 20,
         backgroundColor: '#f2f2f2',
         padding: 12,
+        paddingBottom: 30,
         borderRadius: 10
     },
     requestDescriptionText: {
 
     },
     estimatedTimeContainer: {
-        marginTop: 20,
+        marginTop: 30,
     },
     estimatedTimeBtn: {
         borderWidth: 1.3,
