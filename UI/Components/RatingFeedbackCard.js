@@ -7,8 +7,10 @@ import StarRating from 'react-native-star-rating-widget';
 import { IPAddress } from '../global/global';
 import { useNavigation } from '@react-navigation/native';
 import ThemeDefaults from './ThemeDefaults';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
-const RatingFeedbackCard = ({user, reviewee, item, bookingId, route}) => {
+
+const RatingFeedbackCard = ({user, reviewee, item, bookingId, route, fromProfile}) => {
 
     const navigation = useNavigation()
     const [rating, setRating] = useState(0)
@@ -30,29 +32,29 @@ const RatingFeedbackCard = ({user, reviewee, item, bookingId, route}) => {
         };
     }, [route]);
     
-    const handleFetchWorkerComment = async () => {
-        console.log("calledcalled: ", item)
-        try {
-            await fetch(`http://${IPAddress}:3000/reviews/${bookingId}`, {
-                method: "GET",
-                headers: {
-                    'content-type': 'application/json'
-                },
-            }).then(res => res.json())
-            .then(data => {
-                console.log("review data: ", data)
-                setReviewData({...data})
-                const list = user ? {...data.recruiter[0]} : {...data.worker[0]}
-                // user ? setReviewDataRec({...list}) : setReviewDataW({...list})
-                // setReviewData({...data})
-                user ? console.log("recruiter review: ", list) : console.log("worker review: ", list)
-            })
-        } catch (error) {
-            console.log("fetch workercomment", error)
-        }
+    // const handleFetchWorkerComment = async () => {
+    //     console.log("calledcalled: ", item)
+    //     try {
+    //         await fetch(`http://${IPAddress}:3000/reviews/${bookingId}`, {
+    //             method: "GET",
+    //             headers: {
+    //                 'content-type': 'application/json'
+    //             },
+    //         }).then(res => res.json())
+    //         .then(data => {
+    //             console.log("review data: ", data)
+    //             setReviewData({...data})
+    //             const list = user ? {...data.recruiter[0]} : {...data.worker[0]}
+    //             // user ? setReviewDataRec({...list}) : setReviewDataW({...list})
+    //             // setReviewData({...data})
+    //             user ? console.log("recruiter review: ", list) : console.log("worker review: ", list)
+    //         })
+    //     } catch (error) {
+    //         console.log("fetch workercomment", error)
+    //     }
 
-        setLoading(false)
-    }
+    //     setLoading(false)
+    // }
     
     return (
     <>
@@ -66,7 +68,7 @@ const RatingFeedbackCard = ({user, reviewee, item, bookingId, route}) => {
         {
             item.map((rating, index) => {
                 return(
-                    <View style={styles.container} key={index}>
+                    <View style={[styles.container, fromProfile && {marginHorizontal: 0, marginBottom: 0, marginTop: 15, marginHorizontal: 3}]} key={index}>
                         <View style={[styles.reviewerInfo, styles.flexRow]}>
                             <View style={[styles.flexRow]}>
                                 <Image style={styles.reviewerPic} source={
@@ -90,7 +92,12 @@ const RatingFeedbackCard = ({user, reviewee, item, bookingId, route}) => {
                                 </View>
                             </View>
                             
-                            <View style={styles.rating}>
+                            <View style={[styles.rating, styles.flexRow]}>
+                                {/* <View style={styles.flexRow}>
+                                    <TText style={{fontSize: 14, color: '#555' }}>({rating.rating}</TText>
+                                    <Icon name="star" size={15} color={'#555'} />
+                                    <TText style={{fontSize: 14, color: '#555'}}>)</TText>
+                                </View> */}
                                 <StarRating
                                     rating={rating.rating}
                                     onChange={()=>{}}
@@ -98,6 +105,7 @@ const RatingFeedbackCard = ({user, reviewee, item, bookingId, route}) => {
                                     starStyle={{marginRight: -5}}
                                     style={{zIndex:5, paddingRight: 8}}
                                 />
+                                
                             </View>
                         </View>
 

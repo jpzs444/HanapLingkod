@@ -11,6 +11,8 @@ import { useNavigation } from '@react-navigation/native';
 
 import ImageView from "react-native-image-viewing";
 import Swiper from 'react-native-swiper'
+import { FlashList } from '@shopify/flash-list';
+import RatingFeedbackCard from '../Components/RatingFeedbackCard';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -25,6 +27,10 @@ const UserProfile = ({route}) => {
     const isFocused = navigation.isFocused();
 
     const [workList, setWorkList] = useState([])
+    const [userRatings, setUserRatings] = useState([])
+    const [ratingFilter, setRatingFilter] = useState("All")
+    const [page, setPage] = useState(1)
+
     const [activeTab, setActiveTab] = useState('works')
     const [rerender, setRerender] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
@@ -37,6 +43,8 @@ const UserProfile = ({route}) => {
     let workerID = global.userData._id
 
     useEffect(() => {
+        let userType = global.userData.role === 'recruiter'? "RecruiterComment":"WorkerComment"
+        handleFetchUserRatings(userType)
         navigation.addListener("focus", () => {
             getUpdatedUserData()
             refreshFunc()
@@ -84,6 +92,49 @@ const UserProfile = ({route}) => {
         }).catch((error) => console.log("workList fetch: ", error.message))
     }
 
+    const handleFetchUserRatings = async (user) => {
+        try {
+            await fetch(`http://${IPAddress}:3000/${user}/${global.userData._id}?page=${page}`,{
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json'
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("user rating: ", data)
+                setUserRatings([...data.comments])
+            })
+        } catch (error) {
+            console.log("Error fetch user(self) rating: ", error)
+        }
+    }
+
+    const RatingFilterButton = ({label}) => {
+        return(
+            <TouchableOpacity style={[styles.ratingBtn, label === ratingFilter && {borderColor: 'red', borderWidth: 1.3}]}
+                onPress={() => {
+                    setRatingFilter(label)
+                }}
+            >
+                <Icon name="star" size={20} color={"gold"} />
+                <TText style={styles.ratingText}>{label}</TText>
+            </TouchableOpacity>
+        )
+    }
+
+    const RatingFilter = () => {
+        return(
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <RatingFilterButton label={"All"} />
+                <RatingFilterButton label={"5"} />
+                <RatingFilterButton label={"4"} />
+                <RatingFilterButton label={"3"} />
+                <RatingFilterButton label={"2"} />
+                <RatingFilterButton label={"1"} />
+            </View>
+        )
+    }
+
 
     const wait = (timeout) => {
         return new Promise(resolve => setTimeout(resolve, timeout));
@@ -128,38 +179,27 @@ const UserProfile = ({route}) => {
                 showsPagination
                 paginationStyle={{backgroundColor: 'pink'}}
                 renderPagination={renderPagination}
-                activeDot={
-                    <View style={{backgroundColor: ThemeDefaults.appIcon, width: 8, height: 8, borderRadius: 4, marginLeft: 3, marginRight: 3, marginTop: 3, marginBottom: 3,}} />
-                }
-                nextButton={
-                        <TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>›</TText>
-                }
-                prevButton={
-                        <TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>‹</TText>
-                }
+                activeDot={<View style={{backgroundColor: ThemeDefaults.appIcon, width: 8, height: 8, borderRadius: 4, marginLeft: 3, marginRight: 3, marginTop: 3, marginBottom: 3,}} />}
+                nextButton={<TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>›</TText>}
+                prevButton={<TText style={{color:ThemeDefaults.themeOrange, fontSize: 50, fontFamily: 'LexendDeca_SemiBold', marginRight: 5}}>‹</TText>}
                 style={{backgroundColor: 'rgba(0,0,0,0.8)', alignItems: 'center',}}
             >
-                    { 
-                        (global.userData).hasOwnProperty('prevWorks') ? global.userData.prevWorks.map(function(image, index){
-                            return(
-                                <View key={index} style={{flex:1, alignItems: 'center', justifyContent: 'center', width: WIDTH, }}>
-                                    <Image source={{uri: `http://${IPAddress}:3000/images/${image}`}} style={{width: WIDTH - 50, height: HEIGHT / 2}} />
-                                </View>
-                            )
-                        })
-                        : null
-                    }
+                { 
+                    (global.userData).hasOwnProperty('prevWorks') && global.userData.prevWorks.map(function(image, index){
+                        return(
+                            <View key={index} style={{flex:1, alignItems: 'center', justifyContent: 'center', width: WIDTH, }}>
+                                <Image source={{uri: `http://${IPAddress}:3000/images/${image}`}} style={{width: WIDTH - 50, height: HEIGHT / 2}} />
+                            </View>
+                        )
+                    })
+                }
             </Swiper>
         </Modal> : null
         }
         
-      <ScrollView refreshing 
-        refreshControl={
-            <RefreshControl 
-                refreshing={isRefreshing}
-                onRefresh={refreshFunc}
-            />
-        }
+      <ScrollView 
+        refreshing 
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refreshFunc} />}
       >
 
         {/* Top container */}
@@ -235,46 +275,44 @@ const UserProfile = ({route}) => {
             {
                 global.userData.role === 'worker' && activeTab === 'works' ?
                     <View style={{width: '100%', paddingHorizontal: 30}}>
-                    <View style={{ marginTop: 25, marginBottom: global.userData.role === 'worker' ? 0 : 50, padding: 18, backgroundColor: '#fff', borderRadius: 10, elevation: 2, marginHorizontal: 8,}}>
-                        <TText style={{fontFamily: "LexendDeca_Medium", fontSize: 18, marginBottom: 8}}>{global.userData.firstname}'s bio</TText>
-                        <TText style={{fontSize:14}}>{global.userData.workDescription}</TText>
-                    </View>
+                        <View style={{ marginTop: 25, marginBottom: global.userData.role === 'worker' ? 0 : 50, padding: 18, backgroundColor: '#fff', borderRadius: 10, elevation: 2, marginHorizontal: 8,}}>
+                            <TText style={{fontFamily: "LexendDeca_Medium", fontSize: 18, marginBottom: 8}}>{global.userData.firstname}'s bio</TText>
+                            <TText style={{fontSize:14}}>{global.userData.workDescription}</TText>
+                        </View>
                     </View>
                     : null
             }
             
                     {/* works offered by the worker */}
-                    <View style={{marginBottom: 15, marginHorizontal: 30, width: '100%', alignItems: 'center'}}>
+                    <View style={{marginBottom: 15, marginHorizontal: 40, width: '100%', alignItems: 'center', }}>
                         {
                             activeTab === "works" && global.userData.role === 'worker' ?
                             <>
                                 {
                                     workList.map(function (workItem, index) {
-                                return (
-                                <View key={index} style={{width: '96%', paddingHorizontal: 30,}}>
-                                    <View style={{width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 15, padding: 18, backgroundColor: '#fff', borderRadius: 10, borderWidth: .8, borderColor: ThemeDefaults.appIcon, elevation: 2}}>
-                                        {/* <View style={{width: 50, height: 50, borderRadius: 40, backgroundColor: '#f5f5f5', alignItems: 'center', justifyContent: 'center', marginRight: 18}}>
-                                        </View> */}
-                                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                            <Icon name="briefcase" size={28} color="#0f0f0f" />
-                                            <View style={{marginLeft: 10}}>
-                                                <TText style={{fontFamily: "LexendDeca_Medium", fontSize: 16, }}>{workItem.ServiceSubId.ServiceSubCategory}</TText>
-                                                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-                                                    <TText style={{fontSize: 12, marginRight: 20}}>Service Range: ₱{workItem.minPrice} to ₱{workItem.maxPrice}</TText>
+                                        return (
+                                            <View key={index} style={{width: '100%', paddingHorizontal: 40,}}>
+                                                <View style={{width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 15, padding: 18, backgroundColor: '#fff', borderRadius: 10, borderWidth: .8, borderColor: ThemeDefaults.appIcon, elevation: 2}}>
+                                                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                                        <Icon name="briefcase" size={28} color="#0f0f0f" />
+                                                        <View style={{marginLeft: 10}}>
+                                                            <TText style={{fontFamily: "LexendDeca_Medium", fontSize: 16, }}>{workItem.ServiceSubId.ServiceSubCategory}</TText>
+                                                            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                                                                <TText style={{fontSize: 12, marginRight: 20}}>Service Range: ₱{workItem.minPrice} to ₱{workItem.maxPrice}</TText>
+                                                            </View>
+                                                        </View>
+                                                    </View>
+                                                    {
+                                                        global.userData.role === 'recruiter' ?
+                                                            <TouchableOpacity style={{paddingVertical: 5, paddingHorizontal: 10, backgroundColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, elevation: 4}}>
+                                                                <TText style={{fontSize: 12, color: '#fff'}}>Request</TText>
+                                                            </TouchableOpacity>
+                                                            : null
+                                                    }
                                                 </View>
                                             </View>
-                                        </View>
-                                        {
-                                            global.userData.role === 'recruiter' ?
-                                                <TouchableOpacity style={{paddingVertical: 5, paddingHorizontal: 10, backgroundColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, elevation: 4}}>
-                                                    <TText style={{fontSize: 12, color: '#fff'}}>Request</TText>
-                                                </TouchableOpacity>
-                                                : null
-                                        }
-                                    </View>
-                                </View>
-                                )
-                            })
+                                        )
+                                    })
                                 }
                                 <View style={styles.viewScheduleContainer}>
                                     <TouchableOpacity style={styles.viewScheduleBtn}
@@ -285,59 +323,34 @@ const UserProfile = ({route}) => {
                                 </View>
                             </>
                             :
-                            <View style={{marginTop: 20}}>
-                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
+                            <View style={{marginTop: global.userData.role === 'recruiter' ? 0 : 20, width:'88%', paddingHorizontal: 10,}}>
+                                {/* <RatingFilter /> */}
+                                    {
+                                        global.userData.role === 'worker' && <RatingFilter />
+                                    }
 
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>5</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>4</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>3</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>2</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>1</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>All</TText>
-                                    </TouchableOpacity>
-                                    
+                                {/* List of ratings */}
+                                <View style={{ width: '100%', flexGrow: 1, backgroundColor: '#f1f1f1', marginTop: 30, padding: 10, paddingBottom: 20, borderRadius: 10, elevation: 3}}>
+                                    <View style={{flexDirection: 'row', alignItems: 'center', padding: 10}}>
+                                        <TText>Reviews</TText>
+                                        <View style={{width: 25, height: 25, borderRadius: 15, backgroundColor: '#d7d7d7', alignItems: 'center', marginHorizontal: 15}}>
+                                            <TText style={{fontSize: 15}}>{userRatings.length.toString()}</TText>
+                                        </View>
+                                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                            <Icon name="star" size={20} color={'gold'} />
+                                            <TText style={{marginLeft: 5}}>{global.userData.rating}</TText>
+                                        </View>
+                                    </View>
+
+                                    {/* Rating Filter */}
+                                        {
+                                            global.userData.role === 'recruiter' &&
+                                            <View style={{marginVertical: 10}}>
+                                                <RatingFilter />
+                                            </View>
+                                        }
+                                    <RatingFeedbackCard item={userRatings} fromProfile={true} />
                                 </View>
-                                <TText style={{marginTop: 40, textAlign: 'center', color: 'lightgray'}}>Ratings and reviews is not yet available</TText>
                             </View>
                         }
                     </View>
@@ -345,17 +358,17 @@ const UserProfile = ({route}) => {
 
             {/* Photo Gallery of past appointments */}
             {
-                global.userData.role === "worker" && activeTab === 'works' ?
+                global.userData.role === "worker" && activeTab === 'works' &&
                     <View style={{width:'100%',}}>
                         <View style={{marginHorizontal: 30, width: '100%', marginTop: 15, marginBottom: 22,}}>
                             <TText style={{fontSize: 18}}>Gallery from previous appointments</TText>
                         </View>
 
                         {
-                            global.userData.hasOwnProperty("prevWorks") || global.userData.prevWorks.length === 0 ? 
+                            global.userData.hasOwnProperty("prevWorks") && 
                             <View style={{alignItems: 'center'}}>
-                                <TText style={{color: '#ccc'}}>Picture of previous works are not available</TText>
-                            </View>: null
+                                <TText style={{color: '#ccc'}}>Pictures of previous works are not available</TText>
+                            </View>
                         }
 
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 30, paddingLeft: 30,}}>
@@ -375,16 +388,8 @@ const UserProfile = ({route}) => {
                             }
                         </ScrollView>
                     </View>
-                    : null
             }
 
-
-            {/* Ratings and Reviews/Feedbacks */}
-            {
-                global.userData.role === 'recruiter' ?
-                    <TText style={{color:'lightgray'}}>Ratings and Reviews will be available soon</TText>
-                    : null
-            }
         </View>
 
       </ScrollView>
