@@ -53,6 +53,7 @@ const Bookings = ({navigation}) => {
 
             // grab bookings which have the status of active(1) and ongoing(2)
             global.userData.role === "recruiter" ? setBookings([...data.Status2_recruiter, ...data.recruiter]) : setBookings([...data.Status2_worker, ...data.worker])
+            // global.userData.role === "recruiter" ? setBookings([...data.recruiter]) : setBookings([...data.worker])
             // global.userData.role === "recruiter" ? setBookings(curr => [...curr, ...data.recruiter]) : setBookings(curr => [...curr, ...data.worker])
             
         })

@@ -51,9 +51,9 @@ router.route("/booking/:user").get(async function (req, res) {
     }).lean();
     res.send({
       worker: queryResultWorker,
-      // recruiter: queryResultRecruiter,
-      // Status2_worker: Status2_worker,
-      // Status2_recruiter: Status2_recruiter,
+      recruiter: queryResultRecruiter,
+      Status2_worker: Status2_worker,
+      Status2_recruiter: Status2_recruiter,
     });
   } catch (error) {
     res.send(error);

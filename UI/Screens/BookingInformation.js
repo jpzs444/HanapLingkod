@@ -16,11 +16,12 @@ import RatingFeedbackCard from '../Components/RatingFeedbackCard'
 const BookingInformation = ({route}) => {
 
     const navigation = useNavigation()
-    const {bookingID, bookingItem} = route.params
+    const {bookingID, bookingItem, fromCB} = route.params
 
     const [bookingInformation, setBookingInformation] = useState({})
-    const [bookingRatings, setBookingRatings] = useState({})
+    const [bookingRatings, setBookingRatings] = useState([])
     const [isLoading, setisLoading] = useState(false)
+    const [ratingLoading, setRatingLoading] = useState(false)
 
     const [viewCancelModal, setViewCancelModal] = useState(false)
     const [bookingCanceled, setBookingCanceled] = useState(false)
@@ -43,7 +44,9 @@ const BookingInformation = ({route}) => {
     const [viewWrongScheduleModal, setViewWrongScheduleModal] = useState(false)
 
     useEffect(() => {
+        setRatingLoading(true)
         setisLoading(true)
+        setBookingRatings([])
         handleFetchBookingInformation()
         // handleFetchRatingsOfBooking()
         console.log("BookingItem: ", bookingItem)
@@ -54,7 +57,7 @@ const BookingInformation = ({route}) => {
                 bookingInformation.statusWorker == '3' ? setViewBookingInfo(false) : setViewBookingInfo(true)
         
         if(bookingInformation.statusRecruiter == '3' || bookingInformation.statusWorker == '3'){
-            handleFetchRatingsOfBooking()
+            // handleFetchRatingsOfBooking()
         }
 
         let interval = setInterval(() => {handleFetchBookingInformation()}, 10000)
@@ -116,25 +119,40 @@ const BookingInformation = ({route}) => {
             handleFetchRatingsOfBooking()
             
         }).catch(err => console.log("error fetching booking info: ", err.msg))
-        setisLoading(false)
+        // setisLoading(false)
     }
 
     const handleFetchRatingsOfBooking = async () => {
-        console.log("handleFetchRatings... ", bookingInformation._id)
+        console.log("handleFetchRatings... ", bookingID)
         try {
-            fetch(`http://${IPAddress}:3000/reviews/636cc23f3a7d373dd66943b0`, {
+            fetch(`http://${IPAddress}:3000/reviews/${bookingID}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json'
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log("Data from review: ", data)
+
+                let list = []
+                if(data.recruiter.length > 0) list.push(data.recruiter[0])
+                if(data.worker.length > 0) list.push(data.worker[0])
+                // list = [{...data.recruiter[0]}, {...data.worker[0]}]
+                // console.log("Data from review: ", data)
+                
+                console.log("head: ", data)
+                console.log("head emthy: ", list)
+                
+                setBookingRatings([...list])
             })
         } catch (error) {
             console.log("error fetching of booking ratings: ", error)
             
         }
+
+        let ti = setTimeout(setRatingLoading(false), 2000)
+        clearTimeout(ti)
+        setisLoading(false)
+        // setRatingLoading(false)
     }
 
     const handleUpdateBookingStatus = async (status) => {
@@ -197,7 +215,7 @@ const BookingInformation = ({route}) => {
 
     return (
         <ScrollView contentContainerStyle={styles.mainContainer}>
-            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} />
+            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromCB={fromCB} />
             <TText style={styles.mainHeader}>Booking Information</TText>
 
             {/* 
@@ -544,16 +562,18 @@ const BookingInformation = ({route}) => {
             }
                 {/* Rating item */}
                 {
-                    global.userData.role === 'recruiter' ? 
-                        bookingInformation.statusRecruiter == '3' ? 
-                            <RatingFeedbackCard user={true} item={bookingInformation} bookingId={bookingInformation._id} />
-                            :
-                            null
+                    ratingLoading ?
+                    <View style={{width: '100%', alignItems: 'center', height: 40}}>
+                        <ActivityIndicator size={'large'} />
+                    </View>
                     :
-                        bookingInformation.statusWorker == '3' ?
-                            <RatingFeedbackCard user={false} item={bookingInformation} bookingId={bookingInformation._id} />
-                            :
-                            null
+                    (global.userData.role === 'recruiter' && bookingInformation.statusRecruiter == '3') ||
+                    (global.userData.role === 'worker' && bookingInformation.statusWorker == '3') ?
+                    <>
+                        <TText style={{marginLeft: 30, marginBottom: 15, marginTop: 40}}>Ratings and Reviews</TText>
+                        <RatingFeedbackCard item={bookingRatings} bookingId={bookingID} />
+                    </>
+                    : null
                 }
             
             

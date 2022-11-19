@@ -135,7 +135,7 @@ const CompletedRequests = ({route}) => {
                 onEndReachedThreshold={0.5}
                 estimatedItemSize={100}
                 onEndReached={() => setCurrentPage(page => page + 1)}
-                ListEmptyComponent={() => ( <View style={{paddingVertical: 25, alignItems: 'center'}}><TText style={{color: 'lightgray'}}>Find and request a service for it to appear here</TText></View> )}
+                ListEmptyComponent={() => ( <View style={{paddingVertical: 25, alignItems: 'center'}}><TText style={{color: 'lightgray'}}>There are no Completed Requests as of the moment</TText></View> )}
                 ListHeaderComponent={() => (<TText style={styles.headerText}>Completed Bookings</TText>)}
                 renderItem={({item}) => (<BookingItem item={item} />)}
                 ListFooterComponent={() => (<View style={{height: 150}}></View>)}
