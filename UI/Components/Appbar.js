@@ -69,6 +69,8 @@ export default function Appbar(props) {
                                 props.changeCalendarModalState(false)
                             } else if(props.fromRequestForm){
                                 navigation.navigate("RequestFormDrawer", {workerInformation: props.workerInformation, selectedDay: props.selectedDate, selectedTime: props.selectedTime, selectedJob: props.selectedJob, minPrice: props.minPrice, maxPrice: props.maxPrice})
+                            } else if(props.fromCB){
+                                navigation.navigate("CompletedBookingsDrawer")
                             } else {
                                 navigation.goBack()
                             }

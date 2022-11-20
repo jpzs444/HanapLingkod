@@ -195,9 +195,6 @@ const Edit_UserProfile = () => {
     }
 
 
-
-
-
     // Uploading and Picking of Images from device
     const pickImage = async () => {
 
@@ -872,7 +869,7 @@ const Edit_UserProfile = () => {
                                         {
                                             userWorkListEdit.length > 1 ?
                                                 <View style={{alignItems: 'flex-end',  marginTop: 15}}>
-                                                    <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 3, paddingHorizontal: 12, borderWidth: 1.2, borderColor: '#000', borderRadius: 10}}
+                                                    <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center', paddingVertical: 3, paddingHorizontal: 12, borderWidth: 1.2, borderColor: '#c7c7c7', borderRadius: 10}}
                                                         onPress={()=> {
                                                             handleRemoveWorkItem(index)
                                                         }}

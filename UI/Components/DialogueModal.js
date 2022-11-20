@@ -36,7 +36,10 @@ const DialogueModal = ({firstMessage, secondMessage, thirdMessage, visible, onAc
                         <>
                             <TouchableOpacity
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
-                                onPress={() => { onAccept }}
+                                onPress={()=>{
+                                    console.log("hi yes")
+                                    onAccept()
+                                }}
                             >
                                 <TText style={styles.dialogueCancel}>Yes</TText>
                             </TouchableOpacity>

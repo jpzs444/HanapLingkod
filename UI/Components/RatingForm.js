@@ -33,9 +33,10 @@ const RatingForm = ({item, handleUpdate}) => {
         })
     }
 
-    const handleOnSubmit = () => {
+    function handleOnSubmit () {
         handleOnSubmitRatingFeedback()
         handleUpdate()
+        setSubmitReviewModal(false)
     }
 
 
