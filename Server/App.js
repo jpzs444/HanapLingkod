@@ -37,6 +37,8 @@ const Calendar = require("./Routes/CalendarRoutes");
 const WorkerComment = require("./Routes/WorkerCommentRoutes");
 const RecruiterCommentRoutes = require("./Routes/RecruiterCommentRoutes");
 const deleteCancelled = require("./Helpers/deleteCancelled");
+const Conversation = require("./Routes/Conversations");
+const Messages = require("./Routes/messages");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -432,6 +434,7 @@ app.use(ServiceRequestRoutes);
 app.use(RequestPostRoutes);
 app.use(Booking);
 app.use(Calendar);
-
+app.use(Conversation);
+app.use(Messages);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("listening on port 3000."));

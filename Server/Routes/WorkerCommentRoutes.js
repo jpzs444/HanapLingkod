@@ -11,10 +11,12 @@ router.route("/workerComment/:user").get(async function (req, res) {
       page = 1;
     }
     const limit = 10;
-
-    let comments = await WorkerComment.find({
-      reviewee: req.params.user,
-    })
+    let filter = { reviewee: req.params.user };
+    if (req.query.rating != undefined) {
+      filter["rating"] = req.query.rating;
+    }
+    // console.log(filter);
+    let comments = await WorkerComment.find(filter)
       .sort({ serviceDate: -1 })
       .limit(limit * page)
       .lean();
