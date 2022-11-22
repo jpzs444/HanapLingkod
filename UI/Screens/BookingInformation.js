@@ -9,6 +9,7 @@ import TText from '../Components/TText'
 import { useNavigation } from '@react-navigation/native'
 import RatingForm from '../Components/RatingForm'
 import RatingFeedbackCard from '../Components/RatingFeedbackCard'
+import ChatButton from '../Components/ChatButton'
 
 // let dayOfYear = require('dayjs/plugin/dayOfYear')
 // dayjs.extend(dayOfYear)
@@ -291,10 +292,12 @@ const BookingInformation = ({route}) => {
                         activeOpacity={0.5}
                         onPress={() => {
                             console.log("HI")
+                            // go to convo
                         }}
                     >
                         <Image source={require('../assets/icons/chat-bubble.png')} style={{width: 25, height: 25,}} />
                     </TouchableOpacity>
+                    
 
                 <TText style={styles.bookingSubCat}>{bookingItem.subCategory}</TText>
                 <TText style={styles.bookingSchedule}>

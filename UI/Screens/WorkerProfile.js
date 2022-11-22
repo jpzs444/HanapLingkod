@@ -168,7 +168,7 @@ const WorkerProfile = ({route}) => {
 
         {/* Top container */}
         <View style={{elevation: 5, paddingTop: 0, paddingBottom: 30, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, backgroundColor: '#fff'}}>
-            <Appbar settingsBtn={false} onlyBackBtn={true} showLogo={true} />
+            <Appbar settingsBtn={false} onlyBackBtn={true} showLogo={true} chatBtn={true} />
 
             <View>
                 {/* Profile Picture */}

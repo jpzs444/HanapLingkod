@@ -62,7 +62,7 @@ const Requests = () => {
             // console.log("res req: ", res)
         })
         .then((data) => {
-            // console.log("request list data: ", data)
+            console.log("request list data: ", data)
 
             // place to state all rejected/declined requests
             let list = []

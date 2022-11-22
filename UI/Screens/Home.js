@@ -9,6 +9,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import {IPAddress} from '../global/global'
 import ThemeDefaults from '../Components/ThemeDefaults';
 import { FlashList } from '@shopify/flash-list';
+// import { io } from 'socket.io-client'
+
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -27,6 +31,60 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const searchInput = useRef();
+  const socket = useRef()
+
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  // useEffect(() => {
+  //   socket.current = io(`ws://${IPAddress}:8900`)
+  // }, []);
+
+  // useEffect(() => {
+  //   socket.current.emit("addUser", global.userData._id)
+  //   // socket.current.on("getUsers", users => {
+  //   //     console.log("online users: ", users)
+  //   //     setOnlineUsers([...users])
+  //   // })
+  // }, []);
+
+  useEffect(() => {
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        // setNotification(notification);
+        
+      });
+
+      responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log("notification listener response: ", response);
+
+        // turn notification.read to true 
+        fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+          method: "PUT",
+          header: {
+            'content-type': 'application/json',
+          },
+        }).then(() => console.log("all notification read"))
+        .catch((error) => console.log("notification app js error: ", error.message))
+
+        // go to convo
+        navigation.navigate("CompletedBookingsDrawer")
+
+        // go to request/booking page
+
+
+        // fetch(/request/id || /booking/id)
+      });
+
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   
   useEffect(() => {
@@ -629,7 +687,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   greetingText: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: 'LexendDeca_SemiBold',
     color: ThemeDefaults.themeDarkBlue
   },

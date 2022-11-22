@@ -1,5 +1,5 @@
 import { StyleSheet, TextInput, View, TouchableOpacity, Image, StatusBar, FlatList, ScrollView, Dimensions } from 'react-native'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
 import TText from '../Components/TText'
@@ -8,23 +8,38 @@ import { IPAddress } from '../global/global'
 import { FlashList } from '@shopify/flash-list'
 import { io } from 'socket.io-client'
 
+// import { socketContext } from '../Components/DrawerNavigation'
+
+
 
 const ConversationThread = ({route}) => {
 
     const { otherUser, conversation } = route.params
+    // const socketContextRef = useContext(socketContext)
 
     const navigation = useNavigation()
 
     const [message, setMessage] = useState("")
     const [messages, setMessages] = useState([])
     const [incomingMessage, setIncomingMessage] = useState(null)
+
+    const [onlineUsers, setOnlineUsers] = useState([])
     
     const socket = useRef()
 
-    // const scrollRef = useRef()
+    const scrollRef = useRef()
+    const [canScroll, setCanScroll] = useState(false)
+
+    useEffect(() => {
+        if(canScroll){
+            scrollRef.current?.scrollToEnd({animation: "smooth"})
+            setCanScroll(false)
+        }
+    }, [messages, incomingMessage,]);
 
     useEffect(() => {
         socket.current = io(`ws://${IPAddress}:8900`)
+        // console.log("type of socketCOntextref: " , typeof )
         socket.current.on("getMessage", data => {
             setIncomingMessage({
                 sender: data.senderId,
@@ -32,7 +47,7 @@ const ConversationThread = ({route}) => {
                 createdAt: Date.now(),
             })
         })
-    }, []);
+    }, [messages, incomingMessage]);
 
     useEffect(() => {
         incomingMessage && conversation?.members.includes(incomingMessage.sender) &&
@@ -42,9 +57,10 @@ const ConversationThread = ({route}) => {
     useEffect(() => {
         socket.current.emit("addUser", global.userData._id)
         socket.current.on("getUsers", users => {
-            console.log(users)
+            console.log("online users(convo thread): ", users)
+            setOnlineUsers([...users])
         })
-    }, []);
+    }, [route]);
 
 
     useEffect(() => {
@@ -61,23 +77,36 @@ const ConversationThread = ({route}) => {
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log("convo from messages: ", data)
+                // console.log("convo from messages: ", data)
                 setMessages([...data])
+                setCanScroll(true)
             })
         } catch (error) {
             console.log("get messages of convo: ", error)
         }
+        
+        // scrollRef.current?.scrollToEnd({animation: "smooth"})
+
     }
 
     const handleSendMessage = async () => {
 
         const receiver_id = conversation.members.find(member => member !== global.userData._id)
+        
+        const isOnline = onlineUsers.find(user => user.userId === receiver_id)
+        
+        console.log("isONline: ", isOnline)
+        if(isOnline){
+            socket.current.emit("sendMessage", {
+                senderId: global.userData._id, 
+                receiverId: isOnline.userId,
+                text: message,
+            });
             
-        socket.current.emit("sendMessage", {
-            senderId: global.userData._id, 
-            receiverId: receiver_id,
-            text: message,
-        });
+        } else {
+            console.log("no ones there")
+        }
+        
 
         try {
             await fetch(`http://${IPAddress}:3000/messages`, {
@@ -96,15 +125,18 @@ const ConversationThread = ({route}) => {
                 setMessage("")
                 console.log("new message data: ", newMessage)
                 setMessages([...messages, newMessage])
+                setCanScroll(true)
+
             })
 
             console.log("success new sending message")
 
-            
+            // scrollRef.current.scrollToEnd({animation: "smooth"})
         } catch (error) {
             console.log("error send message: ", error)
         }
 
+        // scrollRef.current?.scrollToEnd({animation: "smooth"})
 
     }
 
@@ -191,12 +223,12 @@ const ConversationThread = ({route}) => {
                     )}
                 />
         </View> */}
-        <ScrollView style={styles.thread} contentContainerStyle={{paddingVertical: 60,}} >
+        <ScrollView style={styles.thread} contentContainerStyle={{paddingVertical: 60,}} ref={scrollRef} onContentSizeChange={() => scrollRef.current.scrollToEnd({animation: 'smooth'})} >
             {
                 messages ? 
-                messages.map(messageItem => {
+                messages.map((messageItem, index) => {
                     return(
-                        <View key={messageItem._id}>
+                        <View key={index}>
                             <Messagebox message={messageItem?.text} fromMe={messageItem?.sender === global.userData._id} />
                         </View>
                     )
@@ -223,13 +255,20 @@ const ConversationThread = ({route}) => {
                     value={message ? message : ""}
                     cursorColor={ThemeDefaults.themeOrange}
                     onChangeText={text => setMessage(text)}
+                    onFocus={() => {
+                        scrollRef.current.scrollToEnd({animation: "smooth"})
+                    }}
                     style={styles.input}
                 />
             </View>
             <View style={styles.sendContainer}>
                 <TouchableOpacity style={styles.sendBtn}
                     activeOpacity={0.3}
-                    onPress={() => handleSendMessage()}
+                    onPress={() => {
+                        if(message !== ""){
+                            handleSendMessage()
+                        }
+                    }}
                 >
                     <Icon name={"send"} size={24} color={ThemeDefaults.themeOrange} style={{transform: [{ rotate: '-45deg'}]}} />
                 </TouchableOpacity>
@@ -353,7 +392,7 @@ const styles = StyleSheet.create({
 
     fromOther: {
         alignSelf: 'flex-start',
-        backgroundColor: '#efefef',
+        backgroundColor: '#e4e6eb',
     },
     fromOtherText: {
         color: ThemeDefaults.themeBlack

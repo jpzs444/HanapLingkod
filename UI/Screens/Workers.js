@@ -370,7 +370,7 @@ const Workers = () => {
                                                     </View>
                                                     <View style={styles.workerRatingsHolder}>
                                                         <Icon name="star" color={"gold"} size={18} />
-                                                        <TText style={styles.workerRatings}>4.5</TText>
+                                                        <TText style={styles.workerRatings}>{item.rating}</TText>
                                                     </View>                                     
                                                 </View>
                                                 <View style={styles.workerAddressBox}>

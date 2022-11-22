@@ -28,7 +28,7 @@ const Conversation = ({tab, conversation}) => {
             })
             .then(res => res.json())
             .then(foundUser => {
-                console.log("other user data: ", foundUser)
+                // console.log("other user data: ", foundUser)
                 setOtherUser({...foundUser})
             })
         } catch (error) {

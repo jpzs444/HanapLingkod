@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import * as Device from "expo-device";
@@ -24,6 +24,8 @@ import 'react-native-console-time-polyfill';
 const AppStack = createNativeStackNavigator();
 
 export default function App() {
+
+  // const navigation = useNavigation()
   // const {isLoading, userToken} = useContext(AuthContext);
 
   // if(isLoading) {
@@ -78,7 +80,12 @@ export default function App() {
         }).then(() => console.log("all notification read"))
         .catch((error) => console.log("notification app js error: ", error.message))
 
+        // go to convo
+        // navigation.navigate("CompletedBookingsDrawer")
+
         // go to request/booking page
+
+
         // fetch(/request/id || /booking/id)
       });
     
