@@ -26,6 +26,7 @@ import PostRequests from '../Screens/PostRequests';
 import PostRequestStack from './PostRequestStack';
 import BookingInformation from '../Screens/BookingInformation';
 import CompletedRequests from '../Screens/CompletedRequests';
+import ConversationThread from '../Screens/ConversationThread';
 
 
 const Drawer = createDrawerNavigator();
@@ -84,6 +85,9 @@ export default function DrawerNavigation(){
                 },
             }} />
 
+            <Drawer.Screen name="ConversationThreadDrawer" component={ConversationThread} options={{
+                  drawerItemStyle: { display: 'none' }
+            }}/>
 
             <Drawer.Screen name="RequestFormDrawer" component={RequestForm} options={{
                   drawerItemStyle: { display: 'none' }

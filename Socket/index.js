@@ -26,6 +26,7 @@ io.on("connection", (socket) => {
   //take userId and socketId from user
   socket.on("addUser", (userId) => {
     addUser(userId, socket.id);
+    console.log("added user: ", users)
     io.emit("getUsers", users);
   });
 
