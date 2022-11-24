@@ -11,7 +11,7 @@ router.route("/workerComment/:user").get(async function (req, res) {
       page = 1;
     }
     const limit = 10;
-    let filter = { reviewee: req.params.user };
+    let filter = { reviewee: req.params.user, deleteflag: false };
     if (req.query.rating != undefined) {
       filter["rating"] = req.query.rating;
     }

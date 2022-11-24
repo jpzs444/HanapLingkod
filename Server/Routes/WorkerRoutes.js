@@ -50,7 +50,9 @@ router.route("/Worker").get(async function (req, res) {
   const limit = 10;
 
   const result = await Worker.find(filter)
-    .select("-unavailableTime -licenseCertificate -GovId -pushtoken -password -accountStatus")
+    .select(
+      "-unavailableTime -licenseCertificate -GovId -pushtoken -password -accountStatus"
+    )
     .limit(limit * page)
     .lean()
     .exec();
