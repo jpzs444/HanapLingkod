@@ -4,6 +4,7 @@ const notification = require("../Helpers/PushNotification");
 const RequestPost = require("../Models/RequestPost");
 const dayjs = require("dayjs");
 const PostComment = require("../Models/PostComment");
+const Recruiters = require("../Models/Recruiters");
 
 router
   .route("/request-post")
@@ -17,7 +18,9 @@ router
       }
       const limit = 10;
 
-      let result = await RequestPost.find({})
+      let result = await RequestPost.find({
+        deleteflag: false,
+      })
         .sort({ date: -1 })
         .limit(limit * page)
         .lean()
@@ -128,7 +131,14 @@ router
       //initialize transactions
       session.startTransaction();
       // console.log(req.body);
-
+      const post = await RequestPost.findOne({ _id: req.params.id })
+        .select("recruiterId")
+        .lean()
+        .exec();
+      const pushIDRecruiter = await Recruiters.findOne(
+        { _id: post.recruiterId },
+        { pushtoken: 1, _id: 0 }
+      ).lean();
       const comment = await PostComment.create(
         [
           {
@@ -138,7 +148,10 @@ router
         ],
         { session }
       );
+
       console.log(comment[0]._id);
+      console.log(post);
+      console.log(pushIDRecruiter);
       await RequestPost.findOneAndUpdate(
         { _id: req.params.id },
         {
@@ -147,6 +160,15 @@ router
         { session }
       );
       await session.commitTransaction();
+
+      notification(
+        [pushIDRecruiter.pushtoken],
+        "New Comment on your Post!",
+        req.body.message,
+        { Type: "New Comment on post", id: req.params.id },
+        post.recruiterId
+      );
+
       console.log("success");
       res.send("Succesfully Created");
     } catch (err) {

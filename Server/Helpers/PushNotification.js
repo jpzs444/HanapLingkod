@@ -1,6 +1,6 @@
 const { Expo } = require("expo-server-sdk");
 const UserNotification = require("../Models/Notifications");
-function notification(pushID, title, body, userID) {
+function notification(pushID, title, body, data, userID) {
   // Create a new Expo SDK client
   // optionally providing an access token if you have enabled push security
   let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
@@ -25,7 +25,7 @@ function notification(pushID, title, body, userID) {
       sound: "default",
       title: title,
       body: body,
-      data: { withSome: "data" },
+      data: data,
       userID: userID,
     });
   }

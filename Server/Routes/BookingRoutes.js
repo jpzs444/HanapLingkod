@@ -29,6 +29,7 @@ router.route("/booking/:user").get(async function (req, res) {
       workerId: req.params.user,
       bookingStatus: { $ne: 2 },
       $and: [{ bookingStatus: { $ne: 2 } }, { bookingStatus: { $ne: 3 } }],
+      deleteflag: false,
     })
       .sort({ serviceDate: -1 })
       .limit(limit * page)
@@ -116,6 +117,7 @@ router
         [pushIDWorker.pushtoken],
         "Recruiter mark the booking as done",
         "lorem ipsum ",
+        { Type: "Updated Booking Status", id: req.params.id },
         workerId
       );
     }
@@ -147,6 +149,7 @@ router
         [pushIDRecruiter.pushtoken],
         "worker mark the booking as done",
         "lorem ipsum ",
+        { Type: "Updated Booking Status", id: req.params.id },
         recruiterId
       );
     }
@@ -192,6 +195,8 @@ router
         [pushIDRecruiter.pushtoken],
         "On the Way",
         "Worker is on the way",
+        { Type: "Updated Booking Status", id: req.params.id },
+
         recruiterId
       );
     }
@@ -214,6 +219,7 @@ router
           [pushIDRecruiter.pushtoken],
           "Worker cancelled the booking",
           "lorem ipsum ",
+          { Type: "Updated Booking Status", id: req.params.id },
           recruiterId
         );
       }
@@ -222,6 +228,7 @@ router
           [pushIDWorker.pushtoken],
           "Worker cancelled the booking",
           "lorem ipsum ",
+          { Type: "Updated Booking Status", id: req.params.id },
           workerId
         );
       }
@@ -282,6 +289,7 @@ router.route("/completed-bookings/:user").get(async function (req, res) {
     let queryResultWorker = await Booking.find({
       workerId: req.params.user,
       bookingStatus: 3,
+      deleteflag: false,
     })
       .sort({ date: -1, bookingStatus: 1 })
       .limit(limit * page)
