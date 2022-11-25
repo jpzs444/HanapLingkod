@@ -28,7 +28,9 @@ router
   .route("/service-sub-category")
   .get(async function (req, res) {
     try {
-      let queryResult = await ServiceSubCategory.find({}).exec();
+      let queryResult = await ServiceSubCategory.find({
+        deleteflag: false,
+      }).exec();
       res.send(queryResult);
     } catch (error) {
       res.send(error);

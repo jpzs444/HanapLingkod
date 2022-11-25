@@ -24,6 +24,7 @@ router.route("/service-request/:user").get(async function (req, res) {
     let queryResultWorker = await ServiceRequest.find({
       workerId: req.params.user,
       requestStatus: { $ne: 3 },
+      deleteflag: false,
     })
       .sort({ serviceDate: -1 })
       .limit(limit * page)
@@ -31,6 +32,7 @@ router.route("/service-request/:user").get(async function (req, res) {
     let queryResultRecruiter = await ServiceRequest.find({
       recruiterId: req.params.user,
       requestStatus: { $ne: 3 },
+      deleteflag: false,
     })
       .sort({ serviceDate: -1 })
       .limit(limit * page)
@@ -85,7 +87,7 @@ router.route("/service-request").post(async function (req, res) {
       geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
       requestStatus: 1,
     });
-    console.log(pushID);
+    console.log(serviceRequest._id);
     serviceRequest.save(function (err) {
       if (!err) {
         res.send("New Service Request Created");
@@ -93,6 +95,7 @@ router.route("/service-request").post(async function (req, res) {
           [pushID.pushtoken],
           "New Request",
           "New Request Check It out",
+          { Type: "New Service Request", id: serviceRequest._id },
           req.body.workerId
         );
       } else {
@@ -211,6 +214,8 @@ router
             [pushIDRecruiter.pushtoken],
             "Accepted",
             "your request has been accepted",
+            { Type: "updated Service Request", id: req.params.id },
+
             recruiterId
           );
           console.log("Successfully Updated status 2");
@@ -234,6 +239,8 @@ router
           [pushIDRecruiter.pushtoken],
           "Rejected",
           "your request has been rejected",
+          { Type: "updated Service Request", id: req.params.id },
+
           recruiterId
         );
         res.send("Successfully Updated to status 3 ");
@@ -254,6 +261,8 @@ router
           [pushIDWorker.pushtoken],
           "Cancelled",
           "Recruiter Cancelled the request",
+          { Type: "updated Service Request", id: req.params.id },
+
           workerId
         );
         res.send("Successfully Updated to status 4 ");
