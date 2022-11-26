@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.route("/Worker").get(async function (req, res) {
-  console.log("aa");
+  // console.log("aa");
   let filter = {};
   if (req.query.verified != undefined) {
     filter["verification"] = req.query.verified;
@@ -40,7 +40,6 @@ router.route("/Worker").get(async function (req, res) {
   if (req.query.rating != undefined) {
     filter["rating"] = { $gte: parseFloat(req.query.rating) };
   }
-  console.log(filter);
   let page;
   if (req.query.page) {
     page = parseInt(req.query.page);

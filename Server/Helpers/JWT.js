@@ -1,8 +1,11 @@
 const jwt = require("jsonwebtoken");
 
-function generateAccessToken(username) {
-  // console.log("func 1");
-  return jwt.sign(username, process.env.TOKEN_SECRET, {});
+function generateAccessToken(username, role) {
+  return jwt.sign(
+    { username: username, role: role },
+    process.env.TOKEN_SECRET,
+    {}
+  );
 }
 
 function authenticateToken(req, res, next) {
@@ -11,7 +14,6 @@ function authenticateToken(req, res, next) {
   if (token == null) return res.sendStatus(401);
 
   jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-    console.log(err);
     if (err) return res.sendStatus(403);
     req.CurrentuserId = user;
     next();
