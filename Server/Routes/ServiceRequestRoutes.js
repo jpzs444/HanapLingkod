@@ -62,6 +62,8 @@ router.route("/service-request/:user").get(async function (req, res) {
 });
 router.route("/service-request").post(async function (req, res) {
   try {
+    console.log(req.body.workId);
+
     let startTime = dayjs(
       req.body.serviceDate + " " + req.body.startTime
     ).toISOString();
