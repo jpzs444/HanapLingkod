@@ -10,7 +10,7 @@ const requestPostSchema = new mongoose.Schema({
   startTime: Date,
   minPrice: Number,
   maxPrice: Number,
-  postToggle: Boolean,
+  postToggle: { type: Boolean, default: 1 },
   address: String,
   postCommentId: { type: Schema.Types.ObjectId, ref: "Postcomment" },
   geometry: {

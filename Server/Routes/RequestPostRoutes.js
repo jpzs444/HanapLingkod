@@ -19,7 +19,7 @@ router
       const limit = 10;
 
       let result = await RequestPost.find({
-        deleteflag: false,
+        postToggle: true,
       })
         .sort({ date: -1 })
         .limit(limit * page)

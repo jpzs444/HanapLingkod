@@ -149,54 +149,19 @@ router
     );
   })
   .delete(async function (req, res) {
-    const serviceRequestQuery = await ServiceRequest.find(
-      {
-        workId: req.params.id,
-        requestStatus: 1,
-      },
-      {
-        workerId: 0,
-        recruiterId: 0,
-        workId: 0,
-        subCategory: 0,
-        minPrice: 0,
-        maxPrice: 0,
-        serviceDate: 0,
-        startTime: 0,
-        endTime: 0,
-        description: 0,
-        requestStatus: 0,
-        comment: 0,
-        deleteflag: 0,
-        created_at: 0,
-      }
-    ).lean();
+    const serviceRequestQuery = await ServiceRequest.count({
+      workId: req.params.id,
+      requestStatus: 1,
+    }).lean();
+    console.log("asdsadasd");
+    const BookingQuery = await Booking.count({
+      workId: req.params.id,
+      $and: [{ bookingStatus: { $ne: 3 } }, { bookingStatus: { $ne: 4 } }],
+    }).lean();
 
-    const BookingQuery = await Booking.find(
-      {
-        workId: req.params.id,
-        bookingStatus: 1,
-      },
-      {
-        workerId: 0,
-        recruiterId: 0,
-        workId: 0,
-        subCategory: 0,
-        minPrice: 0,
-        maxPrice: 0,
-        serviceDate: 0,
-        startTime: 0,
-        endTime: 0,
-        description: 0,
-        bookingStatus: 0,
-        comment: 0,
-        deleteflag: 0,
-        created_at: 0,
-        geometry: 0,
-      }
-    ).lean();
-
+    console.log(serviceRequestQuery);
     console.log(BookingQuery);
+
     if (serviceRequestQuery == 0 && BookingQuery == 0) {
       Work.findByIdAndUpdate(
         { _id: req.params.id },
@@ -206,6 +171,7 @@ router
         function (err, doc) {
           if (!err) {
             WorkMiddleware(doc);
+            console.log("Deleted Successfully ");
             res.send("Deleted Successfully ");
           } else {
             res.send(err);
@@ -213,6 +179,7 @@ router
         }
       );
     } else {
+      console.log("A Request is on going cannot delete");
       res.send("A Request is on going cannot delete");
     }
   });
@@ -223,7 +190,7 @@ router.route("/WorkList/:UserId").get(function (req, res) {
     function (err, found) {
       if (found) {
         res.send(found);
-        console.log(res);
+        // console.log(res);
       } else {
         res.send("No such data found");
       }

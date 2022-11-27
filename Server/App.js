@@ -164,6 +164,66 @@ app.post(
   }
 );
 
+app.post("/usernameChecker", async function (req, res) {
+  let user;
+  let jwt;
+
+  if (
+    (await Recruiter.count({ username: req.body.username }).lean().exec()) != 0
+  ) {
+    user = await Recruiter.findOne({ username: req.body.username })
+      .select("phoneNumber role")
+      .lean()
+      .exec();
+    jwt = generateAccessToken(req.body.username, user.role);
+    res.status(200).json({ user: user, token: jwt });
+  } else if (
+    (await Worker.count({ username: req.body.username }).lean().exec()) != 0
+  ) {
+    user = await Worker.findOne({ username: req.body.username })
+      .select("phoneNumber role")
+      .lean()
+      .exec();
+    jwt = generateAccessToken(req.body.username, user.role);
+    res.status(200).json({ user: user, token: jwt });
+  } else {
+    res.status(400).json("Does Not exist");
+  }
+});
+
+app.post("/changePassword", authenticateToken, async function (req, res) {
+  const { username, role } = req.CurrentuserId;
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(req.body.password, salt);
+  if (role === "recruiter") {
+    Recruiter.findOneAndUpdate(
+      { username: username },
+      { password: hashedPassword },
+      function (err, docs) {
+        if (err) {
+          console.log(err);
+          res.status(500).json(err);
+        } else {
+          res.status(200).json("Updated Successfully");
+        }
+      }
+    );
+  } else if (role === "worker") {
+    Worker.findOneAndUpdate(
+      { username: username },
+      { password: hashedPassword },
+      function (err, docs) {
+        if (err) {
+          console.log(err);
+          res.status(500).json(err);
+        } else {
+          res.status(200).json("Updated Successfully");
+        }
+      }
+    );
+  }
+});
+
 app.delete("/prevWorks/:id", function (req, res) {
   try {
     console.log(req.body.toDelete);
