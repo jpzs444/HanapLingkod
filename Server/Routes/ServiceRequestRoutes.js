@@ -62,48 +62,57 @@ router.route("/service-request/:user").get(async function (req, res) {
 });
 router.route("/service-request").post(async function (req, res) {
   try {
-    console.log(req.body.workId);
-
-    let startTime = dayjs(
-      req.body.serviceDate + " " + req.body.startTime
-    ).toISOString();
-    // console.log(req.body.serviceDate);
-
-    // console.log(startTime);
-
-    const pushID = await Worker.findOne(
-      { _id: req.body.workerId },
-      { pushtoken: 1, _id: 0 }
-    ).lean();
-    const serviceRequest = new ServiceRequest({
-      workerId: req.body.workerId,
+    let pendingRequest = await ServiceRequest.count({
       recruiterId: req.body.recruiterId,
-      workId: req.body.workId,
-      subCategory: req.body.subCategory,
-      address: req.body.address,
-      minPrice: req.body.minPrice,
-      maxPrice: req.body.maxPrice,
-      serviceDate: req.body.serviceDate,
-      startTime: startTime,
-      description: req.body.description,
-      geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
       requestStatus: 1,
-    });
-    console.log(serviceRequest._id);
-    serviceRequest.save(function (err) {
-      if (!err) {
-        res.send("New Service Request Created");
-        notification(
-          [pushID.pushtoken],
-          "New Request",
-          "New Request Check It out",
-          { Type: "New Service Request", id: serviceRequest._id },
-          req.body.workerId
-        );
-      } else {
-        res.send(err);
-      }
-    });
+      deleteflag: false,
+    })
+      .lean()
+      .exec();
+    console.log(pendingRequest);
+    if (pendingRequest === 0) {
+      let startTime = dayjs(
+        req.body.serviceDate + " " + req.body.startTime
+      ).toISOString();
+      const pushID = await Worker.findOne(
+        { _id: req.body.workerId },
+        { pushtoken: 1, _id: 0 }
+      ).lean();
+      const serviceRequest = new ServiceRequest({
+        workerId: req.body.workerId,
+        recruiterId: req.body.recruiterId,
+        workId: req.body.workId,
+        subCategory: req.body.subCategory,
+        address: req.body.address,
+        minPrice: req.body.minPrice,
+        maxPrice: req.body.maxPrice,
+        serviceDate: req.body.serviceDate,
+        startTime: startTime,
+        description: req.body.description,
+        geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
+        requestStatus: 1,
+      });
+      console.log(serviceRequest._id);
+      serviceRequest.save(function (err) {
+        if (!err) {
+          console.log("new request created");
+          res.send("true");
+          notification(
+            [pushID.pushtoken],
+            "New Request",
+            "New Request Check It out",
+            { Type: "New Service Request", id: serviceRequest._id },
+            req.body.workerId
+          );
+        } else {
+          res.send(err);
+        }
+      });
+    } else {
+      res.send("false");
+
+      console.log("A pending request is still existing");
+    }
   } catch (error) {
     res.send(error);
   }
