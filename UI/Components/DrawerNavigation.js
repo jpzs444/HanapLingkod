@@ -28,30 +28,14 @@ import BookingInformation from '../Screens/BookingInformation';
 import CompletedRequests from '../Screens/CompletedRequests';
 import ConversationThread from '../Screens/ConversationThread';
 
-import { io } from 'socket.io-client'
 import { IPAddress } from '../global/global';
 
 const Drawer = createDrawerNavigator();
 
-export const socketContext = createContext()
 
 export default function DrawerNavigation(){
 
-    
-    const socket = io(`ws://${IPAddress}:8900`)
-    // socket.current = io(`ws://${IPAddress}:8900`)
-
-    // useEffect(() => {
-    //     socket.emit("addUser", global.userData._id)
-    //     console.log("addedasdae added user")
-    //     // socket.current.on("getUsers", users => {
-    //     //     console.log("online users: ", users)
-    //     //     setOnlineUsers([...users])
-    //     // })
-    // }, []);
-
     return(
-        <socketContext.Provider value={socket}>
             <Drawer.Navigator 
                 drawerContent={props => <CustomDrawer {...props} /> }
                 screenOptions={{ 
@@ -139,7 +123,6 @@ export default function DrawerNavigation(){
 
 
             </Drawer.Navigator>
-        </socketContext.Provider>
     )
 }
 

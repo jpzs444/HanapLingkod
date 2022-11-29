@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import RadioButtonRN from 'radio-buttons-react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import SameDateBookings from '../Components/SameDateBookings';
-import ChatButton from '../Components/ChatButton';
+import CreateConversation from '../Components/CreateConversation';
 
 const HEIGHT = Dimensions.get('window').height
 const WIDTH = Dimensions.get('window').width
@@ -98,6 +98,10 @@ const VIewServiceRequest = ({route}) => {
             setSimilarWorks([])
             setDisplayDate("")
             setFormatedDate(new Date())
+            setDidCancelRequest(false)
+            setHasCancelledRequest(false)
+            setHasDeclinedRequest(false)
+            setHasSentMessage(true)
 
             setRadioBtn(-1)
         }
@@ -190,7 +194,7 @@ const VIewServiceRequest = ({route}) => {
                 acceptMore: radioBtn.toString()
             })
         }).then((res) => {
-            console.log("Success - Cancelled Request Complete: ", res)
+            console.log("Success - Cancelled Request Complete: ")
             setHasDeclinedRequest(true)
             setDeclineRequestModal(false)
 
@@ -213,7 +217,7 @@ const VIewServiceRequest = ({route}) => {
             })
         }).then(res => res.json())
         .then((res) => {
-            console.log("res obj: ", res)
+            console.log("res obj: ")
 
             if(res.success){
                 console.log("Success - Accepted Request Complete")
@@ -272,11 +276,31 @@ const VIewServiceRequest = ({route}) => {
     const handleCreateConversation = async () => {
         // create a conversation
 
-        console.log("to create or not to create")
-
+        try {
+            await fetch(`http://${IPAddress}:3000/conversations`, {
+                method: "POST",
+                headers: {
+                  'content-type': 'application/json'  
+                },
+                body: JSON.stringify({
+                    senderId: global.userData._id,
+                    receiverId: global.userData.role === 'recruiter' ? requestItem.workerId._id : requestItem.recruiterId._id
+                })
+            }).then(res => res.json())
+            .then(data => {
+                console.log("conversation data: ", data[0])
+                setConversation({...data[0]})
+                handleGoToConversation()
+            })
+        } catch (error) {
+            console.log("Error creating new convo: ", error)
+        }
     }
 
     const handleGoToConversation = () => {
+        // navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
+        console.log("otgerUser: ", typeof requestItem.workerId)
+        console.log("convo: ", typeof conversation)
         navigation.navigate("ConversationThreadDrawer", {
             "otherUser": global.userData.role === 'recruiter' ? requestItem.workerId : requestItem.recruiterId, 
             "conversation": conversation
@@ -285,6 +309,7 @@ const VIewServiceRequest = ({route}) => {
 
   return (
     <SafeAreaView style={styles.outermostContainer}>
+    {/* <TText>HI</TText> */}
         <ScrollView contentContainerStyle={styles.mainScrollContainer}>
             <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} />
 

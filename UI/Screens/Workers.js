@@ -72,6 +72,8 @@ const Workers = () => {
             }
             setListOfWorkers([...data])
             setPrevListWorker([...data])
+
+            console.log("workers 1231231: ", data)
             // console.log("list of workers: ", data[3].works.join(', '))
         })
     }

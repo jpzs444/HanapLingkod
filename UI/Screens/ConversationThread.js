@@ -91,7 +91,7 @@ const ConversationThread = ({route}) => {
 
     const handleSendMessage = async () => {
 
-        const receiver_id = conversation.members.find(member => member !== global.userData._id)
+        const receiver_id = conversation.members?.find(member => member !== global.userData._id)
         
         const isOnline = onlineUsers.find(user => user.userId === receiver_id)
         

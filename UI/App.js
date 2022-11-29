@@ -19,6 +19,8 @@ import { IPAddress } from "./global/global";
 import UserProfileStack from "./Components/UserProfileStack";
 
 import 'react-native-console-time-polyfill';
+import ForgotPassword from "./Screens/ForgotPassword";
+import ForgotPasswordStack from "./Components/ForgotPasswordStack";
 
 
 const AppStack = createNativeStackNavigator();
@@ -167,6 +169,7 @@ async function registerForPushNotificationsAsync() {
           <AppStack.Screen name="LoginNavigationStack" component={LoginNavigationStack} /> 
           <AppStack.Screen name="DrawerNavigation" component={DrawerNavigator} /> 
           <AppStack.Screen name="UserProfileStack" component={UserProfileStack} /> 
+          <AppStack.Screen name="ForgotPasswordStack" component={ForgotPasswordStack} /> 
         </AppStack.Navigator>
       </NavigationContainer>
   );

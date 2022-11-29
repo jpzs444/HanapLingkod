@@ -18,8 +18,8 @@ import RnOtpTimer from 'react-native-otp-timer';
 
 export default function OTPVerification({route}, props) {
     const navigation = useNavigation();
-    const {phoneNum, role, user, singleImage, image, 
-        isLogin, work, imagelicense, fromWelcome, 
+    const {phoneNum, role, user, singleImage, image, token,
+        isLogin, work, imagelicense, fromWelcome, forgotPassword,
         fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, workList
     } = route.params;
 
@@ -122,6 +122,8 @@ export default function OTPVerification({route}, props) {
 
             // if authenticated, create the account/login
             console.log('auth successful..');
+
+            forgotPassword && navigation.navigate("FP_Reset", {token: token})
 
             global.isPhoneNumVerified = true
             fromEditUserInfo ? updateUserInformation() : null

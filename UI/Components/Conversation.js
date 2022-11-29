@@ -42,6 +42,8 @@ const Conversation = ({tab, conversation}) => {
         activeOpacity={0.5}
         onPress={() => {
             console.log("hehe")
+            console.log("otherUser: ", typeof otherUser)
+            console.log("conversation: ", typeof conversation)
             navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
         }}
     >

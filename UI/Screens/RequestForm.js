@@ -28,7 +28,7 @@ const RequestForm = ({route, navigation}) => {
 
     const screenFocused = useIsFocused()
 
-    const {workerID, workID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks, dateService, timeService, fromPostReq, selectedDay, selectedTime} = route.params;
+    const {workerID, workID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks, dateService, timeService, fromPostReq, selectedDay, selectedTime, fromListSpecific} = route.params;
     // console.log(workerInformation)
 
     const [loading, setIsLoading] = useState(false)
@@ -80,6 +80,8 @@ const RequestForm = ({route, navigation}) => {
 
     const [reloading, setReloading] = useState(false)
 
+    const [workworkID, setWorkWorkID] = useState("")
+
     const [listUnavailableSched, setListUnavailableSched] = useState({
         // '2022-10-20': dateAppointmentsStyles,
         // '2022-10-29': dateDisabledStyles,
@@ -96,9 +98,16 @@ const RequestForm = ({route, navigation}) => {
     let lll = []
 
     useEffect(() => {
-        console.log("Worker infromation: ", workerInformation)
+        console.log("Worker infromation: ", workID)
+        // setWorkWorkID(workID)
         setLoadedWorkerInfo({...workerInformation})
-        loadUnavailableTime()
+
+        // if(fromListSpecific){
+        //     handelFetchWorkerUnavailableTime()
+        // }
+
+        // loadUnavailableTime()
+
         setIsLoading(false)
         
         setDateSelected(false)
@@ -173,17 +182,33 @@ const RequestForm = ({route, navigation}) => {
         // console.log(coordLongi)
     }, [showMultiWorks])
 
+    
+    const handelFetchWorkerUnavailableTime = async () => {
+        try {
+            await fetch(`http://${IPAddress}:3000/Worker/${workerID}`, {
+                method: "GET",
+                headers: {
+                    "content-type": "application/json"
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("worker data (UT): ", data)
+            })
+        } catch (error) {
+            console.log("error fetch worker ut: ", error)
+        }
+    }
 
     const loadUnavailableTime = () => {
 
         uunn = [...(workerInformation.unavailableTime)]
-        console.log("listUnvSched uunn: ", uunn)
+        // console.log("listUnvSched uunn: ", uunn)
 
         
         uunn.forEach(e => {
-            if(dayjs(e.endDate).subtract){
+            // if(dayjs(e.endDate).subtract){
                 
-            }
+            // }
             
             let dif = new Date(e.startTime).getDate()
             let di = new Date(e.endDate).getDate()
@@ -338,7 +363,7 @@ const RequestForm = ({route, navigation}) => {
         getUnavailableSchedule()
         
         // setViewScheduleModal(true)
-        navigation.navigate("ScheduleDrawer", {selectedDate: new Date(date).toString(), workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true, minPrice: minPrice, maxPrice: maxPrice })
+        navigation.navigate("ScheduleDrawer", {selectedDate: new Date(date).toString(), workID: workID, workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true, minPrice: minPrice, maxPrice: maxPrice })
         setReloading(false)
         // setViewScheduleModal(true)
         
@@ -346,15 +371,18 @@ const RequestForm = ({route, navigation}) => {
     
     const getUnavailableSchedule = () => {
         let dddd = new Date(formatedDate)
-        let uunn = workerInformation.unavailableTime.filter(e => {
-            let sst = new Date(e.startTime)
-            return (sst.getFullYear() === dddd.getFullYear() &&
-            sst.getMonth() === dddd.getMonth() &&
-            sst.getDate() === dddd.getDate())
-        })
-        
-        uunn = uunn.filter(e => dayjs(e.startTime).format("YYYY-MM-DD").toString() === dayjs(new Date(formatedDate)).format("YYYY-MM-DD").toString())
-        setSameDateBookings(prev => [...uunn])
+        if(workerInformation.keys[unavailableTime]){
+            let uunn = workerInformation.unavailableTime?.filter(e => {
+                let sst = new Date(e.startTime)
+                return (sst.getFullYear() === dddd.getFullYear() &&
+                sst.getMonth() === dddd.getMonth() &&
+                sst.getDate() === dddd.getDate())
+            })
+            
+            uunn = uunn.filter(e => dayjs(e.startTime).format("YYYY-MM-DD").toString() === dayjs(new Date(formatedDate)).format("YYYY-MM-DD").toString())
+            setSameDateBookings(prev => [...uunn])
+
+        }
         // setReloading(false)
         // console.log("Filtered unv time to display: ", uunn)
     }
@@ -414,33 +442,38 @@ const RequestForm = ({route, navigation}) => {
         setWorkListModalOpened(bool)
     }
 
-    const handlePendingRequestChecker = () => {
+    const handlePendingRequestChecker = async () => {
+        console.log("pending func")
         setIsLoading(true)
-        fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}`, {
-            method: "GET",
-            headers: {
-                'content-type': 'application/json'
-            },
-        }).then(res => res.json())
-        .then(data => {
-            console.log("pending checker: ", data)
-            let list = [...data.recruiter]
-            list = list.filter(e => e.requestStatus == '1')
-            if(list.length > 0){
-                // has a pending request
-                sethasPendingRequest(true)
-            } else {
-                setPostBtnModal(true)
-                // postRequest()
-            }
-        })
+
+        try {
+            await fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}`, {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json'
+                },
+            }).then(res => res.json())
+            .then(data => {
+                // console.log("pending checker: ", data.recruiter)
+                let list = [...data.recruiter]
+                list = list.filter(e => e.requestStatus == '1')
+    
+                list.length > 0 ? sethasPendingRequest(true) : setPostBtnModal(true)
+
+            })
+        } catch (error) {
+            console.log("error fetch all pending: ", error)
+        }
     }
 
-    const postRequest = () => {
+    const postRequest = async () => {
+        console.log("post req func")
+        setIsLoading(false)
         console.log("worker id", workerInformation._id)
         console.log("user id: ", global.userData._id)
         console.log(selectedJob)
         // console.log(workSelected.ServiceSubId.ServiceSubCategory)
+        console.log(workID)
         console.log(minPrice)
         console.log(maxPrice)
         console.log(formatedDate)
@@ -448,34 +481,38 @@ const RequestForm = ({route, navigation}) => {
 
         let user = global.userData
 
-        fetch(`http://${IPAddress}:3000/service-request`, {
-            method: "POST",
-            headers: {
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({
-                "workerId": workerInformation._id,
-                "recruiterId": global.userData._id,
-                'workId': workID,
-                "address": useCustomAddress ? customAddress : `${user.street}, ${user.purok}, ${user.barangay} ${user.city}, ${user.province}`,
-                "subCategory": selectedJob ? selectedJob : workSelected.ServiceSubId.ServiceSubCategory,
-                "minPrice": minPrice ? minPrice : workSelected.minPrice,
-                "maxPrice": maxPrice ? maxPrice : workSelected.maxPrice,
-                "serviceDate": dayjs(formatedDate).format("YYYY-MM-DD"),
-                "startTime": dayjs(formatedTime).format("HH:mm"),
-                "description": requestDescription,
-                "lat": coordLati,
-                "long": coordLongi,
+        try {
+            await fetch(`http://${IPAddress}:3000/service-request`, {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify({
+                    "workerId": workerInformation._id,
+                    "recruiterId": user._id,
+                    'workId': workID,
+                    "address": useCustomAddress ? customAddress : `${user.street}, ${user.purok}, ${user.barangay} ${user.city}, ${user.province}`,
+                    "subCategory": selectedJob ? selectedJob : workSelected.ServiceSubId.ServiceSubCategory,
+                    "minPrice": minPrice ? minPrice : workSelected.minPrice,
+                    "maxPrice": maxPrice ? maxPrice : workSelected.maxPrice,
+                    "serviceDate": dayjs(formatedDate).format("YYYY-MM-DD"),
+                    "startTime": dayjs(formatedTime).format("HH:mm"),
+                    "description": requestDescription,
+                    "lat": coordLati,
+                    "long": coordLongi,
+                })
             })
-        }).then((res) => {
+
             console.log("Service Request Posted! ")
             // global.serviceRequestPosted = true
             setRequestDescription("")
             setFormatedDate(new Date())
             setFormatedTime(new Date())
             // navigation.navigate("HomeScreen")
-        })
-        .catch((err) => console.log("Service Request Error: ", err))
+
+        } catch (error) {
+            console.log("Service Request Error: ", error)
+        }
     }
 
     const customMapStyle = [
@@ -541,13 +578,14 @@ const RequestForm = ({route, navigation}) => {
                             <TouchableOpacity
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
+                                    setPostBtnModal(false)
+                                    postRequest()
+
                                     setConfirmServiceRequest(true)
                                     setRequestPostedModal(true)
                                     // check if recruiter has a pending request
                                     // handlePendingRequestChecker()
                                     // fetch post request
-                                    postRequest()
-                                    setPostBtnModal(false)
                                     // navigation.navigate("HomeScreen")
                                 }}
                             >
@@ -948,7 +986,7 @@ const RequestForm = ({route, navigation}) => {
                     </View>
 
                     {/* Custom address */}
-                    <TText style={{marginTop: 15, fontSize: 15}}>Use a different address for the service?</TText>
+                    <TText style={{marginTop: 15, fontSize: 14}}>Use a different address for the service? (Optional)</TText>
                     <View style={{flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 10, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', overflow: 'hidden', marginTop: 5}}>
                         <Icon name="map-plus" size={22} color={ThemeDefaults.themeLighterBlue}  />
                         <TextInput 
@@ -1010,7 +1048,7 @@ const RequestForm = ({route, navigation}) => {
                                 onPress={()=> {
                                     if(dateSelected){
                                         // navigation.navigate("ScheduleDrawer", {selectedDate: new Date(formatedDate).toString(), workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true.valueOf, minPrice: minPrice, maxPrice: maxPrice})
-                                        navigation.navigate("ScheduleDrawer", {selectedDate: new Date(formatedDate).toString(), workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true, minPrice: minPrice, maxPrice: maxPrice })
+                                        navigation.navigate("ScheduleDrawer", {selectedDate: new Date(formatedDate).toString(), workID: workID, workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true, minPrice: minPrice, maxPrice: maxPrice })
 
                                         // setViewScheduleModal(true)
                                     }
