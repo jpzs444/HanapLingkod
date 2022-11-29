@@ -11,6 +11,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 import ImageView from "react-native-image-viewing";
 import Swiper from 'react-native-swiper'
+import { concat } from 'react-native-reanimated';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -86,7 +87,8 @@ const WorkerProfile = ({route}) => {
         }).then((res) => res.json())
         .then((data) => {
             setWorkList([...data])
-            // console.log("new work list: ", data)
+            console.log("new work list: ", data)
+            console.log("new work list: ", data[0].ServiceSubId._id)
         }).catch((error) => console.log("workList fetch: ", error.message))
     }
 
@@ -168,7 +170,7 @@ const WorkerProfile = ({route}) => {
 
         {/* Top container */}
         <View style={{elevation: 5, paddingTop: 0, paddingBottom: 30, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, backgroundColor: '#fff'}}>
-            <Appbar settingsBtn={false} onlyBackBtn={true} showLogo={true} />
+            <Appbar settingsBtn={false} onlyBackBtn={true} showLogo={true} chatBtn={true} />
 
             <View>
                 {/* Profile Picture */}
@@ -262,8 +264,19 @@ const WorkerProfile = ({route}) => {
                                             <View style={{}}>
                                                 <TouchableOpacity style={{paddingVertical: 5, paddingHorizontal: 10, backgroundColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, elevation: 4}}
                                                     onPress={() => {
-                                                        navigation.navigate("RequestFormDrawer", {workerID: workerID, workID: workItem._id, workerInformation: workerInformation, selectedJob: workItem.ServiceSubId.ServiceSubCategory, minPrice: workItem.minPrice, maxPrice: workItem.maxPrice, showMultiWorks: false})
-
+                                                        console.log("workItem work Id: ", workItem._id)
+                                                        let i = workItem._id
+                                                        console.log("i: ", i)
+                                                        console.log("i: ", typeof i)
+                                                        navigation.navigate("RequestFormDrawer", {
+                                                            workerID: workerID,
+                                                            workID: workItem.ServiceSubId._id,
+                                                            workerInformation: workerInformation,
+                                                            selectedJob: workItem.ServiceSubId.ServiceSubCategory,
+                                                            minPrice: workItem.minPrice,
+                                                            maxPrice: workItem.maxPrice,
+                                                            showMultiWorks: false
+                                                        })
                                                     }}
                                                 >
                                                     <TText style={{fontSize: 12, color: '#fff'}}>Request</TText>

@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import RadioButtonRN from 'radio-buttons-react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import SameDateBookings from '../Components/SameDateBookings';
+import CreateConversation from '../Components/CreateConversation';
 
 const HEIGHT = Dimensions.get('window').height
 const WIDTH = Dimensions.get('window').width
@@ -62,6 +63,8 @@ const VIewServiceRequest = ({route}) => {
 
     const [loading, setLoading] = useState(false)
 
+    const [conversation, setConversation] = useState({})
+
     // resets all inputs on load
     useEffect(() => {
         setLoading(true)
@@ -95,6 +98,10 @@ const VIewServiceRequest = ({route}) => {
             setSimilarWorks([])
             setDisplayDate("")
             setFormatedDate(new Date())
+            setDidCancelRequest(false)
+            setHasCancelledRequest(false)
+            setHasDeclinedRequest(false)
+            setHasSentMessage(true)
 
             setRadioBtn(-1)
         }
@@ -187,7 +194,7 @@ const VIewServiceRequest = ({route}) => {
                 acceptMore: radioBtn.toString()
             })
         }).then((res) => {
-            console.log("Success - Cancelled Request Complete: ", res)
+            console.log("Success - Cancelled Request Complete: ")
             setHasDeclinedRequest(true)
             setDeclineRequestModal(false)
 
@@ -210,7 +217,7 @@ const VIewServiceRequest = ({route}) => {
             })
         }).then(res => res.json())
         .then((res) => {
-            console.log("res obj: ", res)
+            console.log("res obj: ")
 
             if(res.success){
                 console.log("Success - Accepted Request Complete")
@@ -266,8 +273,43 @@ const VIewServiceRequest = ({route}) => {
         )
     }
 
+    const handleCreateConversation = async () => {
+        // create a conversation
+
+        try {
+            await fetch(`http://${IPAddress}:3000/conversations`, {
+                method: "POST",
+                headers: {
+                  'content-type': 'application/json'  
+                },
+                body: JSON.stringify({
+                    senderId: global.userData._id,
+                    receiverId: global.userData.role === 'recruiter' ? requestItem.workerId._id : requestItem.recruiterId._id
+                })
+            }).then(res => res.json())
+            .then(data => {
+                console.log("conversation data: ", data[0])
+                setConversation({...data[0]})
+                handleGoToConversation()
+            })
+        } catch (error) {
+            console.log("Error creating new convo: ", error)
+        }
+    }
+
+    const handleGoToConversation = () => {
+        // navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
+        console.log("otgerUser: ", typeof requestItem.workerId)
+        console.log("convo: ", typeof conversation)
+        navigation.navigate("ConversationThreadDrawer", {
+            "otherUser": global.userData.role === 'recruiter' ? requestItem.workerId : requestItem.recruiterId, 
+            "conversation": conversation
+        })
+    }
+
   return (
     <SafeAreaView style={styles.outermostContainer}>
+    {/* <TText>HI</TText> */}
         <ScrollView contentContainerStyle={styles.mainScrollContainer}>
             <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} />
 
@@ -596,21 +638,57 @@ const VIewServiceRequest = ({route}) => {
                             <View style={styles.workerNameContainer}>
                                 {
                                     global.userData.role === 'recruiter' ?
-                                        <Text style={styles.carUserNameTxt}>{requestItem.workerId.firstname} {requestItem.workerId.lastname}</Text>
+                                        <>
+                                            <Text style={styles.carUserNameTxt}>{requestItem.workerId.firstname} {requestItem.workerId.lastname}</Text>
+                                            <View style={styles.ratingContainer}>
+                                                <Icon name='star' size={18} color={"gold"} />
+                                                <TText style={styles.ratingText}>{requestItem.workerId.rating}</TText>
+                                            </View>
+                                        </>
                                         :
-                                        <Text style={styles.carUserNameTxt}>{requestItem.recruiterId.firstname} {requestItem.recruiterId.lastname}</Text>
+                                        <>
+                                            <Text style={styles.carUserNameTxt}>{requestItem.recruiterId.firstname} {requestItem.recruiterId.lastname}</Text>
+                                            <View style={styles.ratingContainer}>
+                                                <Icon name='star' size={18} color={"gold"} />
+                                                <TText style={styles.ratingText}>{requestItem.recruiterId.rating}</TText>
+                                                
+                                            </View>
+                                        </>
                                 }
-                            </View>
-                            <View style={styles.ratingContainer}>
-                                <Icon name='star' size={18} color={"gold"} />
-                                <TText style={styles.ratingText}>4.7</TText>
                             </View>
                         </View>
                         <View style={styles.subCatContainer}>
                             <TText style={styles.subCatText}>{requestItem.subCategory}</TText>
                         </View>
+
+
+                    {/* Chat / Message user button */}
                     </View>
+
                 </View>
+                
+                <TouchableOpacity 
+                    style={{
+                        backgroundColor: ThemeDefaults.themeOrange, 
+                        borderRadius: 20, 
+                        padding: 8, 
+                        elevation: 4, 
+                        position: 'absolute', 
+                        top: 38, 
+                        right: 25, 
+                        zIndex: 10,
+                        elevation: 4
+                    }}
+                    activeOpacity={0.5}
+                    onPress={() => {
+                        console.log("HI")
+
+                        //create a conversation
+                        handleCreateConversation()
+                    }}
+                >
+                    <Image source={require('../assets/icons/chat-bubble.png')} style={{width: 25, height: 25,}} />
+                </TouchableOpacity>
 
                 {
                     requestItem.description !== "" ?
@@ -1000,6 +1078,7 @@ const styles = StyleSheet.create({
     ratingContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginLeft: 8
     },
     ratingText: {
         fontSize: 14,

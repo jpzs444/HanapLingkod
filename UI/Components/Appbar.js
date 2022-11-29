@@ -156,7 +156,7 @@ export default function Appbar(props) {
         </View>
 
         {/* right */}
-        <TouchableOpacity style={styles.right}>
+        <TouchableOpacity style={[styles.right,]}>
             {
                 props.hasPicture ? 
                     <TouchableOpacity style={{borderRadius: 20, elevation: 7, alignSelf: 'flex-end', width: 40, height: 40, borderRadius: 20,}} onPress={() => { navigation.navigate("UserProfileStack", {profile_id: global.userData._id}) }}>
@@ -192,6 +192,18 @@ export default function Appbar(props) {
                     <TouchableOpacity disabled={!props.hasChanges} style={[styles.saveBtn, {backgroundColor: props.hasChanges ? ThemeDefaults.themeDarkBlue : 'lightgray'}]} onPress={() => { setBackBtnPressed(true) }}>
                         <TText style={styles.saveBtnText}>Save</TText>
                     </TouchableOpacity>
+            }
+            {
+                props.chatBtn &&
+                <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 20, padding: 8, elevation: 4, alignSelf: 'flex-end'}}
+                    activeOpacity={0.5}
+                    onPress={() => {
+                        console.log("HI")
+                        // go to convo
+                    }}
+                >
+                    <Image source={require('../assets/icons/chat-bubble.png')} style={{width: 25, height: 25,}} />
+                </TouchableOpacity>
             }
         </TouchableOpacity>
     </View>

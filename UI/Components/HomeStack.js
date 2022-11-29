@@ -31,6 +31,7 @@ export default function HomeNavigationStack () {
           <HomeStack.Screen name="MessagingScreen" component={Messaging} />
           <HomeStack.Screen name="NotificationScreen" component={Notifications} />
           <HomeStack.Screen name="RequestsScreen" component={Requests} />
+          <HomeStack.Screen name="RequestsScreenHOME" component={Requests} />
           <HomeStack.Screen name="BookingsScreen" component={Bookings} />
           {/* <HomeStack.Screen name="ViewCommentsScreen" component={ViewComments} /> */}
           {/* <HomeStack.Screen name="WorkerProfileScreen" component={WorkerProfile} /> */}
