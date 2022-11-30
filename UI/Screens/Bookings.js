@@ -198,13 +198,14 @@ const Bookings = () => {
                     ListEmptyComponent={() => ( 
                         <View style={{alignItems: 'center'}}>
                             {
-                                loading &&
+                                loading ?
                                 <View style={{width: '100%', height: 60, alignItems: 'center', marginVertical: 50}}>
                                     <ActivityIndicator size="large" />
                                 </View>
+                                :
+                                <TText style={{color: 'lightgray'}}>Find and request a service for it to appear here</TText>
                             }
 
-                            <TText style={{color: 'lightgray'}}>Find and request a service for it to appear here</TText>
                         </View> 
                     )}
                     ListHeaderComponent={() => (<TText style={styles.headerText}>Bookings</TText>)}

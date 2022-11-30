@@ -66,6 +66,11 @@ const RatingFeedbackCard = ({user, reviewee, item, bookingId, route, fromProfile
         :
         <>
         {
+            item.length < 1 ? 
+            <View style={{width: '100%', alignItems: 'center', marginTop: 30}}>
+                <TText style={{color: '#bbb'}}>No available ratings</TText>
+            </View>
+            :
             item.map((rating, index) => {
                 return(
                     <View style={[styles.container, fromProfile && {marginHorizontal: 0, marginBottom: 0, marginTop: 15, marginHorizontal: 3}]} key={index}>
@@ -92,6 +97,9 @@ const RatingFeedbackCard = ({user, reviewee, item, bookingId, route, fromProfile
                                 </View>
                             </View>
                             
+                        </View>
+
+                        <View style={styles.messageContainer}> 
                             <View style={[styles.rating, styles.flexRow]}>
                                 {/* <View style={styles.flexRow}>
                                     <TText style={{fontSize: 14, color: '#555' }}>({rating.rating}</TText>
@@ -107,9 +115,6 @@ const RatingFeedbackCard = ({user, reviewee, item, bookingId, route, fromProfile
                                 />
                                 
                             </View>
-                        </View>
-
-                        <View style={styles.messageContainer}> 
                             <TText style={[rating.message ? styles.message : styles.noMessage]}>
                                 {
                                     rating.message ? rating.message : "No comment available"
@@ -163,6 +168,8 @@ const styles = StyleSheet.create({
     },
     rating: {
         alignItems: 'flex-start',
+        marginTop: 5,
+        marginBottom: 15,
     },
     messageContainer: {
         width: '100%',

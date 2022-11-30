@@ -30,6 +30,40 @@ export default function Appbar(props) {
     //     })
     // }, [])
 
+    // const handleCreateConversation = async () => {
+    //     // create a conversation
+
+    //     try {
+    //         await fetch(`http://${IPAddress}:3000/conversations`, {
+    //             method: "POST",
+    //             headers: {
+    //               'content-type': 'application/json'  
+    //             },
+    //             body: JSON.stringify({
+    //                 senderId: global.userData._id,
+    //                 receiverId: global.userData.role === 'recruiter' ? bookingInformation.workerId._id : bookingInformation.recruiterId._id
+    //             })
+    //         }).then(res => res.json())
+    //         .then(data => {
+    //             console.log("conversation data: ", data[0])
+    //             setConversation({...data[0]})
+    //             handleGoToConversation()
+    //         })
+    //     } catch (error) {
+    //         console.log("Error creating new convo: ", error)
+    //     }
+    // }
+
+    // const handleGoToConversation = () => {
+    //     // navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
+    //     // console.log("otgerUser: ", typeof requestItem.workerId)
+    //     console.log("convo: ", typeof conversation)
+    //     navigation.navigate("ConversationThreadDrawer", {
+    //         "otherUser": global.userData.role === 'recruiter' ? bookingInformation.workerId : bookingInformation.recruiterId, 
+    //         "conversation": conversation
+    //     })
+    // }
+
   return (
     <View style={styles.container}>
         {/* left */}
@@ -200,6 +234,7 @@ export default function Appbar(props) {
                     onPress={() => {
                         console.log("HI")
                         // go to convo
+                        // handleCreateConversation()
                     }}
                 >
                     <Image source={require('../assets/icons/chat-bubble.png')} style={{width: 25, height: 25,}} />

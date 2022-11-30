@@ -775,10 +775,10 @@ const VIewServiceRequest = ({route}) => {
                 {/* Display sent message by worker */}
                 {
                     hasSentMessage || (requestItem.requestStatus == '3' && requestItem.comment) ? 
-                    <View style={{paddingHorizontal: 28, marginTop: 40,}}>
+                    <View style={{marginHorizontal: 28, marginTop: 40,}}>
                         <TText style={{fontSize: 14}}>{global.userData.role === "recruiter" ? "Message from Worker" : "Message to Recruiter"}</TText>
-                        <View style={{flexDirection: 'row', alignItems: "center", marginTop: 15}}>
-                            <Image source={{uri: global.userData.profilePic}} style={{width: 40, height: 40, borderRadius: 20, elevation: 3}} />
+                        <View style={{flexDirection: 'row', alignItems: "center", marginTop: 15, maxWidth: '90%'}}>
+                        <Image source={requestItem.workerId.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: requestItem.workerId.profilePic }} style={{width: 40, height: 40, borderRadius: 20, elevation: 3}} />
                             <View style={{backgroundColor: '#eee', justifyContent: 'flex-start', marginLeft: 15, alignItems: 'center', paddingHorizontal: 30,paddingVertical: 7, borderRadius: 8}}>
                                 <TText>{requestItem.comment ? requestItem.comment : declinationMessage}</TText>
                             </View>
@@ -1171,7 +1171,7 @@ const styles = StyleSheet.create({
     cancelBtnCont: {
     },
     cancelBtn: {
-        marginTop: 18,
+        marginTop: 25,
         marginHorizontal: 60,
         backgroundColor: ThemeDefaults.themeRed,
         borderRadius: 10,

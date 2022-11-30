@@ -43,13 +43,16 @@ const UserProfile = ({route}) => {
     let workerID = global.userData._id
 
     useEffect(() => {
-        let userType = global.userData.role === 'recruiter'? "RecruiterComment":"WorkerComment"
-        handleFetchUserRatings(userType)
         navigation.addListener("focus", () => {
             getUpdatedUserData()
             refreshFunc()
         })
     }, [])
+    
+    useEffect(() => {
+        console.log("did load ratings: ", ratingFilter)
+        handleFetchUserRatings()
+    }, [ratingFilter]);
     
     // fetch data if role of user is worker
     useEffect(() => {
@@ -92,16 +95,19 @@ const UserProfile = ({route}) => {
         }).catch((error) => console.log("workList fetch: ", error.message))
     }
 
-    const handleFetchUserRatings = async (user) => {
+    const handleFetchUserRatings = async () => {
         try {
-            await fetch(`http://${IPAddress}:3000/${user}/${global.userData._id}?page=${page}`,{
+            let userType = global.userData.role === 'recruiter'? "RecruiterComment":"workerComment"
+            let ff = ratingFilter === "All" ? "" : `?rating=${ratingFilter}`
+            let pp = page ? `?page=${page}`: ""
+            await fetch(`http://${IPAddress}:3000/${userType}/${global.userData._id}${ff}`,{
                 method: "GET",
                 headers: {
                     'content-type': 'application/json'
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log("user rating: ", data)
+                console.log("user ratingfrom selfprofile: ", data)
                 setUserRatings([...data.comments])
             })
         } catch (error) {
