@@ -252,12 +252,13 @@ const Requests = () => {
                 ListEmptyComponent={() => (
                     <View style={{alignItems: 'center'}}>
                         {
-                            loading &&
+                            loading ?
                             <View style={{width: '100%', height: 60, alignItems: 'center', marginTop: 50}}>
                                 <ActivityIndicator size="large" />
                             </View>
+                            :
+                            <TText style={{color: '#c2c2c2', marginTop: 50}}>There is no pending request at the moment</TText>
                         }
-                        <TText style={{color: '#c2c2c2', marginTop: 50}}>There is no pending request at the moment</TText>
                     </View>
                 )}
                 ListHeaderComponent={() => (<ScreenHeaderComponent />)}
