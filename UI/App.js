@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import * as Device from "expo-device";
@@ -19,11 +19,15 @@ import { IPAddress } from "./global/global";
 import UserProfileStack from "./Components/UserProfileStack";
 
 import 'react-native-console-time-polyfill';
+import ForgotPassword from "./Screens/ForgotPassword";
+import ForgotPasswordStack from "./Components/ForgotPasswordStack";
 
 
 const AppStack = createNativeStackNavigator();
 
 export default function App() {
+
+  // const navigation = useNavigation()
   // const {isLoading, userToken} = useContext(AuthContext);
 
   // if(isLoading) {
@@ -78,7 +82,12 @@ export default function App() {
         }).then(() => console.log("all notification read"))
         .catch((error) => console.log("notification app js error: ", error.message))
 
+        // go to convo
+        // navigation.navigate("CompletedBookingsDrawer")
+
         // go to request/booking page
+
+
         // fetch(/request/id || /booking/id)
       });
     
@@ -160,6 +169,7 @@ async function registerForPushNotificationsAsync() {
           <AppStack.Screen name="LoginNavigationStack" component={LoginNavigationStack} /> 
           <AppStack.Screen name="DrawerNavigation" component={DrawerNavigator} /> 
           <AppStack.Screen name="UserProfileStack" component={UserProfileStack} /> 
+          <AppStack.Screen name="ForgotPasswordStack" component={ForgotPasswordStack} /> 
         </AppStack.Navigator>
       </NavigationContainer>
   );

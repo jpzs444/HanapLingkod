@@ -9,6 +9,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import {IPAddress} from '../global/global'
 import ThemeDefaults from '../Components/ThemeDefaults';
 import { FlashList } from '@shopify/flash-list';
+// import { io } from 'socket.io-client'
+
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -27,6 +31,60 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const searchInput = useRef();
+  const socket = useRef()
+
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
+  // useEffect(() => {
+  //   socket.current = io(`ws://${IPAddress}:8900`)
+  // }, []);
+
+  // useEffect(() => {
+  //   socket.current.emit("addUser", global.userData._id)
+  //   // socket.current.on("getUsers", users => {
+  //   //     console.log("online users: ", users)
+  //   //     setOnlineUsers([...users])
+  //   // })
+  // }, []);
+
+  useEffect(() => {
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        // setNotification(notification);
+        
+      });
+
+      responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log("notification listener response: ", response);
+
+        // turn notification.read to true 
+        fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+          method: "PUT",
+          header: {
+            'content-type': 'application/json',
+          },
+        }).then(() => console.log("all notification read"))
+        .catch((error) => console.log("notification app js error: ", error.message))
+
+        // go to convo
+        navigation.navigate("CompletedBookingsDrawer")
+
+        // go to request/booking page
+
+
+        // fetch(/request/id || /booking/id)
+      });
+
+
+    return () => {
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
 
   
   useEffect(() => {
@@ -52,24 +110,30 @@ export default function Home() {
 
   // fetch service category
   useEffect(() => {
+    // getAllCategory()
+    
     navigation.addListener("focus", () => {
-      getAllCategory()
       onRefresh()
+      // getAllCategory()
     })
   }, [])
 
 
-  const getAllCategory = () => {
-    fetch("http://" + IPAddress + ":3000/service-category", {
-      method: 'GET',
-      headers: {
-          "content-type": "application/json",
-      },
-    }).then((res) => res.json())
-    .then((data) => {
-      setCategory([...data])
-      // console.log(data)
-    })
+  const getAllCategory = async () => {
+    try {
+      await fetch(`http://${IPAddress}:3000/service-category`, {
+        method: "GET",
+        headers: {
+            "content-type": "application/json",
+        },
+      }).then((res) => res.json())
+      .then((data) => {
+        setCategory([...data])
+        // console.log("sub-cat:", data)
+      })
+    } catch (error) {
+      console.log("error service cat: ", error)
+    }
   }
 
   const fetchNotificationList = () => {
@@ -161,7 +225,7 @@ export default function Home() {
         {/* Action bar Button */}
         <View style={styles.actionbar_container}>
           <TouchableOpacity style={styles.actionbar_btn}
-            onPress={() => navigation.navigate("RequestsScreen")}
+            onPress={() => navigation.navigate("RequestsScreenHOME")}
           >
             <View style={styles.actionbar_iconContainer}>
               <Icon name="clipboard-text-multiple" size={50} color="#275A53" />
@@ -492,123 +556,123 @@ export default function Home() {
   return (
     <SafeAreaView style={styles.mainContainer}>
           <View style={styles.category_container}>
-          <FlashList 
-        refreshing={isRefreshing} 
-        onRefresh={onRefresh}
-        data={category}
-        keyExtractor={item => item._id}
-        estimatedItemSize={50}
-        // keyboardDismissMode='none'
-        // keyboardShouldPersistTaps={'always'}
-        showsVerticalScrollIndicator={false}
-        ListFooterComponent={() => (<View style={{height: 120}}></View>)}
-        ListHeaderComponent={() => (
-          <ScreenHeaderComponent />
-        )}
-        renderItem={({item}) => (
-          searchResults ? 
-          <View>
-              {
-                item.Category && item.Category !== 'unlisted' ? 
-                  <TouchableOpacity style={styles.categoryBtn}
-                    onPress={() => {
-                      navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
-                    }}
-                  >
-                    <ImageBackground source={require("../assets/images/stock.jpg")} style={styles.category_imageBG}>
-                      <View style={styles.textWrapper}>
-                        <TText style={styles.categoryTxt}>{item.Category}</TText>
-                      </View>
-                    </ImageBackground>
-                  </TouchableOpacity>
-                  :
-                  item.ServiceSubCategory ? 
-                  <TouchableOpacity style={styles.buttonSubCat}
-                      onPress={() => {
-                          navigation.navigate("ListSpecificWorkerScreen", {chosenCategory: item.ServiceSubCategory})
-                      }}
-                  >
-                      <View style={styles.imageContainerSubCat}>
-                          <Image source={require("../assets/images/stock.jpg")} style={styles.imageStyleSubCat} />
-                      </View>
-                      <View style={styles.subCategoryDescriptionBox}>
-                          <View style={styles.subCategoryRow}>
-                              <TText style={styles.subCategoryText}>{item.ServiceSubCategory}</TText>
-                              <TText style={styles.priceRangePrice}>Price Range</TText>
+            <FlashList 
+              refreshing={isRefreshing} 
+              onRefresh={onRefresh}
+              data={category}
+              keyExtractor={item => item._id}
+              estimatedItemSize={50}
+              // keyboardDismissMode='none'
+              // keyboardShouldPersistTaps={'always'}
+              showsVerticalScrollIndicator={false}
+              ListFooterComponent={() => (<View style={{height: 120}}></View>)}
+              ListHeaderComponent={() => (
+                <ScreenHeaderComponent />
+              )}
+              renderItem={({item}) => (
+                searchResults ? 
+                <View>
+                    {
+                      item.Category && item.Category !== 'unlisted' ? 
+                        <TouchableOpacity style={styles.categoryBtn}
+                          onPress={() => {
+                            navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
+                          }}
+                        >
+                          <ImageBackground source={require("../assets/images/stock.jpg")} style={styles.category_imageBG}>
+                            <View style={styles.textWrapper}>
+                              <TText style={styles.categoryTxt}>{item.Category}</TText>
+                            </View>
+                          </ImageBackground>
+                        </TouchableOpacity>
+                        :
+                        item.ServiceSubCategory ? 
+                        <TouchableOpacity style={styles.buttonSubCat}
+                            onPress={() => {
+                                navigation.navigate("ListSpecificWorkerScreen", {chosenCategory: item.ServiceSubCategory})
+                            }}
+                        >
+                            <View style={styles.imageContainerSubCat}>
+                                <Image source={require("../assets/images/stock.jpg")} style={styles.imageStyleSubCat} />
+                            </View>
+                            <View style={styles.subCategoryDescriptionBox}>
+                                <View style={styles.subCategoryRow}>
+                                    <TText style={styles.subCategoryText}>{item.ServiceSubCategory}</TText>
+                                    <TText style={styles.priceRangePrice}>Price Range</TText>
+                                </View>
+                                <View style={[styles.subCategoryRow, {marginBottom: 0}]}>
+                                    <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
+                                    <TText style={styles.priceRangeText}>Price Range</TText>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                        :
+                        item.firstname ? 
+                          <View style={{width: '100%', paddingHorizontal: 20, height: 130}}>
+                            <TouchableOpacity style={styles.buttonWorker}
+                              onPress={() => {
+                                navigation.navigate("RequestFormDrawer", {workerID: item._id, workerInformation: item, selectedJob: '', showMultiWorks: true})
+                              }}
+                            >
+                                <View style={styles.buttonWorkerView}>
+                                    {/* Profile Picture */}
+                                    <View style={styles.imageContainer}>
+                                        <Image source={item.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: item.profilePic}} style={styles.image} />
+                                    </View>
+                                    {/* Worker Information */}
+                                    <View style={styles.descriptionBox}>
+                                        <View style={styles.descriptionTop}>
+                                            <View style={[styles.row, styles.workerInfo]}>
+                                                <View style={styles.workerNameHolder}>
+                                                    <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
+                                                    { item.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
+                                                </View>
+                                                <View style={styles.workerRatingsHolder}>
+                                                    <Icon name="star" color={"gold"} size={18} />
+                                                    <TText style={styles.workerRatings}>4.5</TText>
+                                                </View>                                     
+                                            </View>
+                                            <View style={styles.workerAddressBox}>
+                                                <Icon name='map-marker' size={16} />
+                                                <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.descriptionBottom}>
+                                            {
+                                              item.works &&
+                                              <Text numberOfLines={1} ellipsizeMode='tail' >
+                                                {
+                                                  item.works.map(function(item){
+                                                    return item + ", "
+                                                  })
+                                                }
+                                              </Text>
+                                              
+                                            }
+                                        </View>
+                                    </View>
+                                </View>
+                            </TouchableOpacity>
                           </View>
-                          <View style={[styles.subCategoryRow, {marginBottom: 0}]}>
-                              <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
-                              <TText style={styles.priceRangeText}>Price Range</TText>
-                          </View>
-                      </View>
-                  </TouchableOpacity>
-                  :
-                  item.firstname ? 
-                    <View style={{width: '100%', paddingHorizontal: 20, height: 130}}>
-                      <TouchableOpacity style={styles.buttonWorker}
-                        onPress={() => {
-                          navigation.navigate("RequestFormDrawer", {workerID: item._id, workerInformation: item, selectedJob: '', showMultiWorks: true})
-                        }}
-                      >
-                          <View style={styles.buttonWorkerView}>
-                              {/* Profile Picture */}
-                              <View style={styles.imageContainer}>
-                                  <Image source={item.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: item.profilePic}} style={styles.image} />
-                              </View>
-                              {/* Worker Information */}
-                              <View style={styles.descriptionBox}>
-                                  <View style={styles.descriptionTop}>
-                                      <View style={[styles.row, styles.workerInfo]}>
-                                          <View style={styles.workerNameHolder}>
-                                              <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
-                                              { item.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
-                                          </View>
-                                          <View style={styles.workerRatingsHolder}>
-                                              <Icon name="star" color={"gold"} size={18} />
-                                              <TText style={styles.workerRatings}>4.5</TText>
-                                          </View>                                     
-                                      </View>
-                                      <View style={styles.workerAddressBox}>
-                                          <Icon name='map-marker' size={16} />
-                                          <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
-                                      </View>
-                                  </View>
-                                  <View style={styles.descriptionBottom}>
-                                      {
-                                        item.works &&
-                                        <Text numberOfLines={1} ellipsizeMode='tail' >
-                                          {
-                                            item.works.map(function(item){
-                                              return item + ", "
-                                            })
-                                          }
-                                        </Text>
-                                        
-                                      }
-                                  </View>
-                              </View>
-                          </View>
-                      </TouchableOpacity>
-                    </View>
-                  : null
-                }
-            </View>
-            :
-            item.Category !== 'unlisted' ?
-            <TouchableOpacity style={styles.categoryBtn}
-                onPress={() => {
-                  navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
-                }}
-              >
-                <ImageBackground source={require("../assets/images/painting.jpg")} style={styles.category_imageBG}>
-                  <View style={styles.textWrapper}>
-                    <TText style={styles.categoryTxt}>{item.Category}</TText>
+                        : null
+                      }
                   </View>
-                </ImageBackground>
-              </TouchableOpacity> 
-              : null
-        )}
-      /> 
+                  :
+                  item.Category !== 'unlisted' ?
+                  <TouchableOpacity style={styles.categoryBtn}
+                      onPress={() => {
+                        navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
+                      }}
+                    >
+                      <ImageBackground source={require("../assets/images/painting.jpg")} style={styles.category_imageBG}>
+                        <View style={styles.textWrapper}>
+                          <TText style={styles.categoryTxt}>{item.Category}</TText>
+                        </View>
+                      </ImageBackground>
+                    </TouchableOpacity> 
+                  : null
+              )}
+            /> 
           </View>
     </SafeAreaView>
   )
@@ -629,7 +693,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   greetingText: {
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: 'LexendDeca_SemiBold',
     color: ThemeDefaults.themeDarkBlue
   },

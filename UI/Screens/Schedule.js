@@ -15,7 +15,7 @@ const Schedule = ({route}) => {
 
     const navigation = useNavigation()
 
-    const {selectedDate, workerInformation, selectedJob, fromRequestForm, minPrice, maxPrice, } = route.params
+    const {selectedDate, workID, workerInformation, selectedJob, fromRequestForm, minPrice, maxPrice, } = route.params
 
     const [formatedTime, setFormatedTime] = useState(new Date())
 
@@ -43,7 +43,7 @@ const Schedule = ({route}) => {
       const handleSystemBackButton = () => {
         if(fromRequestForm) {
             navigation.goBack()
-            navigation.navigate("RequestFormDrawer", {workerInformation: workerInformation, selectedDay: new Date(selectedDate).toString(), selectedTime: new Date(formatedTime).toString(), selectedJob: selectedJob})
+            navigation.navigate("RequestFormDrawer", {workerInformation: workerInformation, workID: workID, selectedDay: new Date(selectedDate).toString(), selectedTime: new Date(formatedTime).toString(), selectedJob: selectedJob})
             return true
         } else {
             navigation.navigate("CalendarViewUserStack")
@@ -239,7 +239,7 @@ const Schedule = ({route}) => {
                             <TouchableOpacity style={styles.confirmBtn}
                                 onPress={() => {
                                     // navigation.goBack()
-                                    navigation.navigate("RequestFormDrawer", {workerInformation: workerInformation, selectedDay: new Date(selectedDate).toString(), selectedTime: new Date(formatedTime).toString(), selectedJob: selectedJob, minPrice: minPrice, maxPrice: maxPrice})
+                                    navigation.navigate("RequestFormDrawer", {workerInformation: workerInformation, workID: workID, selectedDay: new Date(selectedDate).toString(), selectedTime: new Date(formatedTime).toString(), selectedJob: selectedJob, minPrice: minPrice, maxPrice: maxPrice})
 
                                 }}
                             >

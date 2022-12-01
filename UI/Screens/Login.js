@@ -157,7 +157,11 @@ export default function Login({navigation}) {
           </View>
 
           {/* Forgot password button */}
-          <TouchableOpacity style={styles.fp_btn}>
+          <TouchableOpacity style={styles.fp_btn}
+            onPress={() => {
+              navigation.navigate("ForgotPasswordStack")
+            }}
+          >
               <Text style={styles.forgotPw}>Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -253,7 +257,7 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         marginHorizontal: '10%',
     },
-    forgotPw: {
+    rforgotPw: {
         fontFamily: 'LexendDeca',
         fontSize: 16,
     },

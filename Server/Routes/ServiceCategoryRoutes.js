@@ -33,7 +33,7 @@ router
   .get(authenticateToken, CheckIfBan, function (req, res) {
     ServiceCategory.find(
       {
-        deleteflag: false,
+        // deleteflag: false,
       },
       function (err, services) {
         if (services) {

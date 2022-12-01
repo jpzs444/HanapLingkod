@@ -30,6 +30,40 @@ export default function Appbar(props) {
     //     })
     // }, [])
 
+    // const handleCreateConversation = async () => {
+    //     // create a conversation
+
+    //     try {
+    //         await fetch(`http://${IPAddress}:3000/conversations`, {
+    //             method: "POST",
+    //             headers: {
+    //               'content-type': 'application/json'  
+    //             },
+    //             body: JSON.stringify({
+    //                 senderId: global.userData._id,
+    //                 receiverId: global.userData.role === 'recruiter' ? bookingInformation.workerId._id : bookingInformation.recruiterId._id
+    //             })
+    //         }).then(res => res.json())
+    //         .then(data => {
+    //             console.log("conversation data: ", data[0])
+    //             setConversation({...data[0]})
+    //             handleGoToConversation()
+    //         })
+    //     } catch (error) {
+    //         console.log("Error creating new convo: ", error)
+    //     }
+    // }
+
+    // const handleGoToConversation = () => {
+    //     // navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
+    //     // console.log("otgerUser: ", typeof requestItem.workerId)
+    //     console.log("convo: ", typeof conversation)
+    //     navigation.navigate("ConversationThreadDrawer", {
+    //         "otherUser": global.userData.role === 'recruiter' ? bookingInformation.workerId : bookingInformation.recruiterId, 
+    //         "conversation": conversation
+    //     })
+    // }
+
   return (
     <View style={styles.container}>
         {/* left */}
@@ -156,7 +190,7 @@ export default function Appbar(props) {
         </View>
 
         {/* right */}
-        <TouchableOpacity style={styles.right}>
+        <TouchableOpacity style={[styles.right,]}>
             {
                 props.hasPicture ? 
                     <TouchableOpacity style={{borderRadius: 20, elevation: 7, alignSelf: 'flex-end', width: 40, height: 40, borderRadius: 20,}} onPress={() => { navigation.navigate("UserProfileStack", {profile_id: global.userData._id}) }}>
@@ -192,6 +226,19 @@ export default function Appbar(props) {
                     <TouchableOpacity disabled={!props.hasChanges} style={[styles.saveBtn, {backgroundColor: props.hasChanges ? ThemeDefaults.themeDarkBlue : 'lightgray'}]} onPress={() => { setBackBtnPressed(true) }}>
                         <TText style={styles.saveBtnText}>Save</TText>
                     </TouchableOpacity>
+            }
+            {
+                props.chatBtn &&
+                <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 20, padding: 8, elevation: 4, alignSelf: 'flex-end'}}
+                    activeOpacity={0.5}
+                    onPress={() => {
+                        console.log("HI")
+                        // go to convo
+                        // handleCreateConversation()
+                    }}
+                >
+                    <Image source={require('../assets/icons/chat-bubble.png')} style={{width: 25, height: 25,}} />
+                </TouchableOpacity>
             }
         </TouchableOpacity>
     </View>

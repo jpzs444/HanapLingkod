@@ -11,53 +11,76 @@ import { useNavigation } from '@react-navigation/native'
 
 // import 'react-native-console-time-polyfill';
 
-const Bookings = ({navigation}) => {
+const Bookings = () => {
 
-    // const navigation = useNavigation()
+    const navigation = useNavigation()
 
     // STATES
     const [bookings, setBookings] = useState([])
     const [currentPage, setCurrentPage] = useState(1)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [loading, setLoading] = useState(false)
+    
 
     useEffect(() => {
-        fetchBookings()
-        // navigation.addListener("focus", () => {fetchBookings()})
-        let fetchInterval = setInterval(() => {
-            setLoading(true)
+        setCurrentPage(1)
+        setBookings([])
+    }, []);
+
+    useEffect(() => {
+        let fetchInterval
+
+        navigation.addListener("focus", () => {
             fetchBookings()
-            setLoading(false)
-        }, 10000)
-
-        console.log("user data: ", global.userData)
-
-
+            console.log("screen focused: bookings")
+            
+            fetchInterval = setInterval(() => {
+                setLoading(true)
+                fetchBookings()
+                // setLoading(false)
+            }, 10000)
+        })
+        
         return () => {
             clearInterval(fetchInterval)
         };
+    }, []);
+
+    useEffect(() => {
+        fetchBookings()
     }, [currentPage]);
 
-    const fetchBookings = async () => {
-        // setLoading(true)
-        const gg = await fetch(`http://${IPAddress}:3000/booking/${global.userData._id}?page=${currentPage}`, {
-            method: "GET",
-            headers: {
-                'content-type': "application/json"
-            }
-        }).then(res => res.json())
-        .then(data => {
-            console.log("Bookings data: ", data)
-            // console.log("Bookings data: ", data.worker.workerId)
-            // console.log("fetched")
 
-            // grab bookings which have the status of active(1) and ongoing(2)
-            global.userData.role === "recruiter" ? setBookings([...data.Status2_recruiter, ...data.recruiter]) : setBookings([...data.Status2_worker, ...data.worker])
-            // global.userData.role === "recruiter" ? setBookings([...data.recruiter]) : setBookings([...data.worker])
-            // global.userData.role === "recruiter" ? setBookings(curr => [...curr, ...data.recruiter]) : setBookings(curr => [...curr, ...data.worker])
+    const fetchBookings = async () => {
+        setLoading(true)
+
+        try {
+            console.log("fetchBookings")
+            fetch(`http://${IPAddress}:3000/booking/${global.userData._id}?page=${currentPage}`, {
+                method: "GET",
+                headers: {
+                    'content-type': "application/json"
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("Bookings data: ", data)
+
+                // grab bookings which have the status of active(1) and ongoing(2)
+                if(global.userData.role === "recruiter") {
+                    setBookings([...data.Status2_recruiter, ...data.recruiter]) 
+                } else {
+                    setBookings([...data.Status2_worker, ...data.worker])
+                }
+
+                
+            })
+            setLoading(false)
+            console.log("bookings state: ", bookings)
+        } catch (error) {
+            console.log("error fetch bookings: ", error) 
+        }  
+
             
-        })
-        // setLoading(false)
     }
 
 
@@ -78,12 +101,6 @@ const Bookings = ({navigation}) => {
     const BookingItem = ({ item }) => {
         return (
             <>
-                {
-                    loading ? 
-                    <View style={{flex: 1, width: '100%', marginTop: 50}}>
-                        <ActivityIndicator size={'large'} style={{width: '100%', alignItems: 'center'}} />
-                    </View>
-                    :
                     <TouchableOpacity style={[styles.bookingItem, item.bookingStatus != '1' && item.bookingStatus != '4' && {borderWidth: 1.5, borderColor: ThemeDefaults.themeLighterBlue }, item.bookingStatus == 4 && {backgroundColor: 'rgba(153,153,153,1)'}, item.bookingStatus == '5' && styles.serviceOngoing]}
                         onPress={() => {
                             console.log("Item ID: ", item._id)
@@ -160,7 +177,6 @@ const Bookings = ({navigation}) => {
                             : null
                         }
                     </TouchableOpacity>
-                }
             </>
         )
     }
@@ -179,7 +195,19 @@ const Bookings = ({navigation}) => {
                     estimatedItemSize={100}
                     onEndReachedThreshold={0.5}
                     onEndReached={() => setCurrentPage(page => page + 1)}
-                    // ListEmptyComponent={() => ( <View style={{paddingVertical: 25, alignItems: 'center'}}><TText style={{color: 'lightgray'}}>Find and request a service for it to appear here</TText></View> )}
+                    ListEmptyComponent={() => ( 
+                        <View style={{alignItems: 'center'}}>
+                            {
+                                loading ?
+                                <View style={{width: '100%', height: 60, alignItems: 'center', marginVertical: 50}}>
+                                    <ActivityIndicator size="large" />
+                                </View>
+                                :
+                                <TText style={{color: 'lightgray'}}>Find and request a service for it to appear here</TText>
+                            }
+
+                        </View> 
+                    )}
                     ListHeaderComponent={() => (<TText style={styles.headerText}>Bookings</TText>)}
                     renderItem={({item}) => (<BookingItem item={item} />)}
                     ListFooterComponent={() => (<View style={{height: 150}}></View>)}

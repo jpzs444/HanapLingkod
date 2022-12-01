@@ -51,6 +51,7 @@ const Edit_UserProfile = () => {
     })
 
     const [userWorkListEdit, setUserWorkListEdit] = useState([])
+    const [workToDelete, setWorkToDelete] = useState([])
 
     const [isModalVisible, setModalVisible] = useState(false)
     const [editHasChanges, setEditHasChanges] = useState(false)
@@ -90,7 +91,9 @@ const Edit_UserProfile = () => {
             // console.log("sub_cat: ", data[0].ServiceSubId.ServiceSubCategory)
 
             for (let i = 0; i < data.length; i++){
+                // console.log("workitem id: ", data[i]._id)
                 setUserWorkListEdit((prev) => ([...prev, {
+                    id: data[i]._id,
                     category: data[i].category,
                     sub_category: `${data[i].ServiceSubId.ServiceSubCategory}`,
                     minPrice: data[i].minPrice,
@@ -159,8 +162,10 @@ const Edit_UserProfile = () => {
     }
 
     const handleRemoveWorkItem = (index) => {
+        setWorkToDelete(prev => [...prev, userWorkListEdit[index]])
         const list = [...userWorkListEdit];
         list.splice(index, 1);
+
         setUserWorkListEdit(list)
         setEditHasChanges(true)
     }
@@ -355,35 +360,66 @@ const Edit_UserProfile = () => {
                 .catch((error) => console.log(error.message))
             }
 
+            console.log("userWorkListEdit: ", userWorkListEdit)
             // Upload set of works
             for(let i = 0; i < userWorkListEdit.length; i++){
-                fetch("http://" + IPAddress + ":3000/Work", {
-                    method: "POST",
-                headers: {
-                    "content-type": "application/json",
-                },
-                body: JSON.stringify({
-                    "Category": userWorkListEdit[i].Category ? 'unlisted' : "",
-                    "ServiceSubCategory": userWorkListEdit[i].sub_category,
-                    "minPrice": userWorkListEdit[i].minPrice,
-                    "maxPrice": userWorkListEdit[i].maxPrice,
-                    "userId": global.userData._id,
-                }),
-                }).then((res) => console.log("successfully added works"))
-                .catch((error) => console.log(error.message))
+                
+                if(userWorkListEdit[i].id){
+                    console.log("only update work: ", userWorkListEdit[i].id)
+                    fetch(`http://${IPAddress}:3000/Work/${userWorkListEdit[i].sub_category}/${userWorkListEdit[i].id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            minPrice: userWorkListEdit[i].minPrice,
+                            maxPrice: userWorkListEdit[i].maxPrice,
+                        })
+                    }).then(res => res.json())
+                    .then(res => {
+                        console.log("Update status: ")
+                        console.log("Success update existing work/s")
+                    })
+                    .catch(err => {
+                        console.log("error Fetch work update: ", err.msg)
+                    })
+                } else {
+                    console.log("only post work")
+                    fetch("http://" + IPAddress + ":3000/Work", {
+                        method: "POST",
+                        headers: {
+                            "content-type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            "Category": userWorkListEdit[i].Category ? 'unlisted' : "",
+                            "ServiceSubCategory": userWorkListEdit[i].sub_category,
+                            "minPrice": userWorkListEdit[i].minPrice,
+                            "maxPrice": userWorkListEdit[i].maxPrice,
+                            "userId": global.userData._id,
+                        }),
+                    })
+                    .then((res) => console.log("successfully added work/s"))
+                    .catch((error) => console.log(error.message))
+                }
             }
             
-            // Update/Upload Works/Services offered by the Worker
-            for(let i = 0; i < workList.length; i++){
-                fetch("http://" + IPAddress + ":3000/Work/" + workList[i].ServiceSubId.ServiceSubCategory + "/" + workList[i]._id, {
-                    method: "DELETE",
-                    headers: {
-                        "content-type": "multipart/form-data",
-                    },
-                }).then((res) => console.log("old set of work deleted successfully   ", res.message))
-                .catch((error) => console.log(error.message))
+            // INCORRECT | Update/Upload Works/Services offered by the Worker
+            if(workToDelete) {
+                console.log("workToDelete: ", workToDelete)
+                for(let i = 0; i < workToDelete.length; i= i+1){
+                    // console.log("subcat delete: ", workToDelete[i].ServiceSubId.ServiceSubCategory)
+                    console.log("subcat delete: ", workToDelete[i].id)
+                    if(workToDelete[i].id){
+                        fetch(`http://${IPAddress}:3000/Work/${workToDelete[i].sub_category}/${workToDelete[i].id}`, {
+                            method: "DELETE",
+                            headers: {
+                                "content-type": "application/json",
+                            },
+                        }).then((res) => console.log("old set of work deleted successfully"))
+                        .catch((error) => console.log("error delete works: ", error.message))
+                    }
+                }
             }
-            // console.log("Delete fetch")
             
             userEditData.bio ? formData.append("workDescription", userEditData.bio) : null
 
@@ -886,14 +922,22 @@ const Edit_UserProfile = () => {
                                             <View>
                                                 <TText style={[styles.inputLabel,]}>Work Category</TText>
                                                 <TouchableOpacity style={[styles.textInputContainer, {marginTop: 5}]}
-                                                    onPress={() => setPickerVisible(true)}
+                                                    onPress={() => {
+                                                        if(!workItem.sub_category){
+                                                            setPickerVisible(true)
+                                                        }
+                                                    }}
                                                 >
                                                     <View style={{flexDirection: 'row', alignContent: 'center', marginTop: 10}}>
                                                         <Icon name='hard-hat' size={22} color={ThemeDefaults.themeOrange} />
                                                         <TText style={{fontSize: 18, marginLeft: 10}}>{ workItem.sub_category ? workItem.sub_category : "Select Work"}</TText>
                                                     </View>
                                                     {/* <TText style={{marginTop: 5,}}>{ workList.service ? "" : workItem.ServiceSubId.ServiceSubCategory}</TText> */}
-                                                    <Icon name="arrow-down-drop-circle" size={20} color={"gray"} />
+
+                                                    {
+                                                        !workItem.sub_category && 
+                                                        <Icon name="arrow-down-drop-circle" size={20} color={"gray"} />
+                                                    }
                                                 </TouchableOpacity>
 
                                                 <Modal

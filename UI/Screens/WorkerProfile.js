@@ -11,6 +11,8 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 import ImageView from "react-native-image-viewing";
 import Swiper from 'react-native-swiper'
+import { concat } from 'react-native-reanimated';
+import RatingFeedbackCard from '../Components/RatingFeedbackCard';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -25,6 +27,10 @@ const WorkerProfile = ({route}) => {
     const isFocused = navigation.isFocused();
 
     const [workList, setWorkList] = useState([])
+    const [userRatings, setUserRatings] = useState([])
+    const [ratingFilter, setRatingFilter] = useState("All")
+
+    const [userRatingStar, setUserRatingStar] = useState(1)
     const [activeTab, setActiveTab] = useState('works')
     const [rerender, setRerender] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
@@ -48,7 +54,32 @@ const WorkerProfile = ({route}) => {
             setWorkList([])
         }
         
-    }, [screenFocused])
+    }, [screenFocused, route])
+
+    useEffect(() => {
+        console.log("userRole: ", userRole)
+        handleFetchRatingUser()
+    }, [route, ratingFilter]);
+
+
+    const handleFetchRatingUser = async () => {
+        try {
+            let rateRoute = userRole ? "RecruiterComment" : "workerComment"
+            let withRating = ratingFilter === "All" ? "" : `?rating=${ratingFilter}`
+            await fetch(`http://${IPAddress}:3000/${rateRoute}/${workerID}${withRating}`, {
+                method: "GET",
+                headers: {
+                    "content-type": "application/json"
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("user rating: ", data)
+                setUserRatings([...data.comments])
+            })
+        } catch (error) {
+            console.log("Error fetch user rating: ", error)   
+        }
+    }
 
     const getUpdatedUserData = () => {
 
@@ -86,7 +117,8 @@ const WorkerProfile = ({route}) => {
         }).then((res) => res.json())
         .then((data) => {
             setWorkList([...data])
-            // console.log("new work list: ", data)
+            console.log("new work list: ", data)
+            console.log("new work list: ", data[0].ServiceSubId._id)
         }).catch((error) => console.log("workList fetch: ", error.message))
     }
 
@@ -111,6 +143,33 @@ const WorkerProfile = ({route}) => {
           </View>
         )
       }
+
+
+      const RatingFilterButton = ({label}) => {
+        return(
+            <TouchableOpacity style={[styles.ratingBtn, label === ratingFilter && {borderColor: 'red', borderWidth: 1.3}]}
+                onPress={() => {
+                    setRatingFilter(label)
+                }}
+            >
+                <Icon name="star" size={20} color={"gold"} />
+                <TText style={styles.ratingText}>{label}</TText>
+            </TouchableOpacity>
+        )
+    }
+
+    const RatingFilter = () => {
+        return(
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <RatingFilterButton label={"All"} />
+                <RatingFilterButton label={"5"} />
+                <RatingFilterButton label={"4"} />
+                <RatingFilterButton label={"3"} />
+                <RatingFilterButton label={"2"} />
+                <RatingFilterButton label={"1"} />
+            </View>
+        )
+    }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -168,7 +227,7 @@ const WorkerProfile = ({route}) => {
 
         {/* Top container */}
         <View style={{elevation: 5, paddingTop: 0, paddingBottom: 30, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, backgroundColor: '#fff'}}>
-            <Appbar settingsBtn={false} onlyBackBtn={true} showLogo={true} />
+            <Appbar settingsBtn={false} onlyBackBtn={true} showLogo={true} chatBtn={true} />
 
             <View>
                 {/* Profile Picture */}
@@ -262,8 +321,19 @@ const WorkerProfile = ({route}) => {
                                             <View style={{}}>
                                                 <TouchableOpacity style={{paddingVertical: 5, paddingHorizontal: 10, backgroundColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, elevation: 4}}
                                                     onPress={() => {
-                                                        navigation.navigate("RequestFormDrawer", {workerID: workerID, workID: workItem._id, workerInformation: workerInformation, selectedJob: workItem.ServiceSubId.ServiceSubCategory, minPrice: workItem.minPrice, maxPrice: workItem.maxPrice, showMultiWorks: false})
-
+                                                        console.log("workItem work Id: ", workItem._id)
+                                                        let i = workItem._id
+                                                        console.log("i: ", i)
+                                                        console.log("i: ", typeof i)
+                                                        navigation.navigate("RequestFormDrawer", {
+                                                            workerID: workerID,
+                                                            workID: workItem.ServiceSubId._id,
+                                                            workerInformation: workerInformation,
+                                                            selectedJob: workItem.ServiceSubId.ServiceSubCategory,
+                                                            minPrice: workItem.minPrice,
+                                                            maxPrice: workItem.maxPrice,
+                                                            showMultiWorks: false
+                                                        })
                                                     }}
                                                 >
                                                     <TText style={{fontSize: 12, color: '#fff'}}>Request</TText>
@@ -279,59 +349,35 @@ const WorkerProfile = ({route}) => {
                                 }
                             </>
                             :
-                            <View style={{marginTop: 20}}>
-                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
+                            <View style={{marginTop: 20,  width: '100%',}}>
+                                
+                                <View style={{ marginHorizontal: 30,}}>
+                                                {/* 
+                                                    message
+                                                    rating 
+                                                    reviewer
+                                                 */}
+                                    <View style={{  backgroundColor: '#f1f1f1', marginTop: 20, padding: 10, paddingBottom: 30, borderRadius: 10, elevation: 3}}>
+                                        <View style={{flexDirection: 'row', alignItems: 'center', padding: 10}}>
+                                            <TText>Reviews</TText>
+                                            <View style={{width: 25, height: 25, borderRadius: 15, backgroundColor: '#d7d7d7', alignItems: 'center', marginHorizontal: 15}}>
+                                                <TText style={{fontSize: 15}}>{userRatings.length.toString()}</TText>
+                                            </View>
+                                            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                                <Icon name="star" size={20} color={'gold'} />
+                                                <TText style={{marginLeft: 5}}>{workerInformation.rating}</TText>
+                                            </View>
+                                        </View>
+                                        
+                                        {/* Rating Filter */}
+                                        <View style={{marginVertical: 0, marginBottom: 20, marginTop: 10}}>
+                                            <RatingFilter />
+                                        </View>
 
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>5</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>4</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>3</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>2</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>1</TText>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.ratingBtn}
-                                        onPress={() => {
-                                            
-                                        }}
-                                    >
-                                        <Icon name="star" size={20} color={"gold"} />
-                                        <TText style={styles.ratingText}>All</TText>
-                                    </TouchableOpacity>
-                                    
+                                        <RatingFeedbackCard item={userRatings} fromProfile={true} />
+                                    </View>
                                 </View>
-                                <TText style={{marginTop: 40, textAlign: 'center', color: 'lightgray'}}>Ratings and reviews is not yet available</TText>
+                                {/* <TText style={{marginTop: 40, textAlign: 'center', color: 'lightgray'}}>Ratings and reviews is not yet available</TText> */}
                             </View>
                         }
                     </View>
@@ -434,5 +480,20 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: "#000",
         backgroundColor: 'gray'
-    }
+    },
+    ratingBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        backgroundColor: '#fefefe',
+        padding: 5,
+        paddingHorizontal: 10,
+        marginRight: 5,
+        borderRadius: 15,
+        minWidth: 50,
+        elevation: 3
+    },
+    ratingText: {
+        marginLeft: 3
+    },
 })
