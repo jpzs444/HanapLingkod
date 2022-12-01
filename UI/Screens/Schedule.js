@@ -1,4 +1,4 @@
-import { StyleSheet, BackHandler, Text, View, TouchableOpacity, Modal, StatusBar, SafeAreaView } from 'react-native'
+import { StyleSheet, BackHandler, Text, View, TouchableOpacity, Modal, StatusBar, SafeAreaView, ActivityIndicator } from 'react-native'
 import Appbar from '../Components/Appbar'
 import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -28,6 +28,8 @@ const Schedule = ({route}) => {
     const [sameDateBookings, setSameDateBookings] = useState([])
     const [hasChanges, setHasChanges] = useState(false)
 
+    const [loading, setLoading] = useState(false)
+
     // system back button behavior
     useEffect(() => {
         // console.log("backbtn pressed");
@@ -54,17 +56,25 @@ const Schedule = ({route}) => {
 
         return false;
       }
+
+    useEffect(() => {
+        setSameDateBookings([])
+        return () => {
+            setSameDateBookings([])
+        }
+    }, [route]);
     
 
     useEffect(() => {
-        getUpdatedUserData()
-        getUnavailableSchedule()
-
+        // getUpdatedUserData()
+        // getUnavailableSchedule()
+        
         navigation.addListener("focus", () => {
+            setLoading(true)
             getUpdatedUserData()
             getUnavailableSchedule()
         })
-    }, [route, hasChanges, global.userData])
+    }, [route, hasChanges])
 
 
     const getUpdatedUserData = () => {
@@ -86,18 +96,34 @@ const Schedule = ({route}) => {
         .catch((error) => console.log(error.message))
     }
 
-    const getUnavailableSchedule = () => {
+    const getUnavailableSchedule = async () => {
         let dddd = new Date(selectedDate)
         let uunn = []
-        if(workerInformation){
-            uunn = workerInformation.unavailableTime.filter(e => {
+        try {
+            await fetch(`http://${IPAddress}:3000/schedule/${workerInformation._id}`, {
+                method: "GET",
+                headers: {
+                    "content-type": "application/json"
+                }
+            }).then(res => res.json())
+            .then(data => {
+                uunn = [...data[0].unavailableTime]
+                setLoading(false)
+                // console.log("unvTime . unvt: ", uunn)
+                
+            })
+        } catch (error) {
+            console.log("error fetching unavailable schedule route", error)
+        }
+        if(uunn){
+            uunn = uunn.filter(e => {
                 let sst = new Date(e.startTime)
                 return (sst.getFullYear() === dddd.getFullYear() &&
                 sst.getMonth() === dddd.getMonth() &&
                 sst.getDate() === dddd.getDate())
             })
         } else {
-            uunn = global.userData.unavailableTime.filter(e => {
+            uunn = uunn.filter(e => {
                 let sst = new Date(e.startTime)
                 return (sst.getFullYear() === dddd.getFullYear() &&
                 sst.getMonth() === dddd.getMonth() &&
@@ -221,7 +247,7 @@ const Schedule = ({route}) => {
             {/* <ScreenFooterComponent /> */}
 
             {
-                sameDateBookings.length !== 0 && global.userData.role === "recruiter" &&
+                sameDateBookings.length !== 0 && global.userData.role === "recruiter" && !loading && 
                 <View style={{marginVertical: 15, marginHorizontal: 30}}>
                     <TText>Scheduled Bookings by the Worker:</TText>
                 </View>
@@ -255,9 +281,16 @@ const Schedule = ({route}) => {
     const ScreenEmptyComponent = () => {
         return(
             <View style={{paddingVertical: 20, alignItems: 'center', marginTop: 20, marginBottom: 40}}>
-                <TText style={{color: 'lightgray'}}>
-                    Schedule is clear for {dayjs(new Date(selectedDate)).format("MMMM DD")}
-                </TText>
+                {
+                    loading ? 
+                        <View style={{width: '100%', marginTop: 50, alignItems: 'center'}}>
+                            <ActivityIndicator size={'large'} />
+                        </View>
+                    :
+                    <TText style={{color: 'lightgray'}}>
+                        Schedule is clear for {dayjs(new Date(selectedDate)).format("MMMM DD")}
+                    </TText>
+                }
             </View>
         )
     }
