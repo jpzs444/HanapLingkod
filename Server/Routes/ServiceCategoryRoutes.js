@@ -8,7 +8,10 @@ const Booking = require("../Models/Booking");
 const multer = require("multer");
 const cloudinary = require("../Helpers/cloudinary");
 const { CategoryMiddleware } = require("../Helpers/DeleteMiddleware");
+const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
+const { CheckIfBan } = require("../Helpers/banChecker");
 
+// router.use(authenticateToken);
 //store photos
 const storage = multer.diskStorage({
   //destination for files
@@ -27,7 +30,7 @@ const upload = multer({ storage: storage });
 
 router
   .route("/service-category")
-  .get(function (req, res) {
+  .get(authenticateToken, CheckIfBan, function (req, res) {
     ServiceCategory.find(
       {
         deleteflag: false,

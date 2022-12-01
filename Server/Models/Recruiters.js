@@ -30,6 +30,7 @@ const recruiterSchema = new mongoose.Schema({
   //   },
   // ],
   rating: Number,
+  ban: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("Recruiter", recruiterSchema);

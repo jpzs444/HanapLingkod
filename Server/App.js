@@ -39,7 +39,8 @@ const RecruiterCommentRoutes = require("./Routes/RecruiterCommentRoutes");
 const deleteCancelled = require("./Helpers/deleteCancelled");
 const Conversation = require("./Routes/Conversations");
 const Messages = require("./Routes/messages");
-
+const Admin = require("./Routes/AdminRoutes");
+const { Unban } = require("./Helpers/Unban");
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -103,6 +104,9 @@ cron.schedule("0 * * * *", () => {
 
 cron.schedule("0 0 * * *", () => {
   deleteCancelled();
+});
+cron.schedule("0 0 * * *", () => {
+  Unban();
 });
 
 app.get("/search", async function (req, res) {
@@ -175,7 +179,8 @@ app.post("/usernameChecker", async function (req, res) {
       .select("phoneNumber role")
       .lean()
       .exec();
-    jwt = generateAccessToken(req.body.username, user.role);
+    console.log(user);
+    jwt = generateAccessToken(req.body._id, user.role);
     res.status(200).json({ user: user, token: jwt });
   } else if (
     (await Worker.count({ username: req.body.username }).lean().exec()) != 0
@@ -184,7 +189,7 @@ app.post("/usernameChecker", async function (req, res) {
       .select("phoneNumber role")
       .lean()
       .exec();
-    jwt = generateAccessToken(req.body.username, user.role);
+    jwt = generateAccessToken(req.body._id, user.role);
     res.status(200).json({ user: user, token: jwt });
   } else {
     res.status(400).json("Does Not exist");
@@ -192,12 +197,12 @@ app.post("/usernameChecker", async function (req, res) {
 });
 
 app.post("/changePassword", authenticateToken, async function (req, res) {
-  const { username, role } = req.CurrentuserId;
+  const { id, role } = req.CurrentuserId;
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
   if (role === "recruiter") {
     Recruiter.findOneAndUpdate(
-      { username: username },
+      { id: id },
       { password: hashedPassword },
       function (err, docs) {
         if (err) {
@@ -210,7 +215,7 @@ app.post("/changePassword", authenticateToken, async function (req, res) {
     );
   } else if (role === "worker") {
     Worker.findOneAndUpdate(
-      { username: username },
+      { id: id },
       { password: hashedPassword },
       function (err, docs) {
         if (err) {
@@ -290,7 +295,7 @@ app.post("/login", async (req, res) => {
     if (ifWorkerExist) {
       user = await Worker.findOne({ username: username })
         .select(
-          "-GovId -accountStatus -licenseCertificate -works -prevWorks -unavailableTime -pushtoken"
+          "-GovId -accountStatus -licenseCertificate -works -prevWorks - lableTime -pushtoken"
         )
         .lean();
     } else {
@@ -305,7 +310,7 @@ app.post("/login", async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid Password" });
     }
-    const token = generateAccessToken(String(user._id));
+    const token = generateAccessToken(String(user._id), user.role);
     user["accessToken"] = "Bearer " + token;
     delete user.password;
     console.log(user);
@@ -496,5 +501,7 @@ app.use(Booking);
 app.use(Calendar);
 app.use(Conversation);
 app.use(Messages);
+app.use(Admin);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("listening on port 3000."));
