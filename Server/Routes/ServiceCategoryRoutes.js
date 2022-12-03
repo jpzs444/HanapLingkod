@@ -30,20 +30,23 @@ const upload = multer({ storage: storage });
 
 router
   .route("/service-category")
-  .get(authenticateToken, CheckIfBan, function (req, res) {
-    ServiceCategory.find(
-      {
-        // deleteflag: false,
-      },
-      function (err, services) {
-        if (services) {
-          res.send(services);
-        } else {
-          res.send("No such data found");
+  .get(
+    authenticateToken, CheckIfBan,
+    function (req, res) {
+      ServiceCategory.find(
+        {
+          // deleteflag: false,
+        },
+        function (err, services) {
+          if (services) {
+            res.send(services);
+          } else {
+            res.send("No such data found");
+          }
         }
-      }
-    );
-  })
+      );
+    }
+  )
   .post(upload.single("image"), async function (req, res) {
     let image;
     if (req.file !== undefined) {

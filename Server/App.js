@@ -294,8 +294,9 @@ app.post("/login", async (req, res) => {
     let user;
     if (ifWorkerExist) {
       user = await Worker.findOne({ username: username })
+        // console.log("user");
         .select(
-          "-GovId -accountStatus -licenseCertificate -works -prevWorks - lableTime -pushtoken"
+          "-GovId -accountStatus -licenseCertificate -works -prevWorks -unavailableTime -pushtoken"
         )
         .lean();
     } else {

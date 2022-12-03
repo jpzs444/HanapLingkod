@@ -5,10 +5,12 @@ const RequestPost = require("../Models/RequestPost");
 const dayjs = require("dayjs");
 const PostComment = require("../Models/PostComment");
 const Recruiters = require("../Models/Recruiters");
+const { authenticateToken } = require("../Helpers/JWT");
+const { CheckIfBan } = require("../Helpers/banChecker");
 
 router
   .route("/request-post")
-  .get(async function (req, res) {
+  .get(authenticateToken, async function (req, res) {
     try {
       let page;
       if (req.query.page) {
@@ -30,7 +32,7 @@ router
       res.send(error);
     }
   })
-  .post(async function (req, res) {
+  .post(authenticateToken, CheckIfBan, async function (req, res) {
     try {
       let startTime = dayjs(
         req.body.serviceDate + " " + req.body.startTime

@@ -150,5 +150,101 @@ router
       res.status(200).json(savedbannedWorker);
     }
   });
+router.route("/unbanUser/:role").put(async function (req, res) {
+  // console.log("asd");
+  if (req.params.role === "recruiter") {
+    let updatedBannedRecruiter = await BannedRecruiter.findOneAndUpdate(
+      { _id: req.body.id },
+      { ban: false },
+      { new: true }
+    );
+    res.status(200).json(updatedBannedRecruiter);
+  } else if (req.params.role === "worker") {
+    let updatedBannedWorker = await BannedWorker.findOneAndUpdate(
+      { _id: req.body.id },
+      { ban: false },
+      { new: true }
+    );
+    res.status(200).json(updatedBannedWorker);
+  }
+});
+
+router.route("/unverifiedUsers").get(async function (req, res) {
+  const unverifiedWorkers = await Workers.find({ verification: false })
+    .select(
+      "-unavailableTime -works -username -password -birthday -age -sex -phoneNumber -profilePic -prevWorks -workDescription"
+    )
+    .lean()
+    .exec();
+  const unverifiedRecruiters = await Recruiters.find({ verification: false })
+    .select("-username -password -birthday -age -sex -phoneNumber -profilePic")
+    .lean()
+    .exec();
+  res.send({
+    unverifiedWorkers: unverifiedWorkers,
+    unverifiedRecruiters: unverifiedRecruiters,
+  });
+});
+
+router.route("/verifiedUsers").get(async function (req, res) {
+  const verifiedWorkers = await Workers.find({ verification: true })
+    .select(
+      "-unavailableTime -works -username -password -birthday -age -sex -phoneNumber -profilePic -prevWorks -workDescription"
+    )
+    .lean()
+    .exec();
+  const verifiedRecruiters = await Recruiters.find({ verification: true })
+    .select("-username -password -birthday -age -sex -phoneNumber -profilePic")
+    .lean()
+    .exec();
+  res.send({
+    verifiedWorkers: verifiedWorkers,
+    verifiedRecruiters: verifiedRecruiters,
+  });
+});
+
+router.route("/user/:role").get(async function (req, res) {
+  if (req.params.role === "recruiter") {
+    const Recruiter = await Recruiters.find({ _id: req.body.id })
+      .select("-username -password")
+      .lean()
+      .exec();
+    res.status(200).json(Recruiter);
+  } else if (req.params.role === "worker") {
+    const Worker = await Workers.find({ _id: req.body.id })
+      .select("-unavailableTime -works -username -password ")
+      .lean()
+      .exec();
+    res.status(200).json(Worker);
+  }
+});
+
+router.route("/verifyAUser/:role").put(async function (req, res) {
+  if (req.params.role === "recruiter") {
+    Recruiters.findOneAndUpdate(
+      { _id: req.body.id },
+      { verification: true },
+      function (err) {
+        if (!err) {
+          res.send("user verified");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  } else if (req.params.role === "worker") {
+    Workers.findOneAndUpdate(
+      { _id: req.body.id },
+      { verification: true },
+      function (err) {
+        if (!err) {
+          res.send("user verified");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  }
+});
 
 module.exports = router;
