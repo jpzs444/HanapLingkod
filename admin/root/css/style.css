@@ -8,8 +8,11 @@
 }
 
 body {
+    display: block;
     position: relative;
     background-color: #f9f9f9;
+    margin-left: 300px;
+    transition: 500ms;
 }
 
 .flexRow {
@@ -36,7 +39,7 @@ button {
 }
 
 nav {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -48,6 +51,8 @@ nav {
 .left {
     display: flex;
     padding: 0px 20px;
+    margin-left: 300px;
+    transition: 500ms;
 }
 
 
@@ -96,7 +101,7 @@ nav {
     top: 0;
     left: 0;
     width: 300px;
-    margin-left: -300px;
+    margin-left: 0px;
     height: 100%;
     transition: 500ms;
     overflow-x: hidden;
@@ -157,18 +162,23 @@ nav {
 /* main body */
 
 .body {
-    width: 60%;
+    width: 50%;
     height: 100%;
     margin: auto;
     padding: 0 25px;
     padding-top: 120px;
     padding-bottom: 200px;
+    /* transition: 500ms; */
     /* background-color: burlywood; */
+}
+
+section {
+    transition: 500ms;
 }
 
 header h1 {
     font-size: 30px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .dashboard {

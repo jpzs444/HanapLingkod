@@ -73,7 +73,7 @@
     <!-- body -->
     <main class="body">
         <header>
-            <h1>HanapLingkod</h1>
+            <h1>HanapLingkod Admin</h1>
         </header>
     
         <div class="dashboard">
@@ -97,6 +97,25 @@
                         <p class="info1">Verified   10/20</p>
                     </div>
                 </div>
+
+                <div class="worker-overview dbo-box flexRow">
+                    <img class="overview-icon" src="../assets//icons/worker.png" />
+    
+                    <div class="overview-info">
+                        <p class="overview-title">Requests</p>
+                        <p class="info1">Verified   10/20</p>
+                    </div>
+                </div>
+
+                <div class="worker-overview dbo-box flexRow">
+                    <img class="overview-icon" src="../assets//icons/worker.png" />
+    
+                    <div class="overview-info">
+                        <p class="overview-title">Bookings</p>
+                        <p class="info1">Verified   10/20</p>
+                    </div>
+                </div>
+
             </div>
     
     
@@ -128,9 +147,25 @@
                     <img class="action-icon" src="../assets/icons/account.png" />
                     <p class="action-text">Create<br>Account</p>
                 </div>
+
+                <div class="action-btn" onclick="handleActionBtnClick('Create Account')">
+                    <img class="action-icon" src="../assets/icons/category.png" />
+                    <p class="action-text">Add/Modify<br>Category</p>
+                </div>
+
+                <div class="action-btn" onclick="handleActionBtnClick('Create Account')">
+                    <img class="action-icon" src="../assets/icons/sub-category.png" />
+                    <p class="action-text">Add/Modify<br>Sub-Category</p>
+                </div>
             </div>
             
         </section>
+
+
+        <!-- Reports | Transactions -->
+        <div class="transactions">
+
+        </div>
 
     </main>
 </body>
