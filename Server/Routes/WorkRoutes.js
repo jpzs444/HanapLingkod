@@ -8,10 +8,13 @@ const mongoose = require("mongoose");
 const ServiceRequest = require("../Models/ServiceRequest");
 const Booking = require("../Models/Booking");
 const { WorkMiddleware } = require("../Helpers/DeleteMiddleware");
+const { authenticateToken } = require("../Helpers/JWT");
+const Workers = require("../Models/Workers");
+const { BannedWorker } = require("../Models/BannedUsers");
 
 router
   .route("/Work")
-  .get(async function (req, res) {
+  .get(authenticateToken, async function (req, res) {
     console.time("Work Routes");
 
     let queryResult = await Work.find({
@@ -20,7 +23,7 @@ router
     res.send(queryResult);
     console.timeEnd("Work Routes");
   })
-  .post(async function (req, res) {
+  .post(authenticateToken, async function (req, res) {
     // console.log(req.body);
     const session = await mongoose.connection.startSession();
 
@@ -99,39 +102,52 @@ router
   });
 
 ////get works on specific category
-router.route("/Work/:category").get(async function (req, res) {
-  try {
-    let page;
-    if (req.query.page) {
-      page = parseInt(req.query.page);
-    } else {
-      page = 1;
+router.route("/Work/:category").get(
+  // authenticateToken,
+  async function (req, res) {
+    try {
+      let page;
+      if (req.query.page) {
+        page = parseInt(req.query.page);
+      } else {
+        page = 1;
+      }
+      const limit = 10;
+      // const { page = 1 } = req.query;
+
+      //query the banned workers
+      const bannedUsersResult = await BannedWorker.find({ ban: true });
+      let bannedUsers = [];
+      //put the banned users id to an array
+      bannedUsersResult.forEach((x) => {
+        bannedUsers.push(x.workerId);
+      });
+
+      let subId = await ServiceSubCategory.findOne({
+        ServiceSubCategory: req.params.category,
+      }).lean();
+
+      const count = await Work.countDocuments({
+        ServiceSubId: subId._id,
+      });
+
+      const query = await Work.find({
+        ServiceSubId: subId._id,
+        deleteflag: false,
+        _id: { $nin: bannedUsers },
+      })
+        .limit(limit * page)
+        .lean()
+        .exec();
+      res.send(query);
+    } catch (err) {
+      res.send(err);
     }
-    const limit = 10;
-    // const { page = 1 } = req.query;
-    let subId = await ServiceSubCategory.findOne({
-      ServiceSubCategory: req.params.category,
-    }).lean();
-
-    const count = await Work.countDocuments({
-      ServiceSubId: subId._id,
-    });
-
-    const query = await Work.find({
-      ServiceSubId: subId._id,
-      deleteflag: false,
-    })
-      .limit(limit * page)
-      .lean()
-      .exec();
-    res.send(query);
-  } catch (err) {
-    res.send(err);
   }
-});
+);
 router
   .route("/Work/:category/:id")
-  .get(async function (req, res) {
+  .get(authenticateToken, async function (req, res) {
     let queryResult = await Work.find({ _id: req.params.id }).exec();
     res.send(queryResult);
   })
@@ -163,6 +179,7 @@ router
     console.log(BookingQuery);
 
     if (serviceRequestQuery == 0 && BookingQuery == 0) {
+      let sample = "";
       Work.findByIdAndUpdate(
         { _id: req.params.id },
         {
@@ -170,11 +187,41 @@ router
         },
         function (err, doc) {
           if (!err) {
+            sample = doc;
             WorkMiddleware(doc);
             console.log("Deleted Successfully ");
             res.send("Deleted Successfully ");
           } else {
             res.send(err);
+          }
+        }
+      );
+      const id = await Work.findOne({ _id: req.params.id })
+        .select("workerId")
+        .lean()
+        .exec();
+      console.log(id);
+      const works = await Work.find({
+        workerId: id.workerId,
+        deleteflag: false,
+      })
+        .select("ServiceSubId")
+        .lean()
+        .exec();
+      let availableWorks = [];
+      works.forEach((x) => {
+        console.log(x.ServiceSubId);
+
+        availableWorks.push(x.ServiceSubId.ServiceSubCategory);
+      });
+      Workers.findOneAndUpdate(
+        { _id: id.workerId },
+        { $set: { works: availableWorks } },
+        function (err) {
+          if (!err) {
+            console.log("sdsad");
+          } else {
+            console.log(err);
           }
         }
       );
@@ -184,18 +231,21 @@ router
     }
   });
 
-router.route("/WorkList/:UserId").get(function (req, res) {
-  Work.find(
-    { workerId: req.params.UserId, deleteflag: false },
-    function (err, found) {
-      if (found) {
-        res.send(found);
-        // console.log(res);
-      } else {
-        res.send("No such data found");
+router.route("/WorkList/:UserId").get(
+  // authenticateToken,
+  function (req, res) {
+    Work.find(
+      { workerId: req.params.UserId, deleteflag: false },
+      function (err, found) {
+        if (found) {
+          res.send(found);
+          // console.log(res);
+        } else {
+          res.send("No such data found");
+        }
       }
-    }
-  );
-});
+    );
+  }
+);
 
 module.exports = router;

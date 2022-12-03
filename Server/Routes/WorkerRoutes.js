@@ -8,6 +8,7 @@ const multer = require("multer");
 const cloudinary = require("../Helpers/cloudinary");
 const ServiceRequest = require("../Models/ServiceRequest");
 const Booking = require("../Models/Booking");
+const { BannedWorker, BannedRecruiter } = require("../Models/BannedUsers");
 
 //store photos
 const storage = multer.diskStorage({
@@ -48,6 +49,18 @@ router.route("/Worker").get(async function (req, res) {
   }
   const limit = 10;
 
+  //query the banned workers
+  const bannedUsersResult = await BannedWorker.find({ ban: true });
+  let bannedUsers = [];
+  //put the banned users id to an array
+  bannedUsersResult.forEach((x) => {
+    bannedUsers.push(x.workerId);
+  });
+  //add the banned users id to filters
+  filter["_id"] = {
+    $nin: bannedUsers,
+  };
+  console.log(filter);
   const result = await Worker.find(filter)
     .select(
       "-unavailableTime -licenseCertificate -GovId -pushtoken -password -accountStatus"
