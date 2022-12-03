@@ -50,6 +50,7 @@ const workerSchema = new mongoose.Schema({
   //   },
   // ],
   rating: Number,
+  ban: { offense: Number, ban: false },
 });
 
 module.exports = mongoose.model("Worker", workerSchema);

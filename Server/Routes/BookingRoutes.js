@@ -14,56 +14,59 @@ const {
 } = require("../Helpers/RatingAverage");
 const WorkerComment = require("../Models/WorkerComment");
 const RecruiterComment = require("../Models/RecruiterComment");
+const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 
-router.route("/booking/:user").get(async function (req, res) {
-  try {
-    let page;
-    if (req.query.page) {
-      page = parseInt(req.query.page);
-    } else {
-      page = 1;
+router
+  .route("/booking/:user")
+  .get(authenticateToken, async function (req, res) {
+    try {
+      let page;
+      if (req.query.page) {
+        page = parseInt(req.query.page);
+      } else {
+        page = 1;
+      }
+      const limit = 10;
+
+      let queryResultWorker = await Booking.find({
+        workerId: req.params.user,
+        bookingStatus: { $ne: 2 },
+        $and: [{ bookingStatus: { $ne: 2 } }, { bookingStatus: { $ne: 3 } }],
+        deleteflag: false,
+      })
+        .sort({ serviceDate: -1 })
+        .limit(limit * page)
+        .lean();
+      let queryResultRecruiter = await Booking.find({
+        recruiterId: req.params.user,
+        $and: [{ bookingStatus: { $ne: 2 } }, { bookingStatus: { $ne: 3 } }],
+      })
+        .sort({ serviceDate: -1 })
+        .limit(limit * page)
+        .lean();
+      let Status2_worker = await Booking.find({
+        workerId: req.params.user,
+        bookingStatus: 2,
+      }).lean();
+
+      let Status2_recruiter = await Booking.find({
+        recruiterId: req.params.user,
+        bookingStatus: 2,
+      }).lean();
+      res.send({
+        worker: queryResultWorker,
+        recruiter: queryResultRecruiter,
+        Status2_worker: Status2_worker,
+        Status2_recruiter: Status2_recruiter,
+      });
+    } catch (error) {
+      res.send(error);
     }
-    const limit = 10;
-
-    let queryResultWorker = await Booking.find({
-      workerId: req.params.user,
-      bookingStatus: { $ne: 2 },
-      $and: [{ bookingStatus: { $ne: 2 } }, { bookingStatus: { $ne: 3 } }],
-      deleteflag: false,
-    })
-      .sort({ serviceDate: -1 })
-      .limit(limit * page)
-      .lean();
-    let queryResultRecruiter = await Booking.find({
-      recruiterId: req.params.user,
-      $and: [{ bookingStatus: { $ne: 2 } }, { bookingStatus: { $ne: 3 } }],
-    })
-      .sort({ serviceDate: -1 })
-      .limit(limit * page)
-      .lean();
-    let Status2_worker = await Booking.find({
-      workerId: req.params.user,
-      bookingStatus: 2,
-    }).lean();
-
-    let Status2_recruiter = await Booking.find({
-      recruiterId: req.params.user,
-      bookingStatus: 2,
-    }).lean();
-    res.send({
-      worker: queryResultWorker,
-      recruiter: queryResultRecruiter,
-      Status2_worker: Status2_worker,
-      Status2_recruiter: Status2_recruiter,
-    });
-  } catch (error) {
-    res.send(error);
-  }
-});
+  });
 
 router
   .route("/booking/:user/:id")
-  .put(async function (req, res) {
+  .put(authenticateToken, async function (req, res) {
     // console.log(typeof req.body.confirmWorker);
     let result = await Booking.findOneAndUpdate(
       { _id: req.params.id },
@@ -256,7 +259,7 @@ router
     }
     res.send("updated Sucess");
   })
-  .get(async function (req, res) {
+  .get(authenticateToken, async function (req, res) {
     try {
       let queryResult = await Booking.find({ _id: req.params.id });
       res.send(queryResult);
@@ -276,46 +279,50 @@ router
     );
   });
 
-router.route("/completed-bookings/:user").get(async function (req, res) {
-  try {
-    let page;
-    if (req.query.page) {
-      page = parseInt(req.query.page);
-    } else {
-      page = 1;
+router
+  .route("/completed-bookings/:user")
+  .get(authenticateToken, async function (req, res) {
+    try {
+      let page;
+      if (req.query.page) {
+        page = parseInt(req.query.page);
+      } else {
+        page = 1;
+      }
+      const limit = 10;
+
+      let queryResultWorker = await Booking.find({
+        workerId: req.params.user,
+        bookingStatus: 3,
+        deleteflag: false,
+      })
+        .sort({ date: -1, bookingStatus: 1 })
+        .limit(limit * page)
+        .lean();
+      let queryResultRecruiter = await Booking.find({
+        recruiterId: req.params.user,
+        bookingStatus: 3,
+      })
+        .sort({ date: -1, bookingStatus: 1 })
+        .limit(limit * page)
+        .lean();
+
+      res.send({ worker: queryResultWorker, recruiter: queryResultRecruiter });
+    } catch (error) {
+      res.send(error);
     }
-    const limit = 10;
+  });
 
-    let queryResultWorker = await Booking.find({
-      workerId: req.params.user,
-      bookingStatus: 3,
-      deleteflag: false,
-    })
-      .sort({ date: -1, bookingStatus: 1 })
-      .limit(limit * page)
-      .lean();
-    let queryResultRecruiter = await Booking.find({
-      recruiterId: req.params.user,
-      bookingStatus: 3,
-    })
-      .sort({ date: -1, bookingStatus: 1 })
-      .limit(limit * page)
-      .lean();
-
-    res.send({ worker: queryResultWorker, recruiter: queryResultRecruiter });
-  } catch (error) {
-    res.send(error);
-  }
-});
-
-router.route("/completed-bookings/:user/:id").get(async function (req, res) {
-  try {
-    let queryResult = await Booking.find({ _id: req.params.id });
-    res.send(queryResult);
-  } catch (error) {
-    res.send(error);
-  }
-});
+router
+  .route("/completed-bookings/:user/:id")
+  .get(authenticateToken, async function (req, res) {
+    try {
+      let queryResult = await Booking.find({ _id: req.params.id });
+      res.send(queryResult);
+    } catch (error) {
+      res.send(error);
+    }
+  });
 
 router.route("/booking-comment/:id").post(async function (req, res) {
   console.log(req.body.comment);
