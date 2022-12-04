@@ -109,6 +109,7 @@ const Requests = () => {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
+                    "Authorization": global.userData.accessToken
                 },
                 cache: "reload"
             })

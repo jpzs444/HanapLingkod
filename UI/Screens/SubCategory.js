@@ -27,6 +27,7 @@ const SubCategory = ({route}) => {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
+                "Authorization": global.userData.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {

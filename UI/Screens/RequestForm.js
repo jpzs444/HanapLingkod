@@ -188,7 +188,8 @@ const RequestForm = ({route, navigation}) => {
             await fetch(`http://${IPAddress}:3000/Worker/${workerID}`, {
                 method: "GET",
                 headers: {
-                    "content-type": "application/json"
+                    "content-type": "application/json",
+                    "Authorization": global.userData.accessToken
                 }
             }).then(res => res.json())
             .then(data => {
@@ -391,7 +392,8 @@ const RequestForm = ({route, navigation}) => {
         fetch(`https://hanaplingkod.onrender.com/worker/${workerID}`, {
             method: "GET",
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {
@@ -450,7 +452,8 @@ const RequestForm = ({route, navigation}) => {
             await fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}`, {
                 method: "GET",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 },
             }).then(res => res.json())
             .then(data => {
@@ -486,6 +489,7 @@ const RequestForm = ({route, navigation}) => {
                 method: "POST",
                 headers: {
                     "content-type": "application/json",
+                    "Authorization": global.userData.accessToken
                 },
                 body: JSON.stringify({
                     "workerId": workerInformation._id,

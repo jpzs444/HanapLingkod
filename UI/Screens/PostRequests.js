@@ -36,7 +36,8 @@ const PostRequests = () => {
     fetch(`http://${IPAddress}:3000/request-post/`, {
       method: "GET",
       headers: {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
+        "Authorization": global.userData.accessToken
       }
     }).then((res) => res.json())
     .then((data) => {
@@ -64,7 +65,8 @@ const PostRequests = () => {
           `http://${IPAddress}:3000/request-post/${postID}`, {
             method: "PUT",
             headers: {
-              'content-type': 'application/json'
+              'content-type': 'application/json',
+              "Authorization": global.userData.accessToken
             },
             body: JSON.stringify({
               postToggle: postToggle
