@@ -185,7 +185,7 @@ const RequestForm = ({route, navigation}) => {
     
     const handelFetchWorkerUnavailableTime = async () => {
         try {
-            await fetch(`http://${IPAddress}:3000/Worker/${workerID}`, {
+            await fetch(`http://${IPAddress}:3000/schedule/${workerID}`, {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
@@ -200,9 +200,23 @@ const RequestForm = ({route, navigation}) => {
         }
     }
 
-    const loadUnavailableTime = () => {
+    const loadUnavailableTime = async () => {
 
-        uunn = [...(workerInformation.unavailableTime)]
+        try {
+            await fetch(`http://${IPAddress}:3000/schedule/${workerInformation._id}`, {
+                method: "GET",
+                headers: {
+                    "content-type": "application/json"
+                }
+            }).then(res => res.json())
+            .then(data => {
+                uunn = [...data.unavailableTime]
+            })
+        } catch (error) {
+            console.log("error fetching unavailable schedule", error)
+        }
+
+        // uunn = [...(workerInformation.unavailableTime)]
         // console.log("listUnvSched uunn: ", uunn)
 
         
@@ -360,8 +374,8 @@ const RequestForm = ({route, navigation}) => {
         datesWithCustomization[da.toString()] = dateAppointmentsStyles
         
         // getSameDateBookings(date)
-        loadUnavailableTime()
-        getUnavailableSchedule()
+        // loadUnavailableTime()
+        // getUnavailableSchedule()
         
         // setViewScheduleModal(true)
         navigation.navigate("ScheduleDrawer", {selectedDate: new Date(date).toString(), workID: workID, workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true, minPrice: minPrice, maxPrice: maxPrice })
@@ -370,10 +384,25 @@ const RequestForm = ({route, navigation}) => {
         
     }
     
-    const getUnavailableSchedule = () => {
+    const getUnavailableSchedule = async () => {
         let dddd = new Date(formatedDate)
-        if(workerInformation.keys[unavailableTime]){
-            let uunn = workerInformation.unavailableTime?.filter(e => {
+        let unvTime = []
+        try {
+            await fetch(`http://${IPAddress}:3000/schedule/${workerInformation._id}`, {
+                method: "GET",
+                headers: {
+                    "content-type": "application/json"
+                }
+            }).then(res => res.json())
+            .then(data => {
+                unvTime = [...data.unavailableTime]
+            })
+        } catch (error) {
+            console.log("error fetching unavailable schedule", error)
+        }
+
+        if(unvTime){
+            let uunn = unvTime?.filter(e => {
                 let sst = new Date(e.startTime)
                 return (sst.getFullYear() === dddd.getFullYear() &&
                 sst.getMonth() === dddd.getMonth() &&
@@ -757,8 +786,8 @@ const RequestForm = ({route, navigation}) => {
                         onDayPress={day => {
                             datesWithCustomization[day.dateString] = dateAppointmentsStyles
                             setCalendarSelectedDate({...datesWithCustomization})
-                            loadUnavailableTime()
-                            getUnavailableSchedule()
+                            // loadUnavailableTime()
+                            // getUnavailableSchedule()
                             handleDateConfirm(day.timestamp)
 
                             // setViewScheduleModal(true)

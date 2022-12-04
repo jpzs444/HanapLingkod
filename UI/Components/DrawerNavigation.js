@@ -29,6 +29,9 @@ import CompletedRequests from '../Screens/CompletedRequests';
 import ConversationThread from '../Screens/ConversationThread';
 
 import { IPAddress } from '../global/global';
+import Messaging from '../Screens/Messaging';
+import Requests from '../Screens/Requests';
+import Bookings from '../Screens/Bookings';
 
 const Drawer = createDrawerNavigator();
 
@@ -57,19 +60,10 @@ export default function DrawerNavigation(){
                     }
                 }} />
 
-                <Drawer.Screen name="CompletedBookingsDrawer" component={CompletedRequests} options={{
-                    drawerLabel: "Completed Bookings",
+                <Drawer.Screen name="RequestsDrawer" component={Requests} options={{
+                    drawerLabel: "Requests",
                     drawerIcon: ({color}) => (
-                        <Icon name="clipboard-edit" size={25} color={color}  />
-                    ),
-                    drawerLabelStyle: {
-                        fontFamily: "LexendDeca_Medium",
-                        fontSize: 15
-                    }
-                }} />
-                <Drawer.Screen name="Home2" component={TabNavigation} options={{
-                    drawerIcon: ({color}) => (
-                        <Icon name="home" size={25} color={color}  />
+                        <Icon name="clipboard-text-multiple" size={25} color={color}  />
                     ),
                     drawerLabelStyle: {
                         fontFamily: "LexendDeca_Medium",
@@ -77,7 +71,39 @@ export default function DrawerNavigation(){
                     }
                 }} />
 
-                <Drawer.Screen name="RUT2" component={RegisterUserAccountType} options={{
+                <Drawer.Screen name="BookingsDrawer" component={Bookings} options={{
+                    drawerLabel: "Bookings",
+                    drawerIcon: ({color}) => (
+                        <Icon name="bookmark-box-multiple" size={25} color={color}  />
+                    ),
+                    drawerLabelStyle: {
+                        fontFamily: "LexendDeca_Medium",
+                        fontSize: 15
+                    }
+                }} />
+
+                <Drawer.Screen name="CompletedBookingsDrawer" component={CompletedRequests} options={{
+                    drawerLabel: "Completed Bookings",
+                    drawerIcon: ({color}) => (
+                        <Icon name="clipboard-check-multiple" size={25} color={color}  />
+                    ),
+                    drawerLabelStyle: {
+                        fontFamily: "LexendDeca_Medium",
+                        fontSize: 15
+                    }
+                }} />
+                <Drawer.Screen name="MessagingDrawer" component={Messaging} options={{
+                    drawerLabel: "Messaging",
+                    drawerIcon: ({color}) => (
+                        <Icon name="forum" size={25} color={color}  />
+                    ),
+                    drawerLabelStyle: {
+                        fontFamily: "LexendDeca_Medium",
+                        fontSize: 15
+                    }
+                }} />
+
+                {/* <Drawer.Screen name="RUT2" component={RegisterUserAccountType} options={{
                     drawerIcon: ({color}) => (
                         <Icon name="clipboard-edit" size={25} color={color}  />
                     ),
@@ -85,7 +111,7 @@ export default function DrawerNavigation(){
                         fontFamily: "LexendDeca_Medium",
                         fontSize: 15
                     },
-                }} />
+                }} /> */}
 
                 <Drawer.Screen name="ConversationThreadDrawer" component={ConversationThread} options={{
                     drawerItemStyle: { display: 'none' }
