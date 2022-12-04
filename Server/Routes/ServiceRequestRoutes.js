@@ -9,118 +9,126 @@ const dayjs = require("dayjs");
 const AddToCalendar = require("../Helpers/TimeAdder");
 const checkConflict = require("../Helpers/ConflictChecker");
 const generateOTP = require("../Helpers/OTP_Generator");
+const { CheckIfBan } = require("../Helpers/banChecker");
+const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
+router
+  .route("/service-request/:user")
+  .get(authenticateToken, CheckIfBan, async function (req, res) {
+    console.log(req.params.user);
+    try {
+      let page;
+      if (req.query.page) {
+        page = parseInt(req.query.page);
+      } else {
+        page = 1;
+      }
+      const limit = 10;
 
-router.route("/service-request/:user").get(async function (req, res) {
-  console.log(req.params.user);
-  try {
-    let page;
-    if (req.query.page) {
-      page = parseInt(req.query.page);
-    } else {
-      page = 1;
+      let queryResultWorker = await ServiceRequest.find({
+        workerId: req.params.user,
+        requestStatus: { $ne: 3 },
+        deleteflag: false,
+      })
+        .sort({ serviceDate: -1 })
+        .limit(limit * page)
+        .lean();
+      let queryResultRecruiter = await ServiceRequest.find({
+        recruiterId: req.params.user,
+        requestStatus: { $ne: 3 },
+        deleteflag: false,
+      })
+        .sort({ serviceDate: -1 })
+        .limit(limit * page)
+        .lean();
+
+      let status3_Worker = await ServiceRequest.find({
+        workerId: req.params.user,
+        requestStatus: 3,
+        deleteflag: false,
+      }).lean();
+
+      let status3_Recruiter = await ServiceRequest.find({
+        recruiterId: req.params.user,
+        requestStatus: 3,
+        deleteflag: false,
+      });
+
+      res.send({
+        worker: queryResultWorker,
+        recruiter: queryResultRecruiter,
+        status3_Worker: status3_Worker,
+        status3_Recruiter: status3_Recruiter,
+      });
+    } catch (error) {
+      res.send(error);
     }
-    const limit = 10;
-
-    let queryResultWorker = await ServiceRequest.find({
-      workerId: req.params.user,
-      requestStatus: { $ne: 3 },
-      deleteflag: false,
-    })
-      .sort({ serviceDate: -1 })
-      .limit(limit * page)
-      .lean();
-    let queryResultRecruiter = await ServiceRequest.find({
-      recruiterId: req.params.user,
-      requestStatus: { $ne: 3 },
-      deleteflag: false,
-    })
-      .sort({ serviceDate: -1 })
-      .limit(limit * page)
-      .lean();
-
-    let status3_Worker = await ServiceRequest.find({
-      workerId: req.params.user,
-      requestStatus: 3,
-      deleteflag: false,
-    }).lean();
-
-    let status3_Recruiter = await ServiceRequest.find({
-      recruiterId: req.params.user,
-      requestStatus: 3,
-      deleteflag: false,
-    });
-
-    res.send({
-      worker: queryResultWorker,
-      recruiter: queryResultRecruiter,
-      status3_Worker: status3_Worker,
-      status3_Recruiter: status3_Recruiter,
-    });
-  } catch (error) {
-    res.send(error);
-  }
-});
-router.route("/service-request").post(async function (req, res) {
-  try {
-    let pendingRequest = await ServiceRequest.count({
-      recruiterId: req.body.recruiterId,
-      requestStatus: 1,
-      deleteflag: false,
-    })
-      .lean()
-      .exec();
-    console.log(pendingRequest);
-    if (pendingRequest === 0) {
-      let startTime = dayjs(
-        req.body.serviceDate + " " + req.body.startTime
-      ).toISOString();
-      const pushID = await Worker.findOne(
-        { _id: req.body.workerId },
-        { pushtoken: 1, _id: 0 }
-      ).lean();
-      const serviceRequest = new ServiceRequest({
-        workerId: req.body.workerId,
+  });
+router
+  .route("/service-request")
+  .post(authenticateToken, CheckIfBan, async function (req, res) {
+    try {
+      let pendingRequest = await ServiceRequest.count({
         recruiterId: req.body.recruiterId,
-        workId: req.body.workId,
-        subCategory: req.body.subCategory,
-        address: req.body.address,
-        minPrice: req.body.minPrice,
-        maxPrice: req.body.maxPrice,
-        serviceDate: req.body.serviceDate,
-        startTime: startTime,
-        description: req.body.description,
-        geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
         requestStatus: 1,
-      });
-      console.log(serviceRequest._id);
-      serviceRequest.save(function (err) {
-        if (!err) {
-          console.log("new request created");
-          res.send("true");
-          notification(
-            [pushID.pushtoken],
-            "New Request",
-            "New Request Check It out",
-            { Type: "New Service Request", id: serviceRequest._id },
-            req.body.workerId
-          );
-        } else {
-          res.send(err);
-        }
-      });
-    } else {
-      res.send("false");
+        deleteflag: false,
+      })
+        .lean()
+        .exec();
+      console.log(pendingRequest);
+      if (pendingRequest === 0) {
+        let startTime = dayjs(
+          req.body.serviceDate + " " + req.body.startTime
+        ).toISOString();
+        const pushID = await Worker.findOne(
+          { _id: req.body.workerId },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        const serviceRequest = new ServiceRequest({
+          workerId: req.body.workerId,
+          recruiterId: req.body.recruiterId,
+          workId: req.body.workId,
+          subCategory: req.body.subCategory,
+          address: req.body.address,
+          minPrice: req.body.minPrice,
+          maxPrice: req.body.maxPrice,
+          serviceDate: req.body.serviceDate,
+          startTime: startTime,
+          description: req.body.description,
+          geometry: {
+            type: "point",
+            coordinates: [req.body.long, req.body.lat],
+          },
+          requestStatus: 1,
+        });
+        console.log(serviceRequest._id);
+        serviceRequest.save(function (err) {
+          if (!err) {
+            console.log("new request created");
+            res.send("true");
+            notification(
+              [pushID.pushtoken],
+              "New Request",
+              "New Request Check It out",
+              { Type: "New Service Request", id: serviceRequest._id },
+              req.body.workerId
+            );
+          } else {
+            res.send(err);
+          }
+        });
+      } else {
+        res.send("false");
 
-      console.log("A pending request is still existing");
+        console.log("A pending request is still existing");
+      }
+    } catch (error) {
+      res.send(error);
     }
-  } catch (error) {
-    res.send(error);
-  }
-});
+  });
 //
 router
   .route("/service-request/:user/:id")
-  .put(async function (req, res) {
+  .put(authenticateToken, CheckIfBan, async function (req, res) {
     try {
       let endTime;
       let result;
@@ -284,7 +292,7 @@ router
     }
   })
 
-  .get(async function (req, res) {
+  .get(authenticateToken, async function (req, res) {
     try {
       let queryResult = await ServiceRequest.find({ _id: req.params.id });
       res.send(queryResult);
@@ -303,20 +311,22 @@ router
       }
     );
   });
-router.route("/service-request-comment/:id").post(async function (req, res) {
-  ServiceRequest.findOneAndUpdate(
-    { _id: req.params.id },
-    {
-      comment: req.body.comment,
-    },
-    function (err) {
-      if (!err) {
-        res.send("Success");
-      } else {
-        console.log(err);
+router
+  .route("/service-request-comment/:id")
+  .post(authenticateToken, async function (req, res) {
+    ServiceRequest.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        comment: req.body.comment,
+      },
+      function (err) {
+        if (!err) {
+          res.send("Success");
+        } else {
+          console.log(err);
+        }
       }
-    }
-  );
-});
+    );
+  });
 
 module.exports = router;

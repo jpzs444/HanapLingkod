@@ -23,7 +23,8 @@ const Conversation = ({tab, conversation}) => {
             await fetch(`http://${IPAddress}:3000/${userType}/${otherUser}`, {
                 method: "GET",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 }
             })
             .then(res => res.json())

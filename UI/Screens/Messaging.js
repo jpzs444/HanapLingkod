@@ -53,7 +53,8 @@ const Messaging = () => {
     fetch(`http://${IPAddress}:3000/conversations`, {
       method: "POST",
       headers: {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
+        "Authorization": global.userData.accessToken
       },
       body: JSON.stringify({
         senderId: '636c9025f624714429165b1a',

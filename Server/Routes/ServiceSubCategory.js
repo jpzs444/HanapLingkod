@@ -7,6 +7,8 @@ const Booking = require("../Models/Booking");
 const { SubCategoryMiddleware } = require("../Helpers/DeleteMiddleware");
 const multer = require("multer");
 const cloudinary = require("../Helpers/cloudinary");
+const { authenticate } = require("passport");
+const { authenticateToken } = require("../Helpers/JWT");
 
 //store photos
 const storage = multer.diskStorage({
@@ -26,7 +28,7 @@ const upload = multer({ storage: storage });
 
 router
   .route("/service-sub-category")
-  .get(async function (req, res) {
+  .get(authenticateToken, async function (req, res) {
     try {
       let queryResult = await ServiceSubCategory.find({
         deleteflag: false,

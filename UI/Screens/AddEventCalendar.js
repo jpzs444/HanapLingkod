@@ -83,7 +83,8 @@ const AddEventCalendar = ({route}) => {
         fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
             method: "GET",
             header: {
-                "conten-type": "application/json"
+                "conten-type": "application/json",
+                "Authorization": global.userData.accessToken
             },
         }).then((res) => res.json())
         .then((user) => {
@@ -149,6 +150,7 @@ const AddEventCalendar = ({route}) => {
                 method: eventItem ? "PUT" : "POST",
                 headers: {
                     'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 },
                 body: JSON.stringify({
                     inputDate: dayjs(selectedDate).format("YYYY-MM-DD"),
@@ -169,6 +171,7 @@ const AddEventCalendar = ({route}) => {
                 method: eventItem ? "PUT" : "POST",
                 headers: {
                     'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 },
                 body: JSON.stringify({
                     inputDate: dayjs(selectedDate).format("YYYY-MM-DD"),
@@ -195,7 +198,8 @@ const AddEventCalendar = ({route}) => {
         fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}/${eventItem._id}`, {
             method: "DELETE",
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             }
         }).then(res => {
             console.log("Successful removal of the custom event")

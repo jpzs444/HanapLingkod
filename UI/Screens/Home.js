@@ -64,6 +64,7 @@ export default function Home() {
           method: "PUT",
           header: {
             'content-type': 'application/json',
+            "Authorization": global.userData.accessToken
           },
         }).then(() => console.log("all notification read"))
         .catch((error) => console.log("notification app js error: ", error.message))
@@ -93,6 +94,7 @@ export default function Home() {
       method: 'PUT',
       headers: {
         "content-type": "application/json",
+        "Authorization": global.userData.accessToken
       },
       body: JSON.stringify({
         pushtoken: global.deviceExpoPushToken,
@@ -125,6 +127,7 @@ export default function Home() {
         method: "GET",
         headers: {
             "content-type": "application/json",
+            "Authorization": global.userData.accessToken
         },
       }).then((res) => res.json())
       .then((data) => {
@@ -141,6 +144,7 @@ export default function Home() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        "Authorization": global.userData.accessToken
       },
     }).then((res) => res.json())
     .then((data) => {
@@ -169,6 +173,7 @@ export default function Home() {
       method: "GET",
       headers: {
         "content-type": "application/json",
+        "Authorization": global.userData.accessToken
       },
     }).then((res) => res.json())
     .then((data) => {

@@ -48,7 +48,8 @@ const ViewComments = ({route}) => {
             fetch(`http://${IPAddress}:3000/request-post/${postID}`, {
                 method: "GET",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 }
             }).then((res) => res.json())
             .then(data => {
@@ -68,6 +69,7 @@ const ViewComments = ({route}) => {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
             body: JSON.stringify({
                 workerId: global.userData._id,
@@ -89,6 +91,7 @@ const ViewComments = ({route}) => {
             method: 'DELETE',
             headers: {
                 'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
             body: JSON.stringify({
                 commentId: item

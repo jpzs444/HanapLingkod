@@ -83,7 +83,8 @@ const Schedule = ({route}) => {
         fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
             method: "GET",
             header: {
-                "conten-type": "application/json"
+                "conten-type": "application/json",
+                "Authorization": global.userData.accessToken
             },
         }).then((res) => res.json())
         .then((user) => {
@@ -159,7 +160,8 @@ const Schedule = ({route}) => {
         fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}/${customEventID}`, {
             method: "DELETE",
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             }
         }).then(res => {
             console.log("Successful removal of the custom event")
