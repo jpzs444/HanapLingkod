@@ -26,6 +26,7 @@ const RatingForm = ({item, handleUpdate}) => {
             method: "PUT",
             headers: {
                 'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
             body: JSON.stringify({
                 ...submitBy

@@ -42,6 +42,7 @@ export default function Notifications({route}) {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        "Authorization": global.userData.accessToken
       },
     }).then((res) => res.json())
     .then((data) => {
@@ -146,6 +147,7 @@ export default function Notifications({route}) {
                             method: "PUT",
                             headers: {
                               'content-type': 'application/json',
+                              "Authorization": global.userData.accessToken
                             }
                           }).then(() => {
                             console.log("all notification read")

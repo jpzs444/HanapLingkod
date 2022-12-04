@@ -102,7 +102,8 @@ const BookingInformation = ({route}) => {
         await fetch(`http://${IPAddress}:3000/booking/${global.userData._id}/${bookingID}`, {
             method: "GET",
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             }
         }).then(res => res.json())
         .then(data => {
@@ -131,7 +132,8 @@ const BookingInformation = ({route}) => {
             fetch(`http://${IPAddress}:3000/reviews/${bookingID}`, {
                 method: "GET",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 }
             }).then(res => res.json())
             .then(data => {
@@ -168,7 +170,8 @@ const BookingInformation = ({route}) => {
             await fetch(`http://${IPAddress}:3000/booking/${global.userData._id}/${bookingID}`, {
                 method: 'PUT',
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 },
                 body: JSON.stringify({
                     ...cur_user
@@ -200,7 +203,8 @@ const BookingInformation = ({route}) => {
             await fetch(`http://${IPAddress}:3000/booking-comment/${bookingInformation._id}`, {
                 method: "POST",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 },
                 body: JSON.stringify({
                     comment: canceledMessage
@@ -222,7 +226,8 @@ const BookingInformation = ({route}) => {
             await fetch(`http://${IPAddress}:3000/conversations`, {
                 method: "POST",
                 headers: {
-                  'content-type': 'application/json'  
+                  'content-type': 'application/json',
+                  "Authorization": global.userData.accessToken
                 },
                 body: JSON.stringify({
                     senderId: global.userData._id,

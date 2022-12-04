@@ -63,7 +63,8 @@ const Workers = () => {
         fetch("http://" + IPAddress + ":3000/Worker?page=" + currentPage, {
             method: "GET",
             headers: {
-                "content-type": "application/json"
+                "content-type": "application/json",
+                "Authorization": global.userData.accessToken
             },
         }).then((response) => response.json())
         .then((data) => {

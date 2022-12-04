@@ -59,7 +59,8 @@ const Bookings = () => {
             fetch(`http://${IPAddress}:3000/booking/${global.userData._id}?page=${currentPage}`, {
                 method: "GET",
                 headers: {
-                    'content-type': "application/json"
+                    'content-type': "application/json",
+                    "Authorization": global.userData.accessToken
                 }
             }).then(res => res.json())
             .then(data => {

@@ -69,7 +69,8 @@ const WorkerProfile = ({route}) => {
             await fetch(`http://${IPAddress}:3000/${rateRoute}/${workerID}${withRating}`, {
                 method: "GET",
                 headers: {
-                    "content-type": "application/json"
+                    "content-type": "application/json",
+                    "Authorization": global.userData.accessToken
                 }
             }).then(res => res.json())
             .then(data => {
@@ -88,7 +89,8 @@ const WorkerProfile = ({route}) => {
         fetch("http://" + IPAddress + ":3000/" + userRoute + workerID, {
             method: "GET",
             header: {
-                "conten-type": "application/json"
+                "conten-type": "application/json",
+                "Authorization": global.userData.accessToken
             },
         }).then((res) => res.json())
         .then((user) => {
@@ -113,6 +115,7 @@ const WorkerProfile = ({route}) => {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
+                "Authorization": global.userData.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {

@@ -13,7 +13,8 @@ const CreatConversation = ({status, requestItem}) => {
         await fetch(`http://${IPAddress}:3000/conversations`, {
             method: "POST",
             headers: {
-              'content-type': 'application/json'  
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
             body: JSON.stringify({
                 senderId: global.userData._id,

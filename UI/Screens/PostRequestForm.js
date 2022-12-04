@@ -66,7 +66,8 @@ const PostRequestForm = () => {
         fetch(`http://${IPAddress}:3000/request-post`, {
             method: "POST",
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
             body: JSON.stringify({
                 startTime: formatedTime,

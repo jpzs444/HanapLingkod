@@ -115,7 +115,8 @@ const VIewServiceRequest = ({route}) => {
             await fetch(`http://${IPAddress}:3000/Work/${requestItem.subCategory}`,{
                 method: "GET",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 }
             }).then((res) => res.json())
             .then((data) => {
@@ -136,7 +137,8 @@ const VIewServiceRequest = ({route}) => {
         fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}`, {
             method: "GET",
             headers: {
-                "content-type": 'application/json' 
+                "content-type": 'application/json',
+                "Authorization": global.userData.accessToken
             }
         }).then(res => res.json())
         .then(data => {
@@ -152,7 +154,8 @@ const VIewServiceRequest = ({route}) => {
         fetch(`http:${IPAddress}:3000/service-request/${global.userData._id}`, {
             method: "GET",
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {
@@ -167,7 +170,8 @@ const VIewServiceRequest = ({route}) => {
         fetch(`http:${IPAddress}:3000/service-request/${global.userData._id}/${requestID}`, {
             method: "PUT",
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
             body: JSON.stringify({
                 requestStatus: 4
@@ -187,7 +191,8 @@ const VIewServiceRequest = ({route}) => {
         fetch(`http:${IPAddress}:3000/service-request/${global.userData._id}/${requestID}`, {
             method: "PUT",
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
             body: JSON.stringify({
                 requestStatus: 3,
@@ -207,7 +212,8 @@ const VIewServiceRequest = ({route}) => {
         fetch(`http:${IPAddress}:3000/service-request/${global.userData._id}/${requestID}`, {
             method: "PUT",
             headers: {
-                'content-type': 'application/json'
+                'content-type': 'application/json',
+                "Authorization": global.userData.accessToken
             },
             body: JSON.stringify({
                 requestStatus: 2,
@@ -248,7 +254,8 @@ const VIewServiceRequest = ({route}) => {
             await fetch(`http://${IPAddress}:3000/service-request-comment/${serviceRequestID}`, {
                 method: "POST",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 },
                 body: JSON.stringify({
                     comment: declinationMessage
@@ -280,7 +287,8 @@ const VIewServiceRequest = ({route}) => {
             await fetch(`http://${IPAddress}:3000/conversations`, {
                 method: "POST",
                 headers: {
-                  'content-type': 'application/json'  
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 },
                 body: JSON.stringify({
                     senderId: global.userData._id,

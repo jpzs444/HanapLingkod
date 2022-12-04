@@ -65,7 +65,8 @@ const UserProfile = ({route}) => {
         fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
             method: "GET",
             header: {
-                "conten-type": "application/json"
+                "conten-type": "application/json",
+                "Authorization": global.userData.accessToken
             },
         }).then((res) => res.json())
         .then((user) => {
@@ -87,6 +88,7 @@ const UserProfile = ({route}) => {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
+                "Authorization": global.userData.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {
@@ -103,7 +105,8 @@ const UserProfile = ({route}) => {
             await fetch(`http://${IPAddress}:3000/${userType}/${global.userData._id}${ff}`,{
                 method: "GET",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.userData.accessToken
                 }
             }).then(res => res.json())
             .then(data => {

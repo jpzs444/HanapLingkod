@@ -1,4 +1,4 @@
-export const IPAddress = "192.168.1.8";
+export const IPAddress = "192.168.1.2";
 export const Localhost = "http://" + IPAddress + ":3000";
 
 global.server = "http://" + IPAddress + ":3000/";
