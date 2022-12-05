@@ -30,7 +30,7 @@ const recruiterSchema = new mongoose.Schema({
   //   },
   // ],
   rating: Number,
-  ban: { type: Boolean, default: false },
+  deleteflag: { type: Boolean, default: 0 },
 });
 
 module.exports = mongoose.model("Recruiter", recruiterSchema);

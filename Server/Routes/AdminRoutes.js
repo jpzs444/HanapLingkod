@@ -9,7 +9,16 @@ const Admin = require("../Models/Admin");
 const bcrypt = require("bcrypt");
 const Workers = require("../Models/Workers");
 const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
-const { BannedWorker, BannedRecruiter } = require("../Models/BannedUsers");
+const {
+  BannedWorker,
+  BannedRecruiter,
+  PermanentBannedRecruiter,
+  PermanendBannedWorker,
+} = require("../Models/BannedUsers");
+const RecruiterComment = require("../Models/RecruiterComment");
+const WorkerComment = require("../Models/WorkerComment");
+const ServiceRequest = require("../Models/ServiceRequest");
+const Booking = require("../Models/Booking");
 router.route("/signup/admin").post(async function (req, res) {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -119,12 +128,19 @@ router
     if (req.params.role === "recruiter") {
       let offense = await BannedRecruiter.count({
         recruiterId: req.body.id,
-        ban: false,
       })
         .lean()
         .exec();
       offense += 1;
-      // console.log(offense);
+      console.log(offense);
+      if (offense === 6) {
+        const permanentBannedRecruiter = new PermanentBannedRecruiter({
+          recruiterId: req.body.id,
+          ban: true,
+        });
+        const savedPermanentBannedRecruiter =
+          await permanentBannedRecruiter.save();
+      }
       const bannedRecruiter = new BannedRecruiter({
         recruiterId: req.body.id,
         ban: true,
@@ -135,11 +151,17 @@ router
     } else if (req.params.role === "worker") {
       let offense = await BannedWorker.count({
         workerId: req.body.id,
-        ban: false,
       })
         .lean()
         .exec();
       offense += 1;
+      if (offense === 6) {
+        const permanendBannedWorker = new PermanendBannedWorker({
+          recruiterId: req.body.id,
+          ban: true,
+        });
+        const savedPermanendBannedWorker = await permanendBannedWorker.save();
+      }
       // console.log(offense);
       const bannedWorker = new BannedWorker({
         workerId: req.body.id,
@@ -166,6 +188,24 @@ router.route("/unbanUser/:role").put(async function (req, res) {
       { new: true }
     );
     res.status(200).json(updatedBannedWorker);
+  }
+});
+
+router.route("/permanentBanUser/:role").post(async function (req, res) {
+  if (req.params.role === "recruiter") {
+    const permanentBannedRecruiter = new PermanentBannedRecruiter({
+      recruiterId: req.body.id,
+      ban: true,
+    });
+    const savedPermanentBannedRecruiter = await permanentBannedRecruiter.save();
+    res.status(200).json(savedPermanentBannedRecruiter);
+  } else if (req.params.role === "worker") {
+    const permanendBannedWorker = new PermanendBannedWorker({
+      recruiterId: req.body.id,
+      ban: true,
+    });
+    const savedPermanendBannedWorker = await permanendBannedWorker.save();
+    res.status(200).json(savedPermanendBannedWorker);
   }
 });
 
@@ -232,6 +272,57 @@ router.route("/verifyAUser/:role").put(async function (req, res) {
         }
       }
     );
+  } else if (req.params.role === "worker") {
+    Workers.findOneAndUpdate(
+      { _id: req.body.id },
+      { verification: true },
+      function (err) {
+        if (!err) {
+          res.send("user verified");
+        } else {
+          res.send(err);
+        }
+      }
+    );
+  }
+});
+
+router.route("/deleteAUser/:role").put(async function (req, res) {
+  if (req.params.role === "recruiter") {
+    Recruiters.updateMany({ _id: req.body.id }, { deleteflag: true }).exec();
+
+    RequestPost.updateMany(
+      { recruiterId: req.body.id },
+      {
+        deleteflag: true,
+      }
+    ).exec();
+    RecruiterComment.updateMany(
+      { reviewee: req.body.id },
+      {
+        deleteflag: true,
+      }
+    ).exec();
+
+    WorkerComment.updateMany(
+      { reviewer: req.body.id },
+      {
+        deleteflag: true,
+      }
+    ).exec();
+    ServiceRequest.updateMany(
+      { recruiterId: req.body.id },
+      {
+        deleteflag: false,
+      }
+    ).exec();
+    Booking.updateMany(
+      { recruiterId: req.body.id },
+      {
+        deleteflag: false,
+      }
+    ).exec();
+    res.send("Updated Successfully");
   } else if (req.params.role === "worker") {
     Workers.findOneAndUpdate(
       { _id: req.body.id },

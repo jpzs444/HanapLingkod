@@ -50,7 +50,7 @@ const workerSchema = new mongoose.Schema({
   //   },
   // ],
   rating: Number,
-  ban: { offense: Number, ban: false },
+  deleteflag: { type: Boolean, default: 0 },
 });
 
 module.exports = mongoose.model("Worker", workerSchema);

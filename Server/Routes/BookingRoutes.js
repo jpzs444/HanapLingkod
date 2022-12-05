@@ -217,6 +217,13 @@ router
           }
         }
       );
+      //remove from user
+      console.log(req.params.id);
+      Worker.findOneAndUpdate(
+        { _id: req.params.user },
+        { $pull: { unavailableTime: { bookingId: req.params.id } } }
+      ).exec();
+
       if (req.body.statusWorker == 4) {
         notification(
           [pushIDRecruiter.pushtoken],

@@ -8,6 +8,7 @@ const RecruitercommentSchema = new mongoose.Schema({
   rating: Number,
   message: String,
   created_at: { type: Date, required: true, default: Date.now },
+  deleteflag: { type: Boolean, default: 0 },
 });
 
 RecruitercommentSchema.pre("find", function (next) {

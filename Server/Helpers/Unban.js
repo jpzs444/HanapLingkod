@@ -2,10 +2,11 @@ const { BannedRecruiter, BannedWorker } = require("../Models/BannedUsers");
 const dayjs = require("dayjs");
 
 async function Unban(req, res, next) {
-  const daysBanned = { 1: 1, 2: 3, 3: 7 };
-  for (let i = 1; i <= 3; i++) {
+  const daysBanned = { 3: 1, 4: 3, 5: 7 };
+  for (let i = 3; i <= 5; i++) {
     let bannedRecruiter = await BannedRecruiter.find({ offense: i, ban: true });
     let bannedWorker = await BannedWorker.find({ offense: i, ban: true });
+    console.log(daysBanned[i]);
     checker_Recruiter(bannedRecruiter, daysBanned[i]);
     checker_Worker(bannedRecruiter, daysBanned[i]);
   }
@@ -59,4 +60,7 @@ function checker_Worker(items, days) {
   }
 }
 
-module.exports = { Unban };
+async function monthlyUnban() {
+  BannedWorker.updateMany({}, { ban: false }).exec();
+}
+module.exports = { Unban, monthlyUnban };

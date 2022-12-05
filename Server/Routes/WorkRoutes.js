@@ -102,10 +102,11 @@ router
   });
 
 ////get works on specific category
-router.route("/Work/:category").get(
-  // authenticateToken,
-  async function (req, res) {
+router
+  .route("/Work/:category")
+  .get(authenticateToken, async function (req, res) {
     try {
+      console.log("aaaaa");
       let page;
       if (req.query.page) {
         page = parseInt(req.query.page);
@@ -122,9 +123,12 @@ router.route("/Work/:category").get(
       bannedUsersResult.forEach((x) => {
         bannedUsers.push(x.workerId);
       });
-
+      console.log(bannedUsers);
       let subId = await ServiceSubCategory.findOne({
         ServiceSubCategory: req.params.category,
+        _id: {
+          $nin: bannedUsers,
+        },
       }).lean();
 
       const count = await Work.countDocuments({
@@ -143,8 +147,7 @@ router.route("/Work/:category").get(
     } catch (err) {
       res.send(err);
     }
-  }
-);
+  });
 router
   .route("/Work/:category/:id")
   .get(authenticateToken, async function (req, res) {
