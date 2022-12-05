@@ -17,10 +17,11 @@ router
     const limit = 10;
 
     let result = await UserNotification.find({ userID: req.params.userId })
-      .sort({ date: -1 })
+      .sort({ createdAt: -1 })
       .limit(limit * page)
-      .lean();
-    res.send(result);
+      .lean()
+      .exec();
+    res.send(result.reverse());
   })
   .put(async function (req, res) {
     await UserNotification.updateMany(

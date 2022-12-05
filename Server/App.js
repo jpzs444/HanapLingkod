@@ -40,7 +40,7 @@ const deleteCancelled = require("./Helpers/deleteCancelled");
 const Conversation = require("./Routes/Conversations");
 const Messages = require("./Routes/messages");
 const Admin = require("./Routes/AdminRoutes");
-const { Unban } = require("./Helpers/Unban");
+const { Unban, monthlyUnban } = require("./Helpers/Unban");
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -98,7 +98,7 @@ app.get("/images/:filename", async function (req, res) {
   }
 });
 
-cron.schedule("0 * * * *", () => {
+cron.schedule("*/30 * * * *", () => {
   WorkReminder();
 });
 
@@ -108,6 +108,11 @@ cron.schedule("0 0 * * *", () => {
 cron.schedule("0 0 * * *", () => {
   Unban();
 });
+cron.schedule("0 0 1 * *", () => {
+  monthlyUnban();
+  console.log("Monthly Unban");
+});
+// Unban();
 
 app.get("/search", async function (req, res) {
   let keyword = req.query.keyword;

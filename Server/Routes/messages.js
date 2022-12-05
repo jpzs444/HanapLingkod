@@ -52,10 +52,22 @@ router.post("/messages", async (req, res) => {
 
 router.get("/messages/:conversationId", async (req, res) => {
   try {
+    let page;
+    if (req.query.page) {
+      page = parseInt(req.query.page);
+    } else {
+      page = 1;
+    }
+    const limit = 15;
+
     const messages = await Message.find({
       conversationId: req.params.conversationId,
-    });
-    res.status(200).json(messages);
+    })
+      .sort({ createdAt: -1 })
+      .limit(limit * page)
+      .lean();
+
+    res.status(200).json(messages.reverse());
   } catch (err) {
     res.status(500).json(err);
   }
