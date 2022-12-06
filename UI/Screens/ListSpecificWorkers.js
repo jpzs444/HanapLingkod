@@ -32,7 +32,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         })
         .then((res) => res.json())

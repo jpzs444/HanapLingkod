@@ -25,6 +25,7 @@ import HomeNavigationStack from './HomeStack';
 import ViewComments from '../Screens/ViewComments';
 import Maps from '../Screens/Maps';
 import PostRequestStack from './PostRequestStack';
+import ReportUser from '../Screens/ReportUser';
 
 const hiddenTabNavBtn = () => ({
     tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
@@ -149,6 +150,13 @@ const TabNavigation = () => {
         />
 
         <Tab.Screen name="ViewCommentsTab" component={ViewComments} 
+            options={{
+                tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
+                
+            }}
+        />
+
+        <Tab.Screen name="ReportUserTab" component={ReportUser} 
             options={{
                 tabBarButton: () => <View style={{ width: 0, height: 0 }}></View>,
                 

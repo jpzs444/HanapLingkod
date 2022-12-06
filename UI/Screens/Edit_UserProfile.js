@@ -80,7 +80,7 @@ const Edit_UserProfile = () => {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {
@@ -275,7 +275,7 @@ const Edit_UserProfile = () => {
             method: "DELETE",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: JSON.stringify({
                 "toDelete": prevArrayPrevWorks[indexToRemove],
@@ -356,7 +356,7 @@ const Edit_UserProfile = () => {
                     method: "POST",
                     headers: {
                         "content-type": "multipart/form-data",
-                        "Authorization": global.userData.accessToken
+                        "Authorization": global.accessToken
                     },
                     body: formDataPastWorks,
                 }).then((res) => console.log("successfully uploaded past work images"))
@@ -373,7 +373,7 @@ const Edit_UserProfile = () => {
                         method: 'PUT',
                         headers: {
                             'content-type': 'application/json',
-                            "Authorization": global.userData.accessToken
+                            "Authorization": global.accessToken
                         },
                         body: JSON.stringify({
                             minPrice: userWorkListEdit[i].minPrice,
@@ -393,7 +393,7 @@ const Edit_UserProfile = () => {
                         method: "POST",
                         headers: {
                             "content-type": "application/json",
-                            "Authorization": global.userData.accessToken
+                            "Authorization": global.accessToken
                         },
                         body: JSON.stringify({
                             "Category": userWorkListEdit[i].Category ? 'unlisted' : "",
@@ -419,7 +419,7 @@ const Edit_UserProfile = () => {
                             method: "DELETE",
                             headers: {
                                 "content-type": "application/json",
-                                "Authorization": global.userData.accessToken
+                                "Authorization": global.accessToken
                             },
                         }).then((res) => console.log("old set of work deleted successfully"))
                         .catch((error) => console.log("error delete works: ", error.message))
@@ -472,7 +472,7 @@ const Edit_UserProfile = () => {
             method: "PUT",
             headers: {
                 "content-type": "multipart/form-data",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: formData,
         }).then((response) => console.log("successfully updated user basic information"))
@@ -495,7 +495,7 @@ const Edit_UserProfile = () => {
             method: "GET",
             header: {
                 "conten-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((user) => {

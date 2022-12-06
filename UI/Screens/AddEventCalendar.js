@@ -84,7 +84,7 @@ const AddEventCalendar = ({route}) => {
             method: "GET",
             header: {
                 "conten-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((user) => {
@@ -150,7 +150,7 @@ const AddEventCalendar = ({route}) => {
                 method: eventItem ? "PUT" : "POST",
                 headers: {
                     'content-type': 'application/json',
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     inputDate: dayjs(selectedDate).format("YYYY-MM-DD"),
@@ -171,7 +171,7 @@ const AddEventCalendar = ({route}) => {
                 method: eventItem ? "PUT" : "POST",
                 headers: {
                     'content-type': 'application/json',
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     inputDate: dayjs(selectedDate).format("YYYY-MM-DD"),
@@ -199,7 +199,7 @@ const AddEventCalendar = ({route}) => {
             method: "DELETE",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             }
         }).then(res => {
             console.log("Successful removal of the custom event")

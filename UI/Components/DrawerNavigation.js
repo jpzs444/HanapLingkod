@@ -32,6 +32,9 @@ import { IPAddress } from '../global/global';
 import Messaging from '../Screens/Messaging';
 import Requests from '../Screens/Requests';
 import Bookings from '../Screens/Bookings';
+import ReportUser from '../Screens/ReportUser';
+import SubmitSupport from '../Screens/SubmitSupport';
+import Reports from '../Screens/Reports';
 
 const Drawer = createDrawerNavigator();
 
@@ -102,7 +105,31 @@ export default function DrawerNavigation(){
                         fontSize: 15
                     }
                 }} />
+                <Drawer.Screen name="ReportsDrawer" component={Reports} options={{
+                    drawerLabel: "Reports",
+                    drawerIcon: ({color}) => (
+                        <Icon name="forum" size={25} color={color}  />
+                    ),
+                    drawerLabelStyle: {
+                        fontFamily: "LexendDeca_Medium",
+                        fontSize: 15
+                    }
+                }} />
 
+                <Drawer.Screen name="SubmitSupportDrawer" component={SubmitSupport} options={{
+                    drawerLabel: "Submit Support",
+                    drawerIcon: ({color}) => (
+                        <Icon name="forum" size={25} color={color}  />
+                    ),
+                    drawerLabelStyle: {
+                        fontFamily: "LexendDeca_Medium",
+                        fontSize: 15
+                    }
+                }} />
+
+                <Drawer.Screen name="ReportUserDrawer" component={ReportUser} options={{
+                    drawerItemStyle: { display: 'none' }
+                }} />
                 {/* <Drawer.Screen name="RUT2" component={RegisterUserAccountType} options={{
                     drawerIcon: ({color}) => (
                         <Icon name="clipboard-edit" size={25} color={color}  />

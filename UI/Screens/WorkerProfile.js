@@ -70,7 +70,7 @@ const WorkerProfile = ({route}) => {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 }
             }).then(res => res.json())
             .then(data => {
@@ -90,7 +90,7 @@ const WorkerProfile = ({route}) => {
             method: "GET",
             header: {
                 "conten-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((user) => {
@@ -115,7 +115,7 @@ const WorkerProfile = ({route}) => {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {

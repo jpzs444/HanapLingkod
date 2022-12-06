@@ -13,6 +13,7 @@ import { FlashList } from '@shopify/flash-list';
 
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
+import DialogueModal from '../Components/DialogueModal';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -35,6 +36,8 @@ export default function Home() {
 
   const notificationListener = useRef();
   const responseListener = useRef();
+
+  const [isBanned, setIsBanned] = useState(false)
 
   // useEffect(() => {
   //   socket.current = io(`ws://${IPAddress}:8900`)
@@ -64,7 +67,7 @@ export default function Home() {
           method: "PUT",
           header: {
             'content-type': 'application/json',
-            "Authorization": global.userData.accessToken
+            "Authorization": global.accessToken
           },
         }).then(() => console.log("all notification read"))
         .catch((error) => console.log("notification app js error: ", error.message))
@@ -94,7 +97,7 @@ export default function Home() {
       method: 'PUT',
       headers: {
         "content-type": "application/json",
-        "Authorization": global.userData.accessToken
+        "Authorization": global.accessToken
       },
       body: JSON.stringify({
         pushtoken: global.deviceExpoPushToken,
@@ -116,6 +119,7 @@ export default function Home() {
     
     navigation.addListener("focus", () => {
       onRefresh()
+      console.log("home screen: ", global.accessToken)
       // getAllCategory()
     })
   }, [])
@@ -127,14 +131,22 @@ export default function Home() {
         method: "GET",
         headers: {
             "content-type": "application/json",
-            "Authorization": global.userData.accessToken
+            "Authorization": global.accessToken
         },
       }).then((res) => res.json())
       .then((data) => {
-        setCategory([...data])
-        // console.log("sub-cat:", data)
+        console.log("home accesstoken: ", data)
+        if(data === "Forbidden: User is banned"){
+          setIsBanned(true)
+        } else {
+          setCategory([...data])
+          console.log("sub-cat:", data)
+        }
       })
     } catch (error) {
+      // console.log("")
+      setIsBanned(true)
+
       console.log("error service cat: ", error)
     }
   }
@@ -144,7 +156,7 @@ export default function Home() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        "Authorization": global.userData.accessToken
+        "Authorization": global.accessToken
       },
     }).then((res) => res.json())
     .then((data) => {
@@ -173,7 +185,7 @@ export default function Home() {
       method: "GET",
       headers: {
         "content-type": "application/json",
-        "Authorization": global.userData.accessToken
+        "Authorization": global.accessToken
       },
     }).then((res) => res.json())
     .then((data) => {
@@ -220,6 +232,14 @@ export default function Home() {
         <Appbar hasPicture={true} menuBtn={true} showLogo={true} />
 
         {/* Modals */}
+        <DialogueModal 
+          firstMessage="You are banned!"
+          secondMessage={"You will not have access to view anything"}
+          visible={isBanned}
+          numBtn={1}
+          warning={true}
+          onDecline={setIsBanned}
+        />
         
         
         {/* Greeting header */}
@@ -335,228 +355,228 @@ export default function Home() {
   }
   
 
-  const Mainhomelist = () => {
-    return(
-      <FlashList 
-        refreshing={isRefreshing} 
-        onRefresh={onRefresh}
-        data={category}
-        keyExtractor={item => item._id}
-        estimatedItemSize={50}
-        // keyboardDismissMode='none'
-        // keyboardShouldPersistTaps={'always'}
-        showsVerticalScrollIndicator={false}
-        ListFooterComponent={() => (<View style={{height: 120}}></View>)}
-        ListHeaderComponent={() => (
-          <ScreenHeaderComponent />
-        )}
-        renderItem={({item}) => (
-          searchResults ? 
-          <View>
-              {
-                item.Category && item.Category !== 'unlisted' ? 
-                  <TouchableOpacity style={styles.categoryBtn}
-                    onPress={() => {
-                      navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
-                    }}
-                  >
-                    <ImageBackground source={{uri: item.image}} style={styles.category_imageBG}>
-                      <View style={styles.textWrapper}>
-                        <TText style={styles.categoryTxt}>{item.Category}</TText>
-                      </View>
-                    </ImageBackground>
-                  </TouchableOpacity>
-                  :
-                  item.ServiceSubCategory ? 
-                  <TouchableOpacity style={styles.buttonSubCat}
-                      onPress={() => {
-                          navigation.navigate("ListSpecificWorkerScreen", {chosenCategory: item.ServiceSubCategory})
-                      }}
-                  >
-                      <View style={styles.imageContainerSubCat}>
-                          <Image source={require("../assets/images/stock.jpg")} style={styles.imageStyleSubCat} />
-                      </View>
-                      <View style={styles.subCategoryDescriptionBox}>
-                          <View style={styles.subCategoryRow}>
-                              <TText style={styles.subCategoryText}>{item.ServiceSubCategory}</TText>
-                              <TText style={styles.priceRangePrice}>Price Range</TText>
-                          </View>
-                          <View style={[styles.subCategoryRow, {marginBottom: 0}]}>
-                              <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
-                              <TText style={styles.priceRangeText}>Price Range</TText>
-                          </View>
-                      </View>
-                  </TouchableOpacity>
-                  :
-                  item.firstname ? 
-                    <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
-                      <TouchableOpacity style={styles.buttonWorker}
-                        onPress={() => {
-                          navigation.navigate("RequestFormDrawer", {workerID: item._id, workerInformation: item, selectedJob: '', showMultiWorks: true})
-                        }}
-                      >
-                          <View style={styles.buttonWorkerView}>
-                              {/* Profile Picture */}
-                              <View style={styles.imageContainer}>
-                                  <Image source={item.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: item.profilePic}} style={styles.image} />
-                              </View>
-                              {/* Worker Information */}
-                              <View style={styles.descriptionBox}>
-                                  <View style={styles.descriptionTop}>
-                                      <View style={[styles.row, styles.workerInfo]}>
-                                          <View style={styles.workerNameHolder}>
-                                              <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
-                                              { item.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
-                                          </View>
-                                          <View style={styles.workerRatingsHolder}>
-                                              <Icon name="star" color={"gold"} size={18} />
-                                              <TText style={styles.workerRatings}>4.5</TText>
-                                          </View>                                     
-                                      </View>
-                                      <View style={styles.workerAddressBox}>
-                                          <Icon name='map-marker' size={16} />
-                                          <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
-                                      </View>
-                                  </View>
-                                  <View style={styles.descriptionBottom}>
-                                      {
-                                        item.works &&
-                                        <Text numberOfLines={1} ellipsizeMode='tail' >
-                                          {
-                                            item.works.map(function(item){
-                                              return item + ", "
-                                            })
-                                          }
-                                        </Text>
+  // const Mainhomelist = () => {
+  //   return(
+  //     <FlashList 
+  //       refreshing={isRefreshing} 
+  //       onRefresh={onRefresh}
+  //       data={category}
+  //       keyExtractor={item => item._id}
+  //       estimatedItemSize={50}
+  //       // keyboardDismissMode='none'
+  //       // keyboardShouldPersistTaps={'always'}
+  //       showsVerticalScrollIndicator={false}
+  //       ListFooterComponent={() => (<View style={{height: 120}}></View>)}
+  //       ListHeaderComponent={() => (
+  //         <ScreenHeaderComponent />
+  //       )}
+  //       renderItem={({item}) => (
+  //         searchResults ? 
+  //         <View>
+  //             {
+  //               item.Category && item.Category !== 'unlisted' ? 
+  //                 <TouchableOpacity style={styles.categoryBtn}
+  //                   onPress={() => {
+  //                     navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
+  //                   }}
+  //                 >
+  //                   <ImageBackground source={{uri: item.image}} style={styles.category_imageBG}>
+  //                     <View style={styles.textWrapper}>
+  //                       <TText style={styles.categoryTxt}>{item.Category}</TText>
+  //                     </View>
+  //                   </ImageBackground>
+  //                 </TouchableOpacity>
+  //                 :
+  //                 item.ServiceSubCategory ? 
+  //                 <TouchableOpacity style={styles.buttonSubCat}
+  //                     onPress={() => {
+  //                         navigation.navigate("ListSpecificWorkerScreen", {chosenCategory: item.ServiceSubCategory})
+  //                     }}
+  //                 >
+  //                     <View style={styles.imageContainerSubCat}>
+  //                         <Image source={require("../assets/images/stock.jpg")} style={styles.imageStyleSubCat} />
+  //                     </View>
+  //                     <View style={styles.subCategoryDescriptionBox}>
+  //                         <View style={styles.subCategoryRow}>
+  //                             <TText style={styles.subCategoryText}>{item.ServiceSubCategory}</TText>
+  //                             <TText style={styles.priceRangePrice}>Price Range</TText>
+  //                         </View>
+  //                         <View style={[styles.subCategoryRow, {marginBottom: 0}]}>
+  //                             <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
+  //                             <TText style={styles.priceRangeText}>Price Range</TText>
+  //                         </View>
+  //                     </View>
+  //                 </TouchableOpacity>
+  //                 :
+  //                 item.firstname ? 
+  //                   <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
+  //                     <TouchableOpacity style={styles.buttonWorker}
+  //                       onPress={() => {
+  //                         navigation.navigate("RequestFormDrawer", {workerID: item._id, workerInformation: item, selectedJob: '', showMultiWorks: true})
+  //                       }}
+  //                     >
+  //                         <View style={styles.buttonWorkerView}>
+  //                             {/* Profile Picture */}
+  //                             <View style={styles.imageContainer}>
+  //                                 <Image source={item.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: item.profilePic}} style={styles.image} />
+  //                             </View>
+  //                             {/* Worker Information */}
+  //                             <View style={styles.descriptionBox}>
+  //                                 <View style={styles.descriptionTop}>
+  //                                     <View style={[styles.row, styles.workerInfo]}>
+  //                                         <View style={styles.workerNameHolder}>
+  //                                             <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
+  //                                             { item.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
+  //                                         </View>
+  //                                         <View style={styles.workerRatingsHolder}>
+  //                                             <Icon name="star" color={"gold"} size={18} />
+  //                                             <TText style={styles.workerRatings}>4.5</TText>
+  //                                         </View>                                     
+  //                                     </View>
+  //                                     <View style={styles.workerAddressBox}>
+  //                                         <Icon name='map-marker' size={16} />
+  //                                         <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
+  //                                     </View>
+  //                                 </View>
+  //                                 <View style={styles.descriptionBottom}>
+  //                                     {
+  //                                       item.works &&
+  //                                       <Text numberOfLines={1} ellipsizeMode='tail' >
+  //                                         {
+  //                                           item.works.map(function(item){
+  //                                             return item + ", "
+  //                                           })
+  //                                         }
+  //                                       </Text>
                                         
-                                      }
-                                  </View>
-                              </View>
-                          </View>
-                      </TouchableOpacity>
-                    </View>
-                  : null
-                }
-            </View>
-            :
-            item.Category !== 'unlisted' ?
-            <TouchableOpacity style={styles.categoryBtn}
-                onPress={() => {
-                  navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
-                }}
-              >
-                <ImageBackground source={require("../assets/images/painting.jpg")} style={styles.category_imageBG}>
-                  <View style={styles.textWrapper}>
-                    <TText style={styles.categoryTxt}>{item.Category}</TText>
-                  </View>
-                </ImageBackground>
-              </TouchableOpacity> 
-              : null
-        )}
-      />
-    )
-  }
+  //                                     }
+  //                                 </View>
+  //                             </View>
+  //                         </View>
+  //                     </TouchableOpacity>
+  //                   </View>
+  //                 : null
+  //               }
+  //           </View>
+  //           :
+  //           item.Category !== 'unlisted' ?
+  //           <TouchableOpacity style={styles.categoryBtn}
+  //               onPress={() => {
+  //                 navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
+  //               }}
+  //             >
+  //               <ImageBackground source={require("../assets/images/painting.jpg")} style={styles.category_imageBG}>
+  //                 <View style={styles.textWrapper}>
+  //                   <TText style={styles.categoryTxt}>{item.Category}</TText>
+  //                 </View>
+  //               </ImageBackground>
+  //             </TouchableOpacity> 
+  //             : null
+  //       )}
+  //     />
+  //   )
+  // }
 
-  const ListSearchResults = () => {
-    return(
-      <>
-        <FlashList 
-          data={searchResults}
-          keyExtractor={item => item._id}
-          estimatedItemSize={70}
-          showsVerticalScrollIndicator={false}
-          ListFooterComponent={() => (<View style={{height: 180}}></View>)}
-          ListHeaderComponent={() => (
-            <ScreenHeaderComponent />     
-          )}
-          renderItem={({item}) => (
-            <View>
-              {
-                item.Category && item.Category !== 'unlisted' ? 
-                  <TouchableOpacity style={styles.categoryBtn}
-                    onPress={() => {
-                      navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
-                    }}
-                  >
-                    <ImageBackground source={require("../assets/images/stock.jpg")} style={styles.category_imageBG}>
-                      <View style={styles.textWrapper}>
-                        <TText style={styles.categoryTxt}>{item.Category}</TText>
-                      </View>
-                    </ImageBackground>
-                  </TouchableOpacity>
-                  :
-                  item.ServiceSubCategory ? 
-                  <TouchableOpacity style={styles.buttonSubCat}
-                      onPress={() => {
-                          navigation.navigate("ListSpecificWorkerScreen", {chosenCategory: item.ServiceSubCategory})
-                      }}
-                  >
-                      <View style={styles.imageContainerSubCat}>
-                          <Image source={require("../assets/images/stock.jpg")} style={styles.imageStyleSubCat} />
-                      </View>
-                      <View style={styles.subCategoryDescriptionBox}>
-                          <View style={styles.subCategoryRow}>
-                              <TText style={styles.subCategoryText}>{item.ServiceSubCategory}</TText>
-                              <TText style={styles.priceRangePrice}>Price Range</TText>
-                          </View>
-                          <View style={[styles.subCategoryRow, {marginBottom: 0}]}>
-                              <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
-                              <TText style={styles.priceRangeText}>Price Range</TText>
-                          </View>
-                      </View>
-                  </TouchableOpacity>
-                  :
-                  item.firstname ? 
-                    <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
-                      <TouchableOpacity style={styles.buttonWorker}>
-                          <View style={styles.buttonWorkerView}>
-                              {/* Profile Picture */}
-                              <View style={styles.imageContainer}>
-                                  <Image source={item.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: `http://${IPAddress}:3000/images/${item.profilePic}`}} style={styles.image} />
-                              </View>
-                              {/* Worker Information */}
-                              <View style={styles.descriptionBox}>
-                                  <View style={styles.descriptionTop}>
-                                      <View style={[styles.row, styles.workerInfo]}>
-                                          <View style={styles.workerNameHolder}>
-                                              <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
-                                              { item.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
-                                          </View>
-                                          <View style={styles.workerRatingsHolder}>
-                                              <Icon name="star" color={"gold"} size={18} />
-                                              <TText style={styles.workerRatings}>4.5</TText>
-                                          </View>                                     
-                                      </View>
-                                      <View style={styles.workerAddressBox}>
-                                          <Icon name='map-marker' size={16} />
-                                          <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
-                                      </View>
-                                  </View>
-                                  <View style={styles.descriptionBottom}>
-                                      {
-                                        item.works &&
-                                        <Text numberOfLines={1} ellipsizeMode='tail' >
-                                          {
-                                            item.works.map(function(item){
-                                              return item + ", "
-                                            })
-                                          }
-                                        </Text>
+  // const ListSearchResults = () => {
+  //   return(
+  //     <>
+  //       <FlashList 
+  //         data={searchResults}
+  //         keyExtractor={item => item._id}
+  //         estimatedItemSize={70}
+  //         showsVerticalScrollIndicator={false}
+  //         ListFooterComponent={() => (<View style={{height: 180}}></View>)}
+  //         ListHeaderComponent={() => (
+  //           <ScreenHeaderComponent />     
+  //         )}
+  //         renderItem={({item}) => (
+  //           <View>
+  //             {
+  //               item.Category && item.Category !== 'unlisted' ? 
+  //                 <TouchableOpacity style={styles.categoryBtn}
+  //                   onPress={() => {
+  //                     navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
+  //                   }}
+  //                 >
+  //                   <ImageBackground source={require("../assets/images/stock.jpg")} style={styles.category_imageBG}>
+  //                     <View style={styles.textWrapper}>
+  //                       <TText style={styles.categoryTxt}>{item.Category}</TText>
+  //                     </View>
+  //                   </ImageBackground>
+  //                 </TouchableOpacity>
+  //                 :
+  //                 item.ServiceSubCategory ? 
+  //                 <TouchableOpacity style={styles.buttonSubCat}
+  //                     onPress={() => {
+  //                         navigation.navigate("ListSpecificWorkerScreen", {chosenCategory: item.ServiceSubCategory})
+  //                     }}
+  //                 >
+  //                     <View style={styles.imageContainerSubCat}>
+  //                         <Image source={require("../assets/images/stock.jpg")} style={styles.imageStyleSubCat} />
+  //                     </View>
+  //                     <View style={styles.subCategoryDescriptionBox}>
+  //                         <View style={styles.subCategoryRow}>
+  //                             <TText style={styles.subCategoryText}>{item.ServiceSubCategory}</TText>
+  //                             <TText style={styles.priceRangePrice}>Price Range</TText>
+  //                         </View>
+  //                         <View style={[styles.subCategoryRow, {marginBottom: 0}]}>
+  //                             <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
+  //                             <TText style={styles.priceRangeText}>Price Range</TText>
+  //                         </View>
+  //                     </View>
+  //                 </TouchableOpacity>
+  //                 :
+  //                 item.firstname ? 
+  //                   <View style={{width: '100%', paddingHorizontal: 30, height: 130}}>
+  //                     <TouchableOpacity style={styles.buttonWorker}>
+  //                         <View style={styles.buttonWorkerView}>
+  //                             {/* Profile Picture */}
+  //                             <View style={styles.imageContainer}>
+  //                                 <Image source={item.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: `http://${IPAddress}:3000/images/${item.profilePic}`}} style={styles.image} />
+  //                             </View>
+  //                             {/* Worker Information */}
+  //                             <View style={styles.descriptionBox}>
+  //                                 <View style={styles.descriptionTop}>
+  //                                     <View style={[styles.row, styles.workerInfo]}>
+  //                                         <View style={styles.workerNameHolder}>
+  //                                             <TText style={styles.workerNameText}>{item.firstname}{item.middlename === "undefined" ? "" : item.middlename} {item.lastname}</TText>
+  //                                             { item.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null }
+  //                                         </View>
+  //                                         <View style={styles.workerRatingsHolder}>
+  //                                             <Icon name="star" color={"gold"} size={18} />
+  //                                             <TText style={styles.workerRatings}>4.5</TText>
+  //                                         </View>                                     
+  //                                     </View>
+  //                                     <View style={styles.workerAddressBox}>
+  //                                         <Icon name='map-marker' size={16} />
+  //                                         <Text numberOfLines={1} ellipsizeMode='tail' style={styles.workerAddressText}>{item.street}, {item.purok}, {item.barangay}</Text>
+  //                                     </View>
+  //                                 </View>
+  //                                 <View style={styles.descriptionBottom}>
+  //                                     {
+  //                                       item.works &&
+  //                                       <Text numberOfLines={1} ellipsizeMode='tail' >
+  //                                         {
+  //                                           item.works.map(function(item){
+  //                                             return item + ", "
+  //                                           })
+  //                                         }
+  //                                       </Text>
                                         
-                                      }
-                                  </View>
-                              </View>
-                          </View>
-                      </TouchableOpacity>
-                    </View>
-                  : null
-                }
-            </View>
-          )}
-        />
-      </>
-    )
-  }
+  //                                     }
+  //                                 </View>
+  //                             </View>
+  //                         </View>
+  //                     </TouchableOpacity>
+  //                   </View>
+  //                 : null
+  //               }
+  //           </View>
+  //         )}
+  //       />
+  //     </>
+  //   )
+  // }
 
   return (
     <SafeAreaView style={styles.mainContainer}>

@@ -54,7 +54,7 @@ const Messaging = () => {
       method: "POST",
       headers: {
         'content-type': 'application/json',
-        "Authorization": global.userData.accessToken
+        "Authorization": global.accessToken
       },
       body: JSON.stringify({
         senderId: '636c9025f624714429165b1a',

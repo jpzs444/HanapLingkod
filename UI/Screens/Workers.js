@@ -64,7 +64,7 @@ const Workers = () => {
             method: "GET",
             headers: {
                 "content-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((response) => response.json())
         .then((data) => {

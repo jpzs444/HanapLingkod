@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="./css/style.css">
 
     <title>HanapLingkod</title>
 </head>
@@ -17,11 +17,11 @@
     <nav class="flexRow">
         <div class="left">
             <button id="menu-btn" onclick="handleOpenSideNav()">
-                <img id="menu-image" src="../assets/icons/menu.png"/>
+                <img id="menu-image" src="./assets/icons/menu.png"/>
             </button>
     
             <button class="flexRow" id="logo-btn">
-                <img id="logo-image" src="../assets/logo/logo_icon.png" />
+                <img id="logo-image" src="./assets/logo/logo_icon.png" />
                 <p class="title">HanapLingkod</p>
             </button>
         </div>
@@ -29,7 +29,7 @@
             <a class="home-link" href="#">Home</a>
             <a class="account-link" href="#">Account</a>
             <button id="settings-btn">
-                <img id="settings-image" src="../assets/icons/settings.png" />
+                <img id="settings-image" src="./assets/icons/settings.png" />
             </button>
         </div>
     </nav>
@@ -37,33 +37,33 @@
     <div class="side-navigation">
         <div class="close-btn-div">
             <button id="close-side-menu" onclick="handleCloseSideNav()">
-                <img class="arrow-left-menu" src="../assets/icons/arrow-left-long.png" />
+                <img class="arrow-left-menu" src="./assets/icons/arrow-left-long.png" />
             </button>
         </div>
 
         <div class="side-nav-menu">
             <div class="menu flexRow">
-                <img class="menu-icon" src="../assets/icons/home.png" />
+                <img class="menu-icon" src="./assets/icons/home.png" />
                 <p class="menu-text">Home</p>
             </div>
 
             <div class="menu flexRow">
-                <img class="menu-icon" src="../assets/icons/penalization.png" />
+                <img class="menu-icon" src="./assets/icons/penalization.png" />
                 <p class="menu-text">User Penalization</p>
             </div>
 
             <div class="menu flexRow">
-                <img class="menu-icon" src="../assets/icons/verification.png" />
+                <img class="menu-icon" src="./assets/icons/verification.png" />
                 <p class="menu-text">User Verification</p>
             </div>
 
             <div class="menu flexRow">
-                <img class="menu-icon" src="../assets/icons/reports.png" />
+                <img class="menu-icon" src="./assets/icons/reports.png" />
                 <p class="menu-text">Create Account</p>
             </div>
 
             <div class="menu flexRow">
-                <img class="menu-icon" src="../assets/icons/account.png" />
+                <img class="menu-icon" src="./assets/icons/account.png" />
                 <p class="menu-text">Home</p>
             </div>
         </div>
@@ -81,7 +81,7 @@
     
             <div class="dashboard-overview flexRow">
                 <div class="recruiter-overview dbo-box flexRow">
-                    <img class="overview-icon" src="../assets//icons/recruiter.png" />
+                    <img class="overview-icon" src="./assets//icons/recruiter.png" />
     
                     <div class="overview-info">
                         <p class="overview-title">Recruiters</p>
@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="worker-overview dbo-box flexRow">
-                    <img class="overview-icon" src="../assets//icons/worker.png" />
+                    <img class="overview-icon" src="./assets//icons/worker.png" />
     
                     <div class="overview-info">
                         <p class="overview-title">Workers</p>
@@ -99,7 +99,7 @@
                 </div>
 
                 <div class="worker-overview dbo-box flexRow">
-                    <img class="overview-icon" src="../assets//icons/worker.png" />
+                    <img class="overview-icon" src="./assets//icons/worker.png" />
     
                     <div class="overview-info">
                         <p class="overview-title">Requests</p>
@@ -108,7 +108,7 @@
                 </div>
 
                 <div class="worker-overview dbo-box flexRow">
-                    <img class="overview-icon" src="../assets//icons/worker.png" />
+                    <img class="overview-icon" src="./assets//icons/worker.png" />
     
                     <div class="overview-info">
                         <p class="overview-title">Bookings</p>
@@ -129,37 +129,37 @@
             <div class="action-btn-container">
                 
                 <div class="action-btn" onclick="handleActionBtnClick('Account Penalization')">
-                    <img class="action-icon" src="../assets/icons/penalization.png" />
+                    <img class="action-icon" src="./assets/icons/penalization.png" />
                     <p class="action-text">Account<br>Penalization</p>
                 </div>
                 
                 <div class="action-btn" onclick="window.location.href='account_verification.html'">
-                    <img class="action-icon" src="../assets/icons/verification.png" />
+                    <img class="action-icon" src="./assets/icons/verification.png" />
                     <p class="action-text">Account<br>Verification</p>
                 </div>
 
                 <div class="action-btn" onclick="handleActionBtnClick('User Reports')">
-                    <img class="action-icon" src="../assets/icons/reports.png" />
+                    <img class="action-icon" src="./assets/icons/reports.png" />
                     <p class="action-text">User<br>Reports</p>
                 </div>
                 
                 <div class="action-btn" onclick="window.location.href='./signup/signup.html'">
-                    <img class="action-icon" src="../assets/icons/account.png" />
+                    <img class="action-icon" src="./assets/icons/account.png" />
                     <p class="action-text">Create<br>Account</p>
                 </div>
 
                 <div class="action-btn" onclick="handleActionBtnClick('Create Account')">
-                    <img class="action-icon" src="../assets/icons/category.png" />
+                    <img class="action-icon" src="./assets/icons/category.png" />
                     <p class="action-text">Add/Modify<br>Category</p>
                 </div>
 
                 <div class="action-btn" onclick="handleActionBtnClick('Create Account')">
-                    <img class="action-icon" src="../assets/icons/sub-category.png" />
+                    <img class="action-icon" src="./assets/icons/sub-category.png" />
                     <p class="action-text">Add/Modify<br>Sub-Category</p>
                 </div>
 
-                <div class="action-btn" onclick="handleActionBtnClick('Create Account')">
-                    <img class="action-icon" src="../assets/icons/people.png" />
+                <div class="action-btn" onclick="window.location.href='UsersView.html'">
+                    <img class="action-icon" src="./assets/icons/people.png" />
                     <p class="action-text">View<br>Users</p>
                 </div>
             </div>
@@ -175,5 +175,5 @@
     </main>
 </body>
 
-<script src="../javascript/script.js"></script>
+<script src="./javascript/script.js"></script>
 </html>
