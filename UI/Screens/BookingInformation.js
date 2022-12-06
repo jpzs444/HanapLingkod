@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, Image, StatusBar, TouchableOpacity, Modal, TextInput, ActivityIndicator } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, Image, StatusBar, TouchableOpacity, Modal, TextInput, ActivityIndicator, Pressable } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { IPAddress } from '../global/global'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -103,7 +103,7 @@ const BookingInformation = ({route}) => {
             method: "GET",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             }
         }).then(res => res.json())
         .then(data => {
@@ -133,7 +133,7 @@ const BookingInformation = ({route}) => {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 }
             }).then(res => res.json())
             .then(data => {
@@ -171,7 +171,7 @@ const BookingInformation = ({route}) => {
                 method: 'PUT',
                 headers: {
                     'content-type': 'application/json',
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     ...cur_user
@@ -204,7 +204,7 @@ const BookingInformation = ({route}) => {
                 method: "POST",
                 headers: {
                     'content-type': 'application/json',
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     comment: canceledMessage
@@ -227,7 +227,7 @@ const BookingInformation = ({route}) => {
                 method: "POST",
                 headers: {
                   'content-type': 'application/json',
-                  "Authorization": global.userData.accessToken
+                  "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     senderId: global.userData._id,
@@ -259,6 +259,24 @@ const BookingInformation = ({route}) => {
         <ScrollView contentContainerStyle={styles.mainContainer}>
             <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromCB={fromCB} />
             <TText style={styles.mainHeader}>Booking Information</TText>
+
+            {/* {
+                (bookingInformation.bookingStatus == '2' || bookingInformation.bookingStatus == '4' || bookingInformation.bookingStatus == '5') &&
+                <View style={{position: 'absolute', bottom: 40, left: 0, right: 0, }}>
+                    <TouchableOpacity style={{padding: 10}}
+                        onPress={() => {
+                            {
+                                global.userData.role ==="recruiter" ?
+                                navigation.navigate("ReportUserDrawer", {userReportedID: bookingItem.workerId._id, userFullName: `${bookingItem.workerId.firstname} ${bookingItem.workerId.lastname}`, userRole: "Worker", userProfilePicture: bookingItem.workerId.profilePic})
+                                :
+                                navigation.navigate("ReportUserDrawer", {userReportedID: bookingItem.recruiterId._id, userFullName: `${bookingItem.recruiterId.firstname} ${bookingItem.recruiterId.lastname}`, userRole: "Recruiter", userProfilePicture: bookingItem.recruiterId.profilePic})
+                            }
+                        }}
+                    >
+                        <TText style={{textAlign: 'center', color: ThemeDefaults.themeRed}}>Report this {global.userData.role === "recruiter"? "worker": "recruiter"}</TText>
+                    </TouchableOpacity>
+                </View>
+            } */}
 
             {/* 
             
@@ -367,7 +385,7 @@ const BookingInformation = ({route}) => {
                             <TText style={styles.workerName}>{bookingItem.workerId.firstname} {bookingItem.workerId.lastname}  {bookingItem.workerId.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null} </TText>
                             <View style={styles.workerRating}>
                                 <Icon name='star' size={18} color={"gold"} />
-                                <TText style={styles.workerRatingText}>{bookingItem.workerId.rating}</TText>
+                                <TText style={styles.workerRatingText}>{bookingItem.workerId.rating ? bookingItem.workerId.rating : "no rating"}</TText>
                             </View>
                         </View>
                         :
@@ -375,7 +393,7 @@ const BookingInformation = ({route}) => {
                             <TText style={styles.workerName}>{bookingItem.recruiterId.firstname} {bookingItem.recruiterId.lastname}  {bookingItem.recruiterId.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null} </TText>
                             <View style={styles.workerRating}>
                                 <Icon name='star' size={18} color={"gold"} />
-                                <TText style={styles.workerRatingText}>{bookingItem.recruiterId.rating}</TText>
+                                <TText style={styles.workerRatingText}>{bookingItem.recruiterId.rating ? bookingItem.recruiterId.rating : "no rating"}</TText>
                             </View>
                         </View>
                     }
@@ -469,7 +487,7 @@ const BookingInformation = ({route}) => {
                 <>
                     <View style={styles.bookingDescription}>
                         <TText style={styles.bookingDescriptionHeader}>Additional description</TText>
-                        <TText style={styles.bookingDescriptionText}>{bookingItem.description}</TText>
+                        <TText style={styles.bookingDescriptionText}>{bookingItem.description ? bookingItem.description : " --"}</TText>
                     </View>
 
                     <View style={styles.recruiterCard}>
@@ -511,18 +529,20 @@ const BookingInformation = ({route}) => {
                     <View style={styles.waitCancel}>
                         {
                             global.userData.role === "recruiter" ?
-                            <TText style={styles.waitCancelText}>Please wait for the worker or 
-                                <TouchableOpacity style={styles.cancelBtn}
-                                    activeOpacity={0.5}
-                                    onPress={() => {
-                                        console.log("Cancel booking")
-                                        // setViewCancelModal(true)
-                                        setBookingCanceled(true)
-                                    }}
-                                >
-                                    <TText style={styles.cancelText}>cancel booking</TText>
-                                </TouchableOpacity>
-                            </TText>
+                            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                                <TText style={styles.waitCancelText}>Please wait for the worker or </TText>
+                                    <TouchableOpacity style={[styles.cancelBtn,]}
+                                        activeOpacity={0.5}
+                                        onPress={() => {
+                                            console.log("Cancel booking")
+                                            // setViewCancelModal(true)
+                                            setBookingCanceled(true)
+                                        }}
+                                    >
+                                        <TText style={styles.cancelText}>cancel booking</TText>
+                                    </TouchableOpacity>
+
+                            </View>
                             :
                             <TText style={[styles.waitCancelText,]}>Please wait for the scheduled date and time or 
                                 <TouchableOpacity style={styles.cancelBtn}
@@ -548,6 +568,24 @@ const BookingInformation = ({route}) => {
                         </TouchableOpacity> */}
                     </View>
                 </>
+            }
+
+            {
+                (bookingInformation.bookingStatus == '2' || bookingInformation.bookingStatus == '4' || bookingInformation.bookingStatus == '5') &&
+                <View style={{marginTop: 20}}>
+                    <TouchableOpacity style={{padding: 10}}
+                        onPress={() => {
+                            {
+                                global.userData.role ==="recruiter" ?
+                                navigation.navigate("ReportUserDrawer", {userReportedID: bookingItem.workerId._id, userFullName: `${bookingItem.workerId.firstname} ${bookingItem.workerId.lastname}`, userRole: "Worker", userProfilePicture: bookingItem.workerId.profilePic})
+                                :
+                                navigation.navigate("ReportUserDrawer", {userReportedID: bookingItem.recruiterId._id, userFullName: `${bookingItem.recruiterId.firstname} ${bookingItem.recruiterId.lastname}`, userRole: "Recruiter", userProfilePicture: bookingItem.recruiterId.profilePic})
+                            }
+                        }}
+                    >
+                        <TText style={{textAlign: 'center',}}>If you want to report this {global.userData.role === "recruiter"? "worker": "recruiter"}, <TText style={{color: ThemeDefaults.themeRed}}>click here</TText></TText>
+                    </TouchableOpacity>
+                </View>
             }
 
 
@@ -998,7 +1036,7 @@ const styles = StyleSheet.create({
     },
     waitCancelText: {
         textAlign: 'center',
-        width: '100%'
+        // width: '100%'
     },
     cancelBtn: {
         

@@ -1,9 +1,10 @@
-export const IPAddress = "192.168.1.2";
+export const IPAddress = "192.168.1.3";
 export const Localhost = "http://" + IPAddress + ":3000";
 
 global.server = "http://" + IPAddress + ":3000/";
 
 global.userData = {};
+global.token = "";
 global.deviceExpoPushToken = "";
 
 global.notificationCount = 0;

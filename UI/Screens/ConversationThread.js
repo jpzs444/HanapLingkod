@@ -73,7 +73,8 @@ const ConversationThread = ({route}) => {
             fetch(`http://${IPAddress}:3000/messages/${conversation._id}`, {
                 method: "GET",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken
                 }
             }).then(res => res.json())
             .then(data => {
@@ -112,7 +113,8 @@ const ConversationThread = ({route}) => {
             await fetch(`http://${IPAddress}:3000/messages`, {
                 method: "POST",
                 headers: {
-                    'content-type': 'application/json'
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     conversationId: conversation._id,

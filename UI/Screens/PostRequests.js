@@ -37,7 +37,7 @@ const PostRequests = () => {
       method: "GET",
       headers: {
         'content-type': 'application/json',
-        "Authorization": global.userData.accessToken
+        "Authorization": global.accessToken
       }
     }).then((res) => res.json())
     .then((data) => {
@@ -66,7 +66,7 @@ const PostRequests = () => {
             method: "PUT",
             headers: {
               'content-type': 'application/json',
-              "Authorization": global.userData.accessToken
+              "Authorization": global.accessToken
             },
             body: JSON.stringify({
               postToggle: postToggle

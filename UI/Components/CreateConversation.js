@@ -14,7 +14,7 @@ const CreatConversation = ({status, requestItem}) => {
             method: "POST",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: JSON.stringify({
                 senderId: global.userData._id,

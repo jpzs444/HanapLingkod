@@ -116,7 +116,7 @@ const VIewServiceRequest = ({route}) => {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 }
             }).then((res) => res.json())
             .then((data) => {
@@ -138,7 +138,7 @@ const VIewServiceRequest = ({route}) => {
             method: "GET",
             headers: {
                 "content-type": 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             }
         }).then(res => res.json())
         .then(data => {
@@ -155,7 +155,7 @@ const VIewServiceRequest = ({route}) => {
             method: "GET",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {
@@ -171,7 +171,7 @@ const VIewServiceRequest = ({route}) => {
             method: "PUT",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: JSON.stringify({
                 requestStatus: 4
@@ -192,7 +192,7 @@ const VIewServiceRequest = ({route}) => {
             method: "PUT",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: JSON.stringify({
                 requestStatus: 3,
@@ -213,7 +213,7 @@ const VIewServiceRequest = ({route}) => {
             method: "PUT",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: JSON.stringify({
                 requestStatus: 2,
@@ -255,7 +255,7 @@ const VIewServiceRequest = ({route}) => {
                 method: "POST",
                 headers: {
                     'content-type': 'application/json',
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     comment: declinationMessage
@@ -288,7 +288,7 @@ const VIewServiceRequest = ({route}) => {
                 method: "POST",
                 headers: {
                     'content-type': 'application/json',
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     senderId: global.userData._id,
@@ -836,6 +836,23 @@ const VIewServiceRequest = ({route}) => {
                                         <TText style={{color: ThemeDefaults.themeWhite, fontFamily: 'LexendDeca_Medium'}}>Post a Request</TText>
                                     </TouchableOpacity>
                                 </View>
+                                {
+                                    (requestItem.requestStatus == '3' || requestItem.requestStatus == '4') &&
+                                    <View style={{marginTop: 20 }}>
+                                        <TouchableOpacity style={{padding: 10}}
+                                            onPress={() => {
+                                                {
+                                                    global.userData.role ==="recruiter" ?
+                                                    navigation.navigate("ReportUserDrawer", {userReportedID: requestItem.workerId._id, userFullName: `${requestItem.workerId.firstname} ${requestItem.workerId.lastname}`, userRole: "Worker", userProfilePicture: requestItem.workerId.profilePic})
+                                                    :
+                                                    navigation.navigate("ReportUserDrawer", {userReportedID: requestItem.recruiterId._id, userFullName: `${requestItem.recruiterId.firstname} ${requestItem.recruiterId.lastname}`, userRole: "Recruiter", userProfilePicture: requestItem.recruiterId.profilePic})
+                                                }
+                                            }}
+                                        >
+                                            <TText style={{textAlign: 'center',}}>If you want to report this {global.userData.role === "recruiter"? "worker": "recruiter"}, <TText style={{color: ThemeDefaults.themeRed}}>click here</TText></TText>
+                                        </TouchableOpacity>
+                                    </View>
+                                }
                             </View>
                             :
                             <View style={{marginTop: 15}}>
@@ -867,6 +884,7 @@ const VIewServiceRequest = ({route}) => {
                                 }
                             </View>
                         }
+
                     </View>
                 }
 

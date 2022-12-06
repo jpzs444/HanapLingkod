@@ -51,7 +51,7 @@ const CompletedRequests = ({route}) => {
         method: "GET",
         headers: {
           "content-type": "application/json",
-          "Authorization": global.userData.accessToken
+          "Authorization": global.accessToken
         }
       })
       .then(res => res.json())

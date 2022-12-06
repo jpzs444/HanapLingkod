@@ -67,7 +67,7 @@ const PostRequestForm = () => {
             method: "POST",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: JSON.stringify({
                 startTime: formatedTime,

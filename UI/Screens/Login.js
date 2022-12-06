@@ -77,6 +77,8 @@ export default function Login({navigation}) {
             setIsWrongCredentials(false);
             
             global.userData = user;
+            global.accessToken = user.accessToken;
+            console.log("access token login: ", user.accessToken)
             
             setIsLoading(false)
             setUser({username: "", password: ""});

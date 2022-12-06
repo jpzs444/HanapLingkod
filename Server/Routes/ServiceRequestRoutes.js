@@ -65,7 +65,10 @@ router
   });
 router
   .route("/service-request")
-  .post(authenticateToken, CheckIfBan, async function (req, res) {
+  .post(
+    authenticateToken, 
+    CheckIfBan, 
+    async function (req, res) {
     try {
       console.log("asd");
       let pendingRequest = await ServiceRequest.count({
