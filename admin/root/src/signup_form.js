@@ -7,7 +7,7 @@ function SignUpForm() {
         lastname: "",
         middlename: "",
         firstname: "",
-        sex: "",
+        sex: "male",
         birthday: "",
         age: "",
         email: "",
@@ -40,9 +40,23 @@ function SignUpForm() {
     const handleCreateAccount = async (e) => {
         e.preventDefault()
         console.log("hi submit form")
+        console.log("userInformation: ", userInformation)
 
         try {
-            await fetch(`https://hanaplingkod.onrender.com/signup/admin`, {
+            await fetch(`http://192.168.1.3/Work`, {
+                method: "GET",
+                headers: {
+                    "content-type": 'application/json'
+                },
+            }).then(res => res.json())
+            .then(data => console.log(data))
+        } catch (error) {
+            console.log("error fetch service cat")
+        }
+
+        try {
+            // await fetch(`https://hanaplingkod.onrender.com/signup/admin`, {
+                await fetch(`http://192.168.1.3:3000/signup/admin`, {
                 method: "POST",
                 headers: {
                     "content-type": "application/json"
@@ -53,29 +67,25 @@ function SignUpForm() {
                     password: confirmPassword,
                     firstname: userInformation.firstname,
                     lastname: userInformation.lastname,
-                    middlename: userInformation.middlename ? userInformation.middlename : "",
+                    middlename: userInformation?.middlename ? userInformation.middlename : "",
                     birthday: userInformation.birthday,
                     age: userInformation.age,
                     sex: userInformation.sex,
                     phoneNumber: userInformation.phoneNumber,
                     emailAddress: userInformation.email,
                 })
-            }).then(res => res.json())
-            .then(data => [
-                console.log("created admin user")
-            ])
+            }).then(res => console.log(res))
+            .catch(err=> console.log("error caa: ", err.message))
+            
         } catch (error) {
-            console.log("error sign up: ", error)
+            console.log("error create admin account: ", error)
         }
     }
 
     return (
         <div className="signup-container">
             {/* logo */}
-            <div className="left">
-                <img src="./assets/logo/logo_full.png" className="image_logo" />
-                <p>The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog. The quick brown fox jumps over the lazy dog.</p>
-            </div>
+            <img src="./assets/logo/logo_full.png" className="image_logo left" />
 
             <div className='right'>
                 <div className="form-container">
@@ -156,7 +166,9 @@ function SignUpForm() {
                         <div className="formRow">
                             <div className="item_wide">
                                 <label className="label" for="birthday">Birthday</label>
-                                <input type="date" id="birthday" className="input_wide_input" name="birthday" required onChange={e => setUserInformation(prev => ({...prev, birthday: e.target.value}))} />
+                                <input type="date" id="birthday" className="input_wide_input" name="birthday" required onChange={e => {
+                                    setUserInformation(prev => ({...prev, birthday: e.target.value}))
+                                }} />
                             </div>
                             {/* age and sex */}
                             <div className="item_multi">
@@ -166,9 +178,12 @@ function SignUpForm() {
                                 </div>
                                 <div className="item_small">
                                     <label className="label" for="sex">Sex</label>
-                                    <select id="select_sex" onChange={e => setUserInformation(prev => ({...prev, sex: e.target.value}))}>
-                                        <option styles="background-color: #FA7A17" value="Male">Male</option>
-                                        <option value="Female">Female</option>
+                                    <select id="select_sex" onChange={e => {
+                                        console.log(e.target.value)
+                                        setUserInformation(prev => ({...prev, sex: e.target.value}))
+                                    }}>
+                                        <option styles="background-color: #FA7A17" value="male">Male</option>
+                                        <option value="female">Female</option>
                                     </select>
                                     {/* <input type="text" id="sex" className="input_smaller" name="sex" required /> */}
                                 </div>
@@ -179,7 +194,7 @@ function SignUpForm() {
                         <div className="formRow">
                             <div className="item_wide">
                                 <label className="label" for="phoneNumber">Phone Number</label>
-                                <input type="number" id="phoneNumber" className="input_wide_input" name="phoneNumber" placeholder="ex. +639123456789" required />
+                                <input type="number" id="phoneNumber" className="input_wide_input" name="phoneNumber" onChange={e => setUserInformation(prev => ({...prev, phoneNumber: e.target.value}))} placeholder="ex. +639123456789" required />
                             </div>
                         </div>
 

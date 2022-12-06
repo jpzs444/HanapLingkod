@@ -189,7 +189,7 @@ const RequestForm = ({route, navigation}) => {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 }
             }).then(res => res.json())
             .then(data => {
@@ -391,7 +391,8 @@ const RequestForm = ({route, navigation}) => {
             await fetch(`http://${IPAddress}:3000/schedule/${workerInformation._id}`, {
                 method: "GET",
                 headers: {
-                    "content-type": "application/json"
+                    "content-type": "application/json",
+                    "Authorization": global.accessToken
                 }
             }).then(res => res.json())
             .then(data => {
@@ -422,7 +423,7 @@ const RequestForm = ({route, navigation}) => {
             method: "GET",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {
@@ -482,11 +483,11 @@ const RequestForm = ({route, navigation}) => {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
-                    "Authorization": global.userData.accessToken
+                    "authorization": global.accessToken
                 },
             }).then(res => res.json())
             .then(data => {
-                // console.log("pending checker: ", data.recruiter)
+                console.log("pending checker: ", data)
                 let list = [...data.recruiter]
                 list = list.filter(e => e.requestStatus == '1')
     
@@ -518,7 +519,7 @@ const RequestForm = ({route, navigation}) => {
                 method: "POST",
                 headers: {
                     "content-type": "application/json",
-                    "Authorization": global.userData.accessToken
+                    "authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     "workerId": workerInformation._id,
@@ -534,6 +535,19 @@ const RequestForm = ({route, navigation}) => {
                     "lat": coordLati,
                     "long": coordLongi,
                 })
+            })
+            .then(res => res.text())
+            .then(data => {
+                console.log("post res data: ", data)
+                if(data === 'false'){
+                    console.log("req post data: ", data)
+                    sethasPendingRequest(true)
+                } else {
+                    setRequestPostedModal(true)
+                }
+                // else {
+                //     setPostBtnModal(true)
+                // }
             })
 
             console.log("Service Request Posted! ")
@@ -614,8 +628,7 @@ const RequestForm = ({route, navigation}) => {
                                     setPostBtnModal(false)
                                     postRequest()
 
-                                    setConfirmServiceRequest(true)
-                                    setRequestPostedModal(true)
+                                    // setRequestPostedModal(true)
                                     // check if recruiter has a pending request
                                     // handlePendingRequestChecker()
                                     // fetch post request
@@ -1222,7 +1235,8 @@ const RequestForm = ({route, navigation}) => {
                     disabled={!dateSelected && !timeSelected && serviceSelected && !fromPostReq}
                     onPress={() => {
                         // setIsLoading(true)
-                        handlePendingRequestChecker()
+                        // handlePendingRequestChecker()
+                        setPostBtnModal(true)
                     }}
                 >
                     <TText style={styles.submitBtnTxt}>{ loading ? <ActivityIndicator size={'large'} style={{width: '100%', height: '100%'}} /> :"Submit Request"}</TText>

@@ -299,7 +299,7 @@ export default function OTPVerification({route}, props) {
                 method: "DELETE",
                 headers: {
                     "content-type": "application/json",
-                    "Authorization": global.userData.accessToken
+                    "Authorization": global.accessToken
                 },
             }).then((res) => console.log("old work set deleted successfully   ", res.message))
             .catch((error) => console.log(error.message))
@@ -310,7 +310,7 @@ export default function OTPVerification({route}, props) {
             method: "PUT",
             headers: {
                 "content-type": "multipart/form-data",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: formDataPastWorks
         }).then((res) => console.log("successfully uploaded past work images"))
@@ -321,7 +321,7 @@ export default function OTPVerification({route}, props) {
             method: "PUT",
             headers: {
                 "content-type": "multipart/form-data",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: formDataSetOfWorks
         }).then((res) => console.log("successfully uploaded and updated works"))
@@ -332,7 +332,7 @@ export default function OTPVerification({route}, props) {
             method: "PUT",
             headers: {
                 "content-type": "multipart/form-data",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
             body: formDataUserInfo,
         }).then((response) => console.log("successfully updated user basic information"))

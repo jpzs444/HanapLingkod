@@ -36,7 +36,7 @@ const ModalPicker = (props) => {
             method: "GET",
             headers: {
                 "content-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((response)=> response.json())
         .then((data) => {
@@ -50,7 +50,7 @@ const ModalPicker = (props) => {
             method: "GET",
             headers: {
                 "content-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((response)=> response.json())
         .then((data) => {
@@ -65,7 +65,7 @@ const ModalPicker = (props) => {
             method: "GET",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {

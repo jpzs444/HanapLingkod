@@ -93,7 +93,7 @@ const CalendarView = () => {
             method: "GET",
             header: {
                 "conten-type": "application/json",
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((user) => {
@@ -194,7 +194,7 @@ const CalendarView = () => {
             method: "DELETE",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             }
         }).then(res => {
             console.log("Successful removal of the custom event")
@@ -214,7 +214,7 @@ const CalendarView = () => {
             method: "GET",
             headers: {
                 'content-type': 'application/json',
-                "Authorization": global.userData.accessToken
+                "Authorization": global.accessToken
             },
         }).then((res) => res.json())
         .then((data) => {
