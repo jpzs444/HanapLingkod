@@ -4,10 +4,11 @@ const UserNotification = require("../Models/Notifications");
 const Work = require("../Models/Work");
 const Worker = require("../Models/Workers");
 const Recruiter = require("../Models/Recruiters");
+const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 
 router
   .route("/notification/:userId")
-  .get(async function (req, res) {
+  .get(authenticateToken, async function (req, res) {
     let page;
     if (req.query.page) {
       page = parseInt(req.query.page);
@@ -23,7 +24,7 @@ router
       .exec();
     res.send(result.reverse());
   })
-  .put(async function (req, res) {
+  .put(authenticateToken, async function (req, res) {
     await UserNotification.updateMany(
       { userID: req.params.userId },
       { $set: { read: 1 } }
@@ -31,7 +32,7 @@ router
     res.send("Updated Successfully");
   });
 
-router.route("/setToken/:userID").put(function (req, res) {
+router.route("/setToken/:userID").put(authenticateToken, function (req, res) {
   console.log(req.params.userID);
   console.log(req.body);
   Worker.updateOne(

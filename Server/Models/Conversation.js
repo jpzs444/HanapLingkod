@@ -5,6 +5,7 @@ const ConversationSchema = mongoose.Schema(
     members: {
       type: Array,
     },
+    deleteflag: { type: Boolean, default: 0 },
   },
   { timestamps: true }
 );
