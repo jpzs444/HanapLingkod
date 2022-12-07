@@ -1,3 +1,4 @@
+export const IPAddress = "192.168.68.131";
 export const IPAddress = "192.168.1.12";
 export const Localhost = "http://" + IPAddress + ":3000";
 

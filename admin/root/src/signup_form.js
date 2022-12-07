@@ -40,46 +40,64 @@ function SignUpForm() {
     const handleCreateAccount = async (e) => {
         e.preventDefault()
         console.log("hi submit form")
-        console.log("userInformation: ", userInformation)
+        // console.log("userInformation: ", userInformation)
 
         try {
-            await fetch(`http://192.168.1.3/Work`, {
-                method: "GET",
-                headers: {
-                    "content-type": 'application/json'
-                },
-            }).then(res => res.json())
-            .then(data => console.log(data))
-        } catch (error) {
-            console.log("error fetch service cat")
-        }
+            // await fetch(`http://192.168.1.3/Work`, {
+            //     method: "GET",
+            //     headers: {
+            //         "content-type": 'application/json'
+            //     },
+            // }).then(res => res.json())
+            // .then(data => console.log(data))
 
-        try {
-            // await fetch(`https://hanaplingkod.onrender.com/signup/admin`, {
-                await fetch(`http://192.168.1.3:3000/signup/admin`, {
+            await fetch(`http://192.168.68.131:3000/login/admin`, {
                 method: "POST",
                 headers: {
                     "content-type": "application/json"
                 },
-                mode: "no-cors",
                 body: JSON.stringify({
-                    username: userInformation.username,
-                    password: confirmPassword,
-                    firstname: userInformation.firstname,
-                    lastname: userInformation.lastname,
-                    middlename: userInformation?.middlename ? userInformation.middlename : "",
-                    birthday: userInformation.birthday,
-                    age: userInformation.age,
-                    sex: userInformation.sex,
-                    phoneNumber: userInformation.phoneNumber,
-                    emailAddress: userInformation.email,
-                })
-            }).then(res => console.log(res))
-            .catch(err=> console.log("error caa: ", err.message))
-            
+                    username: "admin",
+                    password: "admin"
+                }),
+            }).then(res => {
+                if(res.ok){
+                    return res.json()
+                } else {
+                    throw res
+                }
+            })
+            .then(data => console.log("data login: ", data))
         } catch (error) {
-            console.log("error create admin account: ", error)
+            console.log("error fetch service cat: ", error)
         }
+
+        // try {
+        //     // await fetch(`https://hanaplingkod.onrender.com/signup/admin`, {
+        //         await fetch(`http://192.168.1.3:3000/signup/admin`, {
+        //         method: "POST",
+        //         headers: {
+        //             "content-type": "application/json"
+        //         },
+        //         mode: "no-cors",
+        //         body: JSON.stringify({
+        //             username: userInformation.username,
+        //             password: confirmPassword,
+        //             firstname: userInformation.firstname,
+        //             lastname: userInformation.lastname,
+        //             middlename: userInformation?.middlename ? userInformation.middlename : "",
+        //             birthday: userInformation.birthday,
+        //             age: userInformation.age,
+        //             sex: userInformation.sex,
+        //             phoneNumber: userInformation.phoneNumber,
+        //             emailAddress: userInformation.email,
+        //         })
+        //     }).then(res => console.log(res))
+        //     .catch(err=> console.log("error caa: ", err.message))
+            
+        // } catch (error) {
+        //     console.log("error create admin account: ", error)
+        // }
     }
 
     return (

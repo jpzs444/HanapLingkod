@@ -26,6 +26,7 @@ router.route("/Recruiter").get(authenticateToken, function (req, res) {
   Recruiter.find({}, function (err, found) {
     if (found) {
       res.send(found);
+      console.log(found)
     } else {
       res.send("No such data found");
     }

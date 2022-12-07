@@ -59,12 +59,17 @@
 
             <div class="menu flexRow">
                 <img class="menu-icon" src="./assets/icons/reports.png" />
-                <p class="menu-text">Create Account</p>
+                <p class="menu-text">User Reports</p>
             </div>
 
             <div class="menu flexRow">
                 <img class="menu-icon" src="./assets/icons/account.png" />
-                <p class="menu-text">Home</p>
+                <p class="menu-text">Create Account</p>
+            </div>
+
+            <div class="menu flexRow">
+                <img class="menu-icon" src="./assets/icons/transaction.png" />
+                <p class="menu-text">Transaction</p>
             </div>
         </div>
     </div>
@@ -73,7 +78,7 @@
     <!-- body -->
     <main class="body">
         <header>
-            <h1>HanapLingkod Admin</h1>
+            <h1>HanapLingkod</h1>
         </header>
     
         <div class="dashboard">
@@ -98,24 +103,6 @@
                     </div>
                 </div>
 
-                <div class="worker-overview dbo-box flexRow">
-                    <img class="overview-icon" src="./assets//icons/worker.png" />
-    
-                    <div class="overview-info">
-                        <p class="overview-title">Requests</p>
-                        <p class="info1">Verified   10/20</p>
-                    </div>
-                </div>
-
-                <div class="worker-overview dbo-box flexRow">
-                    <img class="overview-icon" src="./assets//icons/worker.png" />
-    
-                    <div class="overview-info">
-                        <p class="overview-title">Bookings</p>
-                        <p class="info1">Verified   10/20</p>
-                    </div>
-                </div>
-
             </div>
     
     
@@ -124,13 +111,18 @@
 
         <!-- Actions -->
         <section class="actions">
-            <h2>Actions</h2>
+            <div class="actionsHeader">
+                <hr>
+                <h2>Actions</h2>
+                <hr>
+
+            </div>
 
             <div class="action-btn-container">
                 
-                <div class="action-btn" onclick="handleActionBtnClick('Account Penalization')">
-                    <img class="action-icon" src="./assets/icons/penalization.png" />
-                    <p class="action-text">Account<br>Penalization</p>
+                <div class="action-btn" onclick="window.location.href='UsersView.html'">
+                    <img class="action-icon" src="./assets/icons/people.png" />
+                    <p class="action-text">View<br>Users</p>
                 </div>
                 
                 <div class="action-btn" onclick="window.location.href='account_verification.html'">
@@ -138,30 +130,26 @@
                     <p class="action-text">Account<br>Verification</p>
                 </div>
 
-                <div class="action-btn" onclick="handleActionBtnClick('User Reports')">
-                    <img class="action-icon" src="./assets/icons/reports.png" />
-                    <p class="action-text">User<br>Reports</p>
+                <div class="action-btn" onclick="handleActionBtnClick('Account Penalization')">
+                    <img class="action-icon" src="./assets/icons/penalization.png" />
+                    <p class="action-text">Account<br>Penalization</p>
                 </div>
                 
-                <div class="action-btn" onclick="window.location.href='./signup/signup.html'">
-                    <img class="action-icon" src="./assets/icons/account.png" />
-                    <p class="action-text">Create<br>Account</p>
-                </div>
-
                 <div class="action-btn" onclick="handleActionBtnClick('Create Account')">
                     <img class="action-icon" src="./assets/icons/category.png" />
                     <p class="action-text">Add/Modify<br>Category</p>
                 </div>
 
-                <div class="action-btn" onclick="handleActionBtnClick('Create Account')">
-                    <img class="action-icon" src="./assets/icons/sub-category.png" />
-                    <p class="action-text">Add/Modify<br>Sub-Category</p>
+                <div class="action-btn" onclick="window.location.href='./signup.html'">
+                    <img class="action-icon" src="./assets/icons/account.png" />
+                    <p class="action-text">Create<br>Account</p>
                 </div>
 
-                <div class="action-btn" onclick="window.location.href='UsersView.html'">
-                    <img class="action-icon" src="./assets/icons/people.png" />
-                    <p class="action-text">View<br>Users</p>
+                <div class="action-btn" onclick="handleActionBtnClick('User Reports')">
+                    <img class="action-icon" src="./assets/icons/reports.png" />
+                    <p class="action-text">User<br>Reports</p>
                 </div>
+                
             </div>
             
         </section>
