@@ -19,6 +19,8 @@ const RecruiterComment = require("../Models/RecruiterComment");
 const WorkerComment = require("../Models/WorkerComment");
 const ServiceRequest = require("../Models/ServiceRequest");
 const Booking = require("../Models/Booking");
+
+
 router.route("/signup/admin").post(async function (req, res) {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
