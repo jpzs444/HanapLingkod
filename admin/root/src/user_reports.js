@@ -50,10 +50,6 @@ const UserReports = () => {
                 <h1>User Reports</h1>
 
                 <div>
-                    {/* <div>
-                        <button>Recruiters</button>
-                        <button>Workers</button>
-                    </div> */}
                     <div>
                         <table>
                             <tr class="reports-tr-title">

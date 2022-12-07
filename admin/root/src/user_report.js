@@ -9,7 +9,7 @@ const UserReport = () => {
             "reportElapsedTime": "5 days",
             "reportDescription": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
             "reporter": "Leah Custodio",
-            //"picture": 
+            "userImage": "https://www.panaynews.net/wp-content/uploads/2018/07/Coco-10-e1531191379317.jpg", 
             "userReported": "Juan D. Cruz", 
             "userRole": "Worker",
             "userStrikes": "2",
@@ -63,10 +63,6 @@ const UserReport = () => {
                 <h1>User Report</h1>
 
                 <div>
-                    {/* <div>
-                        <button>Recruiters</button>
-                        <button>Workers</button>
-                    </div> */}
                     <div>                    
                         {
                             DATA.map(item => (
@@ -75,7 +71,7 @@ const UserReport = () => {
                                     <p class="report-date-reporter">Reported {item.reportDate} <span class="dot">•</span> {item.reportElapsedTime} ago <span class="dot">•</span> {item.reporter}</p>
                                     <h4>Reported User</h4>
                                     <div class="report-user-container">
-                                        <div><img src="https://img.icons8.com/material-sharp/40/000000/user-male-circle.png"/></div>
+                                        <div class="report-user-img"><img src={item.userImage}/></div>
                                         <div class="report-user-info">
                                             <div>{item.userReported}</div>
                                             <div class="report-user-info-add">

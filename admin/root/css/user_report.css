@@ -285,12 +285,20 @@ header h1 {
     margin: 10px 0 30px;
     display: inline-flex;
     padding: 7px 15px 7px 12px;
-    border: 1px solid #CBCBCB;
+    border: 1px solid rgba(0, 0, 0, 0.25);
     border-radius: 8px;
 }
 
-.report-user-container img {
-    display: block;
+.report-user-img {
+    width: 40px;
+    height: 40px;
+}
+
+.report-user-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50px;
 }
 
 .report-user-info {
@@ -401,8 +409,6 @@ header h1 {
     left: 0;
     top: 0;
     background-color: rgba(217, 217, 217, 0.8);
-    /*display: flex;*/
-    /* display: none; */
     align-items: center;
     justify-content: center;
 }
@@ -451,8 +457,6 @@ header h1 {
     left: 0;
     top: 0;
     background-color: rgba(217, 217, 217, 0.8);
-    /* display: flex; */
-    /* display: none; */
     align-items: center;
     justify-content: center;
 }
@@ -463,14 +467,6 @@ header h1 {
     background-color: #fff;
     box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
     border-radius: 10px;
-}
-
-.modal-title {
-    margin-bottom: 30px;
-}
-
-.modal-description {
-    margin-bottom: 60px;   
 }
 
 .modal-description-add {
@@ -486,21 +482,6 @@ header h1 {
     min-width: 250px;
 }
 
-.modal-buttons {
-    display: flex;
-    justify-content: space-evenly;
-    gap: 150px;
-}
-
-.modal-button {
-    font-size: 20px;
-    padding: 0;
-}
-
 #penalize-yes:hover {
     color: #ebbc13;
-}
-
-.modal-button-cancel:hover {
-    opacity: 0.35;
 }
