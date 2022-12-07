@@ -154,7 +154,7 @@ router
     let queryResult = await Work.find({ _id: req.params.id }).exec();
     res.send(queryResult);
   })
-  .put(function (req, res) {
+  .put(authenticateToken, function (req, res) {
     Work.findOneAndUpdate(
       { _id: req.params.id },
       { minPrice: req.body.minPrice, maxPrice: req.body.maxPrice },
@@ -167,7 +167,7 @@ router
       }
     );
   })
-  .delete(async function (req, res) {
+  .delete(authenticateToken, async function (req, res) {
     const serviceRequestQuery = await ServiceRequest.count({
       workId: req.params.id,
       requestStatus: 1,
@@ -234,21 +234,18 @@ router
     }
   });
 
-router.route("/WorkList/:UserId").get(
-  // authenticateToken,
-  function (req, res) {
-    Work.find(
-      { workerId: req.params.UserId, deleteflag: false },
-      function (err, found) {
-        if (found) {
-          res.send(found);
-          // console.log(res);
-        } else {
-          res.send("No such data found");
-        }
+router.route("/WorkList/:UserId").get(authenticateToken, function (req, res) {
+  Work.find(
+    { workerId: req.params.UserId, deleteflag: false },
+    function (err, found) {
+      if (found) {
+        res.send(found);
+        // console.log(res);
+      } else {
+        res.send("No such data found");
       }
-    );
-  }
-);
+    }
+  );
+});
 
 module.exports = router;

@@ -274,7 +274,7 @@ router
       res.send(error);
     }
   })
-  .delete(async function (req, res) {
+  .delete(authenticateToken, async function (req, res) {
     Booking.findByIdAndUpdate(
       { _id: req.params.id },
       { deleteflag: true },
@@ -331,37 +331,44 @@ router
     }
   });
 
-router.route("/booking-comment/:id").post(async function (req, res) {
-  console.log(req.body.comment);
-  Booking.findOneAndUpdate(
-    { _id: req.params.id },
-    {
-      comment: req.body.comment,
-    },
-    function (err) {
-      if (!err) {
-        res.send("Success");
-      } else {
-        console.log(err);
+router
+  .route("/booking-comment/:id")
+  .post(authenticateToken, async function (req, res) {
+    console.log(req.body.comment);
+    Booking.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        comment: req.body.comment,
+      },
+      function (err) {
+        if (!err) {
+          res.send("Success");
+        } else {
+          console.log(err);
+        }
       }
-    }
-  );
-});
+    );
+  });
 
-router.route("/reviews/:bookingId").get(async function (req, res) {
-  console.log(req.params.bookingId);
-  const workerCommentResult = await WorkerComment.find({
-    bookingId: req.params.bookingId,
-  })
-    .lean()
-    .exec();
-  const recruiterCommentResult = await RecruiterComment.find({
-    bookingId: req.params.bookingId,
-  })
-    .lean()
-    .exec();
+router
+  .route("/reviews/:bookingId")
+  .get(authenticateToken, async function (req, res) {
+    console.log(req.params.bookingId);
+    const workerCommentResult = await WorkerComment.find({
+      bookingId: req.params.bookingId,
+    })
+      .lean()
+      .exec();
+    const recruiterCommentResult = await RecruiterComment.find({
+      bookingId: req.params.bookingId,
+    })
+      .lean()
+      .exec();
 
-  res.send({ worker: workerCommentResult, recruiter: recruiterCommentResult });
-});
+    res.send({
+      worker: workerCommentResult,
+      recruiter: recruiterCommentResult,
+    });
+  });
 
 module.exports = router;

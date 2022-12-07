@@ -38,7 +38,7 @@ router
       res.send(error);
     }
   })
-  .post(function (req, res) {
+  .post(authenticateToken, function (req, res) {
     const SubCategory = new ServiceSubCategory({
       ServiceID: req.body.ServiceID,
       ServiceSubCategory: req.body.subCategory,
@@ -51,7 +51,7 @@ router
       }
     });
   })
-  .delete(function (req, res) {
+  .delete(authenticateToken, function (req, res) {
     ServiceSubCategory.deleteMany(function (err) {
       if (!err) {
         res.send("Successfully deleted all files");

@@ -19,6 +19,9 @@ const RecruiterComment = require("../Models/RecruiterComment");
 const WorkerComment = require("../Models/WorkerComment");
 const ServiceRequest = require("../Models/ServiceRequest");
 const Booking = require("../Models/Booking");
+const Work = require("../Models/Work");
+const Conversation = require("../Models/Conversation");
+const Report = require("../Models/Report");
 router.route("/signup/admin").post(async function (req, res) {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -67,7 +70,7 @@ router.route("/login/admin").post(async function (req, res) {
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid Password" });
     }
-    const token = generateAccessToken(String(user._id));
+    const token = generateAccessToken(String(user._id), user.role);
     user["accessToken"] = "Bearer " + token;
     delete user.password;
     console.log(user);
@@ -322,20 +325,119 @@ router.route("/deleteAUser/:role").put(async function (req, res) {
         deleteflag: false,
       }
     ).exec();
-    res.send("Updated Successfully");
+    res.send("Deleted Successfully");
   } else if (req.params.role === "worker") {
-    Workers.findOneAndUpdate(
-      { _id: req.body.id },
-      { verification: true },
-      function (err) {
-        if (!err) {
-          res.send("user verified");
-        } else {
-          res.send(err);
-        }
+    Workers.updateMany({ _id: req.body.id }, { deleteflag: true }).exec();
+    Work.updateMany({ workerId: req.body.id }, { deleteflag: true }).exec();
+    ServiceRequest.updateMany(
+      { workerId: req.body.id },
+      {
+        deleteflag: false,
       }
-    );
+    ).exec();
+
+    Booking.updateMany(
+      { workerId: req.body.id },
+      {
+        deleteflag: false,
+      }
+    ).exec();
+
+    RecruiterComment.updateMany(
+      { reviewer: req.body.id },
+      {
+        deleteflag: true,
+      }
+    ).exec();
+
+    WorkerComment.updateMany(
+      { reviewee: req.body.id },
+      {
+        deleteflag: true,
+      }
+    ).exec();
+    Conversation.updateMany(
+      { members: req.body.id },
+      {
+        deleteflag: false,
+      }
+    ).exec();
+
+    res.send("Deleted Successfully");
   }
 });
+
+router
+  .route("/reportAUser")
+  .post(async function (req, res) {
+    const report = new Report({
+      title: req.body.title,
+      reportedUser: req.body.reportedUser,
+      description: req.body.description,
+    });
+    const savedReport = await report.save();
+    res.send(savedReport);
+  })
+  .get(async function (req, res) {
+    let reports = await Report.find({}).select("-description").lean().exec();
+    for (i of reports) {
+      if ((await Workers.count({ _id: i.reportedUser }).lean().exec()) != 0) {
+        let user = await Workers.findOne({ _id: i.reportedUser })
+          .select("firstname lastname middlename role")
+          .lean()
+          .exec();
+        i.user = user;
+      }
+      if (
+        (await Recruiters.count({ _id: i.reportedUser }).lean().exec()) != 0
+      ) {
+        let user = await Recruiters.findOne({ _id: i.reportedUser })
+          .select("firstname lastname middlename role")
+          .lean()
+          .exec();
+        i.user = user;
+      }
+    }
+    res.send(reports);
+  });
+
+router
+  .route("/reportAUser/:id")
+  .get(async function (req, res) {
+    let report = await Report.findOne({ _id: req.params.id }).lean().exec();
+    let reportedUser;
+    if (
+      (await Workers.count({ _id: report.reportedUser }).lean().exec()) != 0
+    ) {
+      let user = await Workers.findOne({ _id: report.reportedUser })
+        .select(
+          "-unavailableTime -works -username -password -birthday -age -sex -phoneNumber -prevWorks -workDescription"
+        )
+        .lean()
+        .exec();
+      reportedUser = user;
+    }
+    if (
+      (await Recruiters.count({ _id: report.reportedUser }).lean().exec()) != 0
+    ) {
+      let user = await Recruiters.findOne({ _id: report.reportedUser })
+        .select("-username -password -birthday -age -sex -phoneNumber")
+        .lean()
+        .exec();
+      reportedUser = user;
+    }
+    res.send({ report: report, reportedUser: reportedUser });
+  })
+  .delete(async function (req, res) {
+    Report.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        deleteflag: true,
+      }
+    )
+      .lean()
+      .exec();
+    res.send("deleted Succssfully");
+  });
 
 module.exports = router;

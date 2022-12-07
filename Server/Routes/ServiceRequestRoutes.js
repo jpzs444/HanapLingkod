@@ -304,7 +304,7 @@ router
       res.send(error);
     }
   })
-  .delete(async function (req, res) {
+  .delete(authenticateToken, async function (req, res) {
     ServiceRequest.findByIdAndUpdate(
       { _id: req.params.id },
       { deleteflag: true },

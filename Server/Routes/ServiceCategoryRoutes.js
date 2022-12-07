@@ -30,24 +30,21 @@ const upload = multer({ storage: storage });
 
 router
   .route("/service-category")
-  .get(
-    authenticateToken, CheckIfBan,
-    function (req, res) {
-      ServiceCategory.find(
-        {
-          // deleteflag: false,
-        },
-        function (err, services) {
-          if (services) {
-            res.send(services);
-          } else {
-            res.send("No such data found");
-          }
+  .get(authenticateToken, CheckIfBan, function (req, res) {
+    ServiceCategory.find(
+      {
+        // deleteflag: false,
+      },
+      function (err, services) {
+        if (services) {
+          res.send(services);
+        } else {
+          res.send("No such data found");
         }
-      );
-    }
-  )
-  .post(upload.single("image"), async function (req, res) {
+      }
+    );
+  })
+  .post(authenticateToken, upload.single("image"), async function (req, res) {
     let image;
     if (req.file !== undefined) {
       image = await cloudinary.uploader.upload(req.file.path, {
@@ -67,7 +64,7 @@ router
       }
     });
   })
-  .delete(function (req, res) {
+  .delete(authenticateToken, function (req, res) {
     ServiceCategory.deleteMany(function (err) {
       if (!err) {
         res.send("Successfully deleted all files");
@@ -80,7 +77,7 @@ router
 ///// specific /////
 router
   .route("/service-category/:id")
-  .put(upload.single("image"), async function (req, res) {
+  .put(authenticateToken, upload.single("image"), async function (req, res) {
     console.log("asdsad");
     const image = await cloudinary.uploader.upload(req.file.path, {
       folder: "HanapLingkod/Category",
@@ -99,7 +96,7 @@ router
     );
   })
 
-  .get(function (req, res) {
+  .get(authenticateToken, function (req, res) {
     ServiceCategory.find({ _id: req.params.id }, function (err, services) {
       if (services) {
         res.send(services);
@@ -108,7 +105,7 @@ router
       }
     });
   })
-  .delete(async function (req, res) {
+  .delete(authenticateToken, async function (req, res) {
     const subCatQuery = await ServiceSubCategory.find(
       {
         ServiceID: req.params.id,
