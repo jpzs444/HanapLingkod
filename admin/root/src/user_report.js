@@ -16,6 +16,26 @@ const UserReport = () => {
         },
     ]  
 
+    const [isPermabanModalOpen, setIsPermabanModalOpen] = React.useState(false)
+
+    const handleOpenPermabanModal = () => {
+        setIsPermabanModalOpen(true);
+    }
+
+    const handleClosePermabanModal = () => {
+        setIsPermabanModalOpen(false);
+    }
+
+    const [isPenalizeModalOpen, setIsPenalizeModalOpen] = React.useState(false)
+
+    const handleOpenPenalizeModal = () => {
+        setIsPenalizeModalOpen(true);
+    }
+
+    const handleClosePenalizeModal = () => {
+        setIsPenalizeModalOpen(false);
+    }
+
     return(
         <div>
             <nav class="flexRow">
@@ -74,9 +94,40 @@ const UserReport = () => {
                         }
                     </div>
                     <div class="report-buttons">
-                        <button class="button-permanent">Permanently Ban User</button>
-                        <button class="button-penalize">Penalize Reported User</button>
-                        <button class="button-dismiss">Dismiss Report</button>
+                        <button type="button" class="button-permanent" onClick={() => handleOpenPermabanModal()}>Permanently Ban User</button>
+                        <button type="button" class="button-penalize" onClick={() => handleOpenPenalizeModal()}>Penalize Reported User</button>
+                        <button type="button" class="button-dismiss">Dismiss Report</button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Permanent Ban User Modal */}
+            <div class={isPermabanModalOpen ? "permaban-modal-container show-modal" : "permaban-modal-container hide-modal"}>
+                <div class="permaban-modal">
+                    <h2 class="modal-title">Permanently Ban User?</h2>
+                    <p class="modal-description">By clicking "Yes", the account of the reported user will be permanently deleted in HanapLingkod.</p>
+                    <div class="modal-buttons">
+                        <button type="button" class="modal-button" id="permaban-yes">Yes</button>
+                        <button type="button" class="modal-button modal-button-cancel" onClick={() => handleClosePermabanModal()}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Penalize User Modal */}
+            <div class={isPenalizeModalOpen ? "penalize-modal-container show-modal" : "penalize-modal-container hide-modal"}>
+                <div class="penalize-modal">
+                    <h2 class="modal-title">Penalize Reported User?</h2>
+                    <p class="modal-description">By clicking "Yes", the account of the reported user will be given a strike and will be penalized accordingly.</p>
+                    <div class="modal-description-add">
+                        <p>1st to 2nd strike: Sends warning</p>
+                        <p>3rd strike: 1-day account ban</p>
+                        <p>4th strike: 3-day account ban</p>
+                        <p>5th strike: 7-day account ban</p>
+                        <p>6th strike: Permanent ban</p>
+                    </div>
+                   <div class="modal-buttons">
+                        <button type="button" class="modal-button" id="penalize-yes">Yes</button>
+                        <button type="button" class="modal-button modal-button-cancel" onClick={() => handleClosePenalizeModal()}>Cancel</button>
                     </div>
                 </div>
             </div>
