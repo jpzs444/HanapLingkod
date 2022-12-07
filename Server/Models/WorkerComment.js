@@ -8,6 +8,7 @@ const WorkercommentSchema = new mongoose.Schema({
   rating: Number,
   message: String,
   created_at: { type: Date, required: true, default: Date.now },
+  deleteflag: { type: Boolean, default: 0 },
 });
 
 WorkercommentSchema.pre("find", function (next) {

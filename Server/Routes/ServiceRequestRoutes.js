@@ -70,6 +70,7 @@ router
     CheckIfBan, 
     async function (req, res) {
     try {
+      console.log("asd");
       let pendingRequest = await ServiceRequest.count({
         recruiterId: req.body.recruiterId,
         requestStatus: 1,
