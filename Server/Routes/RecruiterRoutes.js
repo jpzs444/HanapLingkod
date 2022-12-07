@@ -25,6 +25,7 @@ router.route("/Recruiter").get(function (req, res) {
   Recruiter.find({}, function (err, found) {
     if (found) {
       res.send(found);
+      console.log(found)
     } else {
       res.send("No such data found");
     }
