@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Recruiter = require("../Models/Recruiters");
 const cloudinary = require("../Helpers/cloudinary");
+const { authenticateToken } = require("../Helpers/JWT");
 
 const multer = require("multer");
 
@@ -21,7 +22,7 @@ const storage = multer.diskStorage({
 //upload the image
 const upload = multer({ storage: storage });
 
-router.route("/Recruiter").get(function (req, res) {
+router.route("/Recruiter").get(authenticateToken, function (req, res) {
   Recruiter.find({}, function (err, found) {
     if (found) {
       res.send(found);
@@ -36,7 +37,7 @@ router.route("/Recruiter").get(function (req, res) {
 
 router
   .route("/Recruiter/:id")
-  .get(function (req, res) {
+  .get(authenticateToken, function (req, res) {
     Recruiter.findOne({ _id: req.params.id }, function (err, found) {
       if (found) {
         res.send(found);
@@ -45,43 +46,47 @@ router
       }
     });
   })
-  .put(upload.single("profilePic"), async function (req, res) {
-    let recruiterObj = {
-      username: req.body.username,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      middlename: req.body.middlename,
-      birthday: req.body.birthday,
-      age: req.body.age,
-      sex: req.body.sex,
-      street: req.body.street,
-      purok: req.body.purok,
-      barangay: req.body.barangay,
-      city: req.body.city,
-      province: req.body.province,
-      phoneNumber: req.body.phoneNumber,
-      emailAddress: req.body.emailAddress,
-    };
-    if (req.file !== undefined) {
-      const profilePic = await cloudinary.uploader.upload(req.file.path, {
-        folder: "HanapLingkod/profilePic",
-      });
-      recruiterObj.profilePic = profilePic.url;
-    }
-    Recruiter.findOneAndUpdate(
-      { _id: req.params.id },
-      recruiterObj,
-      function (err) {
-        if (!err) {
-          res.send("Updated Successfully");
-        } else {
-          res.send(err);
-        }
+  .put(
+    authenticateToken,
+    upload.single("profilePic"),
+    async function (req, res) {
+      let recruiterObj = {
+        username: req.body.username,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        middlename: req.body.middlename,
+        birthday: req.body.birthday,
+        age: req.body.age,
+        sex: req.body.sex,
+        street: req.body.street,
+        purok: req.body.purok,
+        barangay: req.body.barangay,
+        city: req.body.city,
+        province: req.body.province,
+        phoneNumber: req.body.phoneNumber,
+        emailAddress: req.body.emailAddress,
+      };
+      if (req.file !== undefined) {
+        const profilePic = await cloudinary.uploader.upload(req.file.path, {
+          folder: "HanapLingkod/profilePic",
+        });
+        recruiterObj.profilePic = profilePic.url;
       }
-    );
-  })
+      Recruiter.findOneAndUpdate(
+        { _id: req.params.id },
+        recruiterObj,
+        function (err) {
+          if (!err) {
+            res.send("Updated Successfully");
+          } else {
+            res.send(err);
+          }
+        }
+      );
+    }
+  )
 
-  .delete(function (req, res) {
+  .delete(authenticateToken, function (req, res) {
     Recruiter.findOneAndDelete({ _id: req.params.id }, function (err) {
       if (!err) {
         res.send("Deleted Successfully");

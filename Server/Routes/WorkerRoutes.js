@@ -9,7 +9,7 @@ const cloudinary = require("../Helpers/cloudinary");
 const ServiceRequest = require("../Models/ServiceRequest");
 const Booking = require("../Models/Booking");
 const { BannedWorker, BannedRecruiter } = require("../Models/BannedUsers");
-
+const { authenticateToken } = require("../Helpers/JWT");
 //store photos
 const storage = multer.diskStorage({
   //destination for files
@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
 //upload the image
 const upload = multer({ storage: storage });
 
-router.route("/Worker").get(async function (req, res) {
+router.route("/Worker").get(authenticateToken, async function (req, res) {
   // console.log("aa");
   let filter = {};
   if (req.query.verified != undefined) {
@@ -75,7 +75,7 @@ router.route("/Worker").get(async function (req, res) {
 
 router
   .route("/Worker/:id")
-  .get(function (req, res) {
+  .get(authenticateToken, function (req, res) {
     Worker.findOne({ _id: req.params.id }, function (err, found) {
       if (found) {
         res.send(found);
@@ -84,42 +84,50 @@ router
       }
     });
   })
-  .put(upload.single("profilePic"), async function (req, res) {
-    let workerObj = {
-      username: req.body.username,
-      // password: hashedPassword,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      middlename: req.body.middlename,
-      birthday: req.body.birthday,
-      age: req.body.age,
-      sex: req.body.sex,
-      street: req.body.street,
-      purok: req.body.purok,
-      barangay: req.body.barangay,
-      city: req.body.city,
-      province: req.body.province,
-      phoneNumber: req.body.phoneNumber,
-      emailAddress: req.body.emailAddress,
-      workDescription: req.body.workDescription,
-    };
-    if (req.file !== undefined) {
-      const profilePic = await cloudinary.uploader.upload(req.file.path, {
-        folder: "HanapLingkod/profilePic",
-      });
-      workerObj.profilePic = profilePic.url;
-    }
-
-    Worker.findOneAndUpdate({ _id: req.params.id }, workerObj, function (err) {
-      if (!err) {
-        res.send("Updated Successfully");
-      } else {
-        res.send(err);
+  .put(
+    authenticateToken,
+    upload.single("profilePic"),
+    async function (req, res) {
+      let workerObj = {
+        username: req.body.username,
+        // password: hashedPassword,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        middlename: req.body.middlename,
+        birthday: req.body.birthday,
+        age: req.body.age,
+        sex: req.body.sex,
+        street: req.body.street,
+        purok: req.body.purok,
+        barangay: req.body.barangay,
+        city: req.body.city,
+        province: req.body.province,
+        phoneNumber: req.body.phoneNumber,
+        emailAddress: req.body.emailAddress,
+        workDescription: req.body.workDescription,
+      };
+      if (req.file !== undefined) {
+        const profilePic = await cloudinary.uploader.upload(req.file.path, {
+          folder: "HanapLingkod/profilePic",
+        });
+        workerObj.profilePic = profilePic.url;
       }
-    });
-  })
 
-  .delete(function (req, res) {
+      Worker.findOneAndUpdate(
+        { _id: req.params.id },
+        workerObj,
+        function (err) {
+          if (!err) {
+            res.send("Updated Successfully");
+          } else {
+            res.send(err);
+          }
+        }
+      );
+    }
+  )
+
+  .delete(authenticateToken, function (req, res) {
     Worker.findOneAndDelete({ _id: req.params.id }).exec();
     Work.deleteMany({ workerId: req.params.id }).exec();
     ServiceRequest.deleteMany({ workerId: req.params.id }).exec();

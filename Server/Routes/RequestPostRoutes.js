@@ -65,7 +65,7 @@ router
 
 router
   .route("/request-post/:id")
-  .get(async function (req, res) {
+  .get(authenticateToken, async function (req, res) {
     try {
       let query = await RequestPost.find({ _id: req.params.id }).lean().exec();
       let comments = await PostComment.find({
@@ -79,7 +79,7 @@ router
       res.send(error);
     }
   })
-  .put(async function (req, res) {
+  .put(authenticateToken, async function (req, res) {
     console.log("asd");
     RequestPost.findOneAndUpdate(
       { _id: req.params.id },
@@ -100,7 +100,7 @@ router
       }
     );
   })
-  .delete(async function (req, res) {
+  .delete(authenticateToken, async function (req, res) {
     const session = await conn.startSession();
     const query = await RequestPost.findByIdAndDelete(
       {
@@ -127,7 +127,7 @@ router
 
 router
   .route("/request-post-comment/:id")
-  .post(async function (req, res) {
+  .post(authenticateToken, async function (req, res) {
     const session = await conn.startSession();
     try {
       //initialize transactions
@@ -179,7 +179,7 @@ router
       res.status(500).send();
     }
   })
-  .delete(async function (req, res) {
+  .delete(authenticateToken, async function (req, res) {
     const session = await conn.startSession();
 
     try {
