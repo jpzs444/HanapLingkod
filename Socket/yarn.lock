@@ -171,7 +171,14 @@
   dependencies:
     "ms" "^2.1.1"
 
-"debug@~4.3.1", "debug@~4.3.2":
+"debug@~4.3.1":
+  "integrity" "sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ=="
+  "resolved" "https://registry.npmjs.org/debug/-/debug-4.3.4.tgz"
+  "version" "4.3.4"
+  dependencies:
+    "ms" "2.1.2"
+
+"debug@~4.3.2":
   "integrity" "sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ=="
   "resolved" "https://registry.npmjs.org/debug/-/debug-4.3.4.tgz"
   "version" "4.3.4"
@@ -211,9 +218,9 @@
   "version" "5.0.4"
 
 "engine.io@~6.2.0":
-  "integrity" "sha512-4KzwW3F3bk+KlzSOY57fj/Jx6LyRQ1nbcyIadehl+AnXjKT7gDO0ORdRi/84ixvMKTym6ZKuxvbzN62HDDU1Lg=="
-  "resolved" "https://registry.npmjs.org/engine.io/-/engine.io-6.2.0.tgz"
-  "version" "6.2.0"
+  "integrity" "sha512-ECceEFcAaNRybd3lsGQKas3ZlMVjN3cyWwMP25D2i0zWfyiytVbTpRPa34qrr+FHddtpBVOmq4H/DCv1O0lZRA=="
+  "resolved" "https://registry.npmjs.org/engine.io/-/engine.io-6.2.1.tgz"
+  "version" "6.2.1"
   dependencies:
     "@types/cookie" "^0.4.1"
     "@types/cors" "^2.8.12"

@@ -1,6 +1,6 @@
-const io = require("socket.io")(8900, {
+const io = require("socket.io")(process.env.PORT || 8900, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
   },
 });
 
@@ -26,7 +26,7 @@ io.on("connection", (socket) => {
   //take userId and socketId from user
   socket.on("addUser", (userId) => {
     addUser(userId, socket.id);
-    console.log("a user connected: ", users)
+    console.log("a user connected: ", users);
     io.emit("getUsers", users);
   });
 

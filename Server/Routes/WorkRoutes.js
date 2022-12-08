@@ -102,9 +102,9 @@ router
   });
 
 ////get works on specific category
-router
-  .route("/Work/:category")
-  .get(authenticateToken, async function (req, res) {
+router.route("/Work/:category").get(
+  // authenticateToken,
+  async function (req, res) {
     try {
       console.log("aaaaa");
       let page;
@@ -126,19 +126,15 @@ router
       console.log(bannedUsers);
       let subId = await ServiceSubCategory.findOne({
         ServiceSubCategory: req.params.category,
-        _id: {
-          $nin: bannedUsers,
-        },
       }).lean();
 
       const count = await Work.countDocuments({
         ServiceSubId: subId._id,
       });
-
       const query = await Work.find({
         ServiceSubId: subId._id,
         deleteflag: false,
-        _id: { $nin: bannedUsers },
+        workerId: { $nin: bannedUsers },
       })
         .limit(limit * page)
         .lean()
@@ -147,7 +143,8 @@ router
     } catch (err) {
       res.send(err);
     }
-  });
+  }
+);
 router
   .route("/Work/:category/:id")
   .get(authenticateToken, async function (req, res) {

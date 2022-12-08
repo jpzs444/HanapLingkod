@@ -37,15 +37,15 @@ async function WorkReminder() {
 
       notification(
         [pushIDWorker.pushtoken],
-        "Reminder",
-        "You have a Booking scheadule " + time_in_string,
+        "You have a booking scheduled on" + time_in_string,
+        "You may check your bookings on the homepage or the thee-line menu",
         workerId
       );
 
       notification(
         [pushIDRecruiter.pushtoken],
-        "Reminder",
-        "You have a Booking scheadule " + time_in_string,
+        "You have a booking scheduled on" + time_in_string,
+        "You may check your bookings on the homepage or the thee-line menu",
         workerId
       );
     }
