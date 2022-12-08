@@ -32,7 +32,7 @@ const ModalPicker = (props) => {
 
     // sub-categories
     useEffect(() => {
-        fetch("http://"+ IPAddress +":3000/service-sub-category", {
+        fetch("https://hanaplingkod.onrender.com/service-sub-category", {
             method: "GET",
             headers: {
                 "content-type": "application/json",
@@ -46,11 +46,10 @@ const ModalPicker = (props) => {
     
     // categories
     useEffect(() => {
-        fetch("http://"+ IPAddress +":3000/service-category", {
+        fetch("https://hanaplingkod.onrender.com/service-category", {
             method: "GET",
             headers: {
                 "content-type": "application/json",
-                "Authorization": global.accessToken
             },
         }).then((response)=> response.json())
         .then((data) => {
@@ -61,7 +60,7 @@ const ModalPicker = (props) => {
     // worklist
     useEffect(() => {
         props.workerID ?
-        fetch(`http://${IPAddress}:3000/WorkList/${props.workerID}`, {
+        fetch(`https://hanaplingkod.onrender.com/WorkList/${props.workerID}`, {
             method: "GET",
             headers: {
                 'content-type': 'application/json',

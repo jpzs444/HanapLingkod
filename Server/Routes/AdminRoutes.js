@@ -22,6 +22,11 @@ const Booking = require("../Models/Booking");
 const Work = require("../Models/Work");
 const Conversation = require("../Models/Conversation");
 const Report = require("../Models/Report");
+
+// CORS
+const cors = require('cors');
+router.use(cors({origin:"*"}))
+
 router.route("/signup/admin").post(async function (req, res) {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);

@@ -38,6 +38,7 @@ export default function Home() {
   const responseListener = useRef();
 
   const [isBanned, setIsBanned] = useState(false)
+  const [viewModalBanned, setViewModalBanned] = useState(false)
 
   // useEffect(() => {
   //   socket.current = io(`ws://${IPAddress}:8900`)
@@ -60,12 +61,15 @@ export default function Home() {
 
       responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log("notification listener response: ", response);
+        console.log("notification listener response: ", response.notification.request.content.data);
+        console.log("notification listener response: ", response.notification);
+
+        let notif = response.notification.request.content.data
 
         // turn notification.read to true 
-        fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+        fetch(`https://hanaplingkod.onrender.com/notification/${global.deviceExpoPushToken}`, {
           method: "PUT",
-          header: {
+          headers: {
             'content-type': 'application/json',
             "Authorization": global.accessToken
           },
@@ -73,7 +77,36 @@ export default function Home() {
         .catch((error) => console.log("notification app js error: ", error.message))
 
         // go to convo
-        navigation.navigate("CompletedBookingsDrawer")
+        // navigation.navigate("CompletedBookingsDrawer")
+        if(notif.type === "New Message"){
+          navigation.navigate("MessagingTab");
+        }
+
+        switch (notif.Type) {
+          case "New Message":
+            navigation.navigate("MessagingTab");
+            break;
+          
+          case "New Service Request":
+            navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: notif.id, requestItem: {}});
+            break;
+
+          case "Updated Booking Status":
+            navigation.navigate("BookingInformationDrawer", {bookingID: notif.id, bookingItem: {}});
+            break;
+
+          case "Updated Booking Status":
+            navigation.navigate("BookingInformationDrawer", {bookingID: notif.id, bookingItem: {}});
+            break;
+
+          case "updated Service Request":
+            navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: notif.id, requestItem: {}});
+            break;
+          
+        
+          default:
+            navigation.navigate("Home_Drawer");
+        }
 
         // go to request/booking page
 
@@ -93,7 +126,7 @@ export default function Home() {
   
   useEffect(() => {
     // send pushtoken to backend
-    fetch("http://" + IPAddress + ":3000/setToken/" + global.userData._id, {
+    fetch(`https://hanaplingkod.onrender.com/setToken/${global.userData._id}`, {
       method: 'PUT',
       headers: {
         "content-type": "application/json",
@@ -127,7 +160,7 @@ export default function Home() {
 
   const getAllCategory = async () => {
     try {
-      await fetch(`http://${IPAddress}:3000/service-category`, {
+      await fetch(`https://hanaplingkod.onrender.com/service-category`, {
         method: "GET",
         headers: {
             "content-type": "application/json",
@@ -138,6 +171,7 @@ export default function Home() {
         console.log("home accesstoken: ", data)
         if(data === "Forbidden: User is banned"){
           setIsBanned(true)
+          setViewModalBanned(true)
         } else {
           setCategory([...data])
           console.log("sub-cat:", data)
@@ -152,10 +186,10 @@ export default function Home() {
   }
 
   const fetchNotificationList = () => {
-    fetch("http://" + IPAddress + ":3000/notification/" + global.userData._id, {
+    fetch(`https://hanaplingkod.onrender.com/notification/${global.userData._id}`, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         "Authorization": global.accessToken
       },
     }).then((res) => res.json())
@@ -181,7 +215,7 @@ export default function Home() {
 
     setuserHasSearched(true)
     setSearchBtnPressed(false)
-    fetch("http://" + IPAddress + ":3000/search?keyword=" + searchW, {
+    fetch(`https://hanaplingkod.onrender.com/search?keyword=${searchW}`, {
       method: "GET",
       headers: {
         "content-type": "application/json",
@@ -235,10 +269,10 @@ export default function Home() {
         <DialogueModal 
           firstMessage="You are banned!"
           secondMessage={"You will not have access to view anything"}
-          visible={isBanned}
+          visible={viewModalBanned}
           numBtn={1}
           warning={true}
-          onDecline={setIsBanned}
+          onDecline={setViewModalBanned}
         />
         
         
@@ -623,11 +657,11 @@ export default function Home() {
                             <View style={styles.subCategoryDescriptionBox}>
                                 <View style={styles.subCategoryRow}>
                                     <TText style={styles.subCategoryText}>{item.ServiceSubCategory}</TText>
-                                    <TText style={styles.priceRangePrice}>Price Range</TText>
+                                    {/* <TText style={styles.priceRangePrice}>Price Range</TText> */}
+                                    <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
                                 </View>
                                 <View style={[styles.subCategoryRow, {marginBottom: 0}]}>
-                                    <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
-                                    <TText style={styles.priceRangeText}>Price Range</TText>
+                                    {/* <TText style={styles.priceRangeText}>Price Range</TText> */}
                                 </View>
                             </View>
                         </TouchableOpacity>
@@ -654,7 +688,7 @@ export default function Home() {
                                                 </View>
                                                 <View style={styles.workerRatingsHolder}>
                                                     <Icon name="star" color={"gold"} size={18} />
-                                                    <TText style={styles.workerRatings}>4.5</TText>
+                                                    <TText style={styles.workerRatings}>{item.rating ? item.rating : "0"}</TText>
                                                 </View>                                     
                                             </View>
                                             <View style={styles.workerAddressBox}>
@@ -852,7 +886,7 @@ const styles = StyleSheet.create({
   priceRangePrice: {
   },
   categoryText: {
-      
+      color: "#cbcbcb"
   },
   priceRangeText: {
       color: 'rgba(27,35,58,.5)'

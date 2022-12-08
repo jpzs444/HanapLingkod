@@ -42,70 +42,31 @@ const Requests = () => {
     // }, []);
 
     useEffect(() => {
-        // setRequestList({})
-        // setDeclinedRequests([])
-        setPage(1)
-
-
-        // fetchRequestList()
-        
-        // let refreshRequestList
-        // fetchRequestList()
-        // refreshRequestList = setInterval(fetchRequestList, 5000)
-
-
-        // navigation.addListener("blur", () => {
-        //     setRequestList({})
-        //     setDeclinedRequests([])
-        //     setPage(1)
-        //     clearInterval(refreshRequestList)
-        // })
-        
+        setPage(1)        
     }, [])
+
+    useEffect(() => {
+        let reqReq = setInterval(fetchRequestList, 15000)
+        return () => {
+            clearInterval(reqReq)
+        };
+    }, []);
     
     useFocusEffect(
         useCallback(() => {
             fetchRequestList()
-        }, [isFocused])
+        }, [])
     )
 
-    // useEffect(() => {
-    //     if(isFocused){
-    //         console.log("is focused: ", isFocused)
-    //         fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}?page=${page}`, {
-    //             method: "GET",
-    //             headers: {
-    //                 "content-type": "application/json",
-    //             },
-    //         })
-    //         .then((res) => res.json())
-    //         .then((data) => {
-    //             console.log("request list data: ", data)
-                
-    //             // place to state all rejected/declined requests
-    //             // let list = []
-    //             // let decList = []
-    //             if (global.userData.role === 'recruiter') {
-    //                 // list = [...data.recruiter.reverse()]
-    //                 // decList = [...data.status3_Recruiter.reverse()]
-    //                 setRequestList([...data.recruiter.reverse()])
-    //                 setDeclinedRequests([...data.status3_Recruiter.reverse()])
-    //             } else {
-    //                 // list = [...data.worker.reverse()]
-    //                 // decList = [...data.status3_Worker.reverse()]
-    //                 setRequestList([...data.worker.reverse()])
-    //                 setDeclinedRequests([...data.status3_Worker.reverse()])
-    //             }
-    //         })
-    //             console.log("fetchRequestList")
-    //     }
-    // }, [])
+    useEffect(() => {
+        fetchRequestList()
+    }, [page]);
 
     const fetchRequestList = async () => {
  
         setLoading(true)
         try {
-            await fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}?page=${10}`, {
+            await fetch(`https://hanaplingkod.onrender.com/service-request/${global.userData._id}?page=${page}`, {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",

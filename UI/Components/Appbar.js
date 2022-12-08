@@ -30,40 +30,6 @@ export default function Appbar(props) {
     //     })
     // }, [])
 
-    // const handleCreateConversation = async () => {
-    //     // create a conversation
-
-    //     try {
-    //         await fetch(`http://${IPAddress}:3000/conversations`, {
-    //             method: "POST",
-    //             headers: {
-    //               'content-type': 'application/json'  
-    //             },
-    //             body: JSON.stringify({
-    //                 senderId: global.userData._id,
-    //                 receiverId: global.userData.role === 'recruiter' ? bookingInformation.workerId._id : bookingInformation.recruiterId._id
-    //             })
-    //         }).then(res => res.json())
-    //         .then(data => {
-    //             console.log("conversation data: ", data[0])
-    //             setConversation({...data[0]})
-    //             handleGoToConversation()
-    //         })
-    //     } catch (error) {
-    //         console.log("Error creating new convo: ", error)
-    //     }
-    // }
-
-    // const handleGoToConversation = () => {
-    //     // navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
-    //     // console.log("otgerUser: ", typeof requestItem.workerId)
-    //     console.log("convo: ", typeof conversation)
-    //     navigation.navigate("ConversationThreadDrawer", {
-    //         "otherUser": global.userData.role === 'recruiter' ? bookingInformation.workerId : bookingInformation.recruiterId, 
-    //         "conversation": conversation
-    //     })
-    // }
-
   return (
     <View style={styles.container}>
         {/* left */}
@@ -114,9 +80,23 @@ export default function Appbar(props) {
                     </TouchableOpacity> 
             }
             {
+                props.registrationFormPage ? 
+                    <TouchableOpacity style={styles.left}
+                        onPress={() => {
+                            console.log("screenView", props.screenView)
+                            if (props.screenView == 1) navigation.goBack()
+                            else props.stateChangerNext(props.screenView - 1)
+                        }}
+                    >
+                        <Icon name="arrow-left" size={30} />
+                    </TouchableOpacity> : null
+            }
+            {
                 props.backBtn && !props.accTypeSelect && props.registration ? 
                     <TouchableOpacity style={styles.left}
-                        onPress={() => { navigation.goBack() }}
+                        onPress={() => { 
+                            navigation.goBack() 
+                        }}
                     >
                         <Icon name="arrow-left" size={30} color={props.light ? '#fff' : '#000'} />
                     </TouchableOpacity> 
@@ -150,17 +130,6 @@ export default function Appbar(props) {
                     : null
             }
             {
-                props.backBtn && !props.accTypeSelect && !props.otpverificationpage && !props.registration ? 
-                    <TouchableOpacity style={styles.left}
-                        onPress={() => {
-                            if (props.screenView == 1) navigation.goBack()
-                            else props.stateChangerNext(props.screenView - 1)
-                        }}
-                    >
-                        <Icon name="arrow-left" size={30} />
-                    </TouchableOpacity> : null
-            }
-            {
                 props.otpverificationpage ? 
                     <TouchableOpacity style={styles.left}
                         onPress={() => { navigation.replace("AccountTypeSelect") }}
@@ -169,7 +138,6 @@ export default function Appbar(props) {
                     </TouchableOpacity> 
                     : null
             }
-
 
             {/* Menu Button */}
             {

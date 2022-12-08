@@ -23,7 +23,7 @@ const SubCategory = ({route}) => {
     
     useEffect(() => {
         setIsLoading(true)
-        fetch("http://" + IPAddress + ":3000/service-sub-category", {
+        fetch("https://hanaplingkod.onrender.com/service-sub-category", {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
@@ -84,11 +84,11 @@ const SubCategory = ({route}) => {
                         <View style={styles.subCategoryDescriptionBox}>
                             <View style={styles.subCategoryRow}>
                                 <TText style={styles.subCategoryText}>{item.ServiceSubCategory}</TText>
-                                <TText style={styles.priceRangePrice}>Price Range</TText>
+                                {/* <TText style={styles.priceRangePrice}>Price Range</TText> */}
+                                <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
                             </View>
                             <View style={[styles.subCategoryRow, {marginBottom: 0}]}>
-                                <TText style={styles.categoryText}>{item.ServiceID.Category}</TText>
-                                <TText style={styles.priceRangeText}>Price Range</TText>
+                                {/* <TText style={styles.priceRangeText}>Price Range</TText> */}
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
         marginBottom: 10
     },
     headerSubTitle: {
-
+        marginBottom: 15
     },
     buttonContainer: {
         flex: 1,
@@ -157,12 +157,15 @@ const styles = StyleSheet.create({
     subCategoryText: {
         fontSize: 18,
         fontFamily: 'LexendDeca_Bold',
-        color: ThemeDefaults.appIcon
+        color: ThemeDefaults.appIcon,
+        textShadowColor: '#cbcbcb',
+        textShadowOffset: {width: 1, height: 1},
+        textShadowRadius: 15
     },
     priceRangePrice: {
     },
     categoryText: {
-        
+        color: '#cbcbcb',
     },
     priceRangeText: {
         color: 'rgba(27,35,58,.5)'

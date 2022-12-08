@@ -95,7 +95,7 @@ export default function Registration({route}) {
 
     useEffect(() => {
       console.log(user.username)
-      fetch('http://' + IPAddress + ':3000/isUsernameUnique', {
+      fetch('https://hanaplingkod.onrender.com/isUsernameUnique', {
         method: "POST",
         headers: {
           'accept': 'application/json',
@@ -328,6 +328,7 @@ export default function Registration({route}) {
     const [image, setImage] = useState([]);
     //single ID image
     const [singleImage, setSingleImage] = useState('');
+
     // multi license images
     const [imagelicense, setLicenseImage] = useState([]);
     //single license image
@@ -413,7 +414,7 @@ export default function Registration({route}) {
 
 
     const handleUsernameAvailable = (val) => {
-      fetch(`http:/${IPAddress}:3000/isUsernameUnique`, {
+      fetch(`https://hanaplingkod.onrender.com/isUsernameUnique`, {
         method: "POST",
         headers: {
           'content-type': 'application/json'
@@ -436,12 +437,13 @@ export default function Registration({route}) {
 
           <Appbar 
             stateChangerNext={setNext} 
-            backBtn={true} hasPicture={false} 
+            hasPicture={false} 
             registration={true} 
             currentRegistrationScreen={nextNum} 
             userType={userType} 
             screenView={next}
-            showLogo={true}  
+            showLogo={true}
+            registrationFormPage={true}
           />
 
           {/* Page Header */}
@@ -764,7 +766,10 @@ export default function Registration({route}) {
                 <View style={styles.btnContainer}>
                   {/* Next page button */}
                     <TouchableOpacity
-                      style={styles.nextBtn}
+                      disabled={
+                        (!imagelicense || !imageSingleLicense)
+                      }
+                      style={[styles.nextBtn, {backgroundColor: (!imagelicense || !imageSingleLicense) ? "#ccc" : ThemeDefaults.themeOrange}]}
                       onPress={() => { 
                         setNext((current) => current + 1)
                       }}
@@ -967,7 +972,18 @@ export default function Registration({route}) {
                   <View style={styles.btnContainer}>
                   {/* Next page button */}
                     <TouchableOpacity
-                      style={styles.nextBtn}
+                      disabled={
+                        (!user.street ||
+                        !user.purok || !user.barangay ||
+                        !user.city || !user.province || !user.phonenumber)
+                      }
+                      style={[styles.nextBtn, 
+                        {
+                          backgroundColor: (!user.street ||
+                        !user.purok || !user.barangay ||
+                        !user.city || !user.province || !user.phonenumber || (!image || !singleImage)) ? "#ccc" : ThemeDefaults.themeOrange
+                        }
+                      ]}
                       onPress={() => { 
                         // console.log("page 3")
                         setNext((current) => current + 1)
@@ -1066,7 +1082,7 @@ export default function Registration({route}) {
                 <Icon name='lock' size={23} color={"#D0CCCB"} /> 
                 <TextInput style={styles.input} 
                   autoCapitalize={'none'}
-                  placeholder={"Password (use atleast 8 combined letters and numbers..)"}
+                  placeholder={"Password"}
                   placeholderTextColor={"#A1A1A1"}
                   value={user.password ? user.password : null}
                   returnKeyType={"next"}
@@ -1079,6 +1095,12 @@ export default function Registration({route}) {
                   onSubmitEditing={ () => ref_cpw.current.focus() }
                   ref={ref_pw} />
               </View>
+              {
+                user.password.length < 8 &&
+                <View style={{alignSelf: 'flex-start', marginTop: -10, marginBottom: 8}}>
+                  <TText style={{fontSize: 14, color: ThemeDefaults.appIcon}}>* Passwords must have at least 8 characters</TText>
+                </View>
+              }
               
               {/* Confirm Password input */}
               <View style={[styles.inputContainer, {marginBottom: pwMatch ? 0 : 4}]}>
@@ -1254,9 +1276,21 @@ export default function Registration({route}) {
             {/* Next page button */}
             <View style={styles.btnContainer}>
               <TouchableOpacity
-                disabled={!gobtnNext}
-                style={styles.nextBtn}
+                disabled={
+                  (!user.username ||
+                  !(user.password || user.password.length < 8) ||
+                  !user.firstname || !user.lastname || !user.age || 
+                  !user.gender || !user.birthday || !confirmPW || !pwMatch)
+                }
+                style={[styles.nextBtn, 
+                   {backgroundColor: (!user.username ||
+                  !(user.password || user.password.length < 8) ||
+                  !user.firstname || !user.lastname || !user.age || 
+                  !user.gender || !user.birthday || !confirmPW || !pwMatch) ? "#ccc" : ThemeDefaults.themeOrange}
+                ]}
                 onPress={()=> { 
+                  setConfirmPW("")
+                  setPWMatch(false)
                   setNext((current) => current + 1)
                   haveBlanks()
                   }}

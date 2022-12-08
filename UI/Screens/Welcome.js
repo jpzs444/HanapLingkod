@@ -27,14 +27,14 @@ export default function Welcome({route}) {
                         style={styles.btn}
                         // onPress={() => navigation.navigate("Login", {userD:user, role: role, username: user.username, pw: user.password, islogin: true})}
                         onPress={() => {
-                            fetch("http://" + IPAddress + ":3000/login?username="+ user.username, {
+                            fetch("https://hanaplingkod.onrender.com/login?username="+ user.username, {
                                 method: "POST",
                                 body: JSON.stringify({
-                                username: user.username,
-                                password: user.password,
+                                    username: user.username,
+                                    password: user.password,
                                 }),
                                 headers: {
-                                "content-type": "application/json",
+                                    "content-type": "application/json",
                                 },
                             })
                                 .then((response) => response.json())
@@ -44,6 +44,7 @@ export default function Welcome({route}) {
 
                                     if(user._id){                                        
                                         global.userData = user;
+                                        global.accessToken = user.accessToken;
                                         
                                         navigation.replace("HomeStack");
                                         // navigation.navigate("OTPVerification", {isLogin: true, phoneNum: user.phoneNumber, fromWelcome: true})

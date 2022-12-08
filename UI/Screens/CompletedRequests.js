@@ -26,7 +26,7 @@ const CompletedRequests = ({route}) => {
   }, [route])
 
   useEffect(() => {
-    setLoading(true)
+    // setLoading(true)
 
     handleFetchCompletedBookings()
   }, [currentPage])
@@ -47,7 +47,7 @@ const CompletedRequests = ({route}) => {
 
   const handleFetchCompletedBookings = async () => {
     try {
-      await fetch(`http://${IPAddress}:3000/completed-bookings/${global.userData._id}?page=${currentPage}`, {
+      await fetch(`https://hanaplingkod.onrender.com/completed-bookings/${global.userData._id}?page=${currentPage}`, {
         method: "GET",
         headers: {
           "content-type": "application/json",

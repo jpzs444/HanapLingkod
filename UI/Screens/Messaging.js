@@ -16,17 +16,24 @@ const Messaging = () => {
 
   const [activeBtn, setActiveBtn] = useState("All")
   const [conversations, setConversations] = useState([])
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     console.log("hi messaging")
+
     navigation.addListener("focus", () => {
+      setPage(1)
       getConversations()
     })
   }, [])
 
+  useEffect(() => {
+    getConversations()
+  },[page])
+
   const getConversations = async () => {
     try {
-      const res = await fetch(`http://${IPAddress}:3000/conversations/${global.userData._id}`)
+      const res = await fetch(`https://hanaplingkod.onrender.com/conversations/${global.userData._id}?page=${page}`)
       .then(res => res.json())
 
       setConversations([...res])
@@ -50,7 +57,7 @@ const Messaging = () => {
   )
 
   const addConversation = () => {
-    fetch(`http://${IPAddress}:3000/conversations`, {
+    fetch(`https://hanaplingkod.onrender.com/conversations`, {
       method: "POST",
       headers: {
         'content-type': 'application/json',

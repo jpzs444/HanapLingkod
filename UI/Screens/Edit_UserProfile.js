@@ -76,7 +76,7 @@ const Edit_UserProfile = () => {
         setWorkList([])
         setUserWorkListEdit([])
 
-        fetch("http://" + IPAddress + ":3000/WorkList/" + global.userData._id, {
+        fetch(`https://hanaplingkod.onrender.com/WorkList/${global.userData._id}`, {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
@@ -271,7 +271,7 @@ const Edit_UserProfile = () => {
         console.log("image to be deleted: ", list[indexToRemove])
         console.log("updated image list: ", list)
         
-        fetch("http://" + IPAddress + ":3000/prevWorks/" + global.userData._id, {
+        fetch(`https://hanaplingkod.onrender.com/prevWorks/${ global.userData._id}`, {
             method: "DELETE",
             headers: {
                 'content-type': 'application/json',
@@ -352,7 +352,7 @@ const Edit_UserProfile = () => {
                 }
 
                 // upload pasworks images upload by the worker
-                fetch("http://" + IPAddress + ":3000/prevWorks/" + global.userData._id, {
+                fetch(`https://hanaplingkod.onrender.com/prevWorks/${global.userData._id}`, {
                     method: "POST",
                     headers: {
                         "content-type": "multipart/form-data",
@@ -369,7 +369,7 @@ const Edit_UserProfile = () => {
                 
                 if(userWorkListEdit[i].id){
                     console.log("only update work: ", userWorkListEdit[i].id)
-                    fetch(`http://${IPAddress}:3000/Work/${userWorkListEdit[i].sub_category}/${userWorkListEdit[i].id}`, {
+                    fetch(`https://hanaplingkod.onrender.com/Work/${userWorkListEdit[i].sub_category}/${userWorkListEdit[i].id}`, {
                         method: 'PUT',
                         headers: {
                             'content-type': 'application/json',
@@ -389,7 +389,7 @@ const Edit_UserProfile = () => {
                     })
                 } else {
                     console.log("only post work")
-                    fetch("http://" + IPAddress + ":3000/Work", {
+                    fetch("https://hanaplingkod.onrender.com/Work", {
                         method: "POST",
                         headers: {
                             "content-type": "application/json",
@@ -415,7 +415,7 @@ const Edit_UserProfile = () => {
                     // console.log("subcat delete: ", workToDelete[i].ServiceSubId.ServiceSubCategory)
                     console.log("subcat delete: ", workToDelete[i].id)
                     if(workToDelete[i].id){
-                        fetch(`http://${IPAddress}:3000/Work/${workToDelete[i].sub_category}/${workToDelete[i].id}`, {
+                        fetch(`https://hanaplingkod.onrender.com/Work/${workToDelete[i].sub_category}/${workToDelete[i].id}`, {
                             method: "DELETE",
                             headers: {
                                 "content-type": "application/json",
@@ -464,8 +464,8 @@ const Edit_UserProfile = () => {
         // formData.append("province", global.userData.province)
 
         let route = global.userData.role === "recruiter" ? 
-            "http://" + IPAddress + ":3000/Recruiter/" + global.userData._id 
-            : "http://" + IPAddress + ":3000/Worker/" + global.userData._id 
+            "https://hanaplingkod.onrender.com/Recruiter/" + global.userData._id 
+            : "https://hanaplingkod.onrender.com/Worker/" + global.userData._id 
 
         // update recruiter and worker profile picture and basic information
         fetch(route, {
@@ -491,10 +491,10 @@ const Edit_UserProfile = () => {
 
         // update global
         let routeUser = global.userData.role === 'recruiter' ? 'Recruiter' : "Worker"
-        fetch("http://" + IPAddress + ":3000/" + routeUser + "/" + global.userData._id, {
+        fetch(`https://hanaplingkod.onrender.com/${routeUser}/${global.userData._id}`, {
             method: "GET",
-            header: {
-                "conten-type": "application/json",
+            headers: {
+                "content-type": "application/json",
                 "Authorization": global.accessToken
             },
         }).then((res) => res.json())

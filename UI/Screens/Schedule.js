@@ -59,6 +59,7 @@ const Schedule = ({route}) => {
 
     useEffect(() => {
         setSameDateBookings([])
+        console.log("schedule")
         return () => {
             setSameDateBookings([])
         }
@@ -77,31 +78,35 @@ const Schedule = ({route}) => {
     }, [route, hasChanges])
 
 
-    const getUpdatedUserData = () => {
-        let userRoute = global.userData.role === "recruiter" ? "Recruiter/" : "Worker/"
+    const getUpdatedUserData = async() => {
+        let userRoute = global.userData.role === "recruiter" ? "Recruiter" : "Worker"
 
-        fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
-            method: "GET",
-            header: {
-                "conten-type": "application/json",
-                "Authorization": global.accessToken
-            },
-        }).then((res) => res.json())
-        .then((user) => {
-            // console.log("user new load: ", route)
-            global.userData = user
-
-            // setHasChanges(!hasChanges)
-            // console.log("imagelist: ", imageList)
-        })
-        .catch((error) => console.log(error.message))
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/${userRoute}/${global.userData._id}`, {
+                method: "GET",
+                headers: {
+                    "content-type": "application/json",
+                    "Authorization": global.accessToken,
+                },
+            }).then((res) => res.json())
+            .then((user) => {
+                // console.log("user new load: ", route)
+                global.userData = user
+    
+                // setHasChanges(!hasChanges)
+                // console.log("imagelist: ", imageList)
+            })
+            
+        } catch (error) {
+            console.log(error.message)
+        }
     }
 
     const getUnavailableSchedule = async () => {
         let dddd = new Date(selectedDate)
         let uunn = []
         try {
-            await fetch(`http://${IPAddress}:3000/schedule/${workerInformation._id}`, {
+            await fetch(`https://hanaplingkod.onrender.com/schedule/${workerInformation._id}`, {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
@@ -157,21 +162,27 @@ const Schedule = ({route}) => {
 
 
 
-    const handleRemoveCustomEvent = () => {
-        fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}/${customEventID}`, {
-            method: "DELETE",
-            headers: {
-                'content-type': 'application/json',
-                "Authorization": global.accessToken
-            }
-        }).then(res => {
-            console.log("Successful removal of the custom event")
-            // setViewScheduleModal(false)
-            setHasChanges(bool => !bool)
-            getUpdatedUserData()
-            getUnavailableSchedule()
-        })
-        .catch(err => console.log("Error remove custom event: ", err.msg))
+    const handleRemoveCustomEvent = async () => {
+
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/add-schedule/${global.userData._id}/${customEventID}`, {
+                method: "DELETE",
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken,
+                }
+            }).then(res => {
+                res.json()
+                console.log("Successful removal of the custom event")
+                // setViewScheduleModal(false)
+                setHasChanges(bool => !bool)
+                getUpdatedUserData()
+                getUnavailableSchedule()
+            })
+            
+        } catch (error) {
+            console.log("Error remove custom event: ", err.msg)
+        }
     }
 
     const ScreenHeaderComponent = () => (

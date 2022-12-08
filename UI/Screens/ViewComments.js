@@ -45,7 +45,7 @@ const ViewComments = ({route}) => {
     const fetchCommentsFromPost = () => {
 
             setIsLoading(true)
-            fetch(`http://${IPAddress}:3000/request-post/${postID}`, {
+            fetch(`https://hanaplingkod.onrender.com/request-post/${postID}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
@@ -65,7 +65,7 @@ const ViewComments = ({route}) => {
     }
 
     const handleSubmitComment = () => {
-        fetch(`http://${IPAddress}:3000/request-post-comment/${postID}`, {
+        fetch(`https://hanaplingkod.onrender.com/request-post-comment/${postID}`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
@@ -87,7 +87,7 @@ const ViewComments = ({route}) => {
 
     const handleDeleteComment = (item) => {
         console.log("waddup")
-        fetch(`http://${IPAddress}:3000/request-post-comment/${postID}`, {
+        fetch(`https://hanaplingkod.onrender.com/request-post-comment/${postID}`, {
             method: 'DELETE',
             headers: {
                 'content-type': 'application/json',

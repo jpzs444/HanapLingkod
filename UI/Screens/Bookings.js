@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimension, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Appbar from '../Components/Appbar'
 import { FlashList } from '@shopify/flash-list'
 import TText from '../Components/TText'
@@ -7,13 +7,14 @@ import { IPAddress } from '../global/global'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
 import dayjs from 'dayjs'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native'
 
 // import 'react-native-console-time-polyfill';
 
 const Bookings = () => {
 
     const navigation = useNavigation()
+    const isFocused = useIsFocused()
 
     // STATES
     const [bookings, setBookings] = useState([])
@@ -27,24 +28,20 @@ const Bookings = () => {
         setBookings([])
     }, []);
 
-    useEffect(() => {
-        let fetchInterval
-
-        navigation.addListener("focus", () => {
+    useFocusEffect(
+        useCallback(() => {
             fetchBookings()
-            console.log("screen focused: bookings")
-            
-            fetchInterval = setInterval(() => {
-                setLoading(true)
-                fetchBookings()
-                // setLoading(false)
-            }, 10000)
-        })
+        }, [])
+    )
+
+    useEffect(() => {
+        let fetchInterval= setInterval(fetchBookings, 15000)
         
         return () => {
             clearInterval(fetchInterval)
         };
-    }, []);
+    }, [isFocused]);
+
 
     useEffect(() => {
         fetchBookings()
@@ -56,7 +53,7 @@ const Bookings = () => {
 
         try {
             console.log("fetchBookings")
-            fetch(`http://${IPAddress}:3000/booking/${global.userData._id}?page=${currentPage}`, {
+            fetch(`https://hanaplingkod.onrender.com/booking/${global.userData._id}?page=${currentPage}`, {
                 method: "GET",
                 headers: {
                     'content-type': "application/json",
@@ -73,9 +70,9 @@ const Bookings = () => {
                     setBookings([...data.Status2_worker, ...data.worker])
                 }
 
-                
+                setLoading(false)
             })
-            setLoading(false)
+            
             console.log("bookings state: ", bookings)
         } catch (error) {
             console.log("error fetch bookings: ", error) 

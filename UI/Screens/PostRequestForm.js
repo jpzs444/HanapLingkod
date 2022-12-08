@@ -63,7 +63,7 @@ const PostRequestForm = () => {
 
     const handlePostRequest = () => {
         console.log("handlePost")
-        fetch(`http://${IPAddress}:3000/request-post`, {
+        fetch(`https://hanaplingkod.onrender.com/request-post`, {
             method: "POST",
             headers: {
                 'content-type': 'application/json',

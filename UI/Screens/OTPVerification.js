@@ -11,13 +11,16 @@ import Appbar from '../Components/Appbar';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import TText from '../Components/TText';
 
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { IPAddress } from '../global/global';
 
 import RnOtpTimer from 'react-native-otp-timer';
 
-export default function OTPVerification({route}, props) {
+export default function OTPVerification(props) {
     const navigation = useNavigation();
+    
+    const route = useRoute()
+
     const {phoneNum, role, user, singleImage, image, token,
         isLogin, work, imagelicense, fromWelcome, forgotPassword,
         fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, workList
@@ -193,7 +196,7 @@ export default function OTPVerification({route}, props) {
         // formData.append("emailAddress", user.email);
         formData.append("GovId", filename);
   
-        fetch("http://"+ IPAddress +":3000/signup/recruiter?username=" + user.username, {
+        fetch("https://hanaplingkod.onrender.com/signup/recruiter?username=" + user.username, {
           method: "POST",
           body: formData,
           headers: {
@@ -278,7 +281,7 @@ export default function OTPVerification({route}, props) {
         }
 
   
-        fetch("http://"+ IPAddress +":3000/signup/worker?username=" + user.username, {
+        fetch("https://hanaplingkod.onrender.com/signup/worker?username=" + user.username, {
           method: "POST",
           body: formData,
           headers: {
@@ -295,7 +298,7 @@ export default function OTPVerification({route}, props) {
 
         // DELETE  Update/Upload Works/Services offered by the Worker
         for(let i = 0; i < workList.length; i++){
-            fetch("http://" + IPAddress + ":3000/Work/" + workList[i].ServiceSubId.ServiceSubCategory + "/" + workList[i]._id, {
+            fetch("https://hanaplingkod.onrender.com/Work/" + workList[i].ServiceSubId.ServiceSubCategory + "/" + workList[i]._id, {
                 method: "DELETE",
                 headers: {
                     "content-type": "application/json",
@@ -306,7 +309,7 @@ export default function OTPVerification({route}, props) {
         }
 
         // upload pasworks images upload by the worker
-        fetch("http://" + IPAddress + ":3000/prevWorks/" + global.userData._id, {
+        fetch("https://hanaplingkod.onrender.com/prevWorks/" + global.userData._id, {
             method: "PUT",
             headers: {
                 "content-type": "multipart/form-data",
@@ -317,7 +320,7 @@ export default function OTPVerification({route}, props) {
         .catch((error) => console.log(error.message))
 
         // upload new and updated set of works
-        fetch("http://" + IPAddress + ":3000/Work", {
+        fetch("https://hanaplingkod.onrender.com/Work", {
             method: "PUT",
             headers: {
                 "content-type": "multipart/form-data",
@@ -328,7 +331,7 @@ export default function OTPVerification({route}, props) {
         .catch((error) => console.log(error.message))
 
         // update recruiter and worker profile picture and basic information
-        fetch("http://" + IPAddress + ":3000/" + global.userData.role === 'recruiter' ? "Recruiter/" : "Worker/" + global.userData._id, {
+        fetch("https://hanaplingkod.onrender.com/" + global.userData.role === 'recruiter' ? "Recruiter/" : "Worker/" + global.userData._id, {
             method: "PUT",
             headers: {
                 "content-type": "multipart/form-data",
