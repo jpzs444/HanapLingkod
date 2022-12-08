@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image, ActivityIndicator, StatusBar, Dimensions, TextInput } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Image, ActivityIndicator, StatusBar, Dimensions, TextInput, Modal } from 'react-native'
 import React, {useState, useEffect, useRef} from 'react'
 import ThemeDefaults from '../Components/ThemeDefaults'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -9,6 +9,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { IPAddress, Localhost } from '../global/global';
 
 import { FlashList } from '@shopify/flash-list'
+import DialogueModal from '../Components/DialogueModal';
+import { ModalPicker } from '../Components/ModalPicker';
 
 
 const ViewComments = ({route}) => {
@@ -23,6 +25,8 @@ const ViewComments = ({route}) => {
     const [commentList, setCommentList] = useState([])
     const [postInformation, setPostInformation] = useState([])
 
+    const [openContextMenu, setOpenContextMenu] = useState(false)
+
     const [isLoading, setIsLoading] = useState(false)
 
     const commentInput = useRef(null)
@@ -30,13 +34,12 @@ const ViewComments = ({route}) => {
 
     useFocusEffect(
         React.useCallback(() => {
+            setCommentList([])
             fetchCommentsFromPost()
 
             let fetchCommnetsInterval = setInterval(fetchCommentsFromPost, 2000)
-            // setTimeout()
     
             return () => {
-                setCommentList([])
                 clearInterval(fetchCommnetsInterval)
             }
         }, [route])
@@ -225,38 +228,65 @@ const ViewComments = ({route}) => {
                         :
                         <View style={styles.commentItem}>
                         <View style={{flex: 1, flexDirection: 'row', width:'100%'}}>
-                            <Image source={{uri: item.workerId.profilePic}} style={styles.commentUserImage} />
+                            <Image source={item.workerId.profilePic ? {uri: item.workerId.profilePic} : require("../assets/images/default-profile.png")} style={styles.commentUserImage} />
                             <View style={{paddingLeft: 15, alignSelf: 'stretch', flexGrow: 1,}}>
                                 <View style={styles.nameSection}>
                                     {/* name */}
                                     <View style={{alignItems: 'center', flexDirection: 'row'}}>
                                         <TText style={styles.commentNameUserText}>{item.workerId.firstname} {item.workerId.lastname}</TText>
-                                        <Icon name="circle-medium" size={14} color={"#c5c5c5"} style={{marginHorizontal: 2}} />
-                                        <TText style={styles.commentTime}>{handleCreatedAge(item.created_at)}</TText>
+                                        {
+                                            global.userData.role === 'worker' &&
+                                            <>
+                                                <Icon name="circle-medium" size={14} color={"#c5c5c5"} style={{marginHorizontal: 2}} />
+                                                <TText style={styles.commentTime}>{handleCreatedAge(item.created_at)}</TText>
+                                            </>
+                                        }
                                     </View>
 
                                     {
                                         global.userData.role === "recruiter" ?
                                         <View style={{flex: 1, alignItems: 'flex-end'}}>
-                                            <TouchableOpacity style={styles.requestBtn}
+                                            <TouchableOpacity
                                                 activeOpacity={0.4}
                                                 onPress={()=> {
                                                     console.log("postInformation: ", postInformation.maxPrice)
-                                                    navigation.navigate("RequestFormDrawer", {
-                                                        'workerID': item.workerId._id, 
-                                                        'workID': item._id, 
-                                                        'workerInformation': item.workerId, 
-                                                        'selectedJob': postInformation[0].postDescription, 
-                                                        'minPrice': postInformation[0].minPrice, 
-                                                        'maxPrice': postInformation[0].maxPrice, 
-                                                        'dateService': postInformation[0].serviceDate, 
-                                                        'timeService': postInformation[0].startTime, 
-                                                        'showMultiWorks': false,
-                                                        'fromPostReq': true
-                                                    })
+                                                    setOpenContextMenu(true)
+                                                    // navigation.navigate("RequestFormDrawer", {
+                                                    //     'workerID': item.workerId._id, 
+                                                    //     'workID': item._id, 
+                                                    //     'workerInformation': item.workerId, 
+                                                    //     'selectedJob': postInformation[0].postDescription, 
+                                                    //     'minPrice': postInformation[0].minPrice, 
+                                                    //     'maxPrice': postInformation[0].maxPrice, 
+                                                    //     'dateService': postInformation[0].serviceDate, 
+                                                    //     'timeService': postInformation[0].startTime, 
+                                                    //     'showMultiWorks': false,
+                                                    //     'fromPostReq': true
+                                                    // })
                                                 }}
                                             >
-                                                <TText style={styles.requestText}>Send Request</TText>
+                                                <Icon name="dots-horizontal" size={25} color={"gray"} />
+
+                                                <Modal
+                                                    transparent={true}
+                                                    animationType='fade'
+                                                    visible={openContextMenu}
+                                                    onRequestClose={() => {setOpenContextMenu(false)}}
+                                                >
+                                                    <ModalPicker 
+                                                        changeModalVisibility={setOpenContextMenu}
+                                                        setData={(filter) => {
+                                                            console.log(filter)
+                                                            setRequestCategory({...filter})
+                                                            }}
+                                                        contextMenu={true}
+                                                        userReportedID={item.workerId._id} 
+                                                        userFullName={`${item.workerId.firstname} ${item.workerId.lastname}`} 
+                                                        userRole={"worker"}
+                                                        userProfilePicture={item.workerId.profilePic}
+                                                        otherUser={item.workerId}
+                                                    />
+                                                </Modal>
                                             </TouchableOpacity>
                                         </View>
                                         : global.userData.role === "worker" && item.workerId._id === global.userData._id ?
@@ -274,13 +304,43 @@ const ViewComments = ({route}) => {
                                 </View>
                                 <View style={styles.ratingSection}>
                                     <Icon name="star" size={18} color={"gold"} />
-                                    <TText style={styles.ratingText}>4.7</TText>
+                                    <TText style={styles.ratingText}>{item.workerId.rating}</TText>
                                 </View>
                             </View>
                         </View>
                         <View style={styles.commentSection}>
                             <TText style={styles.commentText}>{item.message}</TText>
                         </View>
+                        {
+                            global.userData.role === "recruiter" &&
+                            <View style={{marginTop: 10}}>
+                                <View style={styles.commentSection}>
+                                    <TText style={{color: 'gray', fontSize: 12}}>{dayjs(item.created_at).format("hh:mm A, MMM DD, YYYY")}</TText>
+                                </View>
+                                <View style={{flex: 1, alignItems: 'flex-end'}}>
+                                    <TouchableOpacity style={styles.requestBtn}
+                                        activeOpacity={0.4}
+                                        onPress={()=> {
+                                            console.log("postInformation: ", postInformation.maxPrice)
+                                            navigation.navigate("RequestFormDrawer", {
+                                                'workerID': item.workerId._id, 
+                                                'workID': item._id, 
+                                                'workerInformation': item.workerId, 
+                                                'selectedJob': postInformation[0].postDescription, 
+                                                'minPrice': postInformation[0].minPrice, 
+                                                'maxPrice': postInformation[0].maxPrice, 
+                                                'dateService': postInformation[0].serviceDate, 
+                                                'timeService': postInformation[0].startTime, 
+                                                'showMultiWorks': false,
+                                                'fromPostReq': true
+                                            })
+                                        }}
+                                    >
+                                        <TText style={styles.requestText}>Send Request</TText>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        }
                     </View>
                     }
                     </>
@@ -534,14 +594,14 @@ const styles = StyleSheet.create({
     },
     requestBtn: {
         backgroundColor: ThemeDefaults.themeLighterBlue,
-        borderRadius: 15,
+        borderRadius: 10,
         paddingHorizontal: 15,
         paddingVertical: 4,
         elevation: 3,
         zIndex: 6,
 
         position: 'absolute',
-        top: -10,
+        top: -23,
         right: 0
     },
     deleteCommentBtn: {

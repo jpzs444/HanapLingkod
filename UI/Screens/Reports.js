@@ -5,6 +5,7 @@ import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
 import DialogueModal from '../Components/DialogueModal'
+import { FlashList } from '@shopify/flash-list'
 
 const Reports = () => {
 
@@ -16,7 +17,12 @@ const Reports = () => {
             
             <Text style={styles.headerTitle}>Reports about others</Text>
 
+
             <View style={styles.body}>
+
+                {/* <FlashList 
+                    data
+                /> */}
                 <TouchableOpacity style={styles.reportItem}
                     activeOpacity={0.5}
                     onPress={() => {

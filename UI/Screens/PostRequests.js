@@ -39,7 +39,11 @@ const PostRequests = () => {
 
   const fetchRequestPosts = () => {
 
-    fetch(`https://hanaplingkod.onrender.com/request-post`, {
+    let routeAPI = global.userData.role === 'worker' ? 
+      `https://hanaplingkod.onrender.com/request-post/` 
+      : `https://hanaplingkod.onrender.com/request-post-recruiter/${global.userData._id}`
+
+    fetch(routeAPI, {
       method: "GET",
       headers: {
         'content-type': 'application/json',
@@ -54,7 +58,7 @@ const PostRequests = () => {
       // if(global.userData.role === 'worker'){
       //   list = list.filter(e => e.postToggle)
       // }
-      setPostRequestList([...list])
+      setPostRequestList([...data])
     }).catch((err) => console.log('error post request list: ', err.message))
   }
 
@@ -280,10 +284,7 @@ const PostRequests = () => {
           )}
           renderItem={({item}) => (
             <>
-              {
-                item.recruiterId._id === global.userData._id || global.userData.role === 'worker' ?
-                <MainComponent item={item} /> : null
-              }
+              <MainComponent item={item} />
             </>   
           )}
         />

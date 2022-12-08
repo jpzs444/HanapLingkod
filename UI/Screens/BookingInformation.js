@@ -237,22 +237,16 @@ const BookingInformation = ({route}) => {
             .then(data => {
                 console.log("conversation data: ", data[0])
                 setConversation({...data[0]})
-                handleGoToConversation()
+                navigation.navigate("ConversationThreadDrawer", {
+                    "otherUser": global.userData.role === 'recruiter' ? bookingInformation.workerId : bookingInformation.recruiterId, 
+                    "conversation": data[0]
+                })
             })
         } catch (error) {
             console.log("Error creating new convo: ", error)
         }
     }
 
-    const handleGoToConversation = () => {
-        // navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
-        // console.log("otgerUser: ", typeof requestItem.workerId)
-        console.log("convo: ", typeof conversation)
-        navigation.navigate("ConversationThreadDrawer", {
-            "otherUser": global.userData.role === 'recruiter' ? bookingInformation.workerId : bookingInformation.recruiterId, 
-            "conversation": conversation
-        })
-    }
 
 
     return (
@@ -402,12 +396,13 @@ const BookingInformation = ({route}) => {
                         style={styles.gotoProfileBtn}
                         activeOpacity={0.5}
                         onPress={() => {
+                            console.log("otherUser from bookingInfo: ", bookingItem.worker)
                             global.userData.role === 'recruiter' ? 
                             // console.log("Worker Profile")
-                            navigation.navigate("WorkerProfileDrawer", {workerID: bookingInformation.workerId._id, userRole: false})
+                            navigation.navigate("WorkerProfileDrawer", {workerID: bookingInformation.workerId._id, userRole: false, otherUser: bookingItem.workerId})
                             : 
                             // console.log("Recruiter Profile")
-                            navigation.navigate("WorkerProfileDrawer", {workerID: bookingInformation.recruiterId._id, userRole: true})
+                            navigation.navigate("WorkerProfileDrawer", {workerID: bookingInformation.recruiterId._id, userRole: true, otherUser: bookingItem.recruiterId})
                         }}
                     >
                         <TText style={styles.profileBtnText}>Profile</TText>

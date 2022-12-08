@@ -42,6 +42,20 @@ const Workers = () => {
   const [ratingViewModal, setRatingViewModal] = useState(false)
   const [hasFilter, setHasFilter] = useState(barangayFilter || verifiedFilter || categoryFilter || ratingFilter)
 
+  const [loading, setLoading] = useState(false)
+  const firstUpdate = useRef(true)
+
+  useEffect(() => {
+      getAllWorkers()
+      navigation.addListener("focus", () => setCurrentPage(1))
+      // setPrevListWorker([...listOfWorkers])
+  }, [currentPage])
+
+  useEffect(() => {
+    setHasFilter(barangayFilter || verifiedFilter || categoryFilter || ratingFilter)
+},[barangayFilter, verifiedFilter, categoryFilter, ratingFilter])
+
+
   const changeModalVisibility = (bool) => {
     //getAllWorkers()
     setBarangayViewModal(bool)
@@ -51,38 +65,59 @@ const Workers = () => {
 
   }
 
-  const firstUpdate = useRef(true)
 
-    useEffect(() => {
-        getAllWorkers()
-        navigation.addListener("focus", () => setCurrentPage(1))
-        // setPrevListWorker([...listOfWorkers])
-    }, [currentPage])
-
-    const getAllWorkers = () => {
-        fetch("https://hanaplingkod.onrender.com/Worker?page=" + currentPage, {
-            method: "GET",
-            headers: {
-                "content-type": "application/json",
-                "Authorization": global.accessToken
-            },
-        }).then((response) => response.json())
-        .then((data) => {
-            if(listOfWorkers && data === listOfWorkers){
-                return
-            }
-            setListOfWorkers([...data])
-            setPrevListWorker([...data])
-
-            console.log("workers 1231231: ", data)
-            // console.log("list of workers: ", data[3].works.join(', '))
-        })
+    const getAllWorkers = async (url) => {
+        setLoading(true)
+        console.log("url url url: ", url)
+        let API = `https://hanaplingkod.onrender.com/Worker?page=${1}`
+        if(url){
+            API = url
+        }
+        try {
+            await fetch(API, {
+                method: "GET",
+                headers: {
+                    "content-type": "application/json",
+                    "Authorization": global.accessToken
+                },
+            }).then((response) => response.json())
+            .then((data) => {
+                if(listOfWorkers && data === listOfWorkers){
+                    return
+                }
+                setListOfWorkers([...data])
+                setPrevListWorker([...data])
+    
+                console.log("workers (with filters): ", data)
+                setLoading(false)
+                // console.log("list of workers: ", data[3].works.join(', '))
+            })
+        } catch (error) {
+            console.log("error fetch all workers (with filter): ", error)
+        }
     }
 
-    useEffect(() => {
-        setHasFilter(barangayFilter || verifiedFilter || categoryFilter || ratingFilter)
-    },[barangayFilter, verifiedFilter, categoryFilter, ratingFilter])
+    const filterCategoryWithSettings = () => {
+        let baseURL = "https://hanaplingkod.onrender.com/Worker"
 
+        if(verifiedFilter) {
+            baseURL = baseURL.concat(`?verified=${verifiedFilter}`)
+        }
+
+        if(barangayFilter) {
+            baseURL = baseURL.concat(`?barangay=${barangayFilter}`)
+        }
+
+        if(categoryFilter){
+            baseURL = baseURL.concat(`?category=${categoryFilter}`)
+        }
+
+        if(ratingFilter){
+            baseURL = baseURL.concat(`?rating=${ratingFilter}`)
+        }
+
+        getAllWorkers(baseURL)
+    }
 
     
     const filterCategoryList = (fil) => {
@@ -182,7 +217,8 @@ const Workers = () => {
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
                                         setVerifiedFilter(filter === "Verified" ? true : false )
-                                        filter === "All" ? handleResetFilter() : filter === 'Verified' ? filterVerifiedList(true) : filterVerifiedList(false)
+                                        filterCategoryWithSettings()
+                                        // filter === "All" ? handleResetFilter() : filter === 'Verified' ? filterVerifiedList(true) : filterVerifiedList(false)
                                     }}
                                     verifiedFilter={true}
                                 />
@@ -206,8 +242,10 @@ const Workers = () => {
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
                                         // setBarangayFilter("")
+                                        console.log(filter)
                                         setBarangayFilter(filter)
-                                        filterBarangayList(filter)
+                                        filterCategoryWithSettings()
+                                        // filterBarangayList(filter)
                                     }}
                                     barangay={true}
                                 />
@@ -229,7 +267,9 @@ const Workers = () => {
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
                                         setCategoryFilter(filter.ServiceSubCategory)
-                                        filterCategoryList(filter.ServiceSubCategory)
+                                        filterCategoryWithSettings()
+
+                                        // filterCategoryList(filter.ServiceSubCategory)
                                     }}
                                     categoryFilter={true}
                                 />
@@ -249,7 +289,10 @@ const Workers = () => {
                             >
                                 <ModalPicker 
                                     changeModalVisibility={changeModalVisibility}
-                                    setData={(filter) => setRatingFilter(filter)}
+                                    setData={(filter) => {
+                                        setRatingFilter(filter)
+                                        filterCategoryWithSettings()
+                                    }}
                                     ratingFilter={true}
                                 />
                             </Modal>
@@ -333,6 +376,7 @@ const Workers = () => {
                         onEndReached={() => {setCurrentPage(prev => prev + 1)}}
                         ListEmptyComponent={() => (
                             <View style={{alignItems: 'center', marginTop: 10}}>
+                                {}
                                 <TText style={{fontSize: 18, color: 'gray'}}>No results found. Try again</TText>
                             </View>
                         )}
@@ -350,9 +394,9 @@ const Workers = () => {
                             <TouchableOpacity style={{width: '100%', paddingHorizontal: 30, height: 130, zIndex:10, backgroundColor: ThemeDefaults.themeWhite}}
                                 activeOpacity={0.5}
                                 onPress={() => {
-                                    console.log("workers clicked")
+                                    console.log("workers clicked; ", item)
                                     // navigation.navigate("RequestFormDrawer", {workerID: item._id, workerInformation: item, selectedJob: '', showMultiWorks: true})
-                                    navigation.navigate("WorkerProfileDrawer", {workerID: item._id})
+                                    navigation.navigate("WorkerProfileDrawer", {workerID: item._id, otherUser: item, userRole: false})
 
                                 }}
                             >
