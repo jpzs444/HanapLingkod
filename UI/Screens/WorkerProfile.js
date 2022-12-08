@@ -41,6 +41,8 @@ const WorkerProfile = ({route}) => {
 
     const [workerInformation, setworkerInformation] = useState({})
 
+    const [conversation, setConversation] = useState({})
+
     useEffect(() => {
         // console.log('worker profile screen: ', userRole)
         getUpdatedUserData()
@@ -66,7 +68,7 @@ const WorkerProfile = ({route}) => {
         try {
             let rateRoute = userRole ? "RecruiterComment" : "workerComment"
             let withRating = ratingFilter === "All" ? "" : `?rating=${ratingFilter}`
-            await fetch(`http://${IPAddress}:3000/${rateRoute}/${workerID}${withRating}`, {
+            await fetch(`https://hanaplingkod.onrender.com/${rateRoute}/${workerID}${withRating}`, {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
@@ -86,10 +88,10 @@ const WorkerProfile = ({route}) => {
 
         let userRoute = userRole ? "Recruiter/" : "Worker/"
         
-        fetch("http://" + IPAddress + ":3000/" + userRoute + workerID, {
+        fetch("https://hanaplingkod.onrender.com/" + userRoute + workerID, {
             method: "GET",
-            header: {
-                "conten-type": "application/json",
+            headers: {
+                "content-type": "application/json",
                 "Authorization": global.accessToken
             },
         }).then((res) => res.json())
@@ -111,7 +113,7 @@ const WorkerProfile = ({route}) => {
 
     const getUpdatedWorkList = () => {
         setWorkList([])
-        fetch("http://" + IPAddress + ":3000/WorkList/" + workerID, {
+        fetch("https://hanaplingkod.onrender.com/WorkList/" + workerID, {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
@@ -174,8 +176,55 @@ const WorkerProfile = ({route}) => {
         )
     }
 
+    const handleCreateConversation = async () => {
+        // create a conversation
+
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/conversations`, {
+                method: "POST",
+                headers: {
+                  'content-type': 'application/json',
+                  "Authorization": global.accessToken
+                },
+                body: JSON.stringify({
+                    senderId: global.userData._id,
+                    receiverId: workerID
+                })
+            }).then(res => res.json())
+            .then(data => {
+                console.log("conversation data: ", data[0])
+                setConversation({...data[0]})
+                handleGoToConversation()
+            })
+        } catch (error) {
+            console.log("Error creating new convo: ", error)
+        }
+    }
+
+    const handleGoToConversation = () => {
+        // navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
+        // console.log("otgerUser: ", typeof requestItem.workerId)
+        // console.log("convo: ", typeof conversation)
+        navigation.navigate("ConversationThreadDrawer", {
+            "otherUser": workerID, 
+            "conversation": conversation
+        })
+    }
+
   return (
     <SafeAreaView style={styles.container}>
+
+        {/* chat button */}
+        <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 20, padding: 8, elevation: 4, position: 'absolute', right: 25, top: 60, zIndex: 5}}
+            activeOpacity={0.5}
+            onPress={() => {
+                console.log("HI")
+                // go to convo
+                handleCreateConversation()
+            }}
+        >
+            <Image source={require('../assets/icons/chat-bubble.png')} style={{width: 25, height: 25,}} />
+        </TouchableOpacity>
         
         {/* Image Swiper | Swiper View for images when clicked/opened */}
         {
@@ -230,7 +279,7 @@ const WorkerProfile = ({route}) => {
 
         {/* Top container */}
         <View style={{elevation: 5, paddingTop: 0, paddingBottom: 30, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, backgroundColor: '#fff'}}>
-            <Appbar settingsBtn={false} onlyBackBtn={true} showLogo={true} chatBtn={true} />
+            <Appbar settingsBtn={false} onlyBackBtn={true} showLogo={true} />
 
             <View>
                 {/* Profile Picture */}
@@ -352,7 +401,24 @@ const WorkerProfile = ({route}) => {
                                 }
                             </>
                             :
-                            <View style={{marginTop: 20,  width: '100%',}}>
+                            <View style={{marginTop: 10,  width: '100%',}}>
+
+                                {/* report user */}
+                                <TouchableOpacity
+                                    style={{marginTop: 0, marginBottom: 20}}
+                                    activeOpacity={0.5}
+                                    onPress={() => {
+                                        console.log("report user")
+                                        {
+                                            global.userData.role ==="recruiter" ?
+                                            navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Worker", userProfilePicture: otherUser.profilePic})
+                                            :
+                                            navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Recruiter", userProfilePicture: otherUser.profilePic})
+                                        }
+                                    }}
+                                >
+                                    <TText style={{textAlign: 'center', color: '#bbb'}}>If you want to report this {global.userData.role === "recruiter"? "worker": "recruiter"}, <TText style={{color: ThemeDefaults.themeRed}}>click here</TText></TText>
+                                </TouchableOpacity>
                                 
                                 <View style={{ marginHorizontal: 30,}}>
                                                 {/* 
@@ -390,32 +456,56 @@ const WorkerProfile = ({route}) => {
             {
                 workerInformation.role === "worker" && activeTab === 'works' ?
                     <View style={{width:'100%', marginBottom: 150}}>
+                        {/* report user */}
+                        <TouchableOpacity
+                            style={{marginTop: 20, marginBottom: 30}}
+                            activeOpacity={0.5}
+                            onPress={() => {
+                                console.log("report user")
+                                {
+                                    global.userData.role ==="recruiter" ?
+                                    navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Worker", userProfilePicture: otherUser.profilePic})
+                                    :
+                                    navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Recruiter", userProfilePicture: otherUser.profilePic})
+                                }
+                            }}
+                        >
+                            <TText style={{textAlign: 'center', color: '#bbb'}}>If you want to report this {global.userData.role === "recruiter"? "worker": "recruiter"}, <TText style={{color: ThemeDefaults.themeRed}}>click here</TText></TText>
+                        </TouchableOpacity>
+
                         <View style={{marginHorizontal: 30, width: '100%', marginTop: 15, marginBottom: 22,}}>
-                            <TText style={{fontSize: 18}}>Gallery from previous appointments</TText>
+                            <TText style={{fontSize: 18, marginLeft: 10}}>Gallery from previous appointments</TText>
                         </View>
 
                         {
                             workerInformation.prevWorks.length > 0 ?
-                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 30, paddingLeft: 30,}}>
-                                {
-                                    workerInformation.role !== "recruiter" && workerInformation.prevWorks.map(function(item, index, {length}){
-                                        return(
-                                            <TouchableOpacity key={index} style={{ width: 220, height: 220, elevation: 4, marginRight: 20, marginRight: index + 1 === length ? 70 : 20}}
-                                                onPress={() => {
-                                                    setImageView(true)
-                                                    setInitialIndex(index)
-                                                }}
-                                            >
-                                                <Image source={{uri: `http://${IPAddress}:3000/images/${item}`}} style={{width: '100%', height: '100%'}} />
-                                            </TouchableOpacity>
-                                        )
-                                    })
-                                }
-                            </ScrollView>
-                            : 
-                            <View style={{width: '100%', alignItems: 'center', marginTop: 10}}>
-                                <TText style={{color: 'gray'}}>No available images at the moment</TText>
-                            </View>
+                            <>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 30, paddingLeft: 30,}}>
+                                    {
+                                        workerInformation.role !== "recruiter" && workerInformation.prevWorks.map(function(item, index, {length}){
+                                            return(
+                                                <TouchableOpacity key={index} style={{ width: 220, height: 220, elevation: 4, marginRight: 20, marginRight: index + 1 === length ? 70 : 20}}
+                                                    onPress={() => {
+                                                        setImageView(true)
+                                                        setInitialIndex(index)
+                                                    }}
+                                                >
+                                                    <Image source={{uri: `http://${IPAddress}:3000/images/${item}`}} style={{width: '100%', height: '100%'}} />
+                                                </TouchableOpacity>
+                                            )
+                                        })
+                                    }
+                                </ScrollView>
+                               
+                            </>
+                            :
+                            <>
+                                <View style={{width: '100%', alignItems: 'center', marginTop: 10}}>
+                                    <TText style={{color: 'gray'}}>No available images at the moment</TText>
+                                </View>
+
+                                
+                            </> 
                         }
                     </View>
                     : null

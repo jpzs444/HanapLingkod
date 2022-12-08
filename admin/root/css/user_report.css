@@ -33,6 +33,7 @@ button {
     border: none;
     padding: 8px 15px;
     cursor: pointer;
+    transition: 250ms;
 }
 
 nav {
@@ -86,8 +87,6 @@ nav {
 .home-link, .account-link {
     padding: 0px 30px;
 }
-
-
 
 /* side navigation */
 
@@ -286,12 +285,20 @@ header h1 {
     margin: 10px 0 30px;
     display: inline-flex;
     padding: 7px 15px 7px 12px;
-    border: 1px solid #CBCBCB;
+    border: 1px solid rgba(0, 0, 0, 0.25);
     border-radius: 8px;
 }
 
-.report-user-container img {
-    display: block;
+.report-user-img {
+    width: 40px;
+    height: 40px;
+}
+
+.report-user-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50px;
 }
 
 .report-user-info {
@@ -318,10 +325,16 @@ header h1 {
 .report-user-view-profile {
     font-size: 10.5px;
     background-color: #D9D9D9;
+    border: 1px solid #D9D9D9;
     border-radius: 3px;
     padding: 0 14px;
     height: 20px;
     margin: auto;
+}
+
+.report-user-view-profile:hover {
+    background-color: #fff;
+    color: #000;
 }
 
 .report-description {
@@ -345,6 +358,11 @@ header h1 {
     color: #fff;
 }
 
+.button-permanent:hover {
+    background-color: #fff;
+    color: #FF5353;
+}
+
 .button-penalize {
     background-color: #F2C72C;
     width: 186px;
@@ -355,6 +373,11 @@ header h1 {
     color: #fff;
 }
 
+.button-penalize:hover {
+    background-color: #fff;
+    color: #F2C72C;
+}
+
 .button-dismiss {
     background-color: #FEFEFE;
     width: 186px;
@@ -362,4 +385,103 @@ header h1 {
     border: 1px solid #CBCBCB;
     border-radius: 10px;
     color: #434343;
+}
+
+.button-dismiss:hover {
+    background-color: #434343;
+    color: #fff;
+}
+
+/* Permanent Ban Modal */
+
+.show-modal {
+    display: flex;
+}
+
+.hide-modal {
+    display: none;
+}
+
+.permaban-modal-container {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: rgba(217, 217, 217, 0.8);
+    align-items: center;
+    justify-content: center;
+}
+
+.permaban-modal {
+    width: 560px;
+    padding: 42px 60px;
+    background-color: #fff;
+    box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+}
+
+.modal-title {
+    margin-bottom: 30px;
+}
+
+.modal-description {
+    margin-bottom: 60px;   
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 150px;
+}
+
+.modal-button {
+    font-size: 20px;
+    padding: 0;
+}
+
+#permaban-yes:hover {
+    color: #FF5353;
+}
+
+.modal-button-cancel:hover {
+    opacity: 0.35;
+}
+
+/* Penalize User Modal */
+
+.penalize-modal-container {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: rgba(217, 217, 217, 0.8);
+    align-items: center;
+    justify-content: center;
+}
+
+.penalize-modal {
+    width: 560px;
+    padding: 42px 60px;
+    background-color: #fff;
+    box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+}
+
+.modal-description-add {
+    color: #ACACAC;
+    margin: -30px 0 49px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.modal-description-add p {
+    min-width: 250px;
+}
+
+#penalize-yes:hover {
+    color: #ebbc13;
 }

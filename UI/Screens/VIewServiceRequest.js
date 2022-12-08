@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import { useNavigation } from '@react-navigation/native';
 import RadioButtonRN from 'radio-buttons-react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import SameDateBookings from '../Components/SameDateBookings';
+// import SameDateBookings from '../Components/SameDateBookings';
 import CreateConversation from '../Components/CreateConversation';
 
 const HEIGHT = Dimensions.get('window').height
@@ -112,7 +112,7 @@ const VIewServiceRequest = ({route}) => {
 
     const getSimilarWorks = async () => {
         try {
-            await fetch(`http://${IPAddress}:3000/Work/${requestItem.subCategory}`,{
+            await fetch(`https://hanaplingkod.onrender.com/Work/${requestItem.subCategory}`,{
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
@@ -134,7 +134,7 @@ const VIewServiceRequest = ({route}) => {
     }
 
     const getServiceRequest = () => {
-        fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}`, {
+        fetch(`https://hanaplingkod.onrender.com/service-request/${global.userData._id}`, {
             method: "GET",
             headers: {
                 "content-type": 'application/json',
@@ -151,7 +151,7 @@ const VIewServiceRequest = ({route}) => {
 
 
     const getSameDateBookings = () => {
-        fetch(`http:${IPAddress}:3000/service-request/${global.userData._id}`, {
+        fetch(`https://hanaplingkod.onrender.com/service-request/${global.userData._id}`, {
             method: "GET",
             headers: {
                 'content-type': 'application/json',
@@ -167,7 +167,7 @@ const VIewServiceRequest = ({route}) => {
     }
 
     const cancelRequest = (requestID) => {
-        fetch(`http:${IPAddress}:3000/service-request/${global.userData._id}/${requestID}`, {
+        fetch(`https://hanaplingkod.onrender.com/service-request/${global.userData._id}/${requestID}`, {
             method: "PUT",
             headers: {
                 'content-type': 'application/json',
@@ -188,7 +188,7 @@ const VIewServiceRequest = ({route}) => {
 
     const handleDeclineRequest = (requestID) => {
         console.log("Decline function")
-        fetch(`http:${IPAddress}:3000/service-request/${global.userData._id}/${requestID}`, {
+        fetch(`https://hanaplingkod.onrender.com/service-request/${global.userData._id}/${requestID}`, {
             method: "PUT",
             headers: {
                 'content-type': 'application/json',
@@ -209,7 +209,7 @@ const VIewServiceRequest = ({route}) => {
     }
 
     const handleAcceptRequest = (requestID) => {
-        fetch(`http:${IPAddress}:3000/service-request/${global.userData._id}/${requestID}`, {
+        fetch(`https://hanaplingkod.onrender.com/service-request/${global.userData._id}/${requestID}`, {
             method: "PUT",
             headers: {
                 'content-type': 'application/json',
@@ -251,7 +251,7 @@ const VIewServiceRequest = ({route}) => {
 
     const handleSendReasonDeclination = async () => {
         try {
-            await fetch(`http://${IPAddress}:3000/service-request-comment/${serviceRequestID}`, {
+            await fetch(`https://hanaplingkod.onrender.com/service-request-comment/${serviceRequestID}`, {
                 method: "POST",
                 headers: {
                     'content-type': 'application/json',
@@ -268,7 +268,7 @@ const VIewServiceRequest = ({route}) => {
     }
 
     const handleScheduleChecker = () => {
-        fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}/`)
+        fetch(`https://hanaplingkod.onrender.com/service-request/${global.userData._id}/`)
     }
 
     const ViewActivityIndicator = () => {
@@ -284,7 +284,7 @@ const VIewServiceRequest = ({route}) => {
         // create a conversation
 
         try {
-            await fetch(`http://${IPAddress}:3000/conversations`, {
+            await fetch(`https://hanaplingkod.onrender.com/conversations`, {
                 method: "POST",
                 headers: {
                     'content-type': 'application/json',

@@ -29,11 +29,17 @@ const PostRequests = () => {
 
   useEffect(() => {
     fetchRequestPosts()
-
   },[])
 
+  useEffect(() => {
+    navigation.addListener("focus", () => {
+      fetchRequestPosts()
+    })
+  }, []);
+
   const fetchRequestPosts = () => {
-    fetch(`http://${IPAddress}:3000/request-post/`, {
+
+    fetch(`https://hanaplingkod.onrender.com/request-post`, {
       method: "GET",
       headers: {
         'content-type': 'application/json',
@@ -43,11 +49,11 @@ const PostRequests = () => {
     .then((data) => {
       console.log("request post1: ", data)
 
-      let list = [...data]
-      list = list.reverse()
-      if(global.userData.role === 'worker'){
-        list = list.filter(e => e.postToggle)
-      }
+      let list = {...data}
+      // list = list.reverse()
+      // if(global.userData.role === 'worker'){
+      //   list = list.filter(e => e.postToggle)
+      // }
       setPostRequestList([...list])
     }).catch((err) => console.log('error post request list: ', err.message))
   }
@@ -62,7 +68,7 @@ const PostRequests = () => {
 
     try {
         await fetch(
-          `http://${IPAddress}:3000/request-post/${postID}`, {
+          `https://hanaplingkod.onrender.com/request-post/${postID}`, {
             method: "PUT",
             headers: {
               'content-type': 'application/json',

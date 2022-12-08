@@ -83,16 +83,16 @@ const CalendarView = () => {
             // setViewScheduleModal(false)
         })
         
-    }, [global.userData]);
+    }, []);
 
 
     const getUpdatedUserData = () => {
-        let userRoute = global.userData.role === "recruiter" ? "Recruiter/" : "Worker/"
+        let userRoute = global.userData.role === "recruiter" ? "Recruiter" : "Worker"
 
-        fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
+        fetch(`https://hanaplingkod.onrender.com/${userRoute}/${global.userData._id}`, {
             method: "GET",
-            header: {
-                "conten-type": "application/json",
+            headers: {
+                "content-type": "application/json",
                 "Authorization": global.accessToken
             },
         }).then((res) => res.json())
@@ -190,7 +190,7 @@ const CalendarView = () => {
     }
 
     const handleRemoveCustomEvent = () => {
-        fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}/${customEventID}`, {
+        fetch(`https://hanaplingkod.onrender.com/add-schedule/${global.userData._id}/${customEventID}`, {
             method: "DELETE",
             headers: {
                 'content-type': 'application/json',
@@ -210,7 +210,7 @@ const CalendarView = () => {
     // }
 
     const getSameDateBookings = (date) => {
-        fetch(`http://${IPAddress}:3000/booking/${global.userData._id}`, {
+        fetch(`https://hanaplingkod.onrender.com/booking/${global.userData._id}`, {
             method: "GET",
             headers: {
                 'content-type': 'application/json',

@@ -78,12 +78,12 @@ const AddEventCalendar = ({route}) => {
 
     const getUpdatedUserData = () => {
         console.log("getUpdatedUserData")
-        let userRoute = global.userData.role === "recruiter" ? "Recruiter/" : "Worker/"
+        let userRoute = global.userData.role === "recruiter" ? "Recruiter" : "Worker"
 
-        fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
+        fetch(`https://hanaplingkod.onrender.com/${userRoute}/${global.userData._id}`, {
             method: "GET",
-            header: {
-                "conten-type": "application/json",
+            headers: {
+                "content-type": "application/json",
                 "Authorization": global.accessToken
             },
         }).then((res) => res.json())
@@ -140,13 +140,13 @@ const AddEventCalendar = ({route}) => {
 
     const handleAddEvent = () => {
         console.log("add event")
-        let API = eventItem ?
-            `http://${IPAddress}:3000/add-schedule/${global.userData._id}/${eventItem._id}`
+        let URL = eventItem ?
+            `https://hanaplingkod.onrender.com/add-schedule/${global.userData._id}/${eventItem._id}`
             :
-            `http://${IPAddress}:3000/add-schedule/${global.userData._id}`
+            `https://hanaplingkod.onrender.com/add-schedule/${global.userData._id}`
 
         if(radioBtn){
-            fetch(API, {
+            fetch(URL, {
                 method: eventItem ? "PUT" : "POST",
                 headers: {
                     'content-type': 'application/json',
@@ -167,7 +167,7 @@ const AddEventCalendar = ({route}) => {
                 setHasCreatedAnEvent(true)
             }).catch(err => console.log("error add event: ", err.message))
         } else {
-            fetch(API, {
+            fetch(URL, {
                 method: eventItem ? "PUT" : "POST",
                 headers: {
                     'content-type': 'application/json',
@@ -195,7 +195,7 @@ const AddEventCalendar = ({route}) => {
 
 
     const handleRemoveCustomEvent = () => {
-        fetch(`http://${IPAddress}:3000/add-schedule/${global.userData._id}/${eventItem._id}`, {
+        fetch(`https://hanaplingkod.onrender.com/add-schedule/${global.userData._id}/${eventItem._id}`, {
             method: "DELETE",
             headers: {
                 'content-type': 'application/json',

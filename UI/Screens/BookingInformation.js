@@ -99,7 +99,7 @@ const BookingInformation = ({route}) => {
     
     const handleFetchBookingInformation = async () => {
         // setisLoading(true)
-        await fetch(`http://${IPAddress}:3000/booking/${global.userData._id}/${bookingID}`, {
+        await fetch(`https://hanaplingkod.onrender.com/booking/${global.userData._id}/${bookingID}`, {
             method: "GET",
             headers: {
                 'content-type': 'application/json',
@@ -129,7 +129,7 @@ const BookingInformation = ({route}) => {
     const handleFetchRatingsOfBooking = async () => {
         console.log("handleFetchRatings... ", bookingID)
         try {
-            fetch(`http://${IPAddress}:3000/reviews/${bookingID}`, {
+            fetch(`https://hanaplingkod.onrender.com/reviews/${bookingID}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
@@ -167,7 +167,7 @@ const BookingInformation = ({route}) => {
         
         try {
             let cur_user = global.userData.role === 'recruiter' ? {statusRecruiter: status} : {statusWorker: status}
-            await fetch(`http://${IPAddress}:3000/booking/${global.userData._id}/${bookingID}`, {
+            await fetch(`https://hanaplingkod.onrender.com/booking/${global.userData._id}/${bookingID}`, {
                 method: 'PUT',
                 headers: {
                     'content-type': 'application/json',
@@ -200,7 +200,7 @@ const BookingInformation = ({route}) => {
 
     const handleSendCancelMessage = async () => {
         try {
-            await fetch(`http://${IPAddress}:3000/booking-comment/${bookingInformation._id}`, {
+            await fetch(`https://hanaplingkod.onrender.com/booking-comment/${bookingInformation._id}`, {
                 method: "POST",
                 headers: {
                     'content-type': 'application/json',
@@ -223,7 +223,7 @@ const BookingInformation = ({route}) => {
         // create a conversation
 
         try {
-            await fetch(`http://${IPAddress}:3000/conversations`, {
+            await fetch(`https://hanaplingkod.onrender.com/conversations`, {
                 method: "POST",
                 headers: {
                   'content-type': 'application/json',
