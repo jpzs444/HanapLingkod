@@ -62,10 +62,10 @@ const UserProfile = ({route}) => {
     const getUpdatedUserData = () => {
         let userRoute = global.userData.role === "recruiter" ? "Recruiter/" : "Worker/"
 
-        fetch("http://" + IPAddress + ":3000/" + userRoute + global.userData._id, {
+        fetch("https://hanaplingkod.onrender.com/" + userRoute + global.userData._id, {
             method: "GET",
-            header: {
-                "conten-type": "application/json",
+            headers: {
+                "content-type": "application/json",
                 "Authorization": global.accessToken
             },
         }).then((res) => res.json())
@@ -84,7 +84,7 @@ const UserProfile = ({route}) => {
 
     const getUpdatedWorkList = () => {
         setWorkList([])
-        fetch("http://" + IPAddress + ":3000/WorkList/" + global.userData._id, {
+        fetch("https://hanaplingkod.onrender.com/WorkList/" + global.userData._id, {
             method: 'GET',
             headers: {
                 "content-type": "application/json",
@@ -102,7 +102,7 @@ const UserProfile = ({route}) => {
             let userType = global.userData.role === 'recruiter'? "RecruiterComment":"workerComment"
             let ff = ratingFilter === "All" ? "" : `?rating=${ratingFilter}`
             let pp = page ? `?page=${page}`: ""
-            await fetch(`http://${IPAddress}:3000/${userType}/${global.userData._id}${ff}`,{
+            await fetch(`https://hanaplingkod.onrender.com/${userType}/${global.userData._id}${ff}`,{
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',

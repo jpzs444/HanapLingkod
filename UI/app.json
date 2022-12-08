@@ -24,7 +24,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo/logo_icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.aceeyou.hanaplingkod"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -41,9 +45,14 @@
         {
           "icon": "./assets/logo/logo_icon.png",
           "color": "#2080ff",
-          "sounds": ["./assets/sounds/softare-interface-start.wav"]
+          "sounds": []
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "8be07aa2-6f64-43dd-b0ac-d4a17c86a5a0"
+      }
+    }
   }
 }

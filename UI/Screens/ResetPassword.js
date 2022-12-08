@@ -26,7 +26,7 @@ const ResetPassword = ({route}) => {
     const handleSubmitResetPassword = async () => {
         console.log("Submit New Password")
         try {
-            await fetch(`http://${IPAddress}:3000/changePassword`, {
+            await fetch(`https://hanaplingkod.onrender.com/changePassword`, {
                 method: "POST",
                 headers: {
                     "content-type": "application/json",

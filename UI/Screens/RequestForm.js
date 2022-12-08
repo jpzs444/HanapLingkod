@@ -185,7 +185,7 @@ const RequestForm = ({route, navigation}) => {
     
     const handelFetchWorkerUnavailableTime = async () => {
         try {
-            await fetch(`http://${IPAddress}:3000/schedule/${workerID}`, {
+            await fetch(`https://hanaplingkod.onrender.com/schedule/${workerID}`, {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
@@ -203,10 +203,11 @@ const RequestForm = ({route, navigation}) => {
     const loadUnavailableTime = async () => {
 
         try {
-            await fetch(`http://${IPAddress}:3000/schedule/${workerInformation._id}`, {
+            await fetch(`https://hanaplingkod.onrender.com/schedule/${workerInformation._id}`, {
                 method: "GET",
                 headers: {
-                    "content-type": "application/json"
+                    "content-type": "application/json",
+                    "Authorization": global.accessToken
                 }
             }).then(res => res.json())
             .then(data => {
@@ -388,7 +389,7 @@ const RequestForm = ({route, navigation}) => {
         let dddd = new Date(formatedDate)
         let unvTime = []
         try {
-            await fetch(`http://${IPAddress}:3000/schedule/${workerInformation._id}`, {
+            await fetch(`https://hanaplingkod.onrender.com/schedule/${workerInformation._id}`, {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
@@ -479,11 +480,11 @@ const RequestForm = ({route, navigation}) => {
         setIsLoading(true)
 
         try {
-            await fetch(`http://${IPAddress}:3000/service-request/${global.userData._id}`, {
+            await fetch(`https://hanaplingkod.onrender.com/service-request/${global.userData._id}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
-                    "authorization": global.accessToken
+                    "Authorization": global.accessToken
                 },
             }).then(res => res.json())
             .then(data => {
@@ -515,11 +516,11 @@ const RequestForm = ({route, navigation}) => {
         let user = global.userData
 
         try {
-            await fetch(`http://${IPAddress}:3000/service-request`, {
+            await fetch(`https://hanaplingkod.onrender.com/service-request`, {
                 method: "POST",
                 headers: {
                     "content-type": "application/json",
-                    "authorization": global.accessToken
+                    "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     "workerId": workerInformation._id,
@@ -538,12 +539,12 @@ const RequestForm = ({route, navigation}) => {
             })
             .then(res => res.text())
             .then(data => {
-                console.log("post res data: ", data)
-                if(data === 'false'){
+                // console.log("post res data: ", data)
+                if(data == 'false'){
                     console.log("req post data: ", data)
-                    sethasPendingRequest(true)
-                } else {
                     setRequestPostedModal(true)
+                } else {
+                    sethasPendingRequest(true)
                 }
                 // else {
                 //     setPostBtnModal(true)

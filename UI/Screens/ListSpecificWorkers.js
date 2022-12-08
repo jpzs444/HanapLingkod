@@ -28,7 +28,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
 
 
     const loadWorkers = () => {
-        fetch(`http://${IPAddress}:3000/Work/${chosenCategory}`, {
+        fetch(`https://hanaplingkod.onrender.com/Work/${chosenCategory}`, {
             method: 'GET',
             headers: {
                 "content-type": "application/json",

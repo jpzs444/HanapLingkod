@@ -38,10 +38,10 @@ export default function Notifications({route}) {
 
 
   function fetchNotificationList () {
-    fetch("http://" + IPAddress + ":3000/notification/" + global.userData._id + "?page=" + currentPage, {
+    fetch("https://hanaplingkod.onrender.com/notification/" + global.userData._id + "?page=" + currentPage, {
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         "Authorization": global.accessToken
       },
     }).then((res) => res.json())
@@ -143,7 +143,7 @@ export default function Notifications({route}) {
                           console.log(item)
 
                           // turn notification.read to true 
-                          fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+                          fetch("https://hanaplingkod.onrender.com/notification/" + global.deviceExpoPushToken, {
                             method: "PUT",
                             headers: {
                               'content-type': 'application/json',

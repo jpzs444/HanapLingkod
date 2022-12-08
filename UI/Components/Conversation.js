@@ -20,7 +20,7 @@ const Conversation = ({tab, conversation}) => {
         let userType = global.userData.role === 'recruiter' ? "Worker" : "Recruiter"
         console.log(userType)
         try {
-            await fetch(`http://${IPAddress}:3000/${userType}/${otherUser}`, {
+            await fetch(`https://hanaplingkod.onrender.com/${userType}/${otherUser}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
@@ -44,7 +44,7 @@ const Conversation = ({tab, conversation}) => {
         onPress={() => {
             console.log("hehe")
             console.log("otherUser: ", typeof otherUser)
-            console.log("conversation: ", typeof conversation)
+            console.log("conversation contains: ", conversation)
             navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
         }}
     >

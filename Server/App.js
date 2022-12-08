@@ -44,7 +44,17 @@ const Admin = require("./Routes/AdminRoutes");
 const { Unban, monthlyUnban } = require("./Helpers/Unban");
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({origin:"*"}))
+
+// app.use((req, res, next) => {
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// });
+
 app.use(bodyParser.json());
 app.use(require("express-status-monitor")());
 mongoose.connect(

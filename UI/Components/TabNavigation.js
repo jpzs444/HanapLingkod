@@ -43,11 +43,11 @@ const TabNavigation = () => {
 
   const [notificationCount, setNotificationCount] = useState(0)
   useEffect(() => {
-    fetch("http://" + IPAddress + ":300/notification/:" + devicePushToken, {
+    fetch("https://hanaplingkod.onrender.com/notification/:" + devicePushToken, {
       method: "GET",
       headers: {
         "content-type": "application/json",
-        "Authorization": global.userData.accessToken
+        "Authorization": global.accessToken
       },
     }).then((res) => res.json())
     .then((res) => {

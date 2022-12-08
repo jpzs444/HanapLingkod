@@ -5,8 +5,11 @@ import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
 import DialogueModal from '../Components/DialogueModal'
+import { useNavigation } from '@react-navigation/native'
 
 const ReportUser = ({route}) => {
+
+  const navigation = useNavigation()
 
   const { userReportedID, userFullName, userRole, userProfilePicture } = route.params
 
@@ -14,12 +17,29 @@ const ReportUser = ({route}) => {
   const [reportDescription, setReportDescription] = useState("")
 
   const [viewSubmitModal, setViewSubmitModal] = useState(false)
+  const [reportSubmitted, setReportSubmitted] = useState(false)
 
   const handleSubmitReport = async () => {
     try {
-      // await fetch()
-      console.log("handleSubmiReport button")
       setViewSubmitModal(false)
+      await fetch(`https://hanaplingkod.onrender.com/reportAUser`, {
+        method: "POST",
+        headers: {
+          'content-type': 'application/json',
+          "Authorization": global.accessToken
+        },
+        body: JSON.stringify({
+          title: reportTitle,
+          reportedUser: userReportedID,
+          description: reportDescription
+        })
+      }).then(res => res.json())
+      .then(data => {
+        console.log("Successfully reported user: ", data)
+        setReportSubmitted(true)
+        navigation.navigate("Home_Drawer")
+      })
+      console.log("handleSubmiReport button")
     } catch (error) {
       console.log("submit report error: ", error)
     }
@@ -100,6 +120,14 @@ const ReportUser = ({route}) => {
           numBtn={2}
           onAccept={handleSubmitReport}
           onDecline={setViewSubmitModal}
+        />
+
+        <DialogueModal 
+          firstMessage={"User has been reported"}
+          secondMessage={"Thank you for sending a report. HanapLingkod will review your submitted report and shall apply necessary actions"}
+          visible={reportSubmitted}
+          numBtn={1}
+          onDecline={setReportSubmitted}
         />
 
     </ScrollView>

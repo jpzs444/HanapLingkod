@@ -60,7 +60,7 @@ const Workers = () => {
     }, [currentPage])
 
     const getAllWorkers = () => {
-        fetch("http://" + IPAddress + ":3000/Worker?page=" + currentPage, {
+        fetch("https://hanaplingkod.onrender.com/Worker?page=" + currentPage, {
             method: "GET",
             headers: {
                 "content-type": "application/json",

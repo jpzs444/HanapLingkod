@@ -22,7 +22,7 @@ const RatingForm = ({item, handleUpdate}) => {
             {statusRecruiter: 3, rating: rating, message: feedbackMessage ? feedbackMessage : ""} 
             : {statusWorker: 3, rating: rating, message: feedbackMessage ? feedbackMessage : ""}
 
-        fetch(`http://${IPAddress}:3000/booking/${global.userData._id}/${item._id}`, {
+        fetch(`https://hanaplingkod.onrender.com/booking/${global.userData._id}/${item._id}`, {
             method: "PUT",
             headers: {
                 'content-type': 'application/json',

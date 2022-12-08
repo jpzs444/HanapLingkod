@@ -10,7 +10,7 @@ const CreatConversation = ({status, requestItem}) => {
   const handleCreateConversation = async () => {
     // create a conversation
     try {
-        await fetch(`http://${IPAddress}:3000/conversations`, {
+        await fetch(`https://hanaplingkod.onrender.com/conversations`, {
             method: "POST",
             headers: {
                 'content-type': 'application/json',

@@ -57,15 +57,16 @@ export default function Login({navigation}) {
 
     // FETCH DATA FROM SERVER
     const login = () => {
-      fetch("http://" + IPAddress + ":3000/login", {
+      fetch("https://hanaplingkod.onrender.com/login", {
+        // fetch(`http://${IPAddress}:3000/login`, {
         method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
         body: JSON.stringify({
           username: user.username,
           password: user.password,
         }),
-        headers: {
-          "content-type": "application/json",
-        },
       })
         .then((response) => response.json())
         .then((user) => {

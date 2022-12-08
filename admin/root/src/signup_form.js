@@ -37,8 +37,8 @@ function SignUpForm() {
         }
     }
 
-    const handleCreateAccount = async (e) => {
-        e.preventDefault()
+    const handleCreateAccount = (e) => {
+        // e.preventDefault()
         console.log("hi submit form")
         // console.log("userInformation: ", userInformation)
 
@@ -51,15 +51,15 @@ function SignUpForm() {
             // }).then(res => res.json())
             // .then(data => console.log(data))
 
-            await fetch(`http://192.168.68.131:3000/login/admin`, {
-                method: "POST",
+            fetch(`http://192.168.1.5:3000/work`, {
+                method: "GET",
                 headers: {
                     "content-type": "application/json"
                 },
-                body: JSON.stringify({
-                    username: "admin",
-                    password: "admin"
-                }),
+                // body: JSON.stringify({
+                //     username: "admin",
+                //     password: "admin"
+                // }),
             }).then(res => {
                 if(res.ok){
                     return res.json()
@@ -104,6 +104,8 @@ function SignUpForm() {
         <div className="signup-container">
             {/* logo */}
             <img src="./assets/logo/logo_full.png" className="image_logo left" />
+
+            {/* <button onClick={() => handleCreateAccount()}>try me!</button> */}
 
             <div className='right'>
                 <div className="form-container">

@@ -49,9 +49,9 @@ export default function App() {
       setExpoPushToken(token)
       global.deviceExpoPushToken = token;
 
-      fetch("http://" + IPAddress + ":3000/setToken/" + global.userData._id, {
+      fetch(`https://hanaplingkod.onrender.com/setToken/${global.userData._id}`, {
           method: "PUT",
-          header: {
+          headers: {
             'content-type': 'application/json',
           },
           body: JSON.stringify({
@@ -65,31 +65,34 @@ export default function App() {
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         setNotification(notification);
-        
+        console.log("new notification")
       });
 
     // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
+    // responseListener.current =
+    //   Notifications.addNotificationResponseReceivedListener((response) => {
+    //     let resNotif = response.notification
+    //     console.log("notification response: ", response.notification);
 
-        // turn notification.read to true 
-        fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
-          method: "PUT",
-          header: {
-            'content-type': 'application/json',
-          },
-        }).then(() => console.log("all notification read"))
-        .catch((error) => console.log("notification app js error: ", error.message))
+    //     // turn notification.read to true 
+    //     fetch("http://" + IPAddress + ":3000/notification/" + global.deviceExpoPushToken, {
+    //       method: "PUT",
+    //       headers: {
+    //         'content-type': 'application/json',
+    //       },
+    //     }).then(() => console.log("all notification read"))
+    //     .catch((error) => console.log("notification app js error: ", error.message))
 
-        // go to convo
-        // navigation.navigate("CompletedBookingsDrawer")
+        
 
-        // go to request/booking page
+    //     // go to convo
+    //     // navigation.navigate("CompletedBookingsDrawer")
+
+    //     // go to request/booking page
 
 
-        // fetch(/request/id || /booking/id)
-      });
+    //     // fetch(/request/id || /booking/id)
+    //   });
     
     Notifications.setNotificationHandler({
       handleNotification: async () => ({

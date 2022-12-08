@@ -20,7 +20,7 @@ const ForgotPassword = () => {
     const handleCheckUserExist = async () => {
         setLoading(true)
         try {
-            await fetch(`http://${IPAddress}:3000/usernameChecker`, {
+            await fetch(`https://hanaplingkod.onrender.com/usernameChecker`, {
                 method: "POST",
                 headers: {
                     "content-type": "application/json"
@@ -55,6 +55,7 @@ const ForgotPassword = () => {
                     <Icon name='account-circle' size={18} color={'#aaa'} />
                     <TextInput 
                         placeholder='username'
+                        autoCapitalize={'none'}
                         onChangeText={val => setUsername(val)}
                         style={styles.textInput}
                     />
