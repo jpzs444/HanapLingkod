@@ -90,10 +90,10 @@ const UsersView = () => {
                             <button className={role ? "active" : null} onClick={() => handleSwitchRoleType(true)} id="recruiterButton">Recruiters</button>
                             <button class={role ? null : "active"} onClick={() => handleSwitchRoleType(false)} id="workerButton" >Workers</button>
                         </div>
-                        <div>
-                            <input type="text" onChange={e => setSearchWord(e.target.value)} />
+                        <div class="search-container">
+                            <input type="text" placeholder="Search a user" onChange={e => setSearchWord(e.target.value)} />
                             <button>
-                                <img src="https://img.icons8.com/fluency-systems-regular/48/null/search--v1.png"/>
+                                <img src="https://img.icons8.com/fluency-systems-regular/20/null/search--v1.png"/>
                             </button>
                         </div>
                     </div>
@@ -135,7 +135,10 @@ const UsersView = () => {
                                             <p className="tr_title">{item.address}</p>
                                         </td>
                                         <td className="rating_column">
-                                            <p className="tr_title">Rating</p>
+                                            <div className="rating_container">
+                                                <img src="./assets/icons/star-yellow.png"></img>
+                                                <p className="tr_title">5.0</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
