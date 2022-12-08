@@ -2,19 +2,17 @@
 
 const UserReport = () => {
 
-    const DATA = [
-        {
-            "reportTitle": "Disrepesctful, rude, and attitude problem",
-            "reportDate": "November 14",
-            "reportElapsedTime": "5 days",
-            "reportDescription": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-            "reporter": "Leah Custodio",
-            "userImage": "https://www.panaynews.net/wp-content/uploads/2018/07/Coco-10-e1531191379317.jpg", 
-            "userReported": "Juan D. Cruz", 
-            "userRole": "Worker",
-            "userStrikes": "2",
-        },
-    ]  
+    const DATA = {
+        "reportTitle": "Disrepesctful, rude, and attitude problem",
+        "reportDate": "November 14",
+        "reportElapsedTime": "5 days",
+        "reportDescription": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        "reporter": "Leah Custodio",
+        "userImage": "https://www.panaynews.net/wp-content/uploads/2018/07/Coco-10-e1531191379317.jpg", 
+        "userReported": "Juan D. Cruz", 
+        "userRole": "Worker",
+        "userStrikes": "2",
+    }
 
     const [isPermabanModalOpen, setIsPermabanModalOpen] = React.useState(false)
 
@@ -62,33 +60,28 @@ const UserReport = () => {
             <div class="user-report">
                 <h1>User Report</h1>
 
-                <div>
-                    <div>                    
-                        {
-                            DATA.map(item => (
-                                <div class="report">
-                                    <h1 class="report-title">{item.reportTitle}</h1>
-                                    <p class="report-date-reporter">Reported {item.reportDate} <span class="dot">•</span> {item.reportElapsedTime} ago <span class="dot">•</span> {item.reporter}</p>
-                                    <h4>Reported User</h4>
-                                    <div class="report-user-container">
-                                        <div class="report-user-img"><img src={item.userImage}/></div>
-                                        <div class="report-user-info">
-                                            <div>{item.userReported}</div>
-                                            <div class="report-user-info-add">
-                                                <div>{item.userRole}</div>
-                                                <div class="dot">•</div>
-                                                <div>Strikes: <span class="strike-number">{item.userStrikes}</span></div>
-                                            </div>
-                                        </div>
-
-                                        <button class="report-user-view-profile">View</button>
-                                    </div>
-                                    <h4>Report Description</h4>
-                                    <p class="report-description">"{item.reportDescription}"</p>
+                <div>                    
+                    <div class="report">
+                        <h1 class="report-title">{DATA.reportTitle}</h1>
+                        <p class="report-date-reporter">Reported {DATA.reportDate} <span class="dot">•</span> {DATA.reportElapsedTime} ago <span class="dot">•</span> {DATA.reporter}</p>
+                        <h4><img class="reported-user-icon" src="./assets/icons/account.png"/>Reported User</h4>
+                        <div class="report-user-container">
+                            <div class="report-user-img"><img src={DATA.userImage}/></div>
+                            <div class="report-user-info">
+                                <div>{DATA.userReported}</div>
+                                <div class="report-user-info-add">
+                                    <div>{DATA.userRole}</div>
+                                    <div class="dot">•</div>
+                                    <div>Strikes: <span class="strike-number">{DATA.userStrikes}</span></div>
                                 </div>
-                            ))
-                        }
+                            </div>
+
+                            <button class="report-user-view-profile">View</button>
+                        </div>
+                        <h4><img class="reported-desc-icon" src="./assets/icons/description.png"/>Report Description</h4>
+                        <p class="report-description">"{DATA.reportDescription}"</p>
                     </div>
+
                     <div class="report-buttons">
                         <button type="button" class="button-permanent" onClick={() => handleOpenPermabanModal()}>Permanently Ban User</button>
                         <button type="button" class="button-penalize" onClick={() => handleOpenPenalizeModal()}>Penalize Reported User</button>
