@@ -28,7 +28,7 @@ const upload = multer({ storage: storage });
 
 router
   .route("/service-sub-category")
-  .get(authenticateToken, async function (req, res) {
+  .get(async function (req, res) {
     try {
       let queryResult = await ServiceSubCategory.find({
         deleteflag: false,
