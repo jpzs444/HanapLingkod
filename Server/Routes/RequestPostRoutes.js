@@ -10,28 +10,32 @@ const { CheckIfBan } = require("../Helpers/banChecker");
 
 router
   .route("/request-post")
-  .get(authenticateToken, async function (req, res) {
-    try {
-      let page;
-      if (req.query.page) {
-        page = parseInt(req.query.page);
-      } else {
-        page = 1;
-      }
-      const limit = 10;
+  .get(
+    // authenticateToken,
+    async function (req, res) {
+      try {
+        let page;
+        if (req.query.page) {
+          page = parseInt(req.query.page);
+        } else {
+          page = 1;
+        }
+        const limit = 10;
 
-      let result = await RequestPost.find({
-        postToggle: true,
-      })
-        .sort({ date: -1 })
-        .limit(limit * page)
-        .lean()
-        .exec();
-      res.send(result);
-    } catch (error) {
-      res.send(error);
+        let result = await RequestPost.find({
+          postToggle: true,
+          deleteflag: false,
+        })
+          .sort({ date: -1 })
+          .limit(limit * page)
+          .lean()
+          .exec();
+        res.send(result);
+      } catch (error) {
+        res.send(error);
+      }
     }
-  })
+  )
   .post(authenticateToken, CheckIfBan, async function (req, res) {
     try {
       let startTime = dayjs(
@@ -62,6 +66,32 @@ router
       res.send(error);
     }
   });
+
+router.route("/request-post-recruiter/:userId").get(
+  // authenticateToken,
+  async function (req, res) {
+    try {
+      let page;
+      if (req.query.page) {
+        page = parseInt(req.query.page);
+      } else {
+        page = 1;
+      }
+      const limit = 10;
+
+      let result = await RequestPost.find({
+        recruiterId: req.params.userId,
+      })
+        .sort({ date: -1 })
+        .limit(limit * page)
+        .lean()
+        .exec();
+      res.send(result);
+    } catch (error) {
+      res.send(error);
+    }
+  }
+);
 
 router
   .route("/request-post/:id")
