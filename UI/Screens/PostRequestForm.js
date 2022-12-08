@@ -9,11 +9,12 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import dayjs from 'dayjs';
 import { ModalPicker } from '../Components/ModalPicker';
 import { IPAddress } from '../global/global';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 const PostRequestForm = () => {
 
     const navigation = useNavigation()
+    const isFocused = useIsFocused()
 
     const [categoryModal, setCategoryModal] = useState(false)
     const [requestCategory, setRequestCategory] = useState({})
@@ -21,6 +22,9 @@ const PostRequestForm = () => {
     const [specificRequestText, setSpecificRequestText] = useState("")
     const [minPriceText, setMinPriceText] = useState(null)
     const [maxPriceText, setMaxPriceText] = useState(null)
+
+    const [address, setAddress] = useState(`${global.userData.street}, ${global.userData.purok}, ${global.userData.barangay}, ${global.userData.city}, ${global.userData.province}`)
+    const [otherAddress, setOtherAddress] = useState("")
 
     const [datePickerVisible, setDatePickerVisibility] = useState(false)
     const [timePickerVisible, setTimePickerVisibility] = useState(false)
@@ -40,26 +44,24 @@ const PostRequestForm = () => {
     const [maxPressed, setMaxPressed] = useState(false)
     const minPriceInput = useRef()
     const maxPriceInput = useRef()
+    const otherAddressRef = useRef()
 
     let disabledBtn = !(requestCategory && specificRequestText && minPriceText && maxPriceText && dateSelected && timeSelected)
 
     useEffect(() => {
-        navigation.addListener("focus", () => {
-            setRequestCategory(null)
-            setSpecificRequestText("")
-            setMinPriceText("")
-            setMaxPriceText("")
-            setFormatedDate(new Date())
-            setDisplayDate(new Date())
-            setFormatedTime(new Date())
-            setDisplayTime(new Date())
-            setMinPressed(false)
-            setMaxPressed(false)
-            setDateSelected(false)
-            setTimeSelected(false)
-        })
-        
-    }, [])
+        setRequestCategory(null)
+        setSpecificRequestText("")
+        setMinPriceText("")
+        setMaxPriceText("")
+        setFormatedDate(new Date())
+        setDisplayDate(new Date())
+        setFormatedTime(new Date())
+        setDisplayTime(new Date())
+        setMinPressed(false)
+        setMaxPressed(false)
+        setDateSelected(false)
+        setTimeSelected(false)
+    }, [isFocused])
 
     const handlePostRequest = () => {
         console.log("handlePost")
@@ -77,13 +79,16 @@ const PostRequestForm = () => {
                 serviceDate: formatedDate,
                 minPrice: minPriceText,
                 maxPrice: maxPriceText,
+                address: otherAddress ? otherAddress : address,
                 long: 80,
                 lat: 25,
             })
         }).then((res) => {
-            console.log("res: ", res)
+            res.json()
+        }).then(data => {
+            console.log("res: ",)
             console.log("Success: Added a request to your posts")
-            navigation.navigate("PostRequestPRRStack")
+            navigation.goBack()
         })
         .catch((err) => console.log("error post request: ", err.message))
     }
@@ -213,6 +218,7 @@ const PostRequestForm = () => {
                         placeholder='Min. Labor Price'
                         keyboardType='decimal-pad'
                         ref={minPriceInput}
+                        val={minPriceText ? minPriceText : ""}
                         onChangeText={text => setMinPriceText(text)}
                         style={[styles.textInputMinMax, {opacity: minPressed ? 1 : 0}]}
                     />
@@ -236,6 +242,7 @@ const PostRequestForm = () => {
                         placeholder='Min. Labor Price'
                         keyboardType='decimal-pad'
                         ref={maxPriceInput}
+                        val={maxPriceText ? maxPriceText : ""}
                         onChangeText={text => setMaxPriceText(text)}
                         style={[styles.textInputMinMax, {opacity: maxPressed ? 1 : 0}]}
                     />
@@ -284,11 +291,16 @@ const PostRequestForm = () => {
             {/* Address Picker | Location Picker */}
             <View style={styles.rowContainer}>
                 <TouchableOpacity style={[styles.priceBtn, {flex: 1, paddingVertical: 10, paddingHorizontal: 14}]}>
-                    <Icon name='map' size={22} />
-                    <View style={[styles.rowGrpTxt, {flexGrow: 1}]}>
-                        <TText style={styles.priceText}>Use a different address (optional)</TText>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Icon name='map' size={22} />
+                        <TextInput 
+                            placeholder='Use a different address (Optional)'
+                            onChangeText={val => setOtherAddress(val)}
+                            style={{fontFamily: "LexendDeca", fontSize: 15, marginLeft: 8, width: '92%'}}
+                        />
                     </View>
-                    <Icon name='map-marker' size={20} />
+                    
+                    {/* <Icon name='map-marker' size={20} style={{marginLeft: 'auto'}} /> */}
                 </TouchableOpacity>
             </View>
         </View>

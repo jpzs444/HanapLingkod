@@ -6,6 +6,7 @@ import { IPAddress } from '../global/global';
 import ThemeDefaults from './ThemeDefaults';
 import TText from './TText';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import { useNavigation } from '@react-navigation/native';
 
 
 const SEX = ['Male', 'Female']
@@ -19,11 +20,14 @@ const BARANGAY =[
 ];
 const FILTER_VERIFIED = ["All", "Verified", "Unverified"]
 const FILTER_RATING = ["5", "4", "3", "2", "1"]
+const CONTEXT_MENU = ["View Profile", "Report User"]
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
 const ModalPicker = (props) => {
+
+    const navigation = useNavigation()
     
     const [serviceList, setServiceList] = useState([]);
     const [categories, setCategories] = useState([])
@@ -50,6 +54,7 @@ const ModalPicker = (props) => {
             method: "GET",
             headers: {
                 "content-type": "application/json",
+                "Authorization": global.accessToken
             },
         }).then((response)=> response.json())
         .then((data) => {
@@ -83,6 +88,16 @@ const ModalPicker = (props) => {
         props.changeModalVisibility(false)
         props.setData(selected)
         console.log("Selected: ", selected)
+    }
+
+    const gotoRoute = (item) => {
+        if(item === "View Profile"){
+            navigation.navigate("WorkerProfileDrawer", {workerID: props.userReportedID, userRole: false, otherUser: props.otherUser})
+            // props.changeModalVisibility(false)
+        } else if(item === "Report User"){
+            navigation.navigate("ReportUserDrawer", {userReportedID: props.userReportedID, userFullName: props.userFullName, userRole: "Worker", userProfilePicture: props.userProfilePicture})
+        }
+        props.changeModalVisibility(false)
     }
 
     const workListSelection = workList.map(function(item ,index){
@@ -193,6 +208,20 @@ const ModalPicker = (props) => {
         )
     })
 
+    const optionContextMenu = CONTEXT_MENU.map((item, index) => {
+        return(
+            <TouchableOpacity
+                style={[styles.option, styles.inline]}
+                key={index}
+                onPress={() => gotoRoute(item)}
+            >
+                <TText style={styles.text}>
+                    {item}
+                </TText>
+            </TouchableOpacity>
+        )
+    })
+
 
   return (
     <TouchableOpacity
@@ -223,6 +252,7 @@ const ModalPicker = (props) => {
                 }
 
                 {props.sex ? option : null}
+                {props.contextMenu ? optionContextMenu : null}
             </ScrollView>
         </View>
     </TouchableOpacity>

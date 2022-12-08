@@ -33,11 +33,16 @@ const Messaging = () => {
 
   const getConversations = async () => {
     try {
-      const res = await fetch(`https://hanaplingkod.onrender.com/conversations/${global.userData._id}?page=${page}`)
-      .then(res => res.json())
-
-      setConversations([...res])
-      console.log("conversations: ", res)
+      await fetch(`https://hanaplingkod.onrender.com/conversations/${global.userData._id}`, {
+        method: "GET",
+        headers: {
+          'content-type': 'application/json'
+        }
+      }).then(res => res.json())
+      .then(data => {
+        setConversations([...data])
+        console.log("conversations: ", data)
+      })
 
     } catch (error) {
       console.log("fetch convo: ", error)
