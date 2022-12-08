@@ -65,10 +65,7 @@ router
   });
 router
   .route("/service-request")
-  .post(
-    authenticateToken, 
-    CheckIfBan, 
-    async function (req, res) {
+  .post(authenticateToken, CheckIfBan, async function (req, res) {
     try {
       console.log("asd");
       let pendingRequest = await ServiceRequest.count({
@@ -111,8 +108,8 @@ router
             res.send("true");
             notification(
               [pushID.pushtoken],
-              "New Request",
-              "New Request Check It out",
+              "A new request has been sent to you!",
+              " Kindly check your requests on the homepage or in the three-line menu.",
               { Type: "New Service Request", id: serviceRequest._id },
               req.body.workerId
             );
@@ -235,8 +232,8 @@ router
           // notify recruiter
           notification(
             [pushIDRecruiter.pushtoken],
-            "Accepted",
-            "your request has been accepted",
+            "Your request has been accepted!",
+            "Kindly check your bookings on the homepage or in the three-line menu.",
             { Type: "updated Service Request", id: req.params.id },
 
             recruiterId
@@ -260,8 +257,8 @@ router
         );
         notification(
           [pushIDRecruiter.pushtoken],
-          "Rejected",
-          "your request has been rejected",
+          "We regret to inform you that your request has been rejected.",
+          "Kindly look for other available workers or post a service request.",
           { Type: "updated Service Request", id: req.params.id },
 
           recruiterId
@@ -282,8 +279,8 @@ router
         );
         notification(
           [pushIDWorker.pushtoken],
-          "Cancelled",
-          "Recruiter Cancelled the request",
+          "We regret to inform you that a request to you has been canceled.",
+          "You may check the reason for cancellation in your requests",
           { Type: "updated Service Request", id: req.params.id },
 
           workerId

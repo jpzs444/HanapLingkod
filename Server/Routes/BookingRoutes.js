@@ -118,8 +118,8 @@ router
 
       notification(
         [pushIDWorker.pushtoken],
-        "Recruiter mark the booking as done",
-        "lorem ipsum ",
+        "Recruiter mark the booking as done.",
+        "Check the app to see the review.",
         { Type: "Updated Booking Status", id: req.params.id },
         workerId
       );
@@ -150,8 +150,8 @@ router
       // );
       notification(
         [pushIDRecruiter.pushtoken],
-        "worker mark the booking as done",
-        "lorem ipsum ",
+        "Worker mark the booking as done",
+        "Check the app to see the review",
         { Type: "Updated Booking Status", id: req.params.id },
         recruiterId
       );
@@ -196,8 +196,8 @@ router
       // notify recruiter
       notification(
         [pushIDRecruiter.pushtoken],
-        "On the Way",
-        "Worker is on the way",
+        "The worker is on its way!",
+        "Kindly ensure that you observe the minimum health standards. When the worker arrives, check the matching in-app OTP to ensure the identity of the worker.",
         { Type: "Updated Booking Status", id: req.params.id },
 
         recruiterId
@@ -227,8 +227,8 @@ router
       if (req.body.statusWorker == 4) {
         notification(
           [pushIDRecruiter.pushtoken],
-          "Worker cancelled the booking",
-          "lorem ipsum ",
+          "We regret to inform you that a booking has been canceled.",
+          "You may check the reason for cancellation in your bookings.",
           { Type: "Updated Booking Status", id: req.params.id },
           recruiterId
         );
@@ -236,8 +236,8 @@ router
       if (result.statusRecruiter == 4) {
         notification(
           [pushIDWorker.pushtoken],
-          "Worker cancelled the booking",
-          "lorem ipsum ",
+          "We regret to inform you that a booking has been canceled.",
+          "You may check the reason for cancellation in your bookings.",
           { Type: "Updated Booking Status", id: req.params.id },
           workerId
         );

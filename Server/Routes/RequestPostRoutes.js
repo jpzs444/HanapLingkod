@@ -10,28 +10,32 @@ const { CheckIfBan } = require("../Helpers/banChecker");
 
 router
   .route("/request-post")
-  .get(authenticateToken, async function (req, res) {
-    try {
-      let page;
-      if (req.query.page) {
-        page = parseInt(req.query.page);
-      } else {
-        page = 1;
-      }
-      const limit = 10;
+  .get(
+    // authenticateToken,
+    async function (req, res) {
+      try {
+        let page;
+        if (req.query.page) {
+          page = parseInt(req.query.page);
+        } else {
+          page = 1;
+        }
+        const limit = 10;
 
-      let result = await RequestPost.find({
-        postToggle: true,
-      })
-        .sort({ date: -1 })
-        .limit(limit * page)
-        .lean()
-        .exec();
-      res.send(result);
-    } catch (error) {
-      res.send(error);
+        let result = await RequestPost.find({
+          postToggle: true,
+          deleteflag: false,
+        })
+          .sort({ date: -1 })
+          .limit(limit * page)
+          .lean()
+          .exec();
+        res.send(result);
+      } catch (error) {
+        res.send(error);
+      }
     }
-  })
+  )
   .post(authenticateToken, CheckIfBan, async function (req, res) {
     try {
       let startTime = dayjs(
@@ -49,7 +53,7 @@ router
         maxPrice: req.body.maxPrice,
         address: req.body.address,
         geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
-        postToggle: 0,
+        postToggle: 1,
       });
       requestPost.save(function (err) {
         if (!err) {
@@ -62,6 +66,32 @@ router
       res.send(error);
     }
   });
+
+router.route("/request-post-recruiter/:userId").get(
+  // authenticateToken,
+  async function (req, res) {
+    try {
+      let page;
+      if (req.query.page) {
+        page = parseInt(req.query.page);
+      } else {
+        page = 1;
+      }
+      const limit = 10;
+
+      let result = await RequestPost.find({
+        recruiterId: req.params.userId,
+      })
+        .sort({ date: -1 })
+        .limit(limit * page)
+        .lean()
+        .exec();
+      res.send(result);
+    } catch (error) {
+      res.send(error);
+    }
+  }
+);
 
 router
   .route("/request-post/:id")
@@ -166,7 +196,7 @@ router
       notification(
         [pushIDRecruiter.pushtoken],
         "New Comment on your Post!",
-        req.body.message,
+        "Kindly check your post. To stop receiving comments into your posts, you may turn off the status of your post in the posted requests.",
         { Type: "New Comment on post", id: req.params.id },
         post.recruiterId
       );

@@ -7,6 +7,7 @@ import { FlashList } from '@shopify/flash-list';
 
 import { IPAddress, role, userID } from '../global/global';
 import Appbar from '../Components/Appbar';
+import DialogueModal from '../Components/DialogueModal';
 
 
 export default function Notifications({route}) {
@@ -18,6 +19,8 @@ export default function Notifications({route}) {
     const [currentPage, setCurrentPage] = useState(1)
     const notificationListener = useRef();
     const scrollToTop = useRef()
+
+    const [openNotif, setOpenNotif] = useState(false)
     // useScrollToTop(scrollToTop)
 
     let notificationListEndIndex = notifications.length - 1
@@ -141,6 +144,7 @@ export default function Notifications({route}) {
                         onPress={() => {
                           setNotificationIDClick(item._id)
                           console.log(item)
+                          setOpenNotif(true)
 
                           // turn notification.read to true 
                           fetch("https://hanaplingkod.onrender.com/notification/" + global.deviceExpoPushToken, {
@@ -178,6 +182,14 @@ export default function Notifications({route}) {
                                   </Text>
                               </View>
                           </View>
+
+                          {/* <DialogueModal 
+                            firstMessage={item.title}
+                            secondMessage={item.body}
+                            numBtn={1}
+                            visible={openNotif}
+                            onDecline={setOpenNotif}
+                          /> */}
                       </TouchableOpacity>
                       </View>
                       )

@@ -42,6 +42,11 @@ const Conversation = require("./Routes/Conversations");
 const Messages = require("./Routes/messages");
 const Admin = require("./Routes/AdminRoutes");
 const { Unban, monthlyUnban } = require("./Helpers/Unban");
+const sendEmail = require("./Helpers/SendMail");
+const {
+  PermanendBannedWorker,
+  PermanentBannedRecruiter,
+} = require("./Models/BannedUsers");
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({origin:"*"}))
@@ -130,14 +135,15 @@ cron.schedule("0 0 1 * *", () => {
 
 app.get("/search", async function (req, res) {
   let keyword = req.query.keyword;
-  let regex = new RegExp(`${keyword}`);
-  // console.log(regex);
+  var regex = new RegExp([keyword].join(""), "i");
+  console.log(regex);
 
   let WorkerResult = await Worker.find({
     $or: [{ firstname: regex }, { lastname: regex }, { middlename: regex }],
   })
     .lean()
     .exec();
+
   let CategoryResult = await ServiceCategory.find({ Category: regex })
     .lean()
     .exec();
@@ -304,6 +310,7 @@ app.post("/login", async (req, res) => {
   console.log(req.body);
   try {
     const { username, password } = req.body;
+
     if (!username || !password) {
       return res.status(400).json({ msg: "Not all fields have been entered" });
     }
@@ -311,6 +318,8 @@ app.post("/login", async (req, res) => {
     let ifWorkerExist = await Worker.exists({ username: username });
     let ifRecruiterExist = await Recruiter.exists({ username: username });
     let user;
+    // if ()
+
     if (ifWorkerExist) {
       user = await Worker.findOne({ username: username })
         // console.log("user");
@@ -330,11 +339,23 @@ app.post("/login", async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ msg: "Invalid Password" });
     }
-    const token = generateAccessToken(String(user._id), user.role);
-    user["accessToken"] = "Bearer " + token;
-    delete user.password;
-    console.log(user);
-    res.send(user);
+    let permanentBanWorker = await PermanendBannedWorker.exists({
+      workerId: user._id,
+    });
+    let permanentBanRecruiter = await PermanentBannedRecruiter.exists({
+      recruiterId: user._id,
+    });
+
+    if (permanentBanWorker || permanentBanRecruiter) {
+      console.log(user.username + " is permanently banned");
+      res.send("User Is permanently banned");
+    } else {
+      const token = generateAccessToken(String(user._id), user.role);
+      user["accessToken"] = "Bearer " + token;
+      delete user.password;
+      console.log(user);
+      res.send(user);
+    }
   } catch (error) {
     res.status(500).json({ err: error.message });
   }

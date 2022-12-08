@@ -21,7 +21,7 @@ const WorkerProfile = ({route}) => {
 
     const screenFocused = useIsFocused()
 
-    const {workerID, userRole} = route.params;
+    const {workerID, userRole, otherUser} = route.params;
 
     const navigation = useNavigation()
     const isFocused = navigation.isFocused();
@@ -44,7 +44,8 @@ const WorkerProfile = ({route}) => {
     const [conversation, setConversation] = useState({})
 
     useEffect(() => {
-        // console.log('worker profile screen: ', userRole)
+        console.log('worker profile screen: ', userRole)
+        console.log('worker profile screen: ', otherUser)
         getUpdatedUserData()
 
         if(!userRole){
@@ -192,39 +193,38 @@ const WorkerProfile = ({route}) => {
                 })
             }).then(res => res.json())
             .then(data => {
-                console.log("conversation data: ", data[0])
-                setConversation({...data[0]})
-                handleGoToConversation()
+                console.log("conversation data from somewhere: ", data[0])
+                console.log("otheruser data from somewhere: ", otherUser)
+                navigation.navigate("ConversationThreadDrawer", { 
+                    "otherUser": otherUser,
+                    "conversation": data[0],
+                })
+                setConversation(data[0])
             })
+            // console.log("conversations state: ", conversation)
         } catch (error) {
             console.log("Error creating new convo: ", error)
         }
     }
 
-    const handleGoToConversation = () => {
-        // navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
-        // console.log("otgerUser: ", typeof requestItem.workerId)
-        // console.log("convo: ", typeof conversation)
-        navigation.navigate("ConversationThreadDrawer", {
-            "otherUser": workerID, 
-            "conversation": conversation
-        })
-    }
 
   return (
     <SafeAreaView style={styles.container}>
 
         {/* chat button */}
-        <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 20, padding: 8, elevation: 4, position: 'absolute', right: 25, top: 60, zIndex: 5}}
-            activeOpacity={0.5}
-            onPress={() => {
-                console.log("HI")
-                // go to convo
-                handleCreateConversation()
-            }}
-        >
-            <Image source={require('../assets/icons/chat-bubble.png')} style={{width: 25, height: 25,}} />
-        </TouchableOpacity>
+        {
+            global.userData.role === 'recruiter' &&
+            <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 20, padding: 8, elevation: 4, position: 'absolute', right: 25, top: 60, zIndex: 5}}
+                activeOpacity={0.5}
+                onPress={() => {
+                    console.log("HI")
+                    // go to convo
+                    handleCreateConversation()
+                }}
+            >
+                <Image source={require('../assets/icons/chat-bubble.png')} style={{width: 25, height: 25,}} />
+            </TouchableOpacity>
+        }
         
         {/* Image Swiper | Swiper View for images when clicked/opened */}
         {
@@ -404,21 +404,24 @@ const WorkerProfile = ({route}) => {
                             <View style={{marginTop: 10,  width: '100%',}}>
 
                                 {/* report user */}
-                                <TouchableOpacity
-                                    style={{marginTop: 0, marginBottom: 20}}
-                                    activeOpacity={0.5}
-                                    onPress={() => {
-                                        console.log("report user")
-                                        {
-                                            global.userData.role ==="recruiter" ?
-                                            navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Worker", userProfilePicture: otherUser.profilePic})
-                                            :
-                                            navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Recruiter", userProfilePicture: otherUser.profilePic})
-                                        }
-                                    }}
-                                >
-                                    <TText style={{textAlign: 'center', color: '#bbb'}}>If you want to report this {global.userData.role === "recruiter"? "worker": "recruiter"}, <TText style={{color: ThemeDefaults.themeRed}}>click here</TText></TText>
-                                </TouchableOpacity>
+                                {
+                                    global.userData._id === otherUser._id ? null :
+                                    <TouchableOpacity
+                                        style={{marginTop: 0, marginBottom: 20}}
+                                        activeOpacity={0.5}
+                                        onPress={() => {
+                                            console.log("report user")
+                                            {
+                                                global.userData.role ==="recruiter" ?
+                                                navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Worker", userProfilePicture: otherUser.profilePic})
+                                                :
+                                                navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Recruiter", userProfilePicture: otherUser.profilePic})
+                                            }
+                                        }}
+                                    >
+                                        <TText style={{textAlign: 'center', color: '#bbb'}}>If you want to report this {global.userData.role === "recruiter"? "worker": "recruiter"}, <TText style={{color: ThemeDefaults.themeRed}}>click here</TText></TText>
+                                    </TouchableOpacity>
+                                }
                                 
                                 <View style={{ marginHorizontal: 30,}}>
                                                 {/* 
