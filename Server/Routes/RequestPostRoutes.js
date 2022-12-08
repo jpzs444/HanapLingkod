@@ -49,7 +49,7 @@ router
         maxPrice: req.body.maxPrice,
         address: req.body.address,
         geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
-        postToggle: 0,
+        postToggle: 1,
       });
       requestPost.save(function (err) {
         if (!err) {
@@ -166,7 +166,7 @@ router
       notification(
         [pushIDRecruiter.pushtoken],
         "New Comment on your Post!",
-        req.body.message,
+        "Kindly check your post. To stop receiving comments into your posts, you may turn off the status of your post in the posted requests.",
         { Type: "New Comment on post", id: req.params.id },
         post.recruiterId
       );

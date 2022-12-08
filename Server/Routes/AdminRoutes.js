@@ -22,6 +22,7 @@ const Booking = require("../Models/Booking");
 const Work = require("../Models/Work");
 const Conversation = require("../Models/Conversation");
 const Report = require("../Models/Report");
+const sendEmail = require("../Helpers/SendMail");
 router.route("/signup/admin").post(async function (req, res) {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -128,7 +129,10 @@ router
     }
   })
   .post(async function (req, res) {
+    const daysBanned = { 3: 1, 4: 3, 5: 7 };
+
     if (req.params.role === "recruiter") {
+      let ban = true;
       let offense = await BannedRecruiter.count({
         recruiterId: req.body.id,
       })
@@ -136,6 +140,36 @@ router
         .exec();
       offense += 1;
       console.log(offense);
+
+      if (offense === 1) {
+        const pushIDRecruiter = await Recruiters.findOne(
+          { _id: req.body.id },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        notification(
+          [pushIDRecruiter.pushtoken],
+          "A user has reported you about a (request-booking-comment-message) and this serves as a warning to you.",
+          "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to give you a strike. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com",
+          { Type: "Offense Warning", id: req.body.id },
+          req.body.id
+        );
+        ban = false;
+      }
+
+      if (offense === 2) {
+        const pushIDRecruiter = await Recruiters.findOne(
+          { _id: req.body.id },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        notification(
+          [pushIDRecruiter.pushtoken],
+          "A user has reported you about a (request-booking-comment-message) and this serves as a warning to you.",
+          "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to give you a strike. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com",
+          { Type: "Offense Warning", id: req.body.id },
+          req.body.id
+        );
+        ban = false;
+      }
       if (offense === 6) {
         const permanentBannedRecruiter = new PermanentBannedRecruiter({
           recruiterId: req.body.id,
@@ -143,32 +177,124 @@ router
         });
         const savedPermanentBannedRecruiter =
           await permanentBannedRecruiter.save();
+
+        const pushIDRecruiter = await Recruiters.findOne(
+          { _id: req.body.id },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        notification(
+          [pushIDRecruiter.pushtoken],
+          "A user has reported you about a (request-booking-comment-message) and you are banned permanently",
+          "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you permanently. You can no longer use the application and you are restricted from logging in again. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
+          { Type: "Offense Warning", id: req.body.id },
+          req.body.id
+        );
       }
+
+      if (offense === 3 || offense === 4 || offense === 5) {
+        console.log("asd");
+        const pushIDRecruiter = await Recruiters.findOne(
+          { _id: req.body.id },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        notification(
+          [pushIDRecruiter.pushtoken],
+          "A user has reported you about a (request-booking-comment-message) and you are banned as a penalty.",
+          "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you for " +
+            daysBanned[offense] +
+            " day/s. While banned, you will not be able to use certain features of the application. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
+          { Type: "Offense Warning", id: req.body.id },
+          req.body.id
+        );
+      }
+
       const bannedRecruiter = new BannedRecruiter({
         recruiterId: req.body.id,
-        ban: true,
+        ban: ban,
         offense: offense,
       });
       const savedbannedRecruiter = await bannedRecruiter.save();
+
       res.status(200).json(savedbannedRecruiter);
     } else if (req.params.role === "worker") {
+      let ban = true;
       let offense = await BannedWorker.count({
         workerId: req.body.id,
       })
         .lean()
         .exec();
       offense += 1;
+      if (offense === 1) {
+        const pushIDWorker = await Workers.findOne(
+          { _id: req.body.id },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        notification(
+          [pushIDWorker.pushtoken],
+          "A user has reported you about a (request-booking-comment-message) and this serves as a warning to you.",
+          "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to give you a strike. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
+          { Type: "Offense Warning", id: req.body.id },
+          req.body.id
+        );
+        ban = false;
+        console.log(pushIDWorker);
+      }
+
+      if (offense === 2) {
+        const pushIDWorker = await Workers.findOne(
+          { _id: req.body.id },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        notification(
+          [pushIDWorker.pushtoken],
+          "A user has reported you about a (request-booking-comment-message) and this serves as a warning to you.",
+          "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to give you a strike. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
+          { Type: "Offense Warning", id: req.body.id },
+          req.body.id
+        );
+        ban = false;
+        console.log(pushIDWorker);
+      }
+
       if (offense === 6) {
         const permanendBannedWorker = new PermanendBannedWorker({
-          recruiterId: req.body.id,
+          workerId: req.body.id,
           ban: true,
         });
         const savedPermanendBannedWorker = await permanendBannedWorker.save();
+        const pushIDWorker = await Workers.findOne(
+          { _id: req.body.id },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        notification(
+          [pushIDWorker.pushtoken],
+          "A user has reported you about a (request-booking-comment-message) and you are banned permanently",
+          "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you permanently. You can no longer use the application and you are restricted from logging in again. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
+          { Type: "Offense Warning", id: req.body.id },
+          req.body.id
+        );
       }
-      // console.log(offense);
+      console.log(offense);
+
+      if (offense === 3 || offense === 4 || offense === 5) {
+        const pushIDWorker = await Workers.findOne(
+          { _id: req.body.id },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        notification(
+          [pushIDWorker.pushtoken],
+          "A user has reported you about a (request-booking-comment-message) and you are banned as a penalty.",
+          "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you for " +
+            daysBanned[offense] +
+            " day/s. While banned, you will not be able to use certain features of the application. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
+          { Type: "Offense Warning", id: req.body.id },
+          req.body.id
+        );
+      }
+
       const bannedWorker = new BannedWorker({
         workerId: req.body.id,
-        ban: true,
+        ban: ban,
         offense: offense,
       });
       const savedbannedWorker = await bannedWorker.save();
@@ -439,5 +565,10 @@ router
       .exec();
     res.send("deleted Succssfully");
   });
+
+router.route("/customerSupport").post(async function (req, res) {
+  sendEmail(req.body.subject, req.body.text, req.body.email);
+  res.send("Email has been sent");
+});
 
 module.exports = router;
