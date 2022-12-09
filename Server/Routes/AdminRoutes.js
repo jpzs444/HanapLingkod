@@ -504,12 +504,16 @@ router
       title: req.body.title,
       reportedUser: req.body.reportedUser,
       description: req.body.description,
+      senderId: req.body.senderId,
     });
     const savedReport = await report.save();
     res.send(savedReport);
   })
   .get(async function (req, res) {
-    let reports = await Report.find({}).select("-description").lean().exec();
+    let reports = await Report.find({ deleteflag: false })
+      .select("-description")
+      .lean()
+      .exec();
     for (i of reports) {
       if ((await Workers.count({ _id: i.reportedUser }).lean().exec()) != 0) {
         let user = await Workers.findOne({ _id: i.reportedUser })
@@ -573,6 +577,31 @@ router
 router.route("/customerSupport").post(async function (req, res) {
   sendEmail(req.body.subject, req.body.text, req.body.email);
   res.send("Email has been sent");
+});
+
+router.route("/yourReports/:id").get(async function (req, res) {
+  let reports = await Report.find({
+    senderId: req.params.id,
+  })
+    .lean()
+    .exec();
+  for (i of reports) {
+    if ((await Workers.count({ _id: i.reportedUser }).lean().exec()) != 0) {
+      let user = await Workers.findOne({ _id: i.reportedUser })
+        .select("firstname lastname middlename role")
+        .lean()
+        .exec();
+      i.user = user;
+    }
+    if ((await Recruiters.count({ _id: i.reportedUser }).lean().exec()) != 0) {
+      let user = await Recruiters.findOne({ _id: i.reportedUser })
+        .select("firstname lastname middlename role")
+        .lean()
+        .exec();
+      i.user = user;
+    }
+  }
+  res.send(reports);
 });
 
 module.exports = router;
