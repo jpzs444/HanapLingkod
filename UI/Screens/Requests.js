@@ -108,7 +108,7 @@ const Requests = () => {
     const ScreenHeaderComponent = () => {
         return(
             <View style={styles.headerContainer}>
-                <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} />
+                <Appbar menuBtn={true} showLogo={true} hasPicture={true} />
 
                 <View style={styles.headerTitleBar}>
                     <TText style={styles.headerTitle}>Requests</TText>

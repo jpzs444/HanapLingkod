@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react'
 import { SafeAreaView, View, Image, Text, StatusBar, ScrollView, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import TText from '../Components/TText'
-import { useNavigation, useScrollToTop } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useScrollToTop } from '@react-navigation/native';
 import * as NotificationsL from "expo-notifications";
 import { FlashList } from '@shopify/flash-list';
 
@@ -13,6 +13,7 @@ import DialogueModal from '../Components/DialogueModal';
 export default function Notifications({route}) {
   
     const navigation = useNavigation();
+    const isFocused = useIsFocused()
     // const {user, role} = route.params;
     const [notifications, setNotifications] = useState([])
     const [notificationIDClicked, setNotificationIDClick] = useState(null)
@@ -30,14 +31,19 @@ export default function Notifications({route}) {
     // use useEffect for componentDidMount or for when the page loads
     useEffect(() => {
       fetchNotificationList()
-      
-      let ff = setInterval(() => {fetchNotificationList()}, 5000)
-
-      return () => {
-        clearInterval(ff)
-      };
-
     }, [currentPage])
+
+
+    useEffect(() => {
+      let ff
+      navigation.addListener("focus", () => {
+        ff = setInterval(() => {fetchNotificationList()}, 5000)
+      })
+
+      navigation.addListener("blur", () => {
+        clearInterval(ff)
+      })
+    }, [isFocused]);
 
 
   function fetchNotificationList () {
@@ -147,7 +153,7 @@ export default function Notifications({route}) {
                           setOpenNotif(true)
 
                           // turn notification.read to true 
-                          fetch("https://hanaplingkod.onrender.com/notification/" + global.deviceExpoPushToken, {
+                          fetch("https://hanaplingkod.onrender.com/notification/" + global.userData._id, {
                             method: "PUT",
                             headers: {
                               'content-type': 'application/json',
@@ -183,13 +189,14 @@ export default function Notifications({route}) {
                               </View>
                           </View>
 
-                          {/* <DialogueModal 
+                          <DialogueModal 
                             firstMessage={item.title}
                             secondMessage={item.body}
                             numBtn={1}
                             visible={openNotif}
                             onDecline={setOpenNotif}
-                          /> */}
+                          />
+
                       </TouchableOpacity>
                       </View>
                       )
