@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.6)',
     },
     dialogueContainer: {
+        width: '90%',
         borderWidth: 1.5,
         borderColor: ThemeDefaults.themeLighterBlue,
         borderRadius: 15,

@@ -11,3 +11,7 @@ const handleCloseSideNav = () => {
 const handleActionBtnClick = (action) => {
     console.log("action clicked: ", action)
 }
+
+let adminData = sessionStorage.getItem("adminUsername")
+let adminToken = sessionStorage.getItem("adminAccessToken")
+let adminId = sessionStorage.getItem("adminId")

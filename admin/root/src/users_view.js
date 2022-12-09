@@ -39,19 +39,16 @@ const UsersView = () => {
 
         let userRole = role ? "Recruiter" : "worker"
         try {
-            await fetch(`https://hanaplingkod.onrender.com/${userRole}`, {
-                method: 'get',
+            await fetch(`https://hanaplingkod.onrender.com/Recruiter`, {
+                method: 'GET',
                 headers: {
                     'content-type': "application/json",
-                    'Accept': 'application/json'
-                },
-                mode: "no-cors",
-                // body: JSON.stringify({})
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
             }).then((res) => {
                 res.json()
-                console.log(res)
             })
-            // .then(data => console.log(data.body))
+            .then(data => console.log(data))
             
         } catch (error) {
             console.log("error fetching user data(userViewJS): ", error)

@@ -16,6 +16,7 @@ export default function Notifications({route}) {
     const isFocused = useIsFocused()
     // const {user, role} = route.params;
     const [notifications, setNotifications] = useState([])
+    const [notifOpendata, setNotifOpenData] = useState({})
     const [notificationIDClicked, setNotificationIDClick] = useState(null)
     const [currentPage, setCurrentPage] = useState(1)
     const notificationListener = useRef();
@@ -123,11 +124,24 @@ export default function Notifications({route}) {
     return day > 1 ? `${day} days ago` : `${day} day ago`
   }
 
+  const handleOpenNotificationItem = (data) => {
+    setOpenNotif(true)
+    setNotifOpenData({title: data.title, body: data.body})
+  }
+
 
 
   return (
     <SafeAreaView style={styles.container}>
         {/* will change to flatlist instead of scrollview for better performance and better rendering of notifications */}
+            
+            <DialogueModal 
+              firstMessage={notifOpendata.title}
+              secondMessage={notifOpendata.body}
+              numBtn={1}
+              visible={openNotif}
+              onDecline={setOpenNotif}
+            />
 
             <View style={styles.header}>
               {/* <Appbar hasPicture={true} menuBtn={true} /> */}
@@ -151,6 +165,8 @@ export default function Notifications({route}) {
                           setNotificationIDClick(item._id)
                           console.log(item)
                           setOpenNotif(true)
+
+                          handleOpenNotificationItem(item)
 
                           // turn notification.read to true 
                           fetch("https://hanaplingkod.onrender.com/notification/" + global.userData._id, {
@@ -189,13 +205,13 @@ export default function Notifications({route}) {
                               </View>
                           </View>
 
-                          <DialogueModal 
+                          {/* <DialogueModal 
                             firstMessage={item.title}
                             secondMessage={item.body}
                             numBtn={1}
                             visible={openNotif}
                             onDecline={setOpenNotif}
-                          />
+                          /> */}
 
                       </TouchableOpacity>
                       </View>
@@ -229,7 +245,7 @@ const styles = StyleSheet.create({
       fontFamily: 'LexendDeca_SemiBold',
       fontSize: 18,
       marginTop: 20,
-      marginBottom: 10,
+      marginBottom: 25,
     },
     btnContainer: {
       flexGrow: 1,
@@ -262,7 +278,7 @@ const styles = StyleSheet.create({
       height: 120, 
       borderWidth: 1, 
       borderColor: 'rgba(0,0, 0, 0.05)', 
-      marginTop: 25, 
+      marginTop: 15, 
       borderRadius: 15,
     },
     btnImage: {
