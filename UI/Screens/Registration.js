@@ -26,6 +26,7 @@ import ModalDialog from '../Components/ModalDialog';
 import ImagesPicker from '../Components/ImagesPicker';
 import { IPAddress } from '../global/global';
 import OTPVerification from './OTPVerification';
+import DialogueModal from '../Components/DialogueModal';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
@@ -40,7 +41,7 @@ export default function Registration({route}) {
     
     const [placeholderPhoneNum, setPlaceholderPhoneNum] = useState("Phone Number")
     const [user, setUser] = useState({
-      username: "", password: "", firstname: "",
+      username: "", password: "", firstname: "", email: "",
       lastname: "", birthday: "", age: "", gender: "", street: "",
       purok: "", barangay: "", city: "Daet", province: "Camarines Norte", phonenumber: "",
       role: userType,
@@ -66,6 +67,8 @@ export default function Registration({route}) {
     const [isSexModalVisible, setSexModalVisible] = useState(false)
     const [isBarangayModalVisible, setBarangayModalVisible] = useState(false)
     const [isSubCatModalVisible, setSubCatModalVisible] = useState(false)
+
+    const [viewSubmitModal, setViewSubmitModal] = useState(false)
 
     const [isUnlistedModalVisible, setUnlistedModalVisible] = useState(false)
     const [showAddUnlistedServiceModal, setshowAddUnlistedServiceModal] = useState(true)
@@ -429,6 +432,14 @@ export default function Registration({route}) {
       })
       .catch((error) => console.log(error.message))
     }
+
+    const handleVerifyEmail = (val) => {
+      if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(val)){
+          // return true
+          setInvalidEmail(true)
+      }
+      return false
+  }
   
       
     return (
@@ -1126,7 +1137,7 @@ export default function Registration({route}) {
 
 
               {/* Email input */}
-              {/* <View style={[styles.inputContainer]}>
+              <View style={[styles.inputContainer]}>
                 <Icon name='at' size={23} color={"#D0CCCB"} />
                 <TextInput style={styles.input} 
                   autoCapitalize={'none'}
@@ -1143,7 +1154,7 @@ export default function Registration({route}) {
                   onSubmitEditing={ () => ref_fn.current.focus() } 
                   ref={ref_email}
                   />
-              </View> */}
+              </View>
               
               {/* First Name input */}
               <View style={styles.inputContainer}>
@@ -1289,15 +1300,28 @@ export default function Registration({route}) {
                   !user.gender || !user.birthday || !confirmPW || !pwMatch) ? "#ccc" : ThemeDefaults.themeOrange}
                 ]}
                 onPress={()=> { 
-                  setConfirmPW("")
-                  setPWMatch(false)
-                  setNext((current) => current + 1)
-                  haveBlanks()
+                  if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(user.email)){
+                    setConfirmPW("")
+                    setPWMatch(false)
+                    setNext((current) => current + 1)
+                    haveBlanks()
+                  } else {
+                    setViewSubmitModal(true)
+                  }
                   }}
                 >
                 <TText style={styles.nextText}>Next</TText>
                 <Icon name="arrow-right-thin" size={30} color='white' />
               </TouchableOpacity>
+
+              <DialogueModal 
+                firstMessage={"Invalid email address!"}
+                secondMessage={"The email to be submitted should be in the form of 'email@example.com'"}
+                visible={viewSubmitModal}
+                numBtn={1}
+                warning
+                onDecline={setViewSubmitModal}
+              />
             </View>
           </View> 
           : null

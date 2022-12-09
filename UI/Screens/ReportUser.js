@@ -32,7 +32,7 @@ const ReportUser = ({route}) => {
           title: reportTitle,
           reportedUser: userReportedID,
           description: reportDescription,
-          senderId: global.userData._id
+          senderId: global.userData._id,
         })
       }).then(res => res.json())
       .then(data => {

@@ -181,8 +181,8 @@ const ConversationThread = ({route}) => {
         
         const isOnline = onlineUsers.find(user => user.userId === receiver_id)
         
-        // console.log("isOnline: ", isOnline)
-        // setReceiverOnline(isOnline)
+        console.log("isOnline: ", isOnline)
+        setReceiverOnline(isOnline)
         if(isOnline){
             setReceiverOnline(true)
             socket.current.emit("sendMessage", {
