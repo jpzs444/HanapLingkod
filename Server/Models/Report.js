@@ -7,6 +7,7 @@ const reportSchema = new mongoose.Schema(
     reportedUser: String,
     description: String,
     deleteflag: { type: Boolean, default: 0 },
+    senderId: String,
   },
   { timestamps: true }
 );

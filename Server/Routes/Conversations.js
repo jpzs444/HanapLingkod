@@ -56,4 +56,20 @@ router.get(
   }
 );
 
+router.put("/conversations-Unread/:id", async (req, res) => {
+  Conversation.findOneAndUpdate(
+    { _id: req.params.id },
+    {
+      receiverSeen: req.body.receiverSeen,
+      senderSeen: req.body.senderSeen,
+    },
+    function (err) {
+      if (!err) {
+        res.send("updated convo");
+      } else {
+        res.send(err);
+      }
+    }
+  );
+});
 module.exports = router;
