@@ -86,7 +86,7 @@ router.route("/request-post-recruiter/:userId").get(
         .limit(limit * page)
         .lean()
         .exec();
-      res.send(result);
+      res.send(result.reverse());
     } catch (error) {
       res.send(error);
     }
