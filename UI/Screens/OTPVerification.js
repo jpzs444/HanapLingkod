@@ -184,6 +184,7 @@ export default function OTPVerification(props) {
         formData.append("firstname", user.firstname);
         formData.append("lastname", user.lastname);
         formData.append("middlename", user.middlename ? user.middlename : "");
+        formData.append("emailAddress", user.email);
         formData.append("birthday", user.birthday);
         formData.append("age", user.age);
         formData.append("sex", user.gender);
@@ -252,6 +253,7 @@ export default function OTPVerification(props) {
         formData.append("firstname", user.firstname);
         formData.append("lastname", user.lastname);
         formData.append("middlename", user.middlename ? user.middlename : "");
+        formData.append("emailAddress", user.email);
         formData.append("birthday", user.birthday);
         formData.append("age", user.age);
         formData.append("sex", user.gender);
