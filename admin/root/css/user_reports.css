@@ -33,6 +33,7 @@
     display: grid;
     grid-template-columns: 265px 150px 347px 140px;
     transition: 150ms;
+    cursor: pointer;
 }
 
 .reports-tr-data:hover {

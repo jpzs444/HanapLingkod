@@ -1,4 +1,7 @@
 'use strict';
+// import dayjs from 'https://cdn.skypack.dev/dayjs';
+// let relativeTime = require('dayjs/plugin/relativeTime')
+// dayjs.extend(relativeTime)
 
 const UserReport = () => {
 
@@ -14,7 +17,42 @@ const UserReport = () => {
         "userStrikes": "2",
     }
 
+
     const [isPermabanModalOpen, setIsPermabanModalOpen] = React.useState(false)
+    const [reportInformation, setReportInformation] = React.useState({})
+    const [reportedUser, setReportedUser] = React.useState({})
+    const [senderUser, setSenderUser] = React.useState({})
+    const [cDate, setCDate] = React.useState("")
+    const [cDateToNow, setCDateToNow] = React.useState(0)
+    const [offense, setOffense] = React.useState(0)
+
+    React.useEffect(() => {
+        handleFetchReportInformation()
+    }, []);
+
+    const handleFetchReportInformation = async () => {
+        try {
+            let reportId = sessionStorage.getItem("selectedReportItem")
+            await fetch(`https://hanaplingkod.onrender.com/reportAUser/${reportId}`, {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("report item: ", data)
+                setReportInformation({...data.report})
+                setReportedUser({...data.reportedUser})
+                setSenderUser({...data.senderUser})
+                viewDate(data.report.createdAt)
+                setOffense(data.offense)
+            })
+        } catch (error) {
+            console.log("error fetch report information: ", error)
+        }
+    }
+
 
     const handleOpenPermabanModal = () => {
         setIsPermabanModalOpen(true);
@@ -33,6 +71,44 @@ const UserReport = () => {
     const handleClosePenalizeModal = () => {
         setIsPenalizeModalOpen(false);
     }
+
+    const viewDate = (d) => {
+        let month= ["January","February","March","April","May","June","July",
+        "August","September","October","November","December"];
+        let createdAt = new Date(d)
+
+        let monthIndex = month[createdAt.getMonth()]
+        let dd = `${monthIndex} ${createdAt.getDate()}`
+        setCDate(dd.toString())
+        console.log(dd)
+    }
+
+    const handleNotificationAge = (createdAt) => {
+        let notifDate = new Date(createdAt)
+        let dateNow = new Date()
+        let dateDiff = Math.abs(dateNow.getTime() - notifDate.getTime())
+    
+        // convert milliseconds to seconds
+        dateDiff = dateDiff / 1000
+        // console.log("seconds: ", dateDiff)
+    
+        let day = Math.floor(dateDiff / 60 / 60 / 24)
+        if(day === 0) {  
+          let hours = Math.floor(dateDiff / 60 / 60 )
+          if ( hours === 0 ) {
+            let minutes = Math.floor(dateDiff / 60 % 60)
+            
+            if ( minutes === 0 ) {
+              let seconds = Math.floor(dateDiff % 60)
+              return `${seconds} seconds ago`
+            }
+            
+            return minutes > 1 ? `${minutes} minutes ago` : `${minutes} minute ago`
+          }
+            return hours > 1 ? `${hours} hours ago` : `${hours} hour ago`
+        }
+        return day > 1 ? `${day} days ago` : `${day} day ago`
+      }
 
     return(
         <div>
@@ -62,24 +138,24 @@ const UserReport = () => {
 
                 <div>                    
                     <div class="report">
-                        <h1 class="report-title">{DATA.reportTitle}</h1>
-                        <p class="report-date-reporter">Reported {DATA.reportDate} <span class="dot">•</span> {DATA.reportElapsedTime} ago <span class="dot">•</span> {DATA.reporter}</p>
+                        <h1 class="report-title">{reportInformation.title}</h1>
+                        <p class="report-date-reporter">Reported {cDate} <span class="dot">•</span> {handleNotificationAge(reportInformation.createdAt)}  <span class="dot">•</span> {`${senderUser.firstname} ${senderUser.lastname}`}</p>
                         <h4><img class="reported-user-icon" src="./assets/icons/account.png"/>Reported User</h4>
                         <div class="report-user-container">
-                            <div class="report-user-img"><img src={DATA.userImage}/></div>
+                            <div class="report-user-img"><img src={reportedUser.profilePic === 'pic' ? "../assets/icons/account.png" : reportedUser.profilePic}/></div>
                             <div class="report-user-info">
-                                <div>{DATA.userReported}</div>
+                                <div>{`${reportedUser.firstname} ${reportedUser.lastname}`}</div>
                                 <div class="report-user-info-add">
-                                    <div>{DATA.userRole}</div>
+                                    <div>{reportedUser.role}</div>
                                     <div class="dot">•</div>
-                                    <div>Strikes: <span class="strike-number">{DATA.userStrikes}</span></div>
+                                    <div>Strikes: <span class="strike-number">{offense}</span></div>
                                 </div>
                             </div>
 
                             <button class="report-user-view-profile">View</button>
                         </div>
                         <h4><img class="reported-desc-icon" src="./assets/icons/description.png"/>Report Description</h4>
-                        <p class="report-description">"{DATA.reportDescription}"</p>
+                        <p class="report-description">"{reportInformation.description}"</p>
                     </div>
 
                     <div class="report-buttons">

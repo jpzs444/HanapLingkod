@@ -2,6 +2,12 @@
 
 const UserReports = () => {
 
+    const [reports, setReports] = React.useState([])
+
+    React.useEffect(() => {
+        handleFetchReports()
+    }, []);
+
     const DATA = [
         {
             "name": "Juan D. Cruz", 
@@ -21,7 +27,30 @@ const UserReports = () => {
             "reportTitle": "Very rude, did not fix my problem etc.",
             "status": "Dismissed"
         }
-    ]  
+    ]
+
+    const handleClickReport = (itemId) => {
+        sessionStorage.setItem("selectedReportItem", itemId)
+        window.location.assign("./UserReport.html")
+    }
+    
+    const handleFetchReports = async () => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/reportAUser`, {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("reports: ", data)
+                setReports([...data])
+            })
+        } catch (error) {
+            console.log("error fetching reports: ", error)
+        }
+    }
 
     return(
         <div>
@@ -79,12 +108,12 @@ const UserReports = () => {
                                 </th>
                             </tr>
                             {
-                                DATA.map(item => (
-                                    <tr class="reports-tr-data">
-                                        <td>{item.name}</td>
-                                        <td>{item.role}</td>
-                                        <td>{item.reportTitle}</td>
-                                        <td>{item.status}</td>
+                                reports.map(item => (
+                                    <tr class="reports-tr-data" onClick={() => {handleClickReport(item._id)}}>
+                                        <td>{`${item.user.firstname} ${item.user.middlename.charAt(0).toUpperCase()}. ${item.user.lastname}`}</td>
+                                        <td>{item.user.role}</td>
+                                        <td>{item.title}</td>
+                                        <td>{item.deleteflag.toString()}</td>
                                     </tr>
                                 ))
                             }
