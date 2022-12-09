@@ -62,6 +62,7 @@ router.put("/conversations-Unread/:id", async (req, res) => {
     {
       receiverSeen: req.body.receiverSeen,
       senderSeen: req.body.senderSeen,
+      latestMessage: req.body.latestMessage,
     },
     function (err) {
       if (!err) {

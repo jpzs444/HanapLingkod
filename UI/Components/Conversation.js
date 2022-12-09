@@ -8,19 +8,29 @@ const Conversation = ({tab, conversation}) => {
 
     const navigation = useNavigation()
     const [otherUser, setOtherUser] = useState({})
+    const [otherUserIndex, setOtherUserIndex] = useState(0)
 
     useEffect(() => {
         getOtherUser()
     }, [conversation]);
 
+    // useEffect(() => {
+    //     console.log(conversation)
+    //     console.log(otherUser)
+    //     let index = conversation.members.indexOf(otherUser)
+    //     setOtherUserIndex(index)
+    //     console.log("index inside member: ", index)
+    // }, [otherUser]);
+
+
     const getOtherUser = async () => {
-        const otherUser = conversation.members.find(m => m !== global.userData._id)
-        console.log(otherUser)
+        const otherUseri = conversation.members.find(m => m !== global.userData._id)
+        // console.log(otherUser)
 
         let userType = global.userData.role === 'recruiter' ? "Worker" : "Recruiter"
         console.log(userType)
         try {
-            await fetch(`https://hanaplingkod.onrender.com/${userType}/${otherUser}`, {
+            await fetch(`https://hanaplingkod.onrender.com/${userType}/${otherUseri}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
@@ -31,6 +41,7 @@ const Conversation = ({tab, conversation}) => {
             .then(foundUser => {
                 // console.log("other user data: ", foundUser)
                 setOtherUser({...foundUser})
+                // console.log("index inside member: ", index)
             })
         } catch (error) {
             console.log("get OtherUser: ", error)
@@ -42,9 +53,7 @@ const Conversation = ({tab, conversation}) => {
     <TouchableOpacity style={[styles.container, styles.flexRow]}
         activeOpacity={0.5}
         onPress={() => {
-            console.log("hehe")
-            console.log("otherUser: ", typeof otherUser)
-            console.log("conversation contains: ", conversation)
+            // console.log("conversation contains: ", conversation)
             navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
         }}
     >
@@ -53,10 +62,10 @@ const Conversation = ({tab, conversation}) => {
       />
       <View style={[styles.convoInfo]}>
         <View style={[styles.flexRow, {alignItems: 'center'}]}>
-            <TText style={styles.name}>{`${otherUser.firstname} ${otherUser.lastname}`}</TText>
-            <TText style={styles.date}> &#x2022; Nov 11</TText>
+            <TText style={[styles.name, {fontFamily: conversation.members.indexOf(global.userData._id) === 0 ? conversation.senderSeen ? "LexendDeca" : "LexendDeca_SemiBold" : conversation.receiverSeen ? "LexendDeca" : "LexendDeca_SemiBold"}]}>{`${otherUser.firstname} ${otherUser.lastname}`}</TText>
+            <TText style={styles.date}>  &#x2022;  Nov 11</TText>
         </View>
-        <TText style={[styles.message, tab === "Unread" && styles.unreadMessage]}>The quick brown fox</TText>
+        <TText style={[styles.message, tab === "Unread" && styles.unreadMessage]}>{conversation.latestMessage}</TText>
       </View>
     </TouchableOpacity>
   )
@@ -66,17 +75,17 @@ export default Conversation
 
 const styles = StyleSheet.create({
     container: {
-        borderBottomWidth: 1.3,
-        borderBottomColor: '#ddd',
-        paddingVertical: 15
+        borderTopWidth: 1.3,
+        borderTopColor: '#ddd',
+        paddingVertical: 12
     },
     flexRow: {
         flexDirection: 'row',
         alignItems: 'center'
     },
     image: {
-        width: 60,
-        height: 60,
+        width: 50,
+        height: 50,
         borderRadius: 15,
     },
     convoInfo: {
@@ -84,12 +93,12 @@ const styles = StyleSheet.create({
     },
     name: {
         color: '#0f0f0f',
-        fontFamily: "LexendDeca_Medium",
-        fontSize: 15
+        fontFamily: "LexendDeca",
+        fontSize: 17
     },
     date: {
         color: '#bbb',
-        fontSize: 13
+        fontSize: 12
     },
     message: {
         marginTop: 5,

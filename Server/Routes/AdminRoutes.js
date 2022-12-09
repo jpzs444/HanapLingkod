@@ -113,6 +113,48 @@ router.route("/verifyUser/:role").post(async function (req, res) {
   }
 });
 
+router.route("/notify-reporter/:action").post(async function (req, res) {
+  let reporterquery = {};
+  if (await Recruiters.exists({ _id: req.body.reporter })) {
+    reporterquery = await Recruiters.findOne(
+      { _id: req.body.reporter },
+      { pushtoken: 1, _id: 0 }
+    ).lean();
+  } else if (await Workers.exists({ _id: req.body.reporter })) {
+    reporterquery = await Workers.findOne(
+      { _id: req.body.reporter },
+      { pushtoken: 1, _id: 0 }
+    ).lean();
+  }
+  if (req.params.action === "penalize") {
+    notification(
+      [reporterquery.pushtoken],
+      "Your report for " +
+        req.body.firstname +
+        " " +
+        req.body.lastname +
+        " has been reviewed.",
+      "The Admins of HanapLingkod have reviewed your report and imposed a penalty on the reported user.",
+      { Type: "Offense Warning", id: req.body.reporter },
+      req.body.reporter
+    );
+  } else if (req.params.action === "dismissed") {
+    notification(
+      [reporterquery.pushtoken],
+      "Your report for " +
+        req.body.firstname +
+        " " +
+        req.body.lastname +
+        " has been dismissed.",
+      "The Admins of HanapLingkod have reviewed the actions of your reported user and he/she will not be receiving a penalty. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
+      { Type: "Offense Warning", id: req.body.reporter },
+      req.body.reporter
+    );
+  }
+  console.log("Notification Sent");
+  res.send("Notification Sent");
+});
+
 router
   .route("/banUser/:role")
   .get(async function (req, res) {
@@ -152,7 +194,7 @@ router
         ).lean();
         notification(
           [pushIDRecruiter.pushtoken],
-          "A user has reported you about a (request-booking-comment-message) and this serves as a warning to you.",
+          "A user has reported you and this serves as a warning to you.",
           "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to give you a strike. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com",
           { Type: "Offense Warning", id: req.body.id },
           req.body.id
@@ -167,7 +209,7 @@ router
         ).lean();
         notification(
           [pushIDRecruiter.pushtoken],
-          "A user has reported you about a (request-booking-comment-message) and this serves as a warning to you.",
+          "A user has reported you and this serves as a warning to you.",
           "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to give you a strike. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com",
           { Type: "Offense Warning", id: req.body.id },
           req.body.id
@@ -188,7 +230,7 @@ router
         ).lean();
         notification(
           [pushIDRecruiter.pushtoken],
-          "A user has reported you about a (request-booking-comment-message) and you are banned permanently",
+          "A user has reported you and you are banned permanently",
           "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you permanently. You can no longer use the application and you are restricted from logging in again. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
           { Type: "Offense Warning", id: req.body.id },
           req.body.id
@@ -203,7 +245,7 @@ router
         ).lean();
         notification(
           [pushIDRecruiter.pushtoken],
-          "A user has reported you about a (request-booking-comment-message) and you are banned as a penalty.",
+          "A user has reported you and you are banned as a penalty.",
           "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you for " +
             daysBanned[offense] +
             " day/s. While banned, you will not be able to use certain features of the application. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
@@ -235,7 +277,7 @@ router
         ).lean();
         notification(
           [pushIDWorker.pushtoken],
-          "A user has reported you about a (request-booking-comment-message) and this serves as a warning to you.",
+          "A user has reported you and this serves as a warning to you.",
           "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to give you a strike. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
           { Type: "Offense Warning", id: req.body.id },
           req.body.id
@@ -251,7 +293,7 @@ router
         ).lean();
         notification(
           [pushIDWorker.pushtoken],
-          "A user has reported you about a (request-booking-comment-message) and this serves as a warning to you.",
+          "A user has reported you about and this serves as a warning to you.",
           "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to give you a strike. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
           { Type: "Offense Warning", id: req.body.id },
           req.body.id
@@ -272,7 +314,7 @@ router
         ).lean();
         notification(
           [pushIDWorker.pushtoken],
-          "A user has reported you about a (request-booking-comment-message) and you are banned permanently",
+          "A user has reported you and you are banned permanently",
           "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you permanently. You can no longer use the application and you are restricted from logging in again. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
           { Type: "Offense Warning", id: req.body.id },
           req.body.id
@@ -287,7 +329,7 @@ router
         ).lean();
         notification(
           [pushIDWorker.pushtoken],
-          "A user has reported you about a (request-booking-comment-message) and you are banned as a penalty.",
+          "A user has reported you and you are banned as a penalty.",
           "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you for " +
             daysBanned[offense] +
             " day/s. While banned, you will not be able to use certain features of the application. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",

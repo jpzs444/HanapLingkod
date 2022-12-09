@@ -7,12 +7,13 @@ import ThemeDefaults from '../Components/ThemeDefaults';
 import { FlashList } from '@shopify/flash-list';
 import Conversation from '../Components/Conversation';
 import { IPAddress } from '../global/global';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 
 
 const Messaging = () => {
 
   const navigation = useNavigation()
+  const isFocused = useIsFocused()
 
   const [activeBtn, setActiveBtn] = useState("All")
   const [conversations, setConversations] = useState([])
@@ -29,7 +30,7 @@ const Messaging = () => {
 
   useEffect(() => {
     getConversations()
-  },[page])
+  },[page, isFocused])
 
   const getConversations = async () => {
     try {
@@ -61,41 +62,28 @@ const Messaging = () => {
     </TouchableOpacity>
   )
 
-  const addConversation = () => {
-    fetch(`https://hanaplingkod.onrender.com/conversations`, {
-      method: "POST",
-      headers: {
-        'content-type': 'application/json',
-        "Authorization": global.accessToken
-      },
-      body: JSON.stringify({
-        senderId: '636c9025f624714429165b1a',
-        receiverId: "636a5adf02c0228c61750733",
-      })
-    }).catch(err => console.log('error add convo: ', err))
-  }
 
   const ScreenHeader = () => (
     <>
       <View style={styles.header}>
         <TText style={styles.headerTitle}>Messages</TText>
 
-        <View style={[styles.searchInputContainer, styles.flexRow]}>
+        {/* <View style={[styles.searchInputContainer, styles.flexRow]}>
           <Icon name="magnify" size={25} color={'#bbb'} />
           <TextInput 
             placeholder='Search'
             cursorColor={ThemeDefaults.themeOrange}
             style={styles.textInput}
           />
-        </View>
+        </View> */}
       </View>
 
       {/* Read | Unread */}
-      <View style={[styles.convoSelector, styles.flexRow]}>
+      {/* <View style={[styles.convoSelector, styles.flexRow]}>
         <Selector label={"All"} />
         <View style={styles.verticalLine}></View>
         <Selector label={"Unread"} />
-      </View>
+      </View> */}
     </>
   )
 
@@ -106,7 +94,7 @@ const Messaging = () => {
       <View style={styles.body}>
         <ScreenHeader />
 
-        {
+        {/*
           conversations.length > 0 ?
           conversations.map(conversationItem => {
             console.log("convo id: ", conversationItem._id)
@@ -117,7 +105,7 @@ const Messaging = () => {
           <View style={{alignItems: 'center', marginTop: 50}}>
             <TText style={{color: '#bbb'}}>No conversations at the moment</TText>
           </View>
-        }
+        */}
 
         {/* <Conversation tab={activeBtn} conversation={} />
         <Conversation tab={activeBtn} />
@@ -131,14 +119,19 @@ const Messaging = () => {
           <TText>Add convo</TText>
         </TouchableOpacity> */}
 
-        {/* <FlashList 
-              data={conversations}
-              keyExtractor={key => key._id}
-              estimatedItemSize={80}
-              renderItem={({item}) => (
-                <Conversation tab={activeBtn} conversation={item} />
-              )}
-        /> */}
+        <FlashList 
+            data={conversations}
+            keyExtractor={key => key._id}
+            estimatedItemSize={80}
+            ListEmptyComponent={() => (
+              <View style={{alignItems: 'center', marginTop: 50}}>
+                <TText style={{color: '#bbb'}}>No conversations at the moment</TText>
+              </View>
+            )}
+            renderItem={({item}) => (
+              <Conversation key={item._id} conversation={item} />
+            )}
+        />
       </View>
     </View>
   )
@@ -153,6 +146,7 @@ const styles = StyleSheet.create({
     },
     body: {
       marginHorizontal: 30,
+      flexGrow: 1,
     },
     flexRow: {
       flexDirection: 'row',
@@ -165,7 +159,8 @@ const styles = StyleSheet.create({
     headerTitle: {
       fontFamily: 'LexendDeca_SemiBold',
       fontSize: 20,
-      marginBottom: 15
+      marginBottom: 15,
+      textAlign: 'center'
     },
     searchInputContainer: {
       backgroundColor: '#e5e5e5',
