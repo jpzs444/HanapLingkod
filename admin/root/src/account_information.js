@@ -1,6 +1,6 @@
 'use strict';
 
-const UserReport = () => {
+const AccountInformation = () => {
 
     const DATA = {
         "accountImage": "https://www.panaynews.net/wp-content/uploads/2018/07/Coco-10-e1531191379317.jpg",
@@ -133,4 +133,4 @@ const UserReport = () => {
 
 const rootNode = document.getElementById('rootcomponent');
 const root = ReactDOM.createRoot(rootNode);
-root.render(React.createElement(UserReport));
+root.render(React.createElement(AccountInformation));
