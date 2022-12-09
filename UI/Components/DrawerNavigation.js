@@ -108,7 +108,7 @@ export default function DrawerNavigation(){
                 <Drawer.Screen name="ReportsDrawer" component={Reports} options={{
                     drawerLabel: "Reports",
                     drawerIcon: ({color}) => (
-                        <Icon name="forum" size={25} color={color}  />
+                        <Icon name="alert-circle" size={25} color={color}  />
                     ),
                     drawerLabelStyle: {
                         fontFamily: "LexendDeca_Medium",
@@ -119,7 +119,7 @@ export default function DrawerNavigation(){
                 <Drawer.Screen name="SubmitSupportDrawer" component={SubmitSupport} options={{
                     drawerLabel: "Submit Support",
                     drawerIcon: ({color}) => (
-                        <Icon name="forum" size={25} color={color}  />
+                        <Icon name="lifebuoy" size={25} color={color}  />
                     ),
                     drawerLabelStyle: {
                         fontFamily: "LexendDeca_Medium",

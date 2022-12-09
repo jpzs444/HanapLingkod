@@ -26,6 +26,8 @@ const ConversationThread = ({route}) => {
 
     const [onlineUsers, setOnlineUsers] = useState([])
     const [receiverOnline, setReceiverOnline] = useState(true)
+
+    const [convo, setConvo] = useState({})
     
     const socket = useRef()
 
@@ -42,7 +44,7 @@ const ConversationThread = ({route}) => {
     
 
     useEffect(() => {
-        socket.current = io(`ws://${IPAddress}:8900`)
+        socket.current = io(`https://hanaplingkodchat.onrender.com/`)
         // console.log("type of socketCOntextref: " , typeof )
         socket.current.on("getMessage", data => {
             setIncomingMessage({
@@ -61,7 +63,7 @@ const ConversationThread = ({route}) => {
     useEffect(() => {
         socket.current.emit("addUser", global.userData._id)
         socket.current.on("getUsers", users => {
-            // console.log("online users(convo thread): ", users)
+            console.log("online users(convo thread): ", users)
             setOnlineUsers([...users])
         })
     }, [route]);
@@ -72,13 +74,35 @@ const ConversationThread = ({route}) => {
     }, [route]);
 
     useEffect(() => {
+        console.log("from route: ", conversation)
+        console.log("from route: ", otherUser)
+        // getConversation()
         getMessages()
-    }, [page]);
+    }, []);
+
+
+    // const getConversation = () => {
+    //     try {
+    //         fetch(`https://hanaplingkod.onrender.com/conversations/find/${conversation.members[0]}/${conversation.members[1]}`, {
+    //             method: "GET",
+    //             headers: {
+    //                 "content-type": "application/json",
+    //                 "Authorization": global.accessToken
+    //             }
+    //         }).then(res => res.json())
+    //         .then(data => {
+    //             console.log("data conversation: ", data)
+    //             setConvo({...data})
+    //         })
+    //     } catch (error) {
+    //         console.log("error fetch conversaton from convo thread: ", error)
+    //     }
+    // }
 
 
     const getMessages = () => {
         try {
-            fetch(`https://hanaplingkod.onrender.com/messages/${conversation._id}?page=${page}`, {
+            fetch(`https://hanaplingkod.onrender.com/messages/${conversation._id}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
@@ -86,8 +110,8 @@ const ConversationThread = ({route}) => {
                 }
             }).then(res => res.json())
             .then(data => {
-                // console.log("convo from messages: ", data)
-                setMessages([...data])
+                console.log("convo from messages: ", data)
+                data ? setMessages([...data]) : null
                 setCanScroll(true)
             })
         } catch (error) {
@@ -98,7 +122,7 @@ const ConversationThread = ({route}) => {
 
     }
 
-    const handleSendMessage = async () => {
+    const handleSendMessage = () => {
 
         const receiver_id = conversation.members?.find(member => member !== global.userData._id)
         
@@ -121,7 +145,7 @@ const ConversationThread = ({route}) => {
         
 
         try {
-            await fetch(`https://hanaplingkod.onrender.com/messages`, {
+            fetch(`https://hanaplingkod.onrender.com/messages`, {
                 method: "POST",
                 headers: {
                     'content-type': 'application/json',
@@ -274,10 +298,9 @@ const ConversationThread = ({route}) => {
             <FlashList 
                 data={messages}
                 keyExtractor={item => item._id}
-                estimatedItemSize={200}
-                onEndReachedThreshold={0.5}
-                onEndReached={() => setPage(prevPage => prevPage + 1)}
+                estimatedItemSize={80}
                 contentContainerStyle={{paddingVertical: 60}}
+                ListEmptyComponent={() => (<View><TText> </TText></View>)}
                 renderItem={({item}) => (
                     <Messagebox message={item?.text} fromMe={item?.sender === global.userData._id} />
                 )}

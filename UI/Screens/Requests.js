@@ -133,7 +133,12 @@ const Requests = () => {
                             {
                                 declinedRequests.map(function(item, index){
                                     return(
-                                        <View key={index} style={[styles.requestCard, styles.requestCanceledCard]}>
+                                        <TouchableOpacity key={index} style={[styles.requestCard, styles.requestCanceledCard]}
+                                            activeOpacity={0.5}
+                                            onPress={() => {
+                                                navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
+                                            }}
+                                        >
                                             {/* View when card is clicked/opened */}
 
                                             {/* card */}
@@ -184,7 +189,7 @@ const Requests = () => {
                                                     </View>
                                                 </View>
                                             </View>
-                                        </View>
+                                        </TouchableOpacity>
                                     )
                                 })
                             }
@@ -228,7 +233,12 @@ const Requests = () => {
                 renderItem={({item}) => (
                     <>
                         
-                        <View style={[styles.requestCard, {backgroundColor: item.requestStatus == '4' ? "#999" : ThemeDefaults.themeWhite }]}>
+                        <TouchableOpacity style={[styles.requestCard, {backgroundColor: item.requestStatus == '4' ? "#999" : ThemeDefaults.themeWhite }]}
+                            activeOpacity={0.5}
+                            onPress={() => {
+                                navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
+                            }}
+                        >
 
                         {/* card */}
                         <View style={[styles.cardUserImage]}>
@@ -278,7 +288,7 @@ const Requests = () => {
                                 </View>
                             </View>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                 </>
                 )}
             />

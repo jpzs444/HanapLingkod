@@ -297,23 +297,17 @@ const VIewServiceRequest = ({route}) => {
             }).then(res => res.json())
             .then(data => {
                 console.log("conversation data: ", data[0])
+                navigation.navigate("ConversationThreadDrawer", {
+                    "otherUser": global.userData.role === 'recruiter' ? requestItem.workerId : requestItem.recruiterId, 
+                    "conversation": data[0]
+                })
                 setConversation({...data[0]})
-                handleGoToConversation()
             })
         } catch (error) {
             console.log("Error creating new convo: ", error)
         }
     }
 
-    const handleGoToConversation = () => {
-        // navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
-        console.log("otgerUser: ", typeof requestItem.workerId)
-        console.log("convo: ", typeof conversation)
-        navigation.navigate("ConversationThreadDrawer", {
-            "otherUser": global.userData.role === 'recruiter' ? requestItem.workerId : requestItem.recruiterId, 
-            "conversation": conversation
-        })
-    }
 
   return (
     <SafeAreaView style={styles.outermostContainer}>
