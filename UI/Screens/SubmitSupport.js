@@ -5,28 +5,63 @@ import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
 import DialogueModal from '../Components/DialogueModal'
+import { useNavigation } from '@react-navigation/native'
 
 const SubmitSupport = () => {
+
+    const navigation = useNavigation()
 
     const [email, setEmail] = useState("")
     const [subject, setSubject] = useState("")
     const [message, setMessage] = useState("")
 
+    const [invalidEmail, setInvalidEmail] = useState(false)
+    const [viewInvalidEmailModal, setViewInvalidEmailModal] = useState(false)
+
     const [viewSubmitModal, setViewSubmitModal] = useState(false)
 
-    const handleSubmitSupportMail = () => {
+    useEffect(() => {
+        setEmail("")
+        setSubject("")
+        setMessage("")
+        setInvalidEmail(false)
+        setViewInvalidEmailModal(false)
+        setViewSubmitModal(false)
+    }, []);
+
+    const handleSubmitSupportMail = async () => {
         try {
-            // await fetch()
+            await fetch(`https://hanaplingkod.onrender.com/customerSupport`, {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken
+                },
+                body: JSON.stringify({
+                    email: email,
+                    subject: subject,
+                    text: message
+                })
+            })
             console.log("handleSubmitSupport")
             setViewSubmitModal(false)
+            navigation.navigate("Home_Drawer")
         } catch (error) {
             console.log("submit support email: ", error)
         }
     }
 
+    const handleVerifyEmail = (val) => {
+        if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(val)){
+            // return true
+            setInvalidEmail(true)
+        }
+        return false
+    }
+
     return (
         <ScrollView style={styles.container}>
-            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} />
+            <Appbar menuBtn={true} showLogo={true} hasPicture={true} />
 
             <View style={styles.headerContainer}>
                 <TText style={styles.headerTitle}>Ask for Support</TText>
@@ -40,6 +75,11 @@ const SubmitSupport = () => {
                     <View style={styles.container_input}>
                         <TextInput 
                             placeholder='Enter your email here'
+                            onChangeText={val => {
+                                setEmail(val)
+                            }}
+                            keyboardType={"email-address"}
+                            value={email ? email : ""}
                             style={styles.input_email}
                         />
                     </View>
@@ -50,6 +90,8 @@ const SubmitSupport = () => {
                     <View style={styles.container_input}>
                         <TextInput 
                             placeholder='Enter subject here'
+                            onChangeText={val => setSubject(val)}
+                            value={subject ? subject : ""}
                             style={styles.input_email}
                         />
                     </View>
@@ -63,6 +105,8 @@ const SubmitSupport = () => {
                             multiline
                             numberOfLines={6}
                             textAlignVertical={"top"}
+                            onChangeText={val => setMessage(val)}
+                            value={message ? message : ""}
                             style={[styles.input_email, {paddingTop: 5}]}
                         />
                     </View>
@@ -70,11 +114,19 @@ const SubmitSupport = () => {
 
                 <View style={styles.container_submitButton}>
                     <TouchableOpacity
-                        style={styles.button_submit}
+                        style={[styles.button_submit, {backgroundColor: !email || !subject || !message ? "#ccc" : ThemeDefaults.themeOrange, elevation: !email || !subject || !message ? 0 : 3}]}
                         activeOpacity={0.5}
+                        disabled={
+                            !email || !subject || !message
+                        }
                         onPress={() => {
                             console.log("submit email")
-                            setViewSubmitModal(true)
+                            if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
+                                setViewSubmitModal(true)
+                            } else {
+                                setInvalidEmail(true)
+                                setViewInvalidEmailModal(true)
+                            }
                         }}
                     >
                         <TText style={styles.button_textSubmit}>Submit</TText>
@@ -88,6 +140,15 @@ const SubmitSupport = () => {
                     visible={viewSubmitModal}
                     onAccept={handleSubmitSupportMail}
                     onDecline={setViewSubmitModal}
+                />
+
+                <DialogueModal 
+                    firstMessage={"Invalid Email!"}
+                    secondMessage={"The email to be submitted should be in the form of 'email@example.com'"}
+                    numBtn={1}
+                    warning
+                    visible={viewInvalidEmailModal}
+                    onDecline={setViewInvalidEmailModal}
                 />
 
             </View>
@@ -139,13 +200,15 @@ const styles = StyleSheet.create({
         fontSize: 16
     },
     container_submitButton: {
-        marginTop: 100
+        marginTop: 80
     },
     button_submit: {
         paddingVertical: 15,
         backgroundColor: ThemeDefaults.themeOrange,
         alignItems: 'center',
-        borderRadius: 15
+        borderRadius: 15,
+        marginBottom: 20,
+        elevation: 3
     },
     button_textSubmit: {
         fontFamily: 'LexendDeca_Medium',

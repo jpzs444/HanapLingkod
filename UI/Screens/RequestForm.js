@@ -1197,13 +1197,13 @@ const RequestForm = ({route, navigation}) => {
                                 </View>
                                 <View style={styles.nameStarContainer}>
                                     <Icon name='star' size={20} color="gold" />
-                                    <TText style={styles.workerStars}>4.7</TText>
+                                    <TText style={styles.workerStars}>{loadedWorkerInfo.rating}</TText>
                                 </View>
                             </View>
                             {/* <View style={styles.viewBtnContainer}> */}
                                 <TouchableOpacity style={styles.viewProfileBtn}
                                     onPress={() => {
-                                        navigation.navigate("WorkerProfileDrawer", {workerID: workerID})
+                                        navigation.navigate("WorkerProfileDrawer", {workerID: workerID, otherUser: loadedWorkerInfo, userRole: false})
                                     }}
                                 >
                                     <TText style={styles.viewProfileText}>Profile</TText>

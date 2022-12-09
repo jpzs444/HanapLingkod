@@ -181,7 +181,7 @@ const Bookings = () => {
 
     return (
         <SafeAreaView style={styles.mainContainer}>
-            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} />
+            <Appbar menuBtn={true} showLogo={true} hasPicture={true} />
 
             <View style={styles.listContainer}>
                 <FlashList 

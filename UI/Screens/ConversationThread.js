@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
 import TText from '../Components/TText'
-import { useNavigation } from '@react-navigation/native'
+import { useIsFocused, useNavigation } from '@react-navigation/native'
 import { IPAddress } from '../global/global'
 import { FlashList } from '@shopify/flash-list'
 import { io } from 'socket.io-client'
@@ -15,6 +15,7 @@ import { io } from 'socket.io-client'
 const ConversationThread = ({route}) => {
 
     const { otherUser, conversation } = route.params
+    const isFocused = useIsFocused()
     // const socketContextRef = useContext(socketContext)
 
     const navigation = useNavigation()
@@ -33,6 +34,11 @@ const ConversationThread = ({route}) => {
 
     let scrollRef;
     const [canScroll, setCanScroll] = useState(false)
+
+
+    useEffect(() => {
+        handleSeenByMe()
+    }, [isFocused]);
 
     useEffect(() => {
         if(canScroll){
@@ -63,20 +69,17 @@ const ConversationThread = ({route}) => {
     useEffect(() => {
         socket.current.emit("addUser", global.userData._id)
         socket.current.on("getUsers", users => {
-            console.log("online users(convo thread): ", users)
+            // console.log("online users(convo thread): ", users)
             setOnlineUsers([...users])
         })
     }, [route]);
 
 
     useEffect(() => {
-        navigation.addListener("focus", () => {getMessages()})
-    }, [route]);
-
-    useEffect(() => {
-        console.log("from route: ", conversation)
-        console.log("from route: ", otherUser)
+        // console.log("from route: ", conversation)
+        // console.log("from route: ", otherUser)
         // getConversation()
+        handleSeenByMe()
         getMessages()
     }, []);
 
@@ -99,6 +102,56 @@ const ConversationThread = ({route}) => {
     //     }
     // }
 
+    const handleSeenByMe = () => {
+        try {
+            let index = conversation.members.indexOf(global.userData._id)
+            let updateWho = index === 0 ? {senderSeen: true} : {receiverSeen: true}
+
+            // console.log("convo id index: ", index)
+            // console.log("user id: ", global.userData._id)
+
+
+            // console.log("convo id: ", conversation._id)
+            // console.log("updatewho: ", updateWho)
+
+            fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversation._id}`, {
+                method: "PUT",
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken
+                },
+                body: JSON.stringify({...updateWho})
+            })
+            .then(() => console.log("did seen"))
+        } catch (error) {
+            console.log("!!!!!!!error update seen(convo): ", error)
+        }
+    }
+
+    const handleSetReceiverSeen = async () => {
+        // index 0 sender
+        // index 1 receiver
+
+        try {
+            let index = conversation.members.indexOf(global.userData._id)
+            let updateWho = index === 0 ? {receiverSeen: false, latestMessage: message} : {senderSeen: false, latestMessage: message}
+
+
+            console.log("convo id: ", conversation._id)
+
+            await fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversation._id}`, {
+                method: "PUT",
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken
+                },
+                body: JSON.stringify({...updateWho})
+            }).then(() => console.log("receiver seen updated"))
+        } catch (error) {
+            console.log("!!!!!!!error update seen(convo): ", error)
+        }
+    }
+
 
     const getMessages = () => {
         try {
@@ -110,7 +163,7 @@ const ConversationThread = ({route}) => {
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log("convo from messages: ", data)
+                // console.log("convo from messages: ", data)
                 data ? setMessages([...data]) : null
                 setCanScroll(true)
             })
@@ -163,7 +216,7 @@ const ConversationThread = ({route}) => {
                 // console.log("new message data: ", newMessage)
                 setMessages([...messages, newMessage])
                 setCanScroll(true)
-
+                handleSetReceiverSeen()
             })
 
             console.log("success new sending message")

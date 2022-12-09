@@ -46,7 +46,7 @@ const Workers = () => {
   const firstUpdate = useRef(true)
 
   useEffect(() => {
-      getAllWorkers()
+      getAllWorkers(`https://hanaplingkod.onrender.com/Worker?page=${currentPage}`)
       navigation.addListener("focus", () => setCurrentPage(1))
       // setPrevListWorker([...listOfWorkers])
   }, [currentPage])
@@ -66,15 +66,10 @@ const Workers = () => {
   }
 
 
-    const getAllWorkers = async (url) => {
-        setLoading(true)
-        console.log("url url url: ", url)
-        let API = `https://hanaplingkod.onrender.com/Worker?page=${1}`
-        if(url){
-            API = url
-        }
+    const getAllWorkers = (url) => {
+        console.log("url: ", url)
         try {
-            await fetch(API, {
+            fetch(url, {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
@@ -97,25 +92,41 @@ const Workers = () => {
         }
     }
 
-    const filterCategoryWithSettings = () => {
+    const filterCategoryWithSettings = (field, filter) => {
         let baseURL = "https://hanaplingkod.onrender.com/Worker"
+        setLoading(true)
 
-        if(verifiedFilter) {
-            baseURL = baseURL.concat(`?verified=${verifiedFilter}`)
+        if(field === 'verification' || verifiedFilter) {
+            baseURL = baseURL.concat(`?verification=${filter}`)
+            console.log("verification: ", filter)
+        setLoading(true)
+
         }
 
-        if(barangayFilter) {
-            baseURL = baseURL.concat(`?barangay=${barangayFilter}`)
+        if(field === 'barangay' || barangayFilter) {
+            baseURL = baseURL.concat(`?barangay=${filter}`)
+            console.log("barangay: ", filter)
+            setLoading(true)
+
         }
 
-        if(categoryFilter){
-            baseURL = baseURL.concat(`?category=${categoryFilter}`)
+        if(field === 'category' || categoryFilter){
+            baseURL = baseURL.concat(`?works=${filter}`)
+        setLoading(true)
+         
+            console.log("category: ", filter)
         }
 
-        if(ratingFilter){
-            baseURL = baseURL.concat(`?rating=${ratingFilter}`)
+        if(field === 'rating' || ratingFilter){
+            baseURL = baseURL.concat(`?rating=${filter}`)
+            console.log("rating: ", filter)
+        setLoading(true)
+
         }
 
+        console.log(baseURL)
+
+        getAllWorkers(baseURL)
         getAllWorkers(baseURL)
     }
 
@@ -187,7 +198,7 @@ const Workers = () => {
         setCategoryFilter("")
         setRatingFilter("")
         setCurrentPage(1)
-        getAllWorkers()
+        getAllWorkers(`https://hanaplingkod.onrender.com/Worker?page=${currentPage}`)
         setHasResults(true)
         setPrevListWorker([...listOfWorkers])
       }
@@ -195,7 +206,7 @@ const Workers = () => {
     const ListHeaderComponent = () => {
         return(
             <>
-                <Appbar hasPicture={true} backBtn={true} accTypeSelect={true} showLogo={true} />
+                <Appbar hasPicture={true} menuBtn={true} accTypeSelect={true} showLogo={true} />
                 <View style={styles.header}>
                     <TText style={styles.headerTitle}>Workers</TText>
                 </View>
@@ -216,8 +227,10 @@ const Workers = () => {
                                 <ModalPicker 
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
+                                        setLoading(true)
+
                                         setVerifiedFilter(filter === "Verified" ? true : false )
-                                        filterCategoryWithSettings()
+                                        filterCategoryWithSettings("verification", filter)
                                         // filter === "All" ? handleResetFilter() : filter === 'Verified' ? filterVerifiedList(true) : filterVerifiedList(false)
                                     }}
                                     verifiedFilter={true}
@@ -242,9 +255,11 @@ const Workers = () => {
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
                                         // setBarangayFilter("")
+                                        setLoading(true)
+
                                         console.log(filter)
                                         setBarangayFilter(filter)
-                                        filterCategoryWithSettings()
+                                        filterCategoryWithSettings("barangay", filter)
                                         // filterBarangayList(filter)
                                     }}
                                     barangay={true}
@@ -266,8 +281,11 @@ const Workers = () => {
                                 <ModalPicker 
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
+                                        setLoading(true)
+
+                                        console.log(filter.ServiceSubCategory)
                                         setCategoryFilter(filter.ServiceSubCategory)
-                                        filterCategoryWithSettings()
+                                        filterCategoryWithSettings("category", filter.ServiceSubCategory)
 
                                         // filterCategoryList(filter.ServiceSubCategory)
                                     }}
@@ -290,8 +308,10 @@ const Workers = () => {
                                 <ModalPicker 
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
+                                        setLoading(true)
+
                                         setRatingFilter(filter)
-                                        filterCategoryWithSettings()
+                                        filterCategoryWithSettings("rating", filter)
                                     }}
                                     ratingFilter={true}
                                 />
@@ -364,7 +384,7 @@ const Workers = () => {
                                 {/* item.verification === verifiedFilter || item.barangay === barangayFilter || item || !hasFilter ? */}
                 <View style={{width: WIDTH, height: HEIGHT, paddingTop: 0,}}>
                     <FlashList 
-                        data={prevListWorker}
+                        data={listOfWorkers}
                         extraData={prevListWorker}
                         keyExtractor={item => item._id}
                         estimatedItemSize={100}
@@ -376,8 +396,14 @@ const Workers = () => {
                         onEndReached={() => {setCurrentPage(prev => prev + 1)}}
                         ListEmptyComponent={() => (
                             <View style={{alignItems: 'center', marginTop: 10}}>
-                                {}
-                                <TText style={{fontSize: 18, color: 'gray'}}>No results found. Try again</TText>
+                                {
+                                    loading ?
+                                    <View style={{width: '100%', marginTop: 30, alignItems: 'center'}}>
+                                        <ActivityIndicator size={'large'} />
+                                    </View>
+                                    :
+                                    <TText style={{fontSize: 18, color: 'gray'}}>No results found. Try again</TText>
+                                }
                             </View>
                         )}
                         ListHeaderComponent={() => (
@@ -389,7 +415,7 @@ const Workers = () => {
                         renderItem={({item, index}) => (
                             <> 
                             {
-                                hasResults ?
+                                hasResults && !loading ?
                                                  
                             <TouchableOpacity style={{width: '100%', paddingHorizontal: 30, height: 130, zIndex:10, backgroundColor: ThemeDefaults.themeWhite}}
                                 activeOpacity={0.5}
@@ -439,7 +465,10 @@ const Workers = () => {
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                            : null
+                            : 
+                            <View style={{width: '100%', marginTop: 50, alignItems: 'center'}}>
+                                <ActivityIndicator size={'large'} />
+                            </View>
                             }
                             </>
                         )}
