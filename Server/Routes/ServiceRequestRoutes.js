@@ -78,7 +78,7 @@ router
         .exec();
       console.log(pendingRequest);
       if (pendingRequest === 0) {
-        cnosole.log("true");
+        console.log("true");
         let startTime = dayjs(
           req.body.serviceDate + " " + req.body.startTime
         ).toISOString();
