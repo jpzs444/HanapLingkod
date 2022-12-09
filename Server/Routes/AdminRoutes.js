@@ -582,6 +582,8 @@ router
   .get(async function (req, res) {
     let report = await Report.findOne({ _id: req.params.id }).lean().exec();
     let reportedUser;
+    let senderUser;
+    let offense;
     if (
       (await Workers.count({ _id: report.reportedUser }).lean().exec()) != 0
     ) {
@@ -592,6 +594,12 @@ router
         .lean()
         .exec();
       reportedUser = user;
+
+      offense = await BannedWorker.count({
+        workerId: req.body.id,
+      })
+        .lean()
+        .exec();
     }
     if (
       (await Recruiters.count({ _id: report.reportedUser }).lean().exec()) != 0
@@ -601,8 +609,36 @@ router
         .lean()
         .exec();
       reportedUser = user;
+      offense = await BannedRecruiter.count({
+        recruiterId: report.reportedUser,
+      })
+        .lean()
+        .exec();
     }
-    res.send({ report: report, reportedUser: reportedUser });
+
+    if ((await Workers.count({ _id: report.senderId }).lean().exec()) != 0) {
+      let sender = await Workers.findOne({ _id: report.senderId })
+        .select(
+          "-unavailableTime -works -username -password -birthday -age -sex -phoneNumber -prevWorks -workDescription"
+        )
+        .lean()
+        .exec();
+      senderUser = sender;
+    }
+    if ((await Recruiters.count({ _id: report.senderId }).lean().exec()) != 0) {
+      let sender = await Recruiters.findOne({ _id: report.senderId })
+        .select("-username -password -birthday -age -sex -phoneNumber")
+        .lean()
+        .exec();
+      senderUser = sender;
+    }
+
+    res.send({
+      report: report,
+      reportedUser: reportedUser,
+      senderUser: senderUser,
+      offense: offense,
+    });
   })
   .delete(async function (req, res) {
     Report.findOneAndUpdate(
