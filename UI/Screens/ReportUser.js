@@ -31,7 +31,8 @@ const ReportUser = ({route}) => {
         body: JSON.stringify({
           title: reportTitle,
           reportedUser: userReportedID,
-          description: reportDescription
+          description: reportDescription,
+          senderId: global.userData._id
         })
       }).then(res => res.json())
       .then(data => {

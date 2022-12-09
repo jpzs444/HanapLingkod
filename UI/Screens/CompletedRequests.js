@@ -58,10 +58,10 @@ const CompletedRequests = ({route}) => {
       .then(data => {
         console.log("completed bookings data: ", data.worker)
 
+        setLoading(false)
         global.userData.role === 'recruiter' ? setCompletedBookings([...data.recruiter]) : setCompletedBookings([...data.worker])
       })
 
-      setLoading(false)
     } catch (error) {
         console.log("error completed bookings: ", error)
       
@@ -124,7 +124,7 @@ const CompletedRequests = ({route}) => {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
-        <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} />
+        <Appbar menuBtn={true} showLogo={true} hasPicture={true} />
 
         <View style={styles.listContainer}>
             <FlashList 
@@ -136,7 +136,17 @@ const CompletedRequests = ({route}) => {
                 onEndReachedThreshold={0.5}
                 estimatedItemSize={100}
                 onEndReached={() => setCurrentPage(page => page + 1)}
-                ListEmptyComponent={() => ( <View style={{paddingVertical: 25, alignItems: 'center'}}><TText style={{color: 'lightgray'}}>There are no Completed Requests as of the moment</TText></View> )}
+                ListEmptyComponent={() => ( 
+                  <View style={{paddingVertical: 25, alignItems: 'center'}}>
+                    {
+                      loading ? 
+                      <View style={{alignItems: 'center', width: '100%'}}>
+                        <ActivityIndicator size={'large'} />
+                      </View>
+                      :
+                      <TText style={{color: 'lightgray'}}>There are no Completed Requests as of the moment</TText>
+                    }
+                  </View> )}
                 ListHeaderComponent={() => (<TText style={styles.headerText}>Completed Bookings</TText>)}
                 renderItem={({item}) => (<BookingItem item={item} />)}
                 ListFooterComponent={() => (<View style={{height: 150}}></View>)}

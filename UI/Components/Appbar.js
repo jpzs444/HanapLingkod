@@ -150,12 +150,16 @@ export default function Appbar(props) {
             }
 
         {/* center | HanapLingkod logo */}
-        <View style={styles.center}>
+        <TouchableOpacity style={styles.center}
+            onPress={() => {
+                navigation.navigate("HomeScreen")
+            }}
+        >
             {
                 props.showLogo || props.registration ? <Image source={require('../assets/logo/logo_icon.png')} 
                 style={{width: 40, height: 40}} /> : null
             }
-        </View>
+        </TouchableOpacity>
 
         {/* right */}
         <TouchableOpacity style={[styles.right,]}>

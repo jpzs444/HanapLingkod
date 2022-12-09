@@ -628,7 +628,7 @@ export default function Registration({route}) {
                   ))
                 }
                 
-                {
+                {/* {
                   !hasBlanks ? 
                   <View style={{marginTop: 20, alignItems: 'center'}}>
                     {
@@ -642,7 +642,7 @@ export default function Registration({route}) {
                     }
                     <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{ !pwMatch ? "* Passwords does not match" : null}</TText>
                   </View> : null
-                }
+                } */}
 
                 <View style={[styles.confirm, {width: '90%'}]}>
                   {/* Create Account Button */}
