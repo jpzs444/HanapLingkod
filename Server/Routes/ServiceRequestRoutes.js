@@ -11,6 +11,7 @@ const checkConflict = require("../Helpers/ConflictChecker");
 const generateOTP = require("../Helpers/OTP_Generator");
 const { CheckIfBan } = require("../Helpers/banChecker");
 const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
+const BookingEmail = require("../Helpers/BookingEmail");
 router
   .route("/service-request/:user")
   .get(authenticateToken, CheckIfBan, async function (req, res) {
@@ -77,6 +78,7 @@ router
         .exec();
       console.log(pendingRequest);
       if (pendingRequest === 0) {
+        console.log("true");
         let startTime = dayjs(
           req.body.serviceDate + " " + req.body.startTime
         ).toISOString();
@@ -118,6 +120,7 @@ router
           }
         });
       } else {
+        console.log("false");
         res.send("false");
 
         console.log("A pending request is still existing");
@@ -145,12 +148,12 @@ router
       const { workerId, recruiterId } = result;
       const pushIDWorker = await Worker.findOne(
         { _id: workerId },
-        { pushtoken: 1, _id: 0 }
+        { pushtoken: 1, emailAddress: 1, firstname: 1, lastname: 1, _id: 0 }
       ).lean();
       console.log(pushIDWorker);
       const pushIDRecruiter = await Recruiter.findOne(
         { _id: recruiterId },
-        { pushtoken: 1, _id: 0 }
+        { pushtoken: 1, emailAddress: 1, firstname: 1, lastname: 1, _id: 0 }
       ).lean();
 
       if (req.body.acceptMore === "false") {
@@ -235,9 +238,59 @@ router
             "Your request has been accepted!",
             "Kindly check your bookings on the homepage or in the three-line menu.",
             { Type: "updated Service Request", id: req.params.id },
-
             recruiterId
           );
+
+          //email
+          let date1 = dayjs(result.serviceDate).format("DD/MM/YYYY");
+
+          let time1 = dayjs(result.startTime).format("hh:mm:ss A");
+          //worker
+          let subjectWorker = "Booking Confirmation " + date1 + " " + time1;
+          let textWorker =
+            "You accepted a request!\n" +
+            "\n" +
+            "Good day, " +
+            pushIDWorker.firstname +
+            " " +
+            pushIDWorker.lastname +
+            "\n " +
+            "\n" +
+            "This email serves as a confirmation that you have accepted a request from " +
+            pushIDRecruiter.firstname +
+            " " +
+            pushIDRecruiter.lastname +
+            "\n" +
+            "and further details can be viewed in its booking information, which can be accessed \n" +
+            "through the bookings list in the HanapLingkod Application. If you are not the one who accepted\n" +
+            "the request, or you wish to cancel the booked service, you may cancel it directly through the application.\nThank you.";
+          BookingEmail(subjectWorker, textWorker, pushIDWorker.emailAddress);
+          //recruiter
+          let subjectRecruiter = "Booking Confirmation " + date1 + " " + time1;
+          let textRecruiter =
+            "Your request has been accepted!\n" +
+            "\n" +
+            "Good day, " +
+            pushIDRecruiter.firstname +
+            " " +
+            pushIDRecruiter.lastname +
+            "\n " +
+            "\n" +
+            "This email serves as a confirmation that you have a booked service with " +
+            pushIDWorker.firstname +
+            " " +
+            pushIDWorker.lastname +
+            "\n" +
+            "and further details can be viewed in its booking information, which can be accessed through the \n" +
+            "bookings list in the HanapLingkod Application. If you are not the one who booked the service, or \n" +
+            "you wish to cancel the booked service, you may cancel it directly through the application.\n Thank you.";
+
+          BookingEmail(
+            subjectRecruiter,
+            textRecruiter,
+            pushIDRecruiter.emailAddress
+          );
+
           console.log("Successfully Updated status 2");
           res.status(200).send({ success: true });
         }
@@ -282,7 +335,6 @@ router
           "We regret to inform you that a request to you has been canceled.",
           "You may check the reason for cancellation in your requests",
           { Type: "updated Service Request", id: req.params.id },
-
           workerId
         );
         res.send("Successfully Updated to status 4 ");
