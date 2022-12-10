@@ -37,13 +37,13 @@ const Tab = createBottomTabNavigator();
 const TabNavigation = () => {
 
     let nc = global.notificationCount
-    useEffect(() => {
-        setNotificationCount(global.notificationCount)
-    }, [notificationCount])
+    // useEffect(() => {
+    //     setNotificationCount(global.notificationCount)
+    // }, [notificationCount])
 
   const [notificationCount, setNotificationCount] = useState(0)
   useEffect(() => {
-    fetch("https://hanaplingkod.onrender.com/notification/:" + global.deviceExpoPushToken, {
+    fetch("https://hanaplingkod.onrender.com/notification/:" + global.userData._id, {
       method: "GET",
       headers: {
         "content-type": "application/json",
@@ -51,7 +51,7 @@ const TabNavigation = () => {
       },
     }).then((res) => res.json())
     .then((res) => {
-      setNotificationCount(res.length)
+    //   setNotificationCount(res.length)
       console.log('notif length: ', res.length)
       let notifCount = 0
         for(read of data){
@@ -60,10 +60,38 @@ const TabNavigation = () => {
         }
         }
         global.notificationCount = notifCount
+        setNotificationCount(notifCount)
     }).catch((err) => {
       console.log("error: ", err.message)
     })
-  }, [global.notificationCount])
+    handleGetNotifCount()
+  }, [])
+
+
+  const handleGetNotifCount = async () => {
+    try {
+        await fetch(`"https://hanaplingkod.onrender.com/notification/${global.userData._id}`, {
+            method: "GET",
+            headers: {
+                'content-type': 'application/json',
+                "Authorization": global.accessToken
+            }
+        }).then(res => res.json())
+        .then(data => {
+            let notifCount = 0
+            for(read of data){
+                if(!read.read){
+                    notifCount = notifCount + 1
+                }
+            }
+            setNotificationCount(notifCount)
+            // return notifCount
+        })
+    } catch (error) {
+        console.log("error fetch notif count(tab nav): ", error)
+    }
+  }
+  
 
   return (
     <Tab.Navigator

@@ -23,7 +23,7 @@ import ConfirmDialog from '../Components/ConfirmDialog';
 
 import ThemeDefaults from '../Components/ThemeDefaults';
 import ModalDialog from '../Components/ModalDialog';
-import ImagesPicker from '../Components/ImagesPicker';
+// import ImagesPicker from '../Components/ImagesPicker';
 import { IPAddress } from '../global/global';
 import OTPVerification from './OTPVerification';
 import DialogueModal from '../Components/DialogueModal';
@@ -337,6 +337,8 @@ export default function Registration({route}) {
     //single license image
     const [imageSingleLicense, setSingleLicenseImage] = useState('');
 
+    const [statusImagePickerUseLibraryPermission, setImagePickerUserPermission] = ImagePicker.useMediaLibraryPermissions();
+
 
     const [isPriceGreater, setIsPriceGreater] = useState(true)
     useEffect(() => {
@@ -349,16 +351,30 @@ export default function Registration({route}) {
     }, [services[0].lowestPrice, services[0].highestPrice])
 
     useEffect(() => {
-      (async () => {
+      const requesPermission = async () => {
         if (Platform.OS !== "web") {
           const { status } =
-            await ImagePicker.requestMediaLibraryPermissionsAsync();
-            // await ImagePicker.requestCameraPermissionsAsync();
+            // await ImagePicker.useMediaLibraryPermissions();
+            await ImagePicker.requestCameraPermissionsAsync();
+            // setImagePickerUserPermission(ImagePicker.useMediaLibraryPermissions())
           if (status !== "granted") {
             alert("Sorry, we need camera roll permissions to make this work!");
           }
         }
-      })();
+      }
+      // (async () => {
+      //   if (Platform.OS !== "web") {
+      //     const { status } =
+      //       // await ImagePicker.useMediaLibraryPermissions();
+      //       await ImagePicker.requestCameraPermissionsAsync();
+      //       // setImagePickerUserPermission(ImagePicker.useMediaLibraryPermissions())
+      //     if (status !== "granted") {
+      //       alert("Sorry, we need camera roll permissions to make this work!");
+      //     }
+      //   }
+      // })();
+      requesPermission()
+
     }, []);
 
     const pickImage = async () => {

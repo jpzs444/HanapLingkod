@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "hanaplingkod",
+    "name": "HanapLingkod",
     "slug": "hanaplingkod",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/logo/logo_icon.png",
+    "icon": "./assets/logo/hanaplingkod_icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/logo/logo_full.png",
+      "image": "./assets/logo/hanaplingkod_iconfull.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,28 +22,30 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo/logo_icon.png",
+        "foregroundImage": "./assets/logo/hanaplingkod_icon.png",
         "backgroundColor": "#FFFFFF"
       },
+      "useNextNotificationsApi": true,
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permissoin.READ_EXTERNAL_STORAGE"
       ],
-      "package": "com.aceeyou.hanaplingkod"
+      "package": "com.team4g.hanaplingkod"
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/logo/hanaplingkod_icon.png"
     },
     "plugins": [
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
+          "photosPermission": "The HanapLingkod app accesses your photos to let you upload required IDs and update your profile picture.",
+          "savePhotosPermission": "Allow Hanaplingkod to save photos"
         }
       ],
       [
         "expo-notifications",
         {
-          "icon": "./assets/logo/logo_icon.png",
+          "icon": "./assets/logo/hanaplingkod_icon.png",
           "color": "#2080ff",
           "sounds": []
         }

@@ -110,6 +110,7 @@ h4 {
     font-size: 18px;
     display: flex;
     justify-content: center;
+    transition: 250ms;
 }
 
 .button-permanent {
@@ -119,6 +120,7 @@ h4 {
     border: 1px solid #FF5353;
     border-radius: 10px;
     color: #fff;
+    transition: 200ms;
 }
 
 .button-permanent:hover {
@@ -134,6 +136,7 @@ h4 {
     margin: 0 20px;
     border-radius: 10px;
     color: #fff;
+    transition: 200ms;
 }
 
 .button-penalize:hover {
@@ -148,6 +151,7 @@ h4 {
     border: 1px solid #CBCBCB;
     border-radius: 10px;
     color: #434343;
+    transition: 200ms;
 }
 
 .button-dismiss:hover {
@@ -159,6 +163,7 @@ h4 {
 
 .show-modal {
     display: flex;
+    transition: 300ms;
 }
 
 .hide-modal {
@@ -174,6 +179,7 @@ h4 {
     background-color: rgba(217, 217, 217, 0.8);
     align-items: center;
     justify-content: center;
+    transition: 250ms;
 }
 
 .permaban-modal {
@@ -222,6 +228,7 @@ h4 {
     background-color: rgba(217, 217, 217, 0.8);
     align-items: center;
     justify-content: center;
+    transition: 300ms;
 }
 
 .penalize-modal {

@@ -37,17 +37,16 @@ const UsersView = () => {
 
     const fetchUserData = async (role) => {
 
-        let userRole = role ? "Recruiter" : "worker"
+        let userRole = role ? "recruiter" : "worker"
+        // console.log(sessionStorage.getItem("adminAccessToken"))
         try {
-            await fetch(`https://hanaplingkod.onrender.com/Recruiter`, {
+            await fetch(`https://hanaplingkod.onrender.com/reportAUser`, {
                 method: 'GET',
                 headers: {
                     'content-type': "application/json",
                     "Authorization": sessionStorage.getItem("adminAccessToken")
                 }
-            }).then((res) => {
-                res.json()
-            })
+            }).then(res => res.json())
             .then(data => console.log(data))
             
         } catch (error) {

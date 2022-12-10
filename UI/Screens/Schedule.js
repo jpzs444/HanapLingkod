@@ -106,7 +106,8 @@ const Schedule = ({route}) => {
         let dddd = new Date(selectedDate)
         let uunn = []
         try {
-            await fetch(`https://hanaplingkod.onrender.com/schedule/${workerInformation._id}`, {
+            let scheduleWhoId = global.userData.role === 'worker' ? global.userData._id : workerInformation._id
+            await fetch(`https://hanaplingkod.onrender.com/schedule/${scheduleWhoId}`, {
                 method: "GET",
                 headers: {
                     "content-type": "application/json",
