@@ -50,8 +50,8 @@ const ConversationThread = ({route}) => {
     
 
     useEffect(() => {
-        socket.current = io(`ws://localhost:8900`)
-        // socket.current = io(`https://hanaplingkodchat.onrender.com/`)
+        // socket.current = io(`ws://localhost:8900`)
+        socket.current = io(`https://hanaplingkodchat.onrender.com/`)
         // console.log("type of socketCOntextref: " , typeof )
         socket.current.on("getMessage", data => {
             setIncomingMessage({
