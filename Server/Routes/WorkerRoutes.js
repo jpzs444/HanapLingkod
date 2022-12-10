@@ -30,50 +30,53 @@ const upload = multer({ storage: storage });
 const cors = require("cors");
 router.use(cors({ origin: "*" }));
 
-router.route("/Worker").get(authenticateToken, async function (req, res) {
-  // console.log("aa");
-  let filter = {};
-  if (req.query.verified != undefined) {
-    filter["verification"] = req.query.verified;
-  }
-  if (req.query.barangay != undefined) {
-    filter["barangay"] = req.query.barangay;
-  }
-  if (req.query.category != undefined) {
-    filter["works"] = req.query.category;
-  }
-  if (req.query.rating != undefined) {
-    filter["rating"] = { $gte: parseFloat(req.query.rating) };
-  }
-  let page;
-  if (req.query.page) {
-    page = parseInt(req.query.page);
-  } else {
-    page = 1;
-  }
-  const limit = 10;
+router.route("/Worker").get(
+  // authenticateToken,
+  async function (req, res) {
+    // console.log("aa");
+    let filter = {};
+    if (req.query.verification != undefined) {
+      filter["verification"] = req.query.verification;
+    }
+    if (req.query.barangay != undefined) {
+      filter["barangay"] = req.query.barangay;
+    }
+    if (req.query.works != undefined) {
+      filter["works"] = req.query.works;
+    }
+    if (req.query.rating != undefined) {
+      filter["rating"] = { $gte: parseFloat(req.query.rating) };
+    }
+    let page;
+    if (req.query.page) {
+      page = parseInt(req.query.page);
+    } else {
+      page = 1;
+    }
+    const limit = 10;
 
-  //query the banned workers
-  const bannedUsersResult = await BannedWorker.find({ ban: true });
-  let bannedUsers = [];
-  //put the banned users id to an array
-  bannedUsersResult.forEach((x) => {
-    bannedUsers.push(x.workerId);
-  });
-  //add the banned users id to filters
-  filter["_id"] = {
-    $nin: bannedUsers,
-  };
-  console.log(filter);
-  const result = await Worker.find(filter)
-    .select(
-      "-unavailableTime -licenseCertificate -GovId -pushtoken -password -accountStatus"
-    )
-    .limit(limit * page)
-    .lean()
-    .exec();
-  res.send(result);
-});
+    //query the banned workers
+    const bannedUsersResult = await BannedWorker.find({ ban: true });
+    let bannedUsers = [];
+    //put the banned users id to an array
+    bannedUsersResult.forEach((x) => {
+      bannedUsers.push(x.workerId);
+    });
+    //add the banned users id to filters
+    filter["_id"] = {
+      $nin: bannedUsers,
+    };
+    console.log(filter);
+    const result = await Worker.find(filter)
+      .select(
+        "-unavailableTime -licenseCertificate -GovId -pushtoken -password -accountStatus"
+      )
+      .limit(limit * page)
+      .lean()
+      .exec();
+    res.send(result);
+  }
+);
 
 //////specific///
 
