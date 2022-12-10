@@ -182,118 +182,114 @@ router
 
       // console.log(endTime);
       if (req.body.requestStatus == 2) {
-        if (await checkConflict(req.params.user, req.params.id, endTime)) {
-          console.log("Conflict Scheadule");
-          res.status(400).send({ success: false });
-        } else {
-          const reqObj = {
-            requestStatus: req.body.requestStatus,
-            endTime: req.body.endTime,
-          };
-          reqObj.endTime = endTime;
-          await ServiceRequest.findOneAndUpdate(
-            { _id: req.params.id },
-            reqObj,
-            {
-              new: true,
-            }
-          );
+        // if (await checkConflict(req.params.user, req.params.id, endTime)) {
+        // console.log("Conflict Scheadule");
+        // res.status(400).send({ success: false });
+        // } else {
+        const reqObj = {
+          requestStatus: req.body.requestStatus,
+          endTime: req.body.endTime,
+        };
+        reqObj.endTime = endTime;
+        await ServiceRequest.findOneAndUpdate({ _id: req.params.id }, reqObj, {
+          new: true,
+        });
 
-          //create booking
-          const OTP = generateOTP(6);
-          // console.log(result);
-          const newBooking = await Booking.create({
-            workerId: result.workerId,
-            recruiterId: result.recruiterId,
-            workId: result.workId,
-            subCategory: result.subCategory,
-            minPrice: result.minPrice,
-            maxPrice: result.maxPrice,
-            serviceDate: result.serviceDate,
-            startTime: result.startTime,
-            endTime: endTime,
-            description: result.description,
-            otp: OTP,
-            bookingStatus: 1,
-            address: result.address,
-            geometry: {
-              type: "point",
-              coordinates: [
-                result.geometry.coordinates[0],
-                result.geometry.coordinates[1],
-              ],
-            },
-          });
-          AddToCalendar(newBooking);
-          //put delete flag to true
-          await ServiceRequest.findOneAndUpdate(
-            { _id: req.params.id },
-            {
-              deleteflag: true,
-            }
-          );
-          // notify recruiter
-          notification(
-            [pushIDRecruiter.pushtoken],
-            "Your request has been accepted!",
-            "Kindly check your bookings on the homepage or in the three-line menu.",
-            { Type: "updated Service Request", id: req.params.id },
-            recruiterId
-          );
+        //create booking
+        const OTP = generateOTP(6);
+        // console.log(result);
+        const newBooking = await Booking.create({
+          workerId: result.workerId,
+          recruiterId: result.recruiterId,
+          workId: result.workId,
+          subCategory: result.subCategory,
+          minPrice: result.minPrice,
+          maxPrice: result.maxPrice,
+          serviceDate: result.serviceDate,
+          startTime: result.startTime,
+          endTime: endTime,
+          description: result.description,
+          otp: OTP,
+          bookingStatus: 1,
+          address: result.address,
+          geometry: {
+            type: "point",
+            coordinates: [
+              result.geometry.coordinates[0],
+              result.geometry.coordinates[1],
+            ],
+          },
+        });
+        AddToCalendar(newBooking);
+        //put delete flag to true
+        await ServiceRequest.findOneAndUpdate(
+          { _id: req.params.id },
+          {
+            deleteflag: true,
+          }
+        );
+        // notify recruiter
+        notification(
+          [pushIDRecruiter.pushtoken],
+          "Your request has been accepted!",
+          "Kindly check your bookings on the homepage or in the three-line menu.",
+          { Type: "updated Service Request", id: req.params.id },
+          recruiterId
+        );
 
-          //email
-          let date1 = dayjs(result.serviceDate).format("DD/MM/YYYY");
+        //email
+        let date1 = dayjs(result.serviceDate).format("DD/MM/YYYY");
 
-          let time1 = dayjs(result.startTime).format("hh:mm:ss A");
-          //worker
-          let subjectWorker = "Booking Confirmation " + date1 + " " + time1;
-          let textWorker =
-            "You accepted a request!\n" +
-            "\n" +
-            "Good day, " +
-            pushIDWorker.firstname +
-            " " +
-            pushIDWorker.lastname +
-            "\n " +
-            "\n" +
-            "This email serves as a confirmation that you have accepted a request from " +
-            pushIDRecruiter.firstname +
-            " " +
-            pushIDRecruiter.lastname +
-            "\n" +
-            "and further details can be viewed in its booking information, which can be accessed \n" +
-            "through the bookings list in the HanapLingkod Application. If you are not the one who accepted\n" +
-            "the request, or you wish to cancel the booked service, you may cancel it directly through the application.\nThank you.";
-          BookingEmail(subjectWorker, textWorker, pushIDWorker.emailAddress);
-          //recruiter
-          let subjectRecruiter = "Booking Confirmation " + date1 + " " + time1;
-          let textRecruiter =
-            "Your request has been accepted!\n" +
-            "\n" +
-            "Good day, " +
-            pushIDRecruiter.firstname +
-            " " +
-            pushIDRecruiter.lastname +
-            "\n " +
-            "\n" +
-            "This email serves as a confirmation that you have a booked service with " +
-            pushIDWorker.firstname +
-            " " +
-            pushIDWorker.lastname +
-            "\n" +
-            "and further details can be viewed in its booking information, which can be accessed through the \n" +
-            "bookings list in the HanapLingkod Application. If you are not the one who booked the service, or \n" +
-            "you wish to cancel the booked service, you may cancel it directly through the application.\n Thank you.";
+        let time1 = dayjs(result.startTime).format("hh:mm:ss A");
+        //worker
+        let subjectWorker = "Booking Confirmation " + date1 + " " + time1;
+        let textWorker =
+          "You accepted a request!\n" +
+          "\n" +
+          "Good day, " +
+          pushIDWorker.firstname +
+          " " +
+          pushIDWorker.lastname +
+          "\n " +
+          "\n" +
+          "This email serves as a confirmation that you have accepted a request from " +
+          pushIDRecruiter.firstname +
+          " " +
+          pushIDRecruiter.lastname +
+          "\n" +
+          "and further details can be viewed in its booking information, which can be accessed \n" +
+          "through the bookings list in the HanapLingkod Application. If you are not the one who accepted\n" +
+          "the request, or you wish to cancel the booked service, you may cancel it directly through the application.\nThank you.";
+        BookingEmail(subjectWorker, textWorker, pushIDWorker.emailAddress);
+        //recruiter
+        let subjectRecruiter = "Booking Confirmation " + date1 + " " + time1;
+        let textRecruiter =
+          "Your request has been accepted!\n" +
+          "\n" +
+          "Good day, " +
+          pushIDRecruiter.firstname +
+          " " +
+          pushIDRecruiter.lastname +
+          "\n " +
+          "\n" +
+          "This email serves as a confirmation that you have a booked service with " +
+          pushIDWorker.firstname +
+          " " +
+          pushIDWorker.lastname +
+          "\n" +
+          "and further details can be viewed in its booking information, which can be accessed through the \n" +
+          "bookings list in the HanapLingkod Application. If you are not the one who booked the service, or \n" +
+          "you wish to cancel the booked service, you may cancel it directly through the application.\n Thank you.";
 
-          BookingEmail(
-            subjectRecruiter,
-            textRecruiter,
-            pushIDRecruiter.emailAddress
-          );
+        BookingEmail(
+          subjectRecruiter,
+          textRecruiter,
+          pushIDRecruiter.emailAddress
+        );
 
-          console.log("Successfully Updated status 2");
-          res.status(200).send({ success: true });
-        }
+        console.log("Successfully Updated status 2");
+        res.status(200).send({ success: true });
+        // }
       }
 
       if (req.body.requestStatus == 3) {
