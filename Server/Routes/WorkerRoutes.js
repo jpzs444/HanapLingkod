@@ -26,6 +26,10 @@ const storage = multer.diskStorage({
 //upload the image
 const upload = multer({ storage: storage });
 
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 router.route("/Worker").get(authenticateToken, async function (req, res) {
   // console.log("aa");
   let filter = {};
