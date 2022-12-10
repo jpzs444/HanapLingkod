@@ -78,6 +78,7 @@ router
         .exec();
       console.log(pendingRequest);
       if (pendingRequest === 0) {
+        console.log("true");
         let startTime = dayjs(
           req.body.serviceDate + " " + req.body.startTime
         ).toISOString();
@@ -119,6 +120,7 @@ router
           }
         });
       } else {
+        console.log("false");
         res.send("false");
 
         console.log("A pending request is still existing");
