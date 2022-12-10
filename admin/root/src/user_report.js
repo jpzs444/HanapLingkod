@@ -152,7 +152,7 @@ const UserReport = () => {
                                 </div>
                             </div>
 
-                            <button class="report-user-view-profile">View</button>
+                            <button class="report-user-view-profile" onClick={() => {window.location.assign("./AccountInformation.html")}}>View</button>
                         </div>
                         <h4><img class="reported-desc-icon" src="./assets/icons/description.png"/>Report Description</h4>
                         <p class="report-description">"{reportInformation.description}"</p>

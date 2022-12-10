@@ -540,11 +540,14 @@ const RequestForm = ({route, navigation}) => {
             .then(res => res.text())
             .then(data => {
                 // console.log("post res data: ", data)
+
+                // false = has pending request
+                // true = can create a request
                 if(data == 'false'){
                     console.log("req post data: ", data)
-                    setRequestPostedModal(true)
-                } else {
                     sethasPendingRequest(true)
+                } else {
+                    setRequestPostedModal(true)
                 }
                 // else {
                 //     setPostBtnModal(true)
