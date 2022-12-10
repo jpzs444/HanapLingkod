@@ -25,8 +25,10 @@ const UsersView = () => {
         fetchUserData(role)
     }, [])
 
-    const handleOnClickItem = (name) => {
-        console.log("hi ", name)
+    const handleOnClickItem = (user) => {
+        // console.log("hi userId: ", user)
+        sessionStorage.setItem("viewUserProfile_Id", user)
+        window.location.assign("./")
     }
 
     const handleSwitchRoleType = (b) => {
@@ -36,18 +38,21 @@ const UsersView = () => {
     }
 
     const fetchUserData = async (role) => {
-
+        // role == boolean
         let userRole = role ? "recruiter" : "worker"
-        // console.log(sessionStorage.getItem("adminAccessToken"))
+        
         try {
-            await fetch(`https://hanaplingkod.onrender.com/reportAUser`, {
+            await fetch(`https://hanaplingkod.onrender.com/${userRole}`, {
                 method: 'GET',
                 headers: {
                     'content-type': "application/json",
                     "Authorization": sessionStorage.getItem("adminAccessToken")
                 }
             }).then(res => res.json())
-            .then(data => console.log(data))
+            .then(data => {
+                console.log(data)
+                setUserList([...data])
+            })
             
         } catch (error) {
             console.log("error fetching user data(userViewJS): ", error)
@@ -83,8 +88,8 @@ const UsersView = () => {
                 <main>
                     <div className="tabButton_container">
                         <div>
-                            <button className={role ? "active" : null} onClick={() => handleSwitchRoleType(true)} id="recruiterButton">Recruiters</button>
-                            <button class={role ? null : "active"} onClick={() => handleSwitchRoleType(false)} id="workerButton" >Workers</button>
+                            <button className={role ? "active" : null} onClick={(e) => {e.preventDefault(); handleSwitchRoleType(true); fetchUserData(true);}} id="recruiterButton">Recruiters</button>
+                            <button class={role ? null : "active"} onClick={(e) => {e.preventDefault(); handleSwitchRoleType(false); fetchUserData(false);}} id="workerButton" >Workers</button>
                         </div>
                         <div class="search-container">
                             <input type="text" placeholder="Search a user" onChange={e => setSearchWord(e.target.value)} />
@@ -119,21 +124,21 @@ const UsersView = () => {
 
                             {/* items */}
                             {
-                                DATA.map(item => (
-                                    <tr className="table_data" onClick={() => handleOnClickItem(item.name)}>
+                                userList.map(user => (
+                                    <tr className="table_data" onClick={() => {handleOnClickItem(user._id)}}>
                                         <td className="image_column">
-                                            <img className="userProfilePic" src="./assets/icons/account.png" />
+                                            <img className="userProfilePic" src={user.profilePic === 'pic' ? "./assets/icons/account.png" : user.profilePic} />
                                         </td>
                                         <td className="name_column">
-                                            <p className="tr_title">{item.name}</p>
+                                            <p className="tr_title">{`${user.firstname} ${user.middlename.charAt(0).toUpperCase()} ${user.lastname}`}</p>
                                         </td>
                                         <td className="address_column">
-                                            <p className="tr_title">{item.address}</p>
+                                            <p className="tr_title">{`${user.street}, Purok ${user.purok}, ${user.barangay}, ${user.city}, ${user.province}`}</p>
                                         </td>
                                         <td className="rating_column">
                                             <div className="rating_container">
                                                 <img src="./assets/icons/star-yellow.png"></img>
-                                                <p className="tr_title">5.0</p>
+                                                <p className="tr_title">{user.rating}</p>
                                             </div>
                                         </td>
                                     </tr>
