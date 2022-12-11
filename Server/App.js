@@ -471,7 +471,7 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
         { session }
       );
     }
-    console.log("newly Created work: " + work);
+    // console.log("newly Created work: " + work);
     await session.commitTransaction();
     console.log("success");
     res.send("Succesfully Created");
