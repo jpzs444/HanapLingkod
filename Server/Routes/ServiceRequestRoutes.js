@@ -143,7 +143,9 @@ router
       let result;
 
       if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
-        // console.log("qq");
+        console.log(
+          "endDate:" + req.body.endDate + " end time " + req.body.endTime
+        );
         endTime = dayjs(
           req.body.endDate + " " + req.body.endTime
         ).toISOString();
