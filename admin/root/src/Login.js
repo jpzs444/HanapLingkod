@@ -24,22 +24,19 @@ function Login() {
         }).then(res => res.json())
         .then(data => {
           console.log("login admin data: ", data)
+
+          sessionStorage.setItem("adminAccessToken", data.accessToken)
+          sessionStorage.setItem("adminUsername", data.username)
+          sessionStorage.setItem("adminId", data._id)
           
-          handleSavetoSessionStorage(data)
+          window.location.assign("./index.html")
+          
         })
         // .then(data => console.log("success login: ", data)) 
         console.log("success?")
       } catch (error) {
         console.log("error login: ", error)
       }
-    }
-
-    const handleSavetoSessionStorage = (data) => {
-      sessionStorage.setItem("adminAccessToken", data.accessToken)
-      sessionStorage.setItem("adminUsername", data.username)
-      sessionStorage.setItem("adminId", data._id)
-      
-      window.location.assign("./index.html")
     }
   
   

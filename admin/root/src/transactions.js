@@ -24,7 +24,18 @@ const Transactions = () => {
             "date" : "Nov. 19",
             "status": "Completed"
         }
-    ]  
+    ]
+    
+    const [transactions, setTransactions] = React.useState([])
+
+
+    const fetchTransactions = async () => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/`)
+        } catch (error) {
+            console.log("error fetching transactions (bookings): ", error)
+        }
+    }
 
     return(
         <div>

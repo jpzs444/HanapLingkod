@@ -79,7 +79,7 @@ const SubCategory = ({route}) => {
                         }}
                     >
                         <View style={styles.imageContainer}>
-                            <Image source={require("../assets/images/stock.jpg")} style={styles.imageStyle} />
+                            <Image source={item.image ? {uri: item?.image} : require("../assets/images/stock.jpg")} style={styles.imageStyle} />
                         </View>
                         <View style={styles.subCategoryDescriptionBox}>
                             <View style={styles.subCategoryRow}>

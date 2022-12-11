@@ -638,7 +638,7 @@ export default function Home() {
                             navigation.navigate("SubCategoryScreen", {categoryID: item._id, categoryNAME: item.Category})
                           }}
                         >
-                          <ImageBackground source={require("../assets/images/stock.jpg")} style={styles.category_imageBG}>
+                          <ImageBackground source={item.image ? {uri: item?.image} : require("../assets/images/stock.jpg")} style={styles.category_imageBG}>
                             <View style={styles.textWrapper}>
                               <TText style={styles.categoryTxt}>{item.Category}</TText>
                             </View>

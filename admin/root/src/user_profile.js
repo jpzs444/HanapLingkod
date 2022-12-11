@@ -1,5 +1,8 @@
 'use strict';
 
+let MONTH= ["January","February","March","April","May","June","July",
+        "August","September","October","November","December"];
+
 const UserProfile = () => {
 
     const DATA = {
@@ -25,10 +28,12 @@ const UserProfile = () => {
     const [user, setUser] = React.useState({})
     const [userRatings, setUserRatings] = React.useState([])
     const [userBirthday, setUserBirthday] = React.useState('')
+    const [userOffenses, setUserOffense] = React.useState(0)
 
     React.useEffect(() => {
         fetchUserInformation()
         fetchUserRatings()
+        fetchUserOffense()
     }, [])
 
 
@@ -70,18 +75,38 @@ const UserProfile = () => {
             }).then(res => res.json())
             .then(data => {
                 console.log("user ratings: ", data)
-                setUserRatings({...data})
+                setUserRatings([...data.comments])
             })
         } catch (error) {
             console.log("error fetching user ratings: ", error)
         }
     }
 
+    const fetchUserOffense = async () => {
+        try {
+            let ratingRoute = sessionStorage.getItem("viewUserProfile_role")
+            let userId = sessionStorage.getItem("viewUserProfile_Id")
+
+            await fetch(`https://hanaplingkod.onrender.com/strike/${ratingRoute}/${userId}`, {
+                method: "GET",
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("user offenses: ", data)
+                setUserOffense(data)
+            })
+        } catch (error) {
+            console.log("error fetching user offense: ", error)
+        }
+    }
+
     const getBirthday = (date) => {
         let tempDate = new Date(date)
-        let month= ["January","February","March","April","May","June","July",
-        "August","September","October","November","December"];
-        let birthMonth = month[tempDate.getMonth()]
+        
+        let birthMonth = MONTH[tempDate.getMonth()]
 
         let birthday = `${birthMonth} ${tempDate.getDate()}, ${tempDate.getFullYear()}`
         console.log("bday: ", birthday)
@@ -122,7 +147,7 @@ const UserProfile = () => {
                         <p class="userprof-role">{user.role}</p>
                         <div class="userprof-strikes-container">
                             <p>Strikes:</p>
-                            <p>{DATA.userprofStrikes}/5</p>
+                            <p>{userOffenses}/5</p>
                         </div>
                     </div>
 
@@ -177,29 +202,85 @@ const UserProfile = () => {
                         </div>
 
                         <div class="userprof-main-rating">
-                            <div class="rating-indiv-container">
-                                <div class="rating-indiv-upper">
-                                    <div class="rating-sender">
-                                        <div class="sender-image-container">
-                                            <img src={RATING.ratingSenderImage}/>
+                        {
+                            userRatings.map(function(rating) {
+                                let date = new Date(rating.created_at)
+                                let ratingDate = `${MONTH[date.getMonth()]} ${date.getDate()}, ${date.getHours()}:${date.getMinutes()}`
+                                return (
+                                <div class="rating-indiv-container">
+                                    <div class="rating-indiv-upper">
+                                        <div class="rating-sender">
+                                            <div class="sender-image-container">
+                                                <img src={rating.reviewer.profilePic === 'pic' ? './assets/icons/account.png' : rating.reviewer.profilePic}/>
+                                            </div>
+                                            <div class="sender-details-container">
+                                                <p>{`${rating.reviewer.firstname} ${rating.reviewer.middlename?.charAt(0).toUpperCase()} ${rating.reviewer.lastname}`}</p>
+                                                <p>{ratingDate}</p>
+                                            </div>
                                         </div>
-                                        <div class="sender-details-container">
-                                            <p>{RATING.ratingSender}</p>
-                                            <p>{RATING.ratingDate}, {RATING.ratingTime}</p>
+                                        <div class="rating-stars">
+                                            {
+                                                rating.rating === 5 &&
+                                                <>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                </>
+                                            }
+                                            {
+                                                rating.rating === 4 &&
+                                                <>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                </>
+                                            }
+                                            {
+                                                rating.rating === 3 &&
+                                                <>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                </>
+                                            }
+                                            {
+                                                rating.rating === 2 &&
+                                                <>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                </>
+                                            }
+                                            {
+                                                rating.rating === 1 &&
+                                                <>
+                                                    <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                    <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                                </>
+                                            }
                                         </div>
                                     </div>
-                                    <div class="rating-stars">
-                                        <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
-                                        <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
-                                        <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
-                                        <div class="star-container"><img src="./assets/icons/star-yellow.png"/></div>
-                                        <div class="star-container"><img src="./assets/icons/star-empty.png"/></div>
+                                    <div class="rating-indiv-lower">
+                                        <p>{rating.message ? rating.message : "-- no comment --"}</p>
                                     </div>
                                 </div>
-                                <div class="rating-indiv-lower">
-                                    <p>{RATING.ratingReview}</p>
-                                </div>
-                            </div>
+                            )})
+                        }
+                        {
+                            userRatings.length === 0 &&
+                            <div class={"no-available-ratings"}>No available ratings at the moment</div>
+                        }
                         </div>
                     </div>
                 </div>
