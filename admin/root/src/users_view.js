@@ -172,7 +172,7 @@ const UsersView = () => {
                                             <img className="userProfilePic" src={user.profilePic === 'pic' ? "./assets/icons/account.png" : user.profilePic} />
                                         </td>
                                         <td className="name_column">
-                                            <p className="tr_title">{`${user.firstname} ${user.middlename.charAt(0).toUpperCase()} ${user.lastname}`}</p>
+                                            <p className="tr_title">{`${user.firstname} ${user.middlename?.charAt(0).toUpperCase()} ${user.lastname}`}</p>
                                         </td>
                                         <td className="address_column">
                                             <p className="tr_title">{`${user.street}, Purok ${user.purok}, ${user.barangay}, ${user.city}, ${user.province}`}</p>

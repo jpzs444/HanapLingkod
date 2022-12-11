@@ -44,17 +44,31 @@ const Categories = () => {
 
     const [subCategoryTitle, setSubCategoryTitle] = React.useState("")
     const [subCategoryImage, setSubCategoryImage] = React.useState("")
-
-    const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = React.useState(true)
+    
+    const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = React.useState(false)
     const [isAddSubCategoryModalOpen, setIsAddSubCategoryModalOpen] = React.useState(false)
+    const [isCategorySelectOpen, setIsCategorySelectOpen] = React.useState(false)
+    const [categorySelected, setCategorySelected] = React.useState({})
+    const [categoryListed, setCategoryListed] = React.useState("")
+
+    const [isSubcatSelected, setSubcatSelected] = React.useState(false)
+
+    const [newCategoryTitle, setNewCategoryTitle] = React.useState("")
+    const [categoryAddImage, setCategoryAddImage] = React.useState({})
+    const [categorySelectedAddSubCat, setCategorySelectedAddSubCat] = React.useState("")
+
+    // const [addSubCategoryModalOpen, setEditSubCategoryModalOpen] = React.useState(false)
+
+    const [editCategoryModalOpen, setEditCategoryModalOpen] = React.useState(false)
+    const [editSubCategoryModalOpen, setEditSubCategoryModalOpen] = React.useState(false)
+
+    const [subCatSelected, setSubCatSelected] = React.useState({})
+
 
     React.useEffect(() => {
         fetchCategories()
     }, []);
 
-    React.useEffect(() => {
-        fetchSubCategories()
-    }, [selectedCategory]);
 
 
     const fetchCategories = async () => {
@@ -75,7 +89,8 @@ const Categories = () => {
         }
     }
 
-    const fetchSubCategories = async () => {
+
+    const fetchSubCategories = async (selected) => {
         try {
             await fetch(`https://hanaplingkod.onrender.com/service-sub-category`, {
                 method: "GET",
@@ -86,7 +101,11 @@ const Categories = () => {
             }).then(res => res.json())
             .then(data => {
                 console.log("service sub-categories: ", data)
-                setSubCategories([...data])
+                let list  = data.filter(e => e.ServiceID._id === selected._id)
+                console.log(list)
+                setSubCategories([...list])
+
+
             })
         } catch (error) {
             console.log("error fetching categories: ", error)
@@ -94,25 +113,44 @@ const Categories = () => {
     }
 
 
-    const [isSubcatSelected, setSubcatSelected] = React.useState(false)
 
-    const handleShowSubcatSelected = () => {
+    const handleShowSubcatSelected = (item) => {
         setSubcatSelected(true)
+        setCategorySelected(item)
+        fetchSubCategories(item)
+
+        window.location.href="#link_sub-category-table"
+    }
+
+    const handleShowEditCategory = (item) => {
+        setCategorySelected(item)
+        setNewCategoryTitle(item.Category)
+        setCategoryAddImage(item.image)
+        setEditCategoryModalOpen(true)
+        // fetchSubCategories(item)
+    }
+
+    // discard|close add sub-cat modal
+    const handleDiscardAddSubCategory = () => {
+        setNewCategoryTitle("")
+        setCategoryAddImage({})
+        setCategorySelectedAddSubCat("")
+
+        setEditSubCategoryModalOpen(false)
     }
 
     const handleHideSubcatSelected = () => {
         setSubcatSelected(false)
     }
 
-    const handleAddCategory = async () => {
-        try {
-            // let formdata = 
-            await fetch(`https://hanaplingkod.onrender.com/service-category`, {
-// 
-            })
-        } catch (error) {
-            console.log("error adding a category: ", error)
-        }
+    const handleOpenEditModalSubCat = (item) => {
+        setNewCategoryTitle(item.ServiceSubCategory)
+        setSubCatSelected(item._id)
+        setCategoryListed(item.ServiceID.Category)
+        setCategorySelectedAddSubCat(item._id)
+        setCategoryAddImage(item.image)
+
+        setEditSubCategoryModalOpen(true)
     }
 
     const previewImage = (event) => {
@@ -122,19 +160,188 @@ const Categories = () => {
         if (imageFilesLength > 0) {
             // Get the image path.
             const imageSrc = URL.createObjectURL(imageFiles[0]);
-            // return(imageSrc)
-            // Select the image preview element.
+            console.log("data type of imageFiles: ", imageFiles[0])
+            setCategoryAddImage(imageFiles[0])
+
             const imagePreviewElement = document.querySelector("#preview-selected-image");
-            // /**
-            //  * Assign the path to the image preview element.
-            //  */
             imagePreviewElement.src = imageSrc;
-            // /**
-            //  * Show the element by changing the display value to "block".
-            //  */
             imagePreviewElement.style.display = "block";
         }
     };
+
+    const previewImageSubCat = (event) => {
+        const imageFiles = event.target.files;
+        const imageFilesLength = imageFiles.length;
+        
+        if (imageFilesLength > 0) {
+            // Get the image path.
+            const imageSrc = URL.createObjectURL(imageFiles[0]);
+            console.log("imagefile: ", imageFiles)
+            setCategoryAddImage(imageFiles[0])
+
+            const imagePreviewElement = document.querySelector("#preview-selected-image-subcat");
+            imagePreviewElement.src = imageSrc;
+            imagePreviewElement.style.display = "block";
+        }
+    };
+
+    const previewEditCatImage = (event) => {
+        const imageFiles = event.target.files;
+        const imageFilesLength = imageFiles.length;
+        
+        if (imageFilesLength > 0) {
+            // Get the image path.
+            const imageSrc = URL.createObjectURL(imageFiles[0]);
+            console.log("imagefile: ", imageFiles)
+            setCategoryAddImage(imageFiles[0])
+
+            const imagePreviewElement = document.querySelector("#preview-selected-image-edit-cat");
+            imagePreviewElement.src = imageSrc;
+            imagePreviewElement.style.display = "block";
+        }
+    };
+
+    const previewImageEditSubCat = (event) => {
+        const imageFiles = event.target.files;
+        const imageFilesLength = imageFiles.length;
+        
+        if (imageFilesLength > 0) {
+            // Get the image path.
+            const imageSrc = URL.createObjectURL(imageFiles[0]);
+            console.log("imagefile: ", imageFiles)
+            setCategoryAddImage(imageFiles[0])
+
+            const imagePreviewElement = document.querySelector("#preview-selected-image-edit-subcat");
+            imagePreviewElement.src = imageSrc;
+            imagePreviewElement.style.display = "block";
+        }
+    };
+
+    const handleOnSelectedCategoryListed = (item) => {
+        setCategoryListed(item.Category)
+        setIsCategorySelectOpen(false)
+        setCategorySelectedAddSubCat(item._id)
+    }
+
+    //  Add New Category
+    const handleAddCategory = async () => {
+        try {
+            console.log("handleAddCategory")
+            let formdata = new FormData()
+
+            formdata.append("image", categoryAddImage)
+            formdata.append("Category", newCategoryTitle)
+
+            await fetch(`https://hanaplingkod.onrender.com/service-category`, {
+                method: "POST",
+                headers: {
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                },
+                body: formdata
+            })
+
+            setNewCategoryTitle("")
+            setCategoryAddImage({})
+            setIsAddCategoryModalOpen(false)
+
+            fetchCategories()
+        } catch (error) {
+            console.log("error adding a category: ", error)
+        }
+    }
+
+    // Update Category Title or Image
+    const handleUpdateCategory = async () => {
+        try {
+            console.log("handleUpdateCategory")
+            let formData = new FormData()
+
+            // formData.append("Category", newCategoryTitle)
+            formData.append("image", categoryAddImage)
+
+            await fetch(`https://hanaplingkod.onrender.com/service-category/${categorySelected._id}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                },
+                body: formData
+            })
+
+            setNewCategoryTitle("")
+            setCategoryAddImage({})
+
+            fetchCategories()
+            setEditCategoryModalOpen(false)
+
+        } catch (error) {
+            console.log("error update category: ", error)
+        }
+    }
+
+
+    // add Sub-Category
+    const handleAddSubCategory = async () => {
+        try {
+            console.log("handleAddCategory")
+            let formdata = new FormData()
+
+            // ategorySelectedAddSubCat
+            formdata.append("ServiceID", categorySelectedAddSubCat)
+            formdata.append("image", categoryAddImage)
+            formdata.append("subCategory", newCategoryTitle)
+
+            console.log("cat id: ", categorySelectedAddSubCat)
+            console.log("image selected: ", categoryAddImage)
+            console.log("new title: ", newCategoryTitle)
+
+            // await fetch(`https://hanaplingkod.onrender.com/service-sub-category`, {
+            //     method: "POST",
+            //     headers: {
+            //         "Authorization": sessionStorage.getItem("adminAccessToken")
+            //     },
+            //     body: formdata
+            // })
+
+            setNewCategoryTitle("")
+            setCategoryAddImage({})
+            setCategorySelectedAddSubCat("")
+
+            setIsAddSubCategoryModalOpen(false)
+
+            fetchCategories()
+        } catch (error) {
+            console.log("error adding a category: ", error)
+        }
+    }
+
+    // edit/update Sub-Category
+    const handleUpdateSubCategory = async () => {
+        try {
+            console.log("handleAddCategory")
+            let formdata = new FormData()
+
+            formdata.append("image", categoryAddImage)
+
+            await fetch(`https://hanaplingkod.onrender.com/service-sub-category/${subCatSelected}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                },
+                body: formdata
+            })
+
+            setNewCategoryTitle("")
+            setCategoryAddImage({})
+            setCategorySelectedAddSubCat("")
+
+            setEditSubCategoryModalOpen(false)
+
+            // fetchCategories()
+            fetchSubCategories(categorySelected)
+        } catch (error) {
+            console.log("error adding a category: ", error)
+        }
+    }
 
     return(
         <div>
@@ -150,7 +357,7 @@ const Categories = () => {
                     </button>
                 </div>
                 <div class="right">
-                    <a class="home-link" href="#">Home</a>
+                    <a class="home-link" href="./index.html">Home</a>
                     <a class="account-link" href="#">Account</a>
                     <button id="settings-btn">
                         <img id="settings-image" src="./assets/icons/settings.png" />
@@ -189,7 +396,7 @@ const Categories = () => {
                                 </th>
                             </tr>
                             {
-                                CAT.map(item => (
+                                categories.map(item => (
                                     <tr class="cat-tr-data" 
                                         onClick={() => {
                                             // setSelectedCategory(item.)
@@ -197,13 +404,13 @@ const Categories = () => {
                                     >
                                         <td>
                                             <div class="cat-img">
-                                                <img src={item.catImage}/>
+                                                <img src={item.image}/>
                                             </div>
                                         </td>
-                                        <td className="category-title">{item.catTitle}</td>
+                                        <td className="category-title">{item.Category}</td>
                                         <td class="cat-actions">
-                                            <button type="button" class="cat-actions-button" onClick={() => handleShowSubcatSelected()}>Select</button>
-                                            <button type="button" class="cat-actions-button">Edit</button>
+                                            <button type="button" class="cat-actions-button" onClick={() => handleShowSubcatSelected(item)}>Select</button>
+                                            <button type="button" class="cat-actions-button" onClick={() => handleShowEditCategory(item)}>Edit</button>
                                         </td>
                                     </tr>
                                 ))
@@ -212,13 +419,14 @@ const Categories = () => {
                     </div>
                 </div>
             
-                <div class={isSubcatSelected ? "show-subcat-container" : "hide-subcat-container"}>
+                {/* sub-category table */}
+                <div class={isSubcatSelected ? "show-subcat-container" : "hide-subcat-container"} id={"link_sub-category-table"}>
                     <div class="subcat-heading">
                         <div class="cat-selected">
                             <h5>Category Selected</h5>
-                            <h2>House Cleaning</h2>
+                            <h2>{categorySelected.Category}</h2>
                         </div>
-                        <button type="button" class="add-subcat">Add Sub-Category</button>   
+                        <button type="button" class="add-subcat" onClick={() => setIsAddSubCategoryModalOpen(true)}>Add Sub-Category</button>   
                     </div>
 
                     <div>
@@ -229,13 +437,13 @@ const Categories = () => {
                                         <div class="subcat-th-img">
                                             <img src="https://img.icons8.com/windows/26/000000/folder-tree.png"/>
                                         </div>
-                                        <div class="subcat-th-title">Category Image</div>
+                                        <div class="subcat-th-title">Sub-Category Image</div>
                                     </th>
                                     <th class="subcat-th">
                                         <div class="subcat-th-img">
                                             <img src="https://img.icons8.com/external-tal-revivo-bold-tal-revivo/18/000000/external-online-document-with-title-on-header-template-wireframe-bold-tal-revivo.png"/>
                                         </div>
-                                        <div class="subcat-th-title">Category Title</div>
+                                        <div class="subcat-th-title">Sub-Category Title</div>
                                     </th>
                                     <th class="subcat-th">
                                         <div class="subcat-th-img">
@@ -245,16 +453,16 @@ const Categories = () => {
                                     </th>
                                 </tr>
                                 {
-                                    SUBCAT.map(item => (
+                                    subCategories.map(item => (
                                         <tr class="subcat-tr-data">
                                             <td>
                                                 <div class="subcat-img">
-                                                    <img src={item.subcatImage}/>
+                                                    <img src={item.image}/>
                                                 </div>
                                             </td>
-                                            <td>{item.subcatTitle}</td>
+                                            <td>{item.ServiceSubCategory}</td>
                                             <td class="subcat-actions">
-                                                <button type="button" class="cat-actions-button">Edit</button>
+                                                <button type="button" class="cat-actions-button" onClick={() => handleOpenEditModalSubCat(item)}>Edit</button>
                                             </td>
                                         </tr>
                                     ))
@@ -273,11 +481,12 @@ const Categories = () => {
                         <div>
                             <div>
                                 <h3>Category Title</h3>
-                                <input type="text" placeholder="Enter New Category Title" onChange={(e) => setCategoryTitle(e.target.value)} />
+                                <input type="text" placeholder="Enter New Category Title" onChange={(e) => setNewCategoryTitle(e.target.value)} />
+                                
                             </div>
                             <div>
                                 <h3>Category Image</h3>
-                                <input type="file" id="avatar" name="category-image" accept="image/png, image/jpeg" onChange={previewImage}/>
+                                <input type="file" id="avatar" name="category-image" accept=".png, .jpg, .jpeg" onChange={previewImage}/>
                             </div>
 
                             <img src={'./assets/images/placeholder-image.png'} class="categoryChosenImage" id="preview-selected-image"  />
@@ -285,7 +494,125 @@ const Categories = () => {
 
                         <div class="modal-buttons">
                             <button type="button" class="modal-button" id="confirm-verify" onClick={() => handleAddCategory()}>Save Changes</button>
-                            <button type="button" class="modal-button modal-button-cancel" onClick={() => handleCloseVerifyModal()}>Discard Changes</button>
+                            <button type="button" class="modal-button modal-button-cancel" onClick={() => setIsAddCategoryModalOpen(false)}>Discard Changes</button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* edit/updated Category modal */}
+                <div class={editCategoryModalOpen ? "verify-modal-container show-modal" : "verify-modal-container hide-modal"}>
+                    <div class={"verify-modal modal-edit-category-container"}>
+                        <h2 class="modal-title">Edit Category</h2>
+                        
+                        {/* <div class={"delete-button-container"}>
+                            <button><img src="./assets/icons/trash.png" /></button>
+                        </div> */}
+                        <div >
+                            <div>
+                                <h3>Category Title</h3>
+                                <p class={"category-title-edit-modal"}>{categorySelected.Category}</p>
+                                {/* <input type="text" placeholder="Enter Category Title" value={newCategoryTitle ? newCategoryTitle : ""} onChange={(e) => setNewCategoryTitle(e.target.value)} /> */}
+                            </div>
+                            <div>
+                                <h3>Category Image</h3>
+                                <p class={"replace-image-subtitle"}>Replace Category Image</p>
+                                <input type="file" id="avatar" name="category-image" accept=".png, .jpg, .jpeg" onChange={previewEditCatImage}/>
+                            </div>
+
+                            <img src={categorySelected.image} class="categoryChosenImage" id="preview-selected-image-edit-cat"  />
+                        </div>
+
+                        <div class="modal-buttons">
+                            <button type="button" class="modal-button" id="confirm-verify" onClick={() => handleUpdateCategory()}>Save Changes</button>
+                            <button type="button" class="modal-button modal-button-cancel" onClick={() => setEditCategoryModalOpen(false)}>Discard Changes</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                {/* add Sub-Category modal */}
+                <div class={isAddSubCategoryModalOpen ? "verify-modal-container show-modal" : "verify-modal-container hide-modal"}>
+                    <div class="verify-modal">
+                        <h2 class="modal-title">Add Sub-Category</h2>
+                        
+                        <div class={"subcat-modal-view"}>
+                            <div class={"select-category-container"}>
+                                <h3>Category Listed</h3>
+                                {/* <input type="text" placeholder="Enter New Category Title" onChange={(e) => setCategoryTitle(e.target.value)} /> */}
+                                <button class={"select-category-button"} onClick={() => setIsCategorySelectOpen(prev => !prev)}>{categoryListed ? categoryListed : "Select Category"}  <img class={"button-icon-down"} src={isCategorySelectOpen ? "./assets/icons/chevron-up.png" : "./assets/icons/chevron-down.png"} /></button>
+                            
+                                {
+                                    isCategorySelectOpen &&
+                                    <div id="category-select-menu">
+                                        {
+                                            categories.map(item => (
+                                                <button class={"category-option"} onClick={() => handleOnSelectedCategoryListed(item)}>{item.Category}</button>
+                                            ))
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div>
+                                <h3>Sub-Category Title</h3>
+                                <input type="text" placeholder="Enter New Category Title" onChange={(e) => setNewCategoryTitle(e.target.value)} />
+                            </div>
+                            <div>
+                                <h3>Sub-Category Image</h3>
+                                <input type="file" id="avatar" name="category-image" accept="image/png, image/jpeg" onChange={previewImageSubCat}/>
+                            </div>
+
+                            <img src={'./assets/images/placeholder-image.png'} class="categoryChosenImage" id="preview-selected-image-subcat"  />
+                        </div>
+
+                        <div class="modal-buttons">
+                            <button type="button" class="modal-button" id="confirm-verify" onClick={() => handleAddSubCategory()}>Save Changes</button>
+                            <button type="button" class="modal-button modal-button-cancel" onClick={() => handleDiscardAddSubCategory()}>Discard Changes</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                {/* edit sub-category */}
+                <div class={editSubCategoryModalOpen ? "verify-modal-container show-modal" : "verify-modal-container hide-modal"}>
+                    <div class="verify-modal">
+                        <h2 class="modal-title">Edit Sub-Category</h2>
+                        
+                        <div class={"subcat-modal-view"}>
+                                <h3>Category Listed</h3>
+                                
+                                <h3>Sub-Category Title</h3>
+                                {
+                                    categoryListed === 'unlisted' ?
+                                    <>
+                                        {
+                                            isCategorySelectOpen &&
+                                            <div id="category-select-menu">
+                                                {
+                                                    categories.map(item => (
+                                                        <button class={"category-option"} onClick={() => handleOnSelectedCategoryListed(item)}>{item.Category}</button>
+                                                    ))
+                                                }
+                                            </div>
+                                        }
+                                    </>
+                                    :
+                                    <p class={"category-title-edit-modal"}>{categoryListed}</p>
+                                }
+                            <div>
+                                    {/* <p class={"category-title-edit-modal"}>{newCategoryTitle}</p> */}
+                                
+                            </div>
+                            <div>
+                                <h3>Sub-Category Image</h3>
+                                <input type="file" id="avatar" name="category-image" accept="image/png, image/jpeg" onChange={previewImageEditSubCat}/>
+                            </div>
+
+                            <img src={'./assets/images/placeholder-image.png'} class="categoryChosenImage" id="preview-selected-image-edit-subcat"  />
+                        </div>
+
+                        <div class="modal-buttons">
+                            <button type="button" class="modal-button" id="confirm-verify" onClick={() => handleUpdateSubCategory()}>Save Changes</button>
+                            <button type="button" class="modal-button modal-button-cancel" onClick={() => handleDiscardAddSubCategory()}>Discard Changes</button>
                         </div>
                     </div>
                 </div>
