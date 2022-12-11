@@ -6,6 +6,10 @@ const { authenticateToken } = require("../Helpers/JWT");
 
 const multer = require("multer");
 
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 //store photos
 const storage = multer.diskStorage({
   //destination for files

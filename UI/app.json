@@ -29,7 +29,8 @@
       "permissions": [
         "android.permissoin.READ_EXTERNAL_STORAGE"
       ],
-      "package": "com.team4g.hanaplingkod"
+      "package": "com.team4g.hanaplingkod",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/logo/hanaplingkod_icon.png"
@@ -49,7 +50,8 @@
           "color": "#2080ff",
           "sounds": []
         }
-      ]
+      ],
+      "@react-native-firebase/app"
     ],
     "extra": {
       "eas": {

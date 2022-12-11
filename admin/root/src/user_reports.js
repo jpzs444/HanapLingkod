@@ -29,6 +29,59 @@ const UserReports = () => {
         }
     ]
 
+    const DATAEMPTY = [
+        {
+            "user": {
+                "firstname": "",
+                "middlename": "",
+                "lastname": "",
+                "role": "",
+            }, 
+            "title": "",
+            "deleteflag": ""
+        },
+        {
+            "user": {
+                "firstname": "",
+                "middlename": "",
+                "lastname": "",
+                "role": "",
+            }, 
+            "title": "",
+            "deleteflag": ""
+        },
+        {
+            "user": {
+                "firstname": "",
+                "middlename": "",
+                "lastname": "",
+                "role": "",
+            }, 
+            "title": "",
+            "deleteflag": ""
+        },
+        {
+            "user": {
+                "firstname": "",
+                "middlename": "",
+                "lastname": "",
+                "role": "",
+            }, 
+            "title": "",
+            "deleteflag": ""
+        },
+        {
+            "user": {
+                "firstname": "",
+                "middlename": "",
+                "lastname": "",
+                "role": "",
+            }, 
+            "title": "",
+            "deleteflag": ""
+        },
+    ]
+
     const handleClickReport = (itemId) => {
         sessionStorage.setItem("selectedReportItem", itemId)
         window.location.assign("./UserReport.html")
@@ -45,7 +98,7 @@ const UserReports = () => {
             }).then(res => res.json())
             .then(data => {
                 console.log("reports: ", data)
-                setReports([...data])
+                data.length === 0 ? setReports([...DATAEMPTY]) : setReports([...data])
             })
         } catch (error) {
             console.log("error fetching reports: ", error)
@@ -66,7 +119,7 @@ const UserReports = () => {
                     </button>
                 </div>
                 <div class="right">
-                    <a class="home-link" href="#">Home</a>
+                    <a class="home-link" href="./index.html">Home</a>
                     <a class="account-link" href="#">Account</a>
                     <button id="settings-btn">
                         <img id="settings-image" src="./assets/icons/settings.png" />
@@ -110,7 +163,7 @@ const UserReports = () => {
                             {
                                 reports.map(item => (
                                     <tr class="reports-tr-data" onClick={() => {handleClickReport(item._id)}}>
-                                        <td>{`${item.user.firstname} ${item.user.middlename.charAt(0).toUpperCase()}. ${item.user.lastname}`}</td>
+                                        <td>{`${item.user.firstname} ${item.user.middlename.charAt(0).toUpperCase()} ${item.user.lastname}`}</td>
                                         <td>{item.user.role}</td>
                                         <td>{item.title}</td>
                                         <td>{item.deleteflag.toString()}</td>

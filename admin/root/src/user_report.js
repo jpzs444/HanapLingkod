@@ -53,6 +53,53 @@ const UserReport = () => {
         }
     }
 
+    // Add offense to user | Penalize Reported User
+    const handlePenalizeReportedUser = async (e) => {
+        console.log("penalize reported user")
+        try {
+            // await fetch(`https://hanaplingkod.onrender.com/banUser/${reportedUser.role}`, {
+            //     method: "POST",
+            //     headers: {
+            //         'content-type': 'application/json',
+            //         'Authorization': sessionStorage.getItem("adminAccessToken") 
+            //     },
+            //     body: JSON.stringify({
+            //         id: reportedUser.id
+            //     })
+            // }).then(res => res.json())
+            
+            handleClosePenalizeModal()
+            window.location.assign("./UserReports.html")
+
+        } catch (error) {
+            console.log("error penalizing reported user", error)
+        }
+    }
+
+
+    // permanently bans a user
+    const handlePermanentlyBanReportedUser = async (e) => {
+        console.log("permanently banned reported user")
+        try {
+            // await fetch(`https://hanaplingkod.onrender.com/permanentBanUser/${reportedUser.role}`, {
+            //     method: "POST",
+            //     headers: {
+            //         'content-type': 'application/json',
+            //         'Authorization': sessionStorage.getItem("adminAccessToken") 
+            //     },
+            //     body: JSON.stringify({
+            //         id: reportedUser.id
+            //     })
+            // }).then(res => res.json())
+            
+            handleClosePermabanModal()
+            window.location.assign("./UserReports.html")
+
+        } catch (error) {
+            console.log("error penalizing reported user", error)
+        }
+    }
+
 
     const handleOpenPermabanModal = () => {
         setIsPermabanModalOpen(true);
@@ -172,7 +219,7 @@ const UserReport = () => {
                     <h2 class="modal-title">Permanently Ban User?</h2>
                     <p class="modal-description">By clicking "Yes", the account of the reported user will be permanently deleted in HanapLingkod.</p>
                     <div class="modal-buttons">
-                        <button type="button" class="modal-button" id="permaban-yes">Yes</button>
+                        <button type="button" class="modal-button" id="permaban-yes" onClick={() => handlePermanentlyBanReportedUser()}>Yes</button>
                         <button type="button" class="modal-button modal-button-cancel" onClick={() => handleClosePermabanModal()}>Cancel</button>
                     </div>
                 </div>
@@ -191,7 +238,7 @@ const UserReport = () => {
                         <p>6th strike: Permanent ban</p>
                     </div>
                    <div class="modal-buttons">
-                        <button type="button" class="modal-button" id="penalize-yes">Yes</button>
+                        <button type="button" class="modal-button" id="penalize-yes" onClick={() => handlePenalizeReportedUser()}>Yes</button>
                         <button type="button" class="modal-button modal-button-cancel" onClick={() => handleClosePenalizeModal()}>Cancel</button>
                     </div>
                 </div>

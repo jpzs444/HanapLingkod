@@ -12,7 +12,13 @@ const AccountInformation = () => {
         "accountWorkDesc": "Will do my very best to serve my clients",
     }
 
+    const [user, setUser] = React.useState({})
+    const [userBirthday, setUserBirthday] = React.useState("")
     const [isVerifyModalOpen, setVerifyModalOpen] = React.useState(false);
+
+    React.useEffect(() => {
+        fetchUserInformation()
+    }, []);
 
     const handleOpenVerifyModal = () => {
         setVerifyModalOpen(true)
@@ -20,6 +26,63 @@ const AccountInformation = () => {
 
     const handleCloseVerifyModal = () => {
         setVerifyModalOpen(false)
+    }
+
+    const fetchUserInformation = async () => {
+        try {
+            let userRole = sessionStorage.getItem("viewUserProfile_role")
+            let userId = sessionStorage.getItem("viewUserProfile_Id")
+
+            await fetch(`https://hanaplingkod.onrender.com/${userRole}/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log(data)
+                setUser({...data})
+                setUserBirthday(getBirthday(data.birthday))
+            })
+        } catch (error) {
+            console.log("error fetching user information(account iformation): ", error)
+        }
+    }
+
+    const handleVerifyingUser = async () => {
+        console.log("verify a user")
+
+        try {
+            let userRole = sessionStorage.getItem("viewUserProfile_role")
+            let userId = sessionStorage.getItem("viewUserProfile_Id")
+
+            await fetch(`https://hanaplingkod.onrender.com/verifyAUser/${userRole}`, {
+                method: 'PUT',
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                },
+                body: JSON.stringify({
+                    id: userId
+                })
+            })
+            handleCloseVerifyModal()
+            window.location.assign("./AccountVerification.html")
+        } catch (error) {
+            console.log("error verifying a user: ", error)
+        }
+    }
+
+    const getBirthday = (date) => {
+        let tempDate = new Date(date)
+        let month= ["January","February","March","April","May","June","July",
+        "August","September","October","November","December"];
+        let birthMonth = month[tempDate.getMonth()]
+
+        let birthday = `${birthMonth} ${tempDate.getDate()}, ${tempDate.getFullYear()}`
+        console.log("bday: ", birthday)
+        return birthday
     }
 
     return(
@@ -51,46 +114,49 @@ const AccountInformation = () => {
                 <div class="accinfo-content">
                     <div class="accinfo-content-side">
                         <div class="account-image">
-                            <img src={DATA.accountImage}/>
+                            <img src={user.profilePic === 'pic' ? "./assets/icons/account.png" : user.profilePic}/>
                         </div>
-                        <p class="account-role">{DATA.accountRole}</p>
+                        <p class="account-role">{user.role}</p>
                     </div>
 
                     <div class="accinfo-content-main">                    
-                        <div class="account-main-info">
+                        <div class="account-main-info main-user-information">
                             <div class="info-indiv-container">
-                                <p>Name</p>
+                                <p class="info-label">Name</p>
                                 <div class="info-indiv">
                                     <img src="./assets/icons/account.png"/>
-                                    <p class="account-name">{DATA.accountName}</p>
+                                    <p class="account-name">{`${user.firstname} ${user.middlename?.charAt(0).toUpperCase()} ${user.lastname}`}</p>
                                 </div>
                             </div>
                             <div class="info-indiv-container">
-                                <p>Phone Number</p>
+                                <p class="info-label">Phone Number</p>
                                 <div class="info-indiv">
                                     <img src="./assets/icons/phonenumber.png"/>
-                                    <p class="account-info">{DATA.accountPhone}</p>
+                                    <p class="account-info">{user.phoneNumber}</p>
                                 </div>
                             </div>
                             <div class="info-indiv-container">
-                                <p>Address</p>
+                                <p class="info-label">Address</p>
                                 <div class="info-indiv">
                                     <img src="./assets/icons/location.png"/>
-                                    <p class="account-info">{DATA.accountAddress}</p>
+                                    <p class="account-info">{`${user.street}, Purok ${user.purok}, ${user.barangay}, ${user.city}, ${user.province}`}</p>
                                 </div>
                             </div>
-                            <div class="info-indiv-container">
-                                <p>Work Description</p>
-                                <div class="info-indiv">
-                                    <img src="./assets/icons/description.png"/>
-                                    <p class="account-info">{DATA.accountWorkDesc}</p>
+                            {
+                                user.role === 'worker' &&
+                                <div class="info-indiv-container">
+                                    <p class="info-label">Work Description</p>
+                                    <div class="info-indiv">
+                                        <img src="./assets/icons/description.png"/>
+                                        <p class="account-info">{user.workDescription}</p>
+                                    </div>
                                 </div>
-                            </div>
+                            }
                             <div class="info-indiv-container">
-                                <p>Birthdate</p>
+                                <p class="info-label">Birthdate</p>
                                 <div class="info-indiv">
                                     <img src="./assets/icons/birthday.png"/>
-                                    <p class="account-info">{DATA.accountBirthdate}</p>
+                                    <p class="account-info">{userBirthday}</p>
                                 </div>
                             </div>
                         </div>
@@ -98,16 +164,24 @@ const AccountInformation = () => {
                         <h3>Government-Issued/Valid ID</h3>
 
                         <div class="account-main-info">
-                            
+                            <img className={"govId-image"} src={user.GovId} />
                         </div>
 
-                        <h3>License/Proof of Profession</h3>
+                        {
+                            user.role === "worker" &&
+                            <>
+                                <h3>License/Proof of Profession</h3>
 
-                        <div class="account-main-info">
-                            
-                        </div>
-
-                        <button type="button" class="verify-account-btn" onClick={() => handleOpenVerifyModal()}>Verify Account</button>
+                                <div class="account-main-info">
+                                    <img className={"govId-image"} src={user.licenseCertificate} />
+                                </div>
+                            </>
+                        }
+                        
+                        {
+                            !user.verification &&
+                            <button type="button" class="verify-account-btn" onClick={() => handleOpenVerifyModal()}>Verify Account</button>
+                        }
                     </div>
                 </div>
             </div>
@@ -122,7 +196,7 @@ const AccountInformation = () => {
                         account type.
                     </p>
                     <div class="modal-buttons">
-                        <button type="button" class="modal-button" id="confirm-verify">Verify</button>
+                        <button type="button" class="modal-button" id="confirm-verify" onClick={() => handleVerifyingUser()}>Verify</button>
                         <button type="button" class="modal-button modal-button-cancel" onClick={() => handleCloseVerifyModal()}>Cancel</button>
                     </div>
                 </div>

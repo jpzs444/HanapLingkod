@@ -30,7 +30,69 @@ const Categories = () => {
             "subcatImage" : "https://cdn.thomasnet.com/insights-images/embedded-images/29ff5157-77a2-43ee-8307-82bbdd208d53/2d87c370-ac29-42f4-b792-67d9dfdeee18/FullHD/best-carpet-cleaning-machine-2021.jpg",
             "subcatTitle": "Carpet Cleaning",
         }
-    ]  
+    ]
+
+
+
+    const [categories, setCategories] = React.useState([])
+    const [subCategories, setSubCategories] = React.useState([])
+
+    const [selectedCategory, setSelectedCategory] = React.useState("")
+
+    const [categoryTitle, setCategoryTitle] = React.useState("")
+    const [categoryImage, setCategoryImage] = React.useState("")
+
+    const [subCategoryTitle, setSubCategoryTitle] = React.useState("")
+    const [subCategoryImage, setSubCategoryImage] = React.useState("")
+
+    const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = React.useState(true)
+    const [isAddSubCategoryModalOpen, setIsAddSubCategoryModalOpen] = React.useState(false)
+
+    React.useEffect(() => {
+        fetchCategories()
+    }, []);
+
+    React.useEffect(() => {
+        fetchSubCategories()
+    }, [selectedCategory]);
+
+
+    const fetchCategories = async () => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/service-category`, {
+                method: "GET",
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("service categories: ", data)
+                setCategories([...data])
+            })
+        } catch (error) {
+            console.log("error fetching categories: ", error)
+        }
+    }
+
+    const fetchSubCategories = async () => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/service-sub-category`, {
+                method: "GET",
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("service sub-categories: ", data)
+                setSubCategories([...data])
+            })
+        } catch (error) {
+            console.log("error fetching categories: ", error)
+        }
+    }
+
 
     const [isSubcatSelected, setSubcatSelected] = React.useState(false)
 
@@ -41,6 +103,38 @@ const Categories = () => {
     const handleHideSubcatSelected = () => {
         setSubcatSelected(false)
     }
+
+    const handleAddCategory = async () => {
+        try {
+            // let formdata = 
+            await fetch(`https://hanaplingkod.onrender.com/service-category`, {
+// 
+            })
+        } catch (error) {
+            console.log("error adding a category: ", error)
+        }
+    }
+
+    const previewImage = (event) => {
+        const imageFiles = event.target.files;
+        const imageFilesLength = imageFiles.length;
+        
+        if (imageFilesLength > 0) {
+            // Get the image path.
+            const imageSrc = URL.createObjectURL(imageFiles[0]);
+            // return(imageSrc)
+            // Select the image preview element.
+            const imagePreviewElement = document.querySelector("#preview-selected-image");
+            // /**
+            //  * Assign the path to the image preview element.
+            //  */
+            imagePreviewElement.src = imageSrc;
+            // /**
+            //  * Show the element by changing the display value to "block".
+            //  */
+            imagePreviewElement.style.display = "block";
+        }
+    };
 
     return(
         <div>
@@ -68,12 +162,12 @@ const Categories = () => {
             <div class="categories">
                 <div class="cat-heading">
                     <h1>Categories</h1>
-                    <button type="button" class="add-cat">Add Category</button>   
+                    <button type="button" class="add-cat" onClick={() => setIsAddCategoryModalOpen(true)}>Add Category</button>   
                 </div>
                 
                 <div>
                     <div>
-                        <table>
+                        <table class="category-table">
                             <tr class="cat-tr-title">
                                 <th class="cat-th">
                                     <div class="cat-th-img">
@@ -96,13 +190,17 @@ const Categories = () => {
                             </tr>
                             {
                                 CAT.map(item => (
-                                    <tr class="cat-tr-data">
+                                    <tr class="cat-tr-data" 
+                                        onClick={() => {
+                                            // setSelectedCategory(item.)
+                                        }}
+                                    >
                                         <td>
                                             <div class="cat-img">
                                                 <img src={item.catImage}/>
                                             </div>
                                         </td>
-                                        <td>{item.catTitle}</td>
+                                        <td className="category-title">{item.catTitle}</td>
                                         <td class="cat-actions">
                                             <button type="button" class="cat-actions-button" onClick={() => handleShowSubcatSelected()}>Select</button>
                                             <button type="button" class="cat-actions-button">Edit</button>
@@ -165,6 +263,33 @@ const Categories = () => {
                         </div>
                     </div>
                 </div>
+
+
+                {/* add Category modal */}
+                <div class={isAddCategoryModalOpen ? "verify-modal-container show-modal" : "verify-modal-container hide-modal"}>
+                    <div class="verify-modal">
+                        <h2 class="modal-title">Add Category</h2>
+                        
+                        <div>
+                            <div>
+                                <h3>Category Title</h3>
+                                <input type="text" placeholder="Enter New Category Title" onChange={(e) => setCategoryTitle(e.target.value)} />
+                            </div>
+                            <div>
+                                <h3>Category Image</h3>
+                                <input type="file" id="avatar" name="category-image" accept="image/png, image/jpeg" onChange={previewImage}/>
+                            </div>
+
+                            <img src={'./assets/images/placeholder-image.png'} class="categoryChosenImage" id="preview-selected-image"  />
+                        </div>
+
+                        <div class="modal-buttons">
+                            <button type="button" class="modal-button" id="confirm-verify" onClick={() => handleAddCategory()}>Save Changes</button>
+                            <button type="button" class="modal-button modal-button-cancel" onClick={() => handleCloseVerifyModal()}>Discard Changes</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     )

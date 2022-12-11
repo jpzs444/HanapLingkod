@@ -8,15 +8,18 @@ const AccountVerification = () => {
         {"name": "Pedro P. Penduko", "role": "Worker", "address": "Awitan, Daet, Camarines Norte",},
     ]
 
-    const [role, setRole] = React.useState(true)
-    const [userList, setUserList] = React.useState([])
+    const [role, setRole] = React.useState(false)
+    const [user, setUser] = React.useState([])
 
     React.useEffect(() => {
         fetchUserData(role)
     }, [])
 
-    const handleOnClickItem = (name) => {
-        console.log("hi ", name)
+    const handleOnClickItem = (user) => {
+        console.log("hi ", user.firstname)
+        sessionStorage.setItem("viewUserProfile_Id", user._id)
+        sessionStorage.setItem("viewUserProfile_role", user.role)
+        window.location.assign("./AccountInformation.html")
     }
 
     const handleSwitchRoleType = (b) => {
@@ -26,22 +29,23 @@ const AccountVerification = () => {
     }
 
     const fetchUserData = async (role) => {
-
-        let userRole = role ? "Recruiter" : "worker"
+        // role == boolean
+        let isVerified = role ? "verifiedUsers" : "unverifiedUsers"
+        
         try {
-            await fetch(`https://hanaplingkod.onrender.com/${userRole}`, {
-                method: 'get',
+            await fetch(`https://hanaplingkod.onrender.com/${isVerified}`, {
+                method: 'GET',
                 headers: {
                     'content-type': "application/json",
-                    'Accept': 'application/json'
-                },
-                mode: "no-cors",
-                // body: JSON.stringify({})
-            }).then((res) => {
-                res.json()
-                console.log(res)
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log(data)
+                role ? setUser([...data.verifiedWorkers, ...data.verifiedRecruiters])
+                :
+                setUser([...data.unverifiedWorkers, ...data.unverifiedRecruiters])
             })
-            // .then(data => console.log(data.body))
             
         } catch (error) {
             console.log("error fetching user data(userViewJS): ", error)
@@ -77,8 +81,8 @@ const AccountVerification = () => {
                 <main>
                     <div className="tabButton_container">
                         <div>
-                            <button className={role ? "active" : null} onClick={() => handleSwitchRoleType(true)} id="recruiterButton">Recruiters</button>
-                            <button class={role ? null : "active"} onClick={() => handleSwitchRoleType(false)} id="workerButton" >Workers</button>
+                            <button className={role ? null : "active" } onClick={() => handleSwitchRoleType(false)} id="recruiterButton">Unverified</button>
+                            <button class={role ? "active" : null} onClick={() => handleSwitchRoleType(true)} id="workerButton" >Verified</button>
                         </div>
                     </div>
                     <div className="table_container">
@@ -104,7 +108,7 @@ const AccountVerification = () => {
                                 </th>
                                 <th className="rating_column">
                                     <div className="headerItem_container">
-                                        <img className="column_icon" src="./assets/icons/star-white.png"/>
+                                        <img class="column_icon header-icon" src="./assets/icons/star-white.png"/>
                                         <p className="tr_title">Rating</p>
                                     </div>
                                 </th>
@@ -112,21 +116,21 @@ const AccountVerification = () => {
 
                             {/* items */}
                             {
-                                DATA.map(item => (
-                                    <tr className="table_data" onClick={() => handleOnClickItem(item.name)}>
+                                user.map(item => (
+                                    <tr className="table_data" onClick={() => handleOnClickItem(item)}>
                                         <td className="name_column">
-                                            <p className="tr_title">{item.name}</p>
+                                            <p className="tr_title">{`${item.firstname} ${item.middlename?.charAt(0).toUpperCase()} ${item.lastname}`}</p>
                                         </td>
                                         <td className="role_column">
                                             <p className="tr_title">{item.role}</p>
                                         </td>
                                         <td className="address_column">
-                                            <p className="tr_title">{item.address}</p>
+                                            <p className="tr_title">{`${item.street}, Purok ${item.purok}, ${item.barangay}, ${item.city}, ${item.province}`}</p>
                                         </td>
                                         <td className="rating_column">
                                             <div className="rating_container">
-                                                <img src="./assets/icons/star-yellow.png"></img>
-                                                <p className="tr_title">5.0</p>
+                                                <img src="./assets/icons/star-yellow.png" />
+                                                <p className="tr_title">{item.rating ? item.rating : "0"}</p>
                                             </div>
                                         </td>
                                     </tr>

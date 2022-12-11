@@ -185,9 +185,17 @@ table tr td {
     margin-left: 15px;
 }
 
+.rating_column {
+    padding-left: 25px;
+}
+
 .rating_column img {
     width: 20px;
     height: 20px;
+}
+
+.address_column {
+    padding-right: 15px;
 }
 
 

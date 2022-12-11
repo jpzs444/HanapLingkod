@@ -230,7 +230,7 @@ const Workers = () => {
                                         setLoading(true)
 
                                         setVerifiedFilter(filter === "Verified" ? true : false )
-                                        filterCategoryWithSettings("verification", filter)
+                                        filterCategoryWithSettings("verification", filter === "Verified" ? "true" : "false" )
                                         // filter === "All" ? handleResetFilter() : filter === 'Verified' ? filterVerifiedList(true) : filterVerifiedList(false)
                                     }}
                                     verifiedFilter={true}

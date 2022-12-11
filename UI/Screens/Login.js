@@ -83,8 +83,8 @@ export default function Login({navigation}) {
             
             setIsLoading(false)
             setUser({username: "", password: ""});
-            // navigation.replace("HomeStack");
-            navigation.navigate("OTPVerification", {isLogin: true, phoneNum: user.phoneNumber})
+            navigation.replace("HomeStack");
+            // navigation.navigate("OTPVerification", {isLogin: true, phoneNum: user.phoneNumber})
 
           } else {
             setIsLoading(false)

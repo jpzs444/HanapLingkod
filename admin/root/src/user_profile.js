@@ -22,9 +22,75 @@ const UserProfile = () => {
         "ratingReview": "Recruiter is so sarap. You know that I love chicken nuggets 💖",
     }
 
+    const [user, setUser] = React.useState({})
+    const [userRatings, setUserRatings] = React.useState([])
+    const [userBirthday, setUserBirthday] = React.useState('')
+
+    React.useEffect(() => {
+        fetchUserInformation()
+        fetchUserRatings()
+    }, [])
+
+
+    const fetchUserInformation = async () => {
+        try {
+            let userRole = sessionStorage.getItem("viewUserProfile_role")
+            let userId = sessionStorage.getItem("viewUserProfile_Id")
+
+            console.log(userRole)
+            console.log(userId)
+            await fetch(`https://hanaplingkod.onrender.com/${userRole}/${userId}`, {
+                method: "GET",
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("user information: ", data)
+                setUser({...data})
+                setUserBirthday(getBirthday(data.birthday))
+            })
+        } catch (error) {
+            console.log("error fetching user information", error)
+        }
+    }
+
+    const fetchUserRatings = async () => {
+        try {
+            let ratingRoute = sessionStorage.getItem("viewUserProfile_role") === 'recruiter' ? "RecruiterComment" : "workerComment"
+            let userId = sessionStorage.getItem("viewUserProfile_Id")
+
+            await fetch(`https://hanaplingkod.onrender.com/${ratingRoute}/${userId}`, {
+                method: "GET",
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                console.log("user ratings: ", data)
+                setUserRatings({...data})
+            })
+        } catch (error) {
+            console.log("error fetching user ratings: ", error)
+        }
+    }
+
+    const getBirthday = (date) => {
+        let tempDate = new Date(date)
+        let month= ["January","February","March","April","May","June","July",
+        "August","September","October","November","December"];
+        let birthMonth = month[tempDate.getMonth()]
+
+        let birthday = `${birthMonth} ${tempDate.getDate()}, ${tempDate.getFullYear()}`
+        console.log("bday: ", birthday)
+        return birthday
+    }
+
     return(
         <div>
-            <nav class="flexRow">
+            {/* <nav class="flexRow">
                 <div class="left">
                     <button id="menu-btn" onclick="handleOpenSideNav()">
                         <img id="menu-image" src="./assets/icons/menu.png"/>
@@ -42,7 +108,7 @@ const UserProfile = () => {
                         <img id="settings-image" src="./assets/icons/settings.png" />
                     </button>
                 </div>
-            </nav>
+            </nav> */}
             
 
             <div class="userprof">
@@ -51,9 +117,9 @@ const UserProfile = () => {
                 <div class="userprof-content">
                     <div class="userprof-content-side">
                         <div class="userprof-image">
-                            <img src={DATA.userprofImage}/>
+                            <img src={user.profilePic === 'pic' ? "./assets/icons/account.png" : user.profilePic}/>
                         </div>
-                        <p class="userprof-role">{DATA.userprofRole}</p>
+                        <p class="userprof-role">{user.role}</p>
                         <div class="userprof-strikes-container">
                             <p>Strikes:</p>
                             <p>{DATA.userprofStrikes}/5</p>
@@ -66,35 +132,38 @@ const UserProfile = () => {
                                 <p>Name</p>
                                 <div class="info-indiv">
                                     <img src="./assets/icons/account.png"/>
-                                    <p class="userprof-name">{DATA.userprofName}</p>
+                                    <p class="userprof-name">{`${user.firstname} ${user.middlename?.charAt(0).toUpperCase()} ${user.lastname}`}</p>
                                 </div>
                             </div>
                             <div class="info-indiv-container">
                                 <p>Phone Number</p>
                                 <div class="info-indiv">
                                     <img src="./assets/icons/phonenumber.png"/>
-                                    <p class="userprof-info">{DATA.userprofPhone}</p>
+                                    <p class="userprof-info">{user.phoneNumber}</p>
                                 </div>
                             </div>
                             <div class="info-indiv-container">
                                 <p>Address</p>
                                 <div class="info-indiv">
                                     <img src="./assets/icons/location.png"/>
-                                    <p class="userprof-info">{DATA.userprofAddress}</p>
+                                    <p class="userprof-info">{`${user.street}, Purok ${user.purok}, ${user.barangay}, ${user.city}, ${user.province}`}</p>
                                 </div>
                             </div>
-                            <div class="info-indiv-container">
-                                <p>Work Description</p>
-                                <div class="info-indiv">
-                                    <img src="./assets/icons/description.png"/>
-                                    <p class="userprof-info">{DATA.userprofWorkDesc}</p>
+                            {
+                                user.role === 'worker' &&
+                                <div class="info-indiv-container">
+                                    <p>Work Description</p>
+                                    <div class="info-indiv">
+                                        <img src="./assets/icons/description.png"/>
+                                        <p class="userprof-info">{user.workDescription}</p>
+                                    </div>
                                 </div>
-                            </div>
+                            }
                             <div class="info-indiv-container">
                                 <p>Birthdate</p>
                                 <div class="info-indiv">
                                     <img src="./assets/icons/birthday.png"/>
-                                    <p class="userprof-info">{DATA.userprofBirthdate}</p>
+                                    <p class="userprof-info">{userBirthday}</p>
                                 </div>
                             </div>
                         </div>
@@ -104,7 +173,7 @@ const UserProfile = () => {
                             <div class="rating-heading-icon">
                                 <img src="./assets/icons/star-yellow.png"/>
                             </div>
-                            <p>{DATA.userprofAvgRating}</p>
+                            <p>{user.rating ? user.rating : "0" }</p>
                         </div>
 
                         <div class="userprof-main-rating">
