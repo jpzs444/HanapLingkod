@@ -187,6 +187,7 @@ router
 
       // console.log(endTime);
       if (req.body.requestStatus == 2) {
+        console.log("time outside function: " + endTime);
         if (await checkConflict(req.params.user, req.params.id, endTime)) {
           console.log(
             "conflict cheker result:" +
