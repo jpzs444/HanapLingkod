@@ -682,4 +682,23 @@ router.route("/yourReports/:id").get(async function (req, res) {
   res.send(reports);
 });
 
+router.route("/strike/:role/:id").get(async function (req, res) {
+  if (req.params.role === "recruiter") {
+    console.log(req.params.id);
+    let offense = await BannedRecruiter.count({
+      recruiterId: req.params.id,
+    })
+      .lean()
+      .exec();
+    res.send(String(offense));
+  } else if (req.params.role === "worker") {
+    offense = await BannedWorker.count({
+      workerId: req.body.id,
+    })
+      .lean()
+      .exec();
+    res.send(String(offense));
+  }
+});
+
 module.exports = router;
