@@ -12,6 +12,11 @@ const generateOTP = require("../Helpers/OTP_Generator");
 const { CheckIfBan } = require("../Helpers/banChecker");
 const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 const BookingEmail = require("../Helpers/BookingEmail");
+
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 router
   .route("/service-request/:user")
   .get(authenticateToken, CheckIfBan, async function (req, res) {
