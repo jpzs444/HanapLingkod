@@ -179,10 +179,12 @@ header h1 {
 .dashboard-overview {
     flex-wrap: wrap;
     gap: 12px;
+    justify-content: center;
 }
 
 .dbo-box {
-    flex: 1;
+    /* flex: 1; */
+    width: 350px;
     margin-top: 15px;
     background-color: #fff;
     display: flex;

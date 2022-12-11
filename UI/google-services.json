@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "332235407769",
+    "project_id": "hanaplingkod-94543",
+    "storage_bucket": "hanaplingkod-94543.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:332235407769:android:8941e78bc5e6d62f0c5308",
+        "android_client_info": {
+          "package_name": "com.team4g.hanaplingkod"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "332235407769-g99od1q65o5cogh7c13r9qhcnhqoo1r4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmhC0QamxSekOroDxhBIWdFG3NWVR1F9o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "332235407769-g99od1q65o5cogh7c13r9qhcnhqoo1r4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -15,6 +15,8 @@ body {
     width: 50%;
     margin-right: auto;
     margin-left: auto;
+    justify-content: center;
+    align-items: center;
 }
 
 .headerTitle {
@@ -67,7 +69,7 @@ body {
     padding: 6px 12px;
     border: 2px solid #CBCBCB;
     border-radius: 8px;
-    /* outline: none; */
+    outline: none;
 }
 
 .search-container input::placeholder {
@@ -134,7 +136,8 @@ table {
     width: 100%;
     max-height: 40vh;
     /* border-spacing: 5px; */
-    margin-bottom: 100px;
+    margin-bottom: 200px;
+    align-self: center;
 }
 
 table tr {
@@ -152,6 +155,7 @@ table tr td {
 .userProfilePic{
     width: 30px;
     height: 30px;
+    border-radius: 15px;
 }
 
 
@@ -171,6 +175,10 @@ table tr td {
 .rating_container {
     display: flex;
     margin-left: 15px;
+}
+
+.rating_column {
+    padding-left: 25px;
 }
 
 .rating_column img {
@@ -199,4 +207,8 @@ table tr td {
     height: 100%;
     width: 1px;
     background-color: #cbcbcb;
+}
+
+.address-column {
+    padding-right: 15px;
 }

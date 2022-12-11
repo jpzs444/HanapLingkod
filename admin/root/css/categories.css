@@ -22,6 +22,10 @@
     font-size: 26px;
 }
 
+.category-title {
+    font-size: 18px;
+}
+
 .subcat-heading {
     display: flex;
     align-items: center;
@@ -29,6 +33,12 @@
 
 .cat-selected h5 {
     font-size: 16px;
+}
+
+.categoryChosenImage {
+    width: 400px;
+    height: 250px;
+    margin-top: 30px;
 }
 
 .add-cat,
@@ -51,6 +61,12 @@
 
 table {
     margin: 20px 0 50px;
+}
+
+.category-table{
+    max-height: 300px;
+    overflow-y: scroll;
+    background-color: #1B233A;
 }
 
 .cat-tr-title,
@@ -154,4 +170,94 @@ td {
 
 .hide-subcat-container {
     display: none;
+}
+
+
+/* modal styling */
+
+.show-modal {
+    display: flex;
+}
+
+.hide-modal {
+    display: none;
+}
+
+.verify-modal-container {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: rgba(217, 217, 217, 0.8);
+    align-items: center;
+    justify-content: center;
+}
+
+.verify-modal {
+    width: 1200px;
+    padding: 42px 60px;
+    background-color: #fff;
+    box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+}
+
+.verify-modal input[type="text"] {
+    font-size: 16px;
+    padding: 10px 15px;
+    width: 300px;
+    margin-top: 10px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    border: 1px solid #cbcbcb;
+    outline: none;
+}
+
+.verify-modal input[type="file"] {
+    padding: 8px 12px;
+    margin-top: 10px;
+    /* margin-bottom: 30px; */
+}
+
+.modal-title {
+    margin-top: 20px;
+    margin-bottom: 50px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.modal-description {
+    margin-bottom: 60px;   
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    /* gap: 150px; */
+    margin-top: 50px;
+}
+
+.modal-button {
+    font-size: 18px;
+    padding: 10px 0;
+    width: 250px;
+    margin-left: 20px;
+    border-radius: 10px;
+}
+
+.modal-button-cancel {
+    border: 1px solid #cbcbcb;
+}
+
+.modal-button-cancel:hover {
+    opacity: 0.35;
+}
+
+#confirm-verify {
+    background-color: #FF803C;
+    color: #fff;
+}
+
+#confirm-verify:hover {
+    color: #1fa875;
 }

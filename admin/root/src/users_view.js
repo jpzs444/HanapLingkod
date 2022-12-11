@@ -26,9 +26,10 @@ const UsersView = () => {
     }, [])
 
     const handleOnClickItem = (user) => {
-        // console.log("hi userId: ", user)
-        sessionStorage.setItem("viewUserProfile_Id", user)
-        window.location.assign("./")
+        console.log("hi userId: ", user.role)
+        sessionStorage.setItem("viewUserProfile_Id", user._id)
+        sessionStorage.setItem("viewUserProfile_role", user.role)
+        window.location.assign("./UserProfile.html")
     }
 
     const handleSwitchRoleType = (b) => {
@@ -80,6 +81,47 @@ const UsersView = () => {
                     </button>
                 </div>
             </nav>
+
+            {/* Side Menu/Navigation */}
+            <div class="side-navigation">
+                <div class="close-btn-div">
+                    <button id="close-side-menu" onclick="handleCloseSideNav()">
+                        <img class="arrow-left-menu" src="./assets/icons/arrow-left-long.png" />
+                    </button>
+                </div>
+
+                <div class="side-nav-menu">
+                    <div class="menu flexRow">
+                        <img class="menu-icon" src="./assets/icons/home.png" />
+                        <p class="menu-text">Home</p>
+                    </div>
+
+                    <div class="menu flexRow">
+                        <img class="menu-icon" src="./assets/icons/penalization.png" />
+                        <p class="menu-text">User Penalization</p>
+                    </div>
+
+                    <div class="menu flexRow">
+                        <img class="menu-icon" src="./assets/icons/verification.png" />
+                        <p class="menu-text">User Verification</p>
+                    </div>
+
+                    <div class="menu flexRow">
+                        <img class="menu-icon" src="./assets/icons/reports.png" />
+                        <p class="menu-text">User Reports</p>
+                    </div>
+
+                    <div class="menu flexRow">
+                        <img class="menu-icon" src="./assets/icons/account.png" />
+                        <p class="menu-text">Create Account</p>
+                    </div>
+
+                    <div class="menu flexRow">
+                        <img class="menu-icon" src="./assets/icons/transaction.png" />
+                        <p class="menu-text">Transaction</p>
+                    </div>
+                </div>
+            </div>
             
 
             <div className="container">
@@ -125,7 +167,7 @@ const UsersView = () => {
                             {/* items */}
                             {
                                 userList.map(user => (
-                                    <tr className="table_data" onClick={() => {handleOnClickItem(user._id)}}>
+                                    <tr className="table_data" onClick={() => {handleOnClickItem(user)}}>
                                         <td className="image_column">
                                             <img className="userProfilePic" src={user.profilePic === 'pic' ? "./assets/icons/account.png" : user.profilePic} />
                                         </td>
@@ -138,7 +180,7 @@ const UsersView = () => {
                                         <td className="rating_column">
                                             <div className="rating_container">
                                                 <img src="./assets/icons/star-yellow.png"></img>
-                                                <p className="tr_title">{user.rating}</p>
+                                                <p className="tr_title">{user.rating ? user.rating : "0"}</p>
                                             </div>
                                         </td>
                                     </tr>
