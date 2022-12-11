@@ -141,11 +141,12 @@ router
     try {
       let endTime;
       let result;
+      console.log(
+        "endDate:" + req.body.endDate + " end time " + req.body.endTime
+      );
 
       if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
-        console.log(
-          "endDate:" + req.body.endDate + " end time " + req.body.endTime
-        );
+        console.log("inside endate end time combination");
         endTime = dayjs(
           req.body.endDate + " " + req.body.endTime
         ).toISOString();
