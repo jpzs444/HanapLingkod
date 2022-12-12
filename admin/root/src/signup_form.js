@@ -78,7 +78,10 @@ function SignUpForm() {
     return (
         <div className="signup-container">
             {/* logo */}
-            <img src="./assets/logo/logo_full.png" className="image_logo left" />
+            <div class={"leftface"}>
+                <img src="./assets/logo/logo_full.png" className="image_logo left" />
+                <button onClick={() => window.location.href='Home.html'}>Go to Homepage</button>
+            </div>
 
             {/* <button onClick={() => handleCreateAccount()}>try me!</button> */}
 

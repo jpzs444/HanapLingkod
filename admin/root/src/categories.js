@@ -36,6 +36,7 @@ const Categories = () => {
 
     const [categories, setCategories] = React.useState([])
     const [subCategories, setSubCategories] = React.useState([])
+    const [asd, setAsd] = React.useState({})
 
     const [selectedCategory, setSelectedCategory] = React.useState("")
 
@@ -63,6 +64,8 @@ const Categories = () => {
     const [editSubCategoryModalOpen, setEditSubCategoryModalOpen] = React.useState(false)
 
     const [subCatSelected, setSubCatSelected] = React.useState({})
+
+    const [sideNavOpen, setSideNavOpen] = React.useState(false)
 
 
     React.useEffect(() => {
@@ -117,6 +120,7 @@ const Categories = () => {
     const handleShowSubcatSelected = (item) => {
         setSubcatSelected(true)
         setCategorySelected(item)
+        setAsd(item)
         fetchSubCategories(item)
 
         window.location.href="#link_sub-category-table"
@@ -220,7 +224,20 @@ const Categories = () => {
     const handleOnSelectedCategoryListed = (item) => {
         setCategoryListed(item.Category)
         setIsCategorySelectOpen(false)
+        setAsd(item)
+        console.log(item._id)
         setCategorySelectedAddSubCat(item._id)
+    }
+
+    const handleLogout = () => {
+        sessionStorage.removeItem("adminAccessToken")
+        sessionStorage.removeItem("adminUsername")
+        sessionStorage.removeItem("adminId")
+        sessionStorage.removeItem("viewUserProfile_role")
+        sessionStorage.removeItem("viewUserProfile_Id")
+        sessionStorage.removeItem("selectedReportItem")
+
+        window.location.assign("./index.html")
     }
 
     //  Add New Category
@@ -279,6 +296,11 @@ const Categories = () => {
     }
 
 
+    const handleCloseAddSubCat = () => {
+        setIsAddSubCategoryModalOpen(false)
+    }
+
+
     // add Sub-Category
     const handleAddSubCategory = async () => {
         try {
@@ -287,28 +309,36 @@ const Categories = () => {
 
             // ategorySelectedAddSubCat
             formdata.append("ServiceID", categorySelectedAddSubCat)
-            formdata.append("image", categoryAddImage)
+            // formdata.append("image", categoryAddImage)
             formdata.append("subCategory", newCategoryTitle)
 
             console.log("cat id: ", categorySelectedAddSubCat)
             console.log("image selected: ", categoryAddImage)
             console.log("new title: ", newCategoryTitle)
 
-            // await fetch(`https://hanaplingkod.onrender.com/service-sub-category`, {
-            //     method: "POST",
-            //     headers: {
-            //         "Authorization": sessionStorage.getItem("adminAccessToken")
-            //     },
-            //     body: formdata
-            // })
+            await fetch(`https://hanaplingkod.onrender.com/service-sub-category`, {
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                },
+                body: JSON.stringify({
+                    ServiceID: categorySelectedAddSubCat,
+                    ServiceSubCategory: newCategoryTitle,
+                })
+            })
+            // .then(res => res.json())
+            .then(() => {
+                console.log("added sub-category")
+            })
 
             setNewCategoryTitle("")
             setCategoryAddImage({})
             setCategorySelectedAddSubCat("")
 
             setIsAddSubCategoryModalOpen(false)
-
-            fetchCategories()
+            setCategorySelected(asd)
+            fetchSubCategories(asd)
         } catch (error) {
             console.log("error adding a category: ", error)
         }
@@ -347,29 +377,77 @@ const Categories = () => {
         <div>
             <nav class="flexRow">
                 <div class="left">
-                    <button id="menu-btn" onclick="handleOpenSideNav()">
+                    <button id="menu-btn" onClick={() => setSideNavOpen(prev => !prev)}>
                         <img id="menu-image" src="./assets/icons/menu.png"/>
                     </button>
             
-                    <button class="flexRow" id="logo-btn">
+                    <button class="flexRow" id="logo-btn" onClick={() => window.location.href='Home.html'}>
                         <img id="logo-image" src="./assets/logo/logo_icon.png" />
                         <p class="title">HanapLingkod</p>
                     </button>
                 </div>
                 <div class="right">
-                    <a class="home-link" href="./index.html">Home</a>
-                    <a class="account-link" href="#">Account</a>
-                    <button id="settings-btn">
-                        <img id="settings-image" src="./assets/icons/settings.png" />
+                    <a class="home-link" href="./Home.html">Home</a>
+                    <button id="settings-btn" onClick={() => handleLogout()}>
+                        <img class={"popup-option-icon"} src="./assets/icons/logout.png" />
+                        <p>Logout</p>
                     </button>
                 </div>
             </nav>
+
+            <div class={sideNavOpen ? "side-navigation-open" : "side-navigation"}>
+                <div class="close-btn-div">
+                    <button id="close-side-menu" onClick={() => setSideNavOpen(prev => !prev)}>
+                        <img class="arrow-left-menu" src="./assets/icons/arrow-left-long.png" />
+                    </button>
+                </div>
+
+                <div class="side-nav-menu">
+                    <div class="menu flexRow" onClick={() => window.location.href='Home.html'}>
+                        <img class="menu-icon" src="./assets/icons/home.png" />
+                        <p class="menu-text">Home</p>
+                    </div>
+
+                    <div class="menu flexRow" onClick={() => window.location.href='UsersView.html'}>
+                        <img class="menu-icon" src="./assets/icons/people.png" />
+                        <p class="menu-text">View Users</p>
+                    </div>
+
+                    <div class="menu flexRow" onClick={() => window.location.href='AccountVerification.html'}>
+                        <img class="menu-icon" src="./assets/icons/verification.png" />
+                        <p class="menu-text">User Verification</p>
+                    </div>
+
+                    <div class="menu flexRow" onClick={() => window.location.href='UserReports.html'}>
+                        <img class="menu-icon" src="./assets/icons/reports.png" />
+                        <p class="menu-text">User Reports</p>
+                    </div>
+
+                    <div class="menu flexRow side-navigation-active-page" onClick={() => window.location.href='Categories.html'}>
+                        <img class="menu-icon" src="./assets/icons/category.png" />
+                        <p class="menu-text">Add/Modify Category</p>
+                    </div>
+
+                    <div class="menu flexRow" onClick={() => window.location.href='signup.html'}>
+                        <img class="menu-icon" src="./assets/icons/account.png" />
+                        <p class="menu-text">Create Account</p>
+                    </div>
+
+                    {/* <div class="menu flexRow" onClick={() => window.location.href='Transactions.html'}>
+                        <img class="menu-icon" src="./assets/icons/transaction-gray.png" />
+                        <p class="menu-text">Transaction</p>
+                    </div> */}
+                </div>
+            </div>
             
 
             <div class="categories">
                 <div class="cat-heading">
                     <h1>Categories</h1>
-                    <button type="button" class="add-cat" onClick={() => setIsAddCategoryModalOpen(true)}>Add Category</button>   
+                    <div>
+                        <button type="button" class="add-cat" onClick={() => setIsAddCategoryModalOpen(true)}>Add Category</button>   
+                        <button type="button" class="add-subcat" onClick={() => setIsAddSubCategoryModalOpen(true)}>Add Sub-Category</button>   
+                    </div>
                 </div>
                 
                 <div>
@@ -431,7 +509,7 @@ const Categories = () => {
 
                     <div>
                         <div>
-                            <table>
+                            <table class={"sub-category-big-table"}>
                                 <tr class="subcat-tr-title">
                                     <th class="subcat-th">
                                         <div class="subcat-th-img">
@@ -556,17 +634,17 @@ const Categories = () => {
                                 <h3>Sub-Category Title</h3>
                                 <input type="text" placeholder="Enter New Category Title" onChange={(e) => setNewCategoryTitle(e.target.value)} />
                             </div>
-                            <div>
+                            {/* <div>
                                 <h3>Sub-Category Image</h3>
                                 <input type="file" id="avatar" name="category-image" accept="image/png, image/jpeg" onChange={previewImageSubCat}/>
-                            </div>
+                            </div> */}
 
-                            <img src={'./assets/images/placeholder-image.png'} class="categoryChosenImage" id="preview-selected-image-subcat"  />
+                            {/* <img src={'./assets/images/placeholder-image.png'} class="categoryChosenImage" id="preview-selected-image-subcat"  /> */}
                         </div>
 
                         <div class="modal-buttons">
                             <button type="button" class="modal-button" id="confirm-verify" onClick={() => handleAddSubCategory()}>Save Changes</button>
-                            <button type="button" class="modal-button modal-button-cancel" onClick={() => handleDiscardAddSubCategory()}>Discard Changes</button>
+                            <button type="button" class="modal-button modal-button-cancel" onClick={() => handleCloseAddSubCat()}>Discard Changes</button>
                         </div>
                     </div>
                 </div>

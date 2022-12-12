@@ -17,6 +17,26 @@ body {
 
 /* login styling */
 
+.invalidUsernamePassword-container {
+  background-color: rgba(255,83,83, 0.9);
+  transition: 100ms;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+
+.require-UsernamePassword-container {
+  background-color: #fdd133;
+  transition: 100ms;
+  padding: 10px 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+
+.invalidUsernamePassword-container p, .require-UsernamePassword-container p {
+  color: #FFFFFF;
+}
+
 .loginContainer {
     display: flex;
     flex-grow: 1;
