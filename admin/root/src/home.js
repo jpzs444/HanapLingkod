@@ -2,67 +2,134 @@
 
 function Home() {
 
-    
+    const [sideNavOpen, setSideNavOpen] = React.useState(false)
+    const [recruiter, setRecruiter] = React.useState(0)
+    const [worker, setWorker] = React.useState(0)
+    const [recruiterUnVerified, setRecruiterUnVerified] = React.useState(0)
+    const [workerUnVerified, setWorkerUnVerified] = React.useState(0)
+
+    React.useEffect(() => {
+        fetchRecruiterVerified()
+        fetchWorkerVerified()
+    }, [])
+
+    const handleLogout = () => {
+        sessionStorage.removeItem("adminAccessToken")
+        sessionStorage.removeItem("adminUsername")
+        sessionStorage.removeItem("adminId")
+        sessionStorage.removeItem("viewUserProfile_role")
+        sessionStorage.removeItem("viewUserProfile_Id")
+        sessionStorage.removeItem("selectedReportItem")
+
+        window.location.assign("./index.html")
+    }
+
+    const fetchRecruiterVerified = async () => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/recruiter`, {
+                method: 'GET',
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                let list = [...data]
+                list = list.map(e => !e.verification && setRecruiterUnVerified(prev => prev + 1))
+                console.log(list)
+                setRecruiter(data.length)
+            })
+        } catch (error) {
+            console.log("error fetch user(recruiter): ", error)
+        }
+    }
+
+    const fetchWorkerVerified = async () => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/worker`, {
+                method: 'GET',
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                let list = [...data]
+                console.log(list)
+                list = list.map(e => e.verification && setWorkerUnVerified(prev => prev + 1))
+                setWorker(data.length)
+            })
+        } catch (error) {
+            console.log("error fetch user(recruiter): ", error)
+        }
+    }
+
 
     return (
         <div>
             <nav class="flexRow">
                 <div class="left">
-                    <button id="menu-btn" onclick="handleOpenSideNav()">
+                    <button id="menu-btn" onClick={() => setSideNavOpen(prev => !prev)}>
                         <img id="menu-image" src="./assets/icons/menu.png"/>
                     </button>
             
-                    <button class="flexRow" id="logo-btn">
+                    <button class="flexRow" id="logo-btn" onClick={() => window.location.href='Home.html'}>
                         <img id="logo-image" src="./assets/logo/logo_icon.png" />
                         <p class="title">HanapLingkod</p>
                     </button>
                 </div>
                 <div class="right">
-                    <a class="home-link" href="#">Home</a>
-                    <a class="account-link" href="#">Account</a>
-                    <button id="settings-btn">
-                        <img id="settings-image" src="./assets/icons/settings.png" />
+                    <a class="home-link" href="./Home.html">Home</a>
+                    <button id="settings-btn" onClick={() => handleLogout()}>
+                        <img class={"popup-option-icon"} src="./assets/icons/logout.png" />
+                        <p>Logout</p>
                     </button>
                 </div>
+
             </nav>
 
-            <div class="side-navigation">
+            <div class={sideNavOpen ? "side-navigation-open" : "side-navigation"}>
                 <div class="close-btn-div">
-                    <button id="close-side-menu" onclick="handleCloseSideNav()">
+                    <button id="close-side-menu" onClick={() => setSideNavOpen(prev => !prev)}>
                         <img class="arrow-left-menu" src="./assets/icons/arrow-left-long.png" />
                     </button>
                 </div>
 
-                <div class="side-nav-menu">
-                    <div class="menu flexRow">
+                <div class={"side-nav-menu"}>
+                    <div class="menu flexRow side-navigation-active-page" onClick={() => window.location.href='Home.html'}>
                         <img class="menu-icon" src="./assets/icons/home.png" />
                         <p class="menu-text">Home</p>
                     </div>
 
-                    <div class="menu flexRow">
-                        <img class="menu-icon" src="./assets/icons/penalization.png" />
-                        <p class="menu-text">User Penalization</p>
+                    <div class="menu flexRow" onClick={() => window.location.href='UsersView.html'}>
+                        <img class="menu-icon" src="./assets/icons/people.png" />
+                        <p class="menu-text">View Users</p>
                     </div>
 
-                    <div class="menu flexRow">
+                    <div class="menu flexRow" onClick={() => window.location.href='AccountVerification.html'}>
                         <img class="menu-icon" src="./assets/icons/verification.png" />
                         <p class="menu-text">User Verification</p>
                     </div>
 
-                    <div class="menu flexRow">
+                    <div class="menu flexRow" onClick={() => window.location.href='UserReports.html'}>
                         <img class="menu-icon" src="./assets/icons/reports.png" />
                         <p class="menu-text">User Reports</p>
                     </div>
 
-                    <div class="menu flexRow">
+                    <div class="menu flexRow" onClick={() => window.location.href='Categories.html'}>
+                        <img class="menu-icon" src="./assets/icons/category.png" />
+                        <p class="menu-text">Add/Modify Category</p>
+                    </div>
+
+                    <div class="menu flexRow" onClick={() => window.location.href='signup.html'}>
                         <img class="menu-icon" src="./assets/icons/account.png" />
                         <p class="menu-text">Create Account</p>
                     </div>
 
-                    <div class="menu flexRow">
-                        <img class="menu-icon" src="./assets/icons/transaction.png" />
+                    {/* <div class="menu flexRow" onClick={() => window.location.href='Transactions.html'}>
+                        <img class="menu-icon" src="./assets/icons/transaction-gray.png" />
                         <p class="menu-text">Transaction</p>
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
@@ -78,20 +145,20 @@ function Home() {
             
                     <div class="dashboard-overview flexRow">
                         <div class="recruiter-overview dbo-box flexRow">
-                            <img class="overview-icon" src="./assets//icons/recruiter.png" />
+                            <img class="overview-icon" src="./assets/icons/recruiter.png" />
             
                             <div class="overview-info">
                                 <p class="overview-title">Recruiters</p>
-                                <p class="info1">Verified   10/20</p>
+                                <p class="info1">Verified   {recruiterUnVerified}/{recruiter}</p>
                             </div>
                         </div>
 
                         <div class="worker-overview dbo-box flexRow">
-                            <img class="overview-icon" src="./assets//icons/worker.png" />
+                            <img class="overview-icon" src="./assets/icons/worker.png" />
             
                             <div class="overview-info">
                                 <p class="overview-title">Workers</p>
-                                <p class="info1">Verified   10/20</p>
+                                <p class="info1">Verified {workerUnVerified}/{worker}</p>
                             </div>
                         </div>
 
@@ -112,35 +179,35 @@ function Home() {
 
                     <div class="action-btn-container">
                         
-                        <div class="action-btn" onclick="window.location.href='UsersView.html'">
-                            <img class="action-icon" src="./assets/icons/people.png" />
-                            <p class="action-text">View<br />Users</p>
+                        <div className="action-btn" onClick={() => window.location.href='UsersView.html'}>
+                            <img className="action-icon" src="./assets/icons/people.png" />
+                            <p className="action-text">View<br />Users</p>
                         </div>
                         
-                        <div class="action-btn" onclick="window.location.href='AccountVerification.html'">
+                        <div class={"action-btn"} onClick={() => window.location.href='AccountVerification.html'}>
                             <img class="action-icon" src="./assets/icons/verification.png" />
                             <p class="action-text">Account<br />Verification</p>
                         </div>
 
-                        <div class="action-btn" onclick="window.location.href='./UserReports.html'">
-                            <img class="action-icon" src="./assets/icons/reports.png" />
-                            <p class="action-text">User<br />Reports</p>
+                        <div class={"action-btn"} onClick={() => window.location.href='UserReports.html'}>
+                            <img class={"action-icon"} src="./assets/icons/reports.png" />
+                            <p class={"action-text"}>User<br />Reports</p>
                         </div>
                         
-                        <div class="action-btn" onclick="window.location.href='./Categories.html'">
-                            <img class="action-icon" src="./assets/icons/category.png" />
-                            <p class="action-text">Add/Modify<br />Category</p>
+                        <div class={"action-btn"} onClick={() => window.location.href='Categories.html'}>
+                            <img class={"action-icon"} src="./assets/icons/category.png" />
+                            <p class={"action-text"}>Add/Modify<br />Category</p>
                         </div>
 
-                        <div class="action-btn" onclick="window.location.href='./signup.html'">
+                        <div class="action-btn" onClick={() => window.location.href='signup.html'}>
                             <img class="action-icon" src="./assets/icons/account.png" />
                             <p class="action-text">Create<br />Account</p>
                         </div>
 
-                        <div class="action-btn" onclick="window.location.href='./Transactions.html'">
+                        {/* <div class="action-btn" onClick={() => window.location.href='Transactions.html'}>
                             <img class="action-icon" src="./assets/icons/transaction-gray.png" />
                             <p class="action-text">User<br />Transactions</p>
-                        </div>
+                        </div> */}
 
                         
                         

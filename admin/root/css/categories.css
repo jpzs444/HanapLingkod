@@ -56,6 +56,10 @@ html {
     transition: 250ms;
 }
 
+.add-subcat {
+    margin-left: 10px;
+}
+
 .add-cat:hover,
 .add-subcat:hover,
 .cat-actions-button:hover {
@@ -104,6 +108,10 @@ table {
 .cat-th-title,
 .subcat-th-title {
     margin-left: 12px;
+}
+
+.sub-category-big-table {
+    margin-bottom: 150px;
 }
 
 .cat-tr-data,
