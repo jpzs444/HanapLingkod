@@ -174,11 +174,11 @@ table tr td {
 
 .rating_container {
     display: flex;
-    margin-left: 15px;
+    margin-left: 5px;
 }
 
 .rating_column {
-    padding-left: 25px;
+    padding-left: 15px;
 }
 
 .rating_column img {
@@ -211,4 +211,10 @@ table tr td {
 
 .address-column {
     padding-right: 15px;
+}
+
+td p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

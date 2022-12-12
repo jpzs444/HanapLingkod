@@ -250,6 +250,13 @@ const UserProfile = () => {
                                     <p class="userprof-info">{userBirthday}</p>
                                 </div>
                             </div>
+                            <div class="info-indiv-container">
+                                <p>Verification</p>
+                                <div class="info-indiv">
+                                    <img src="./assets/icons/verification.png"/>
+                                    <p class="userprof-info">{user.verification}</p>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="userprof-rating-heading">

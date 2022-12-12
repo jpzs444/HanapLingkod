@@ -218,6 +218,13 @@ const AccountInformation = () => {
                                     <p class="account-info">{userBirthday}</p>
                                 </div>
                             </div>
+                            <div class="info-indiv-container">
+                                <p>Verification</p>
+                                <div class="info-indiv">
+                                    <img src="./assets/icons/verification.png"/>
+                                    <p class="userprof-info">{user.verification ? "Verified" : "Needs Verification"}</p>
+                                </div>
+                            </div>
                         </div>
 
                         <h3>Government-Issued/Valid ID</h3>

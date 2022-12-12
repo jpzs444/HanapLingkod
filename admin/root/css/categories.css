@@ -132,6 +132,12 @@ td {
     height: 102px;
 }
 
+td p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .cat-tr-data td:first-child,
 .subcat-tr-data td:first-child {
     display: flex;

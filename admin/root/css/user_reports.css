@@ -56,6 +56,12 @@ td {
     background-color: #FFFFFF;
 }
 
+td p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .reports-tr-data td:nth-child(2) {
     font-size: 14px;
 }
