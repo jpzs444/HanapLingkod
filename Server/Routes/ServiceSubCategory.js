@@ -45,7 +45,7 @@ router
   .post(authenticateToken, function (req, res) {
     const SubCategory = new ServiceSubCategory({
       ServiceID: req.body.ServiceID,
-      ServiceSubCategory: req.body.subCategory,
+      ServiceSubCategory: req.body.ServiceSubCategory,
     });
     SubCategory.save(function (err) {
       if (!err) {

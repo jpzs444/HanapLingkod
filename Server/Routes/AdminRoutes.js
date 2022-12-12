@@ -717,7 +717,7 @@ router.route("/strike/:role/:id").get(async function (req, res) {
     res.send(String(offense));
   } else if (req.params.role === "worker") {
     offense = await BannedWorker.count({
-      workerId: req.body.id,
+      workerId: req.params.id,
     })
       .lean()
       .exec();
