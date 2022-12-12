@@ -49,7 +49,7 @@ const {
 } = require("./Models/BannedUsers");
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({origin:"*"}))
+app.use(cors({ origin: "*" }));
 
 // app.use((req, res, next) => {
 //   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -100,7 +100,6 @@ const multipleFile = upload.fields([
   { name: "govId" },
   { name: "certificate" },
 ]);
-
 
 app.get("/images/:filename", async function (req, res) {
   let path = "./Public/Uploads/" + req.params.filename;
@@ -364,6 +363,7 @@ app.post("/login", async (req, res) => {
 app.post("/signup/worker", multipleFile, async (req, res) => {
   //initialize transactions
   const session = await conn.startSession();
+  console.log(req.body);
 
   try {
     //initialize transactions
@@ -372,9 +372,9 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
 
     //cloudinary upload
 
-    const GovIdURL = await cloudinary.uploader.upload(req.files.govId[0].path, {
-      folder: "HanapLingkod/GovId",
-    });
+    // const GovIdURL = await cloudinary.uploader.upload(req.files.govId[0].path, {
+    //   folder: "HanapLingkod/GovId",
+    // });
 
     //hash the password using bcrypt
     const salt = await bcrypt.genSalt(10);
@@ -398,7 +398,7 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
       phoneNumber: req.body.phoneNumber,
       emailAddress: req.body.emailAddress,
       profilePic: "pic",
-      GovId: GovIdURL.url,
+      // GovId: GovIdURL.url,
       workDescription: req.body.workDescription,
       works: SubCategory,
       role: "worker",
@@ -417,7 +417,7 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
 
     //create worker
     const worker = await Worker.create([workerObj], { session });
-
+    console.log("Worker Created");
     //save service sub category id for future use
     //convert category sub category min max price to arrays to create multiple works documents
     let serviceSubCategoryID;
@@ -427,11 +427,16 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
 
     for (var i = 0; i < Category.length; i += 1) {
       //check if the sub category is unlisted or not if unlisted create a new sub category if not query and get the id of the sub category
+      console.log(Category[i]);
       if (Category[i] == "unlisted") {
+        console.log("inside unlisted");
         let unlistedID = await ServiceCategory.findOne(
           { Category: "unlisted" },
           { Category: 0 }
         );
+        console.log("unlisted id: " + unlistedID);
+        console.log("subcategory:" + SubCategory[i]);
+
         const serviceSubCategory = await ServiceSubCategory.create(
           [
             {
@@ -441,14 +446,16 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
           ],
           { session }
         );
-
+        console.log("bewly created sub category id: " + serviceSubCategory[0]);
         serviceSubCategoryID = serviceSubCategory[0].id;
       } else {
+        console.log("inside not unlisted");
         let result = await ServiceSubCategory.findOne(
           { ServiceSubCategory: SubCategory[i] },
           { ServiceSubCategory: 0, ServiceID: 0 },
           { session }
         );
+        console.log(result);
         serviceSubCategoryID = result._id;
       }
       //create work
@@ -464,6 +471,7 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
         { session }
       );
     }
+    // console.log("newly Created work: " + work);
     await session.commitTransaction();
     console.log("success");
     res.send("Succesfully Created");
@@ -528,19 +536,24 @@ app.post(
 );
 
 app.use(function (req, res, next) {
-
   // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
 
   // Request methods you wish to allow
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+  );
 
   // Request headers you wish to allow
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-Requested-With,content-type"
+  );
 
   // Set to true if you need the website to include cookies in the requests sent
   // to the API (e.g. in case you use sessions)
-  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader("Access-Control-Allow-Credentials", true);
 
   // Pass to next layer of middleware
   next();

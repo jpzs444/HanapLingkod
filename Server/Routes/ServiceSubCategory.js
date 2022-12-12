@@ -43,9 +43,10 @@ router
     }
   })
   .post(authenticateToken, function (req, res) {
+    console.log(req.body);
     const SubCategory = new ServiceSubCategory({
       ServiceID: req.body.ServiceID,
-      ServiceSubCategory: req.body.ServiceID,
+      ServiceSubCategory: req.body.ServiceSubCategory,
     });
     SubCategory.save(function (err) {
       if (!err) {
@@ -172,5 +173,13 @@ router
       res.send("A Request is on going cannot delete");
     }
   });
+
+router.route("/moveCategory/:id").put(function (req, res) {
+  ServiceSubCategory.findByIdAndUpdate(
+    { _id: req.params.id },
+    { ServiceID: req.body.ServiceID }
+  ).exec();
+  res.send("Updated success");
+});
 
 module.exports = router;

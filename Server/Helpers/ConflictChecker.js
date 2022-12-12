@@ -27,6 +27,33 @@ async function checkConflict(user, workId, endTime) {
       dayjs(item.startTime).isBetween(startTime, dayjs(endTime), null, "[]") ||
       dayjs(item.endTime).isBetween(startTime, dayjs(endTime), null, "[]")
     ) {
+      console.log(
+        "item.startTime: " + item.startTime + " item.endTime: " + item.endTime
+      );
+      console.log("startTime: " + startTime + " endtime " + dayjs(endTime));
+      console.log(
+        dayjs(startTime).isBetween(
+          item.startTime,
+          dayjs(item.endTime),
+          null,
+          "[]"
+        )
+      );
+      console.log(
+        dayjs(endTime).isBetween(
+          item.startTime,
+          dayjs(item.endTime),
+          null,
+          "[]"
+        )
+      );
+
+      console.log(
+        dayjs(item.startTime).isBetween(startTime, dayjs(endTime), null, "[]")
+      );
+      console.log(
+        dayjs(item.endTime).isBetween(startTime, dayjs(endTime), null, "[]")
+      );
       console.log("conflict sched");
       // return res.status(400).send("some text");
       return true;
