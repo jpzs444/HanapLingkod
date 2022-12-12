@@ -373,13 +373,37 @@ router.route("/permanentBanUser/:role").post(async function (req, res) {
       ban: true,
     });
     const savedPermanentBannedRecruiter = await permanentBannedRecruiter.save();
+
+    const pushIDRecruiter = await Recruiters.findOne(
+      { _id: req.body.id },
+      { pushtoken: 1, _id: 0 }
+    ).lean();
+    notification(
+      [pushIDRecruiter.pushtoken],
+      "A user has reported you and you are banned permanently",
+      "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you permanently. You can no longer use the application and you are restricted from logging in again. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
+      { Type: "Offense Warning", id: req.body.id },
+      req.body.id
+    );
+
     res.status(200).json(savedPermanentBannedRecruiter);
   } else if (req.params.role === "worker") {
     const permanendBannedWorker = new PermanendBannedWorker({
-      recruiterId: req.body.id,
+      workerId: req.body.id,
       ban: true,
     });
     const savedPermanendBannedWorker = await permanendBannedWorker.save();
+    const pushIDWorker = await Workers.findOne(
+      { _id: req.body.id },
+      { pushtoken: 1, _id: 0 }
+    ).lean();
+    notification(
+      [pushIDWorker.pushtoken],
+      "A user has reported you and you are banned permanently",
+      "The Admins of HanapLingkod have evaluated your actions regarding the matter and decided to ban you permanently. You can no longer use the application and you are restricted from logging in again. If you have inquiries, you may contact the Admins through hanaplingkod@gmail.com.",
+      { Type: "Offense Warning", id: req.body.id },
+      req.body.id
+    );
     res.status(200).json(savedPermanendBannedWorker);
   }
 });
@@ -699,6 +723,29 @@ router.route("/strike/:role/:id").get(async function (req, res) {
       .exec();
     res.send(String(offense));
   }
+});
+
+router.route("/Admin-search").get(async function (req, res) {
+  let keyword = req.query.keyword;
+  var regex = new RegExp([keyword].join(""), "i");
+  console.log(regex);
+
+  let WorkerResult = await Workers.find({
+    $or: [{ firstname: regex }, { lastname: regex }, { middlename: regex }],
+  })
+    .lean()
+    .exec();
+
+  let RecruiterResult = await Recruiters.find({
+    $or: [{ firstname: regex }, { lastname: regex }, { middlename: regex }],
+  })
+    .lean()
+    .exec();
+
+  res.send({
+    worker: WorkerResult,
+    RecruiterResult: RecruiterResult,
+  });
 });
 
 module.exports = router;

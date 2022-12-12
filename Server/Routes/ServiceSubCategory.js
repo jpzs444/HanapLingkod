@@ -173,4 +173,12 @@ router
     }
   });
 
+router.route("/moveCategory/:id").put(function (req, res) {
+  ServiceSubCategory.findByIdAndUpdate(
+    { _id: req.params.id },
+    { ServiceID: req.body.ServiceID }
+  ).exec();
+  res.send("Updated success");
+});
+
 module.exports = router;
