@@ -348,7 +348,7 @@ const UserReport = () => {
                     <p class="modal-description">By clicking "Yes", the account of the reported user will be permanently deleted in HanapLingkod.</p>
                     <div class="modal-buttons">
                         <button type="button" class="modal-button" id="permaban-yes" onClick={() => handlePermanentlyBanReportedUser()}>Yes</button>
-                        <button type="button" class="modal-button modal-button-cancel" onClick={() => handleClosePermabanModal()}>Cancel</button>
+                        <button type="button" class="modal-button modal-button-cancel" onClick={() => setIsPermabanModalOpen(false)}>Cancel</button>
                     </div>
                 </div>
             </div>
