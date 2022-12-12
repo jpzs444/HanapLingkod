@@ -21,12 +21,17 @@ const UsersView = () => {
     const [role, setRole] = React.useState(true)
     const [userList, setUserList] = React.useState([])
 
+    const [sideNavOpen, setSideNavOpen] = React.useState(false)
+
     React.useEffect(() => {
         fetchUserData(role)
     }, [])
 
-    const handleOnClickItem = (name) => {
-        console.log("hi ", name)
+    const handleOnClickItem = (user) => {
+        console.log("hi userId: ", user.role)
+        sessionStorage.setItem("viewUserProfile_Id", user._id)
+        sessionStorage.setItem("viewUserProfile_role", user.role)
+        window.location.assign("./UserProfile.html")
     }
 
     const handleSwitchRoleType = (b) => {
@@ -36,45 +41,124 @@ const UsersView = () => {
     }
 
     const fetchUserData = async (role) => {
-
+        // role == boolean
         let userRole = role ? "recruiter" : "worker"
-        // console.log(sessionStorage.getItem("adminAccessToken"))
+        
         try {
-            await fetch(`https://hanaplingkod.onrender.com/reportAUser`, {
+            await fetch(`https://hanaplingkod.onrender.com/${userRole}`, {
                 method: 'GET',
                 headers: {
                     'content-type': "application/json",
                     "Authorization": sessionStorage.getItem("adminAccessToken")
                 }
             }).then(res => res.json())
-            .then(data => console.log(data))
+            .then(data => {
+                setUserList([...data])
+            })
             
         } catch (error) {
             console.log("error fetching user data(userViewJS): ", error)
         }
     }
 
+
+    const handleSearchUser = async () => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/Admin-search?keyword=${searchWord}`, {
+                method: "GET",
+                headers: {
+                    'content-type': "application/json",
+                    "Authorization": sessionStorage.getItem("adminAccessToken")
+                }
+            }).then(res => res.json())
+            .then(data => {
+                setUserList([...data.RecruiterResult, ...data.worker])
+            })
+        } catch (error) {
+            console.log("error search user: ", error)
+        }
+    }
+
+    const handleLogout = () => {
+        sessionStorage.removeItem("adminAccessToken")
+        sessionStorage.removeItem("adminUsername")
+        sessionStorage.removeItem("adminId")
+        sessionStorage.removeItem("viewUserProfile_role")
+        sessionStorage.removeItem("viewUserProfile_Id")
+        sessionStorage.removeItem("selectedReportItem")
+
+        window.location.assign("./index.html")
+    }
+
+
+
     return(
         <div>
             <nav class="flexRow">
                 <div class="left">
-                    <button id="menu-btn" onclick="handleOpenSideNav()">
+                    <button id="menu-btn" onClick={() => setSideNavOpen(prev => !prev)}>
                         <img id="menu-image" src="./assets/icons/menu.png"/>
                     </button>
             
-                    <button class="flexRow" id="logo-btn">
+                    <button class="flexRow" id="logo-btn" onClick={() => window.location.href='Home.html'}>
                         <img id="logo-image" src="./assets/logo/logo_icon.png" />
                         <p class="title">HanapLingkod</p>
                     </button>
                 </div>
                 <div class="right">
-                    <a class="home-link" href="#">Home</a>
-                    <a class="account-link" href="#">Account</a>
-                    <button id="settings-btn">
-                        <img id="settings-image" src="./assets/icons/settings.png" />
+                    <a class="home-link" href="./Home.html">Home</a>
+                    <button id="settings-btn" onClick={() => handleLogout()}>
+                        <img class={"popup-option-icon"} src="./assets/icons/logout.png" />
+                        <p>Logout</p>
                     </button>
                 </div>
             </nav>
+
+            {/* Side Menu/Navigation */}
+            <div class={sideNavOpen ? "side-navigation-open" : "side-navigation"}>
+                <div class="close-btn-div">
+                    <button id="close-side-menu" onClick={() => setSideNavOpen(prev => !prev)}>
+                        <img class="arrow-left-menu" src="./assets/icons/arrow-left-long.png" />
+                    </button>
+                </div>
+
+                <div class="side-nav-menu">
+                    <div class="menu flexRow" onClick={() => window.location.href='Home.html'}>
+                        <img class="menu-icon" src="./assets/icons/home.png" />
+                        <p class="menu-text">Home</p>
+                    </div>
+
+                    <div class="menu flexRow side-navigation-active-page" onClick={() => window.location.href='UsersView.html'}>
+                        <img class="menu-icon" src="./assets/icons/people.png" />
+                        <p class="menu-text">View Users</p>
+                    </div>
+
+                    <div class="menu flexRow" onClick={() => window.location.href='AccountVerification.html'}>
+                        <img class="menu-icon" src="./assets/icons/verification.png" />
+                        <p class="menu-text">User Verification</p>
+                    </div>
+
+                    <div class="menu flexRow" onClick={() => window.location.href='UserReports.html'}>
+                        <img class="menu-icon" src="./assets/icons/reports.png" />
+                        <p class="menu-text">User Reports</p>
+                    </div>
+
+                    <div class="menu flexRow" onClick={() => window.location.href='Categories.html'}>
+                        <img class="menu-icon" src="./assets/icons/category.png" />
+                        <p class="menu-text">Add/Modify Category</p>
+                    </div>
+
+                    <div class="menu flexRow" onClick={() => window.location.href='signup.html'}>
+                        <img class="menu-icon" src="./assets/icons/account.png" />
+                        <p class="menu-text">Create Account</p>
+                    </div>
+
+                    {/* <div class="menu flexRow" onClick={() => window.location.href='Transactions.html'}>
+                        <img class="menu-icon" src="./assets/icons/transaction-gray.png" />
+                        <p class="menu-text">Transaction</p>
+                    </div> */}
+                </div>
+            </div>
             
 
             <div className="container">
@@ -83,12 +167,12 @@ const UsersView = () => {
                 <main>
                     <div className="tabButton_container">
                         <div>
-                            <button className={role ? "active" : null} onClick={() => handleSwitchRoleType(true)} id="recruiterButton">Recruiters</button>
-                            <button class={role ? null : "active"} onClick={() => handleSwitchRoleType(false)} id="workerButton" >Workers</button>
+                            <button className={role ? "active" : null} onClick={(e) => {e.preventDefault(); handleSwitchRoleType(true); fetchUserData(true);}} id="recruiterButton">Recruiters</button>
+                            <button class={role ? null : "active"} onClick={(e) => {e.preventDefault(); handleSwitchRoleType(false); fetchUserData(false);}} id="workerButton" >Workers</button>
                         </div>
                         <div class="search-container">
                             <input type="text" placeholder="Search a user" onChange={e => setSearchWord(e.target.value)} />
-                            <button>
+                            <button onClick={() => handleSearchUser()}>
                                 <img src="https://img.icons8.com/fluency-systems-regular/20/null/search--v1.png"/>
                             </button>
                         </div>
@@ -119,21 +203,21 @@ const UsersView = () => {
 
                             {/* items */}
                             {
-                                DATA.map(item => (
-                                    <tr className="table_data" onClick={() => handleOnClickItem(item.name)}>
+                                userList.map(user => (
+                                    <tr className="table_data" onClick={() => {handleOnClickItem(user)}}>
                                         <td className="image_column">
-                                            <img className="userProfilePic" src="./assets/icons/account.png" />
+                                            <img className="userProfilePic" src={user.profilePic === 'pic' ? "./assets/icons/account.png" : user.profilePic} />
                                         </td>
                                         <td className="name_column">
-                                            <p className="tr_title">{item.name}</p>
+                                            <p className="tr_title">{`${user.firstname} ${user.middlename?.charAt(0).toUpperCase()} ${user.lastname}`}</p>
                                         </td>
                                         <td className="address_column">
-                                            <p className="tr_title">{item.address}</p>
+                                            <p className="tr_title">{`${user.street}, Purok ${user.purok}, ${user.barangay}, ${user.city}, ${user.province}`}</p>
                                         </td>
                                         <td className="rating_column">
                                             <div className="rating_container">
                                                 <img src="./assets/icons/star-yellow.png"></img>
-                                                <p className="tr_title">5.0</p>
+                                                <p className="tr_title">{user.rating ? user.rating : "0"}</p>
                                             </div>
                                         </td>
                                     </tr>

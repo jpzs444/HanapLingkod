@@ -1,4 +1,4 @@
-
+'use-strict'
 
 export const TopNavigation = () => {
     return(
@@ -23,3 +23,7 @@ export const TopNavigation = () => {
         </nav>
     )
 }
+
+const rootNode = document.getElementById('topnavigationcomponent');
+const root = ReactDOM.createRoot(rootNode);
+root.render(React.createElement(TopNavigation));

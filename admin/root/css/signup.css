@@ -20,6 +20,36 @@ body {
     background-color: #FAFAFA;
 }
 
+.leftface {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+
+    justify-content: center;
+    height: auto;
+}
+
+.leftface img {
+    margin-bottom: 50px;
+}
+
+.leftface button {
+    width: 300px;
+    padding: 12px 0;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0 5px 3px rgba(170, 170, 170, 0.3);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+
+    background-color: #FA7A17;
+    color: #FFFFFF;
+}
+
 .signup-container {
     height: 100vh;
     width: 100vw;

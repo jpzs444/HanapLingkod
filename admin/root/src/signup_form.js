@@ -38,72 +38,50 @@ function SignUpForm() {
     }
 
     const handleCreateAccount = (e) => {
-        // e.preventDefault()
+        e.preventDefault()
         console.log("hi submit form")
-        // console.log("userInformation: ", userInformation)
+        console.log("userInformation: ", userInformation)
 
         try {
-            // await fetch(`http://192.168.1.3/Work`, {
-            //     method: "GET",
-            //     headers: {
-            //         "content-type": 'application/json'
-            //     },
-            // }).then(res => res.json())
-            // .then(data => console.log(data))
 
-            fetch(`http://192.168.1.5:3000/work`, {
-                method: "GET",
+            fetch(`https://hanaplingkod.onrender.com/signup/admin`, {
+                method: "POST",
                 headers: {
                     "content-type": "application/json"
                 },
-                // body: JSON.stringify({
-                //     username: "admin",
-                //     password: "admin"
-                // }),
+                body: JSON.stringify({
+                    username: userInformation.username,
+                    password: confirmPassword,
+                    firstname: userInformation.firstname,
+                    lastname: userInformation.lastname,
+                    middlename: userInformation.middlename,
+                    birthday: userInformation.birthday,
+                    age: userInformation.age,
+                    sex: userInformation.sex,
+                    phoneNumber: userInformation.phoneNumber,
+                    emailAddress: userInformation.email,
+                }),
             }).then(res => {
                 if(res.ok){
+                    window.location.assign("./login.html")
                     return res.json()
                 } else {
                     throw res
                 }
             })
-            .then(data => console.log("data login: ", data))
+
         } catch (error) {
             console.log("error fetch service cat: ", error)
         }
-
-        // try {
-        //     // await fetch(`https://hanaplingkod.onrender.com/signup/admin`, {
-        //         await fetch(`http://192.168.1.3:3000/signup/admin`, {
-        //         method: "POST",
-        //         headers: {
-        //             "content-type": "application/json"
-        //         },
-        //         mode: "no-cors",
-        //         body: JSON.stringify({
-        //             username: userInformation.username,
-        //             password: confirmPassword,
-        //             firstname: userInformation.firstname,
-        //             lastname: userInformation.lastname,
-        //             middlename: userInformation?.middlename ? userInformation.middlename : "",
-        //             birthday: userInformation.birthday,
-        //             age: userInformation.age,
-        //             sex: userInformation.sex,
-        //             phoneNumber: userInformation.phoneNumber,
-        //             emailAddress: userInformation.email,
-        //         })
-        //     }).then(res => console.log(res))
-        //     .catch(err=> console.log("error caa: ", err.message))
-            
-        // } catch (error) {
-        //     console.log("error create admin account: ", error)
-        // }
     }
 
     return (
         <div className="signup-container">
             {/* logo */}
-            <img src="./assets/logo/logo_full.png" className="image_logo left" />
+            <div class={"leftface"}>
+                <img src="./assets/logo/logo_full.png" className="image_logo left" />
+                <button onClick={() => window.location.href='Home.html'}>Go to Homepage</button>
+            </div>
 
             {/* <button onClick={() => handleCreateAccount()}>try me!</button> */}
 
@@ -222,7 +200,7 @@ function SignUpForm() {
                         <div className="button-container">
                             <button id="button_create-account" type="submit" >Create Account</button>
                             {/* <input type="submit" value="Create Account" id="button_create-account" onclick /> */}
-                            <p className="hasAccount">Already have an account? <a className="link_signin" href="#">Sign in</a></p>
+                            <p className="hasAccount">Already have an account? <a className="link_signin" href="./login.html">Sign in</a></p>
                         </div>
                     </form>
                 </div>
