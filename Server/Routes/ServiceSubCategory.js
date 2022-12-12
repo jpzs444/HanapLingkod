@@ -43,6 +43,7 @@ router
     }
   })
   .post(authenticateToken, function (req, res) {
+    console.log(req.body);
     const SubCategory = new ServiceSubCategory({
       ServiceID: req.body.ServiceID,
       ServiceSubCategory: req.body.ServiceSubCategory,
