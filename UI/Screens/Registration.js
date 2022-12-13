@@ -673,19 +673,16 @@ export default function Registration({route}) {
 
                 <View style={[styles.confirm, {width: '90%'}]}>
                   {/* Create Account Button */}
-                    <TouchableOpacity style={[styles.confirmBtn, {backgroundColor: hasBlanks && pwMatch ? ThemeDefaults.themeOrange : 'rgba(140, 130, 126, 0.2)', elevation: hasBlanks ? 3 : 0}]} 
-                      disabled={hasBlanks && pwMatch ? false : true}
+                    <TouchableOpacity style={[styles.confirmBtn, {backgroundColor: services[0].service && services[0].lowestPrice && services[0].highestPrice ? ThemeDefaults.themeOrange : '#ccc', elevation: services[0].service && services[0].lowestPrice && services[0].highestPrice ? 3 : 0}]} 
+                      disabled={!services[0].service && !services[0].lowestPrice && !services[0].highestPrice}
                       onPress={() => {
                         console.log("confirm from worker information work description")
-                        haveBlanks()
-                        if(hasBlanks){
-                          setShowDialog(true)
-                        }
-                        
+                        setShowDialog(true)
                       }}
                     >
-                      <TText style={{fontFamily: 'LexendDeca_SemiBold', fontSize: 18, color: ThemeDefaults.themeWhite}}
-                        >Create Account</TText>
+                      <TText style={{fontFamily: 'LexendDeca_SemiBold', fontSize: 18, color: ThemeDefaults.themeWhite}}>
+                        Create Account
+                      </TText>
                     </TouchableOpacity>
                   </View>
                 
@@ -719,7 +716,7 @@ export default function Registration({route}) {
             next == 3 ? 
               <View style={styles.workDescriptionContainer}>
                 <View style={styles.workDescriptionBox}>
-                  <TText style={{marginBottom: 15, fontFamily: 'LexendDeca_Medium', fontSize: 18}}>Work Description</TText>
+                  <TText style={{marginBottom: 15, fontFamily: 'LexendDeca_Medium', fontSize: 18}}>Work Description (Optional):</TText>
                   <View style={{
                       // minHeight: 150, 
                       backgroundColor: '#fff',
@@ -751,7 +748,7 @@ export default function Registration({route}) {
 
                 <View style={{width: '100%', alignItems: 'center', marginBottom: 20}}>
                 <View style={{width: '80%', marginTop: 40,}}>
-                  <TText style={{fontSize: 18}}>License(s)/Certificate(s):</TText>
+                  <TText style={{fontSize: 18}}>Licenses/Certificates (Optional):</TText>
                   <View style={{alignItems: 'center'}}>
                     <TouchableOpacity 
                       onPress={pickImage}
@@ -793,10 +790,7 @@ export default function Registration({route}) {
                 <View style={styles.btnContainer}>
                   {/* Next page button */}
                     <TouchableOpacity
-                      disabled={
-                        (!imagelicense || !imageSingleLicense)
-                      }
-                      style={[styles.nextBtn, {backgroundColor: (!imagelicense || !imageSingleLicense) ? "#ccc" : ThemeDefaults.themeOrange}]}
+                      style={[styles.nextBtn, {backgroundColor: ThemeDefaults.themeOrange}]}
                       onPress={() => { 
                         setNext((current) => current + 1)
                       }}
@@ -1022,10 +1016,10 @@ export default function Registration({route}) {
                   </View>
                   :
                   <View style={styles.confirm}>
-                      {/* Control Message */}
+                      {/* Control Message | Recruiter button */}
                       <View style={{marginBottom: 15, opacity: hasBlanks ? 1 : 0}}>
-                        <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{haveBlanks ? "* Please fill in all the blanks" : null}</TText>
-                        <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{!pwMatch ? "* Passwords does not match" : null}</TText>
+                        {/* <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{haveBlanks ? "* Please fill in all the blanks" : null}</TText>
+                        <TText style={{fontSize: 18, color: ThemeDefaults.appIcon}}>{!pwMatch ? "* Passwords does not match" : null}</TText> */}
                       </View>
                   {/* Create Account Button */}
                     <TouchableOpacity style={[styles.confirmBtn, {backgroundColor: !hasBlanks ? ThemeDefaults.themeOrange : 'rgba(140, 130, 126, 0.2)', elevation: !hasBlanks ? 3 : 0}]}  

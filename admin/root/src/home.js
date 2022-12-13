@@ -5,8 +5,8 @@ function Home() {
     const [sideNavOpen, setSideNavOpen] = React.useState(false)
     const [recruiter, setRecruiter] = React.useState(0)
     const [worker, setWorker] = React.useState(0)
-    const [recruiterUnVerified, setRecruiterUnVerified] = React.useState(0)
-    const [workerUnVerified, setWorkerUnVerified] = React.useState(0)
+    const [recruiterVerified, setRecruiterVerified] = React.useState(0)
+    const [workerVerified, setWorkerVerified] = React.useState(0)
 
     React.useEffect(() => {
         fetchRecruiterVerified()
@@ -35,7 +35,7 @@ function Home() {
             }).then(res => res.json())
             .then(data => {
                 let list = [...data]
-                list = list.map(e => !e.verification && setRecruiterUnVerified(prev => prev + 1))
+                list = list.map(e => e.verification && setRecruiterVerified(prev => prev + 1))
                 console.log(list)
                 setRecruiter(data.length)
             })
@@ -56,7 +56,7 @@ function Home() {
             .then(data => {
                 let list = [...data]
                 console.log(list)
-                list = list.map(e => e.verification && setWorkerUnVerified(prev => prev + 1))
+                list = list.map(e => e.verification && setWorkerVerified(prev => prev + 1))
                 setWorker(data.length)
             })
         } catch (error) {
@@ -137,7 +137,7 @@ function Home() {
             {/* body */}
             <div class="body">
                 <header>
-                    <h1>HanapLingkod</h1>
+                    <h1><span style={{color: "#FF803C"}}>Hanap</span><span style={{color: "#434343"}}>Lingkod</span></h1>
                 </header>
             
                 <div class="dashboard">
@@ -149,7 +149,7 @@ function Home() {
             
                             <div class="overview-info">
                                 <p class="overview-title">Recruiters</p>
-                                <p class="info1">Verified   {recruiterUnVerified}/{recruiter}</p>
+                                <p class="info1">Verified   {recruiterVerified}/{recruiter}</p>
                             </div>
                         </div>
 
@@ -158,7 +158,7 @@ function Home() {
             
                             <div class="overview-info">
                                 <p class="overview-title">Workers</p>
-                                <p class="info1">Verified {workerUnVerified}/{worker}</p>
+                                <p class="info1">Verified {workerVerified}/{worker}</p>
                             </div>
                         </div>
 

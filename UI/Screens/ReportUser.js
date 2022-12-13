@@ -5,11 +5,12 @@ import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
 import DialogueModal from '../Components/DialogueModal'
-import { useNavigation } from '@react-navigation/native'
+import { useIsFocused, useNavigation } from '@react-navigation/native'
 
 const ReportUser = ({route}) => {
 
   const navigation = useNavigation()
+  const isFocused = useIsFocused()
 
   const { userReportedID, userFullName, userRole, userProfilePicture } = route.params
 
@@ -18,6 +19,11 @@ const ReportUser = ({route}) => {
 
   const [viewSubmitModal, setViewSubmitModal] = useState(false)
   const [reportSubmitted, setReportSubmitted] = useState(false)
+
+  useEffect(() => {
+    setReportTitle("")
+    setReportDescription("")
+  }, [isFocused]);
 
   const handleSubmitReport = async () => {
     try {
@@ -38,12 +44,24 @@ const ReportUser = ({route}) => {
       .then(data => {
         console.log("Successfully reported user: ", data)
         setReportSubmitted(true)
-        navigation.navigate("Home_Drawer")
       })
       console.log("handleSubmiReport button")
     } catch (error) {
       console.log("submit report error: ", error)
     }
+  }
+
+  const handleSubmited = (b) => {
+    handleCloseSubmittedModal()
+    handleGoToHome()
+  }
+  
+  const handleCloseSubmittedModal = () => {
+    setReportSubmitted(false)
+  }
+  
+  const handleGoToHome = () => {
+    navigation.navigate("Home_Drawer")
   }
 
   return (
@@ -72,7 +90,7 @@ const ReportUser = ({route}) => {
             <TText style={styles.headerTitle}>Reported User</TText>
 
             <View style={styles.reportedUser_information_container}>
-              <Image style={styles.userReportedImage} source={ userProfilePicture ? {uri: userProfilePicture} : require("../assets/images/default-profile.png")} />
+              <Image style={styles.userReportedImage} source={ userProfilePicture === "pic" ? require("../assets/images/default-profile.png") : {uri: userProfilePicture}} />
 
               <View style={styles.reportedUser_nameRole}>
                 <TText style={styles.reportedUser_name}>{userFullName}</TText>
@@ -83,11 +101,11 @@ const ReportUser = ({route}) => {
 
           {/* Report Description Input */}
           <View style={styles.description_section}>
-            <TText style={styles.headerTitle}>Description</TText>
+            <TText style={styles.headerTitle}>Report Details</TText>
 
             <View style={styles.inputContainer}>
               <TextInput 
-                placeholder='Write here the description of your report'
+                placeholder='Write here the description of your report *'
                 multiline
                 value={reportDescription ? reportDescription : ""}
                 numberOfLines={6}
@@ -101,8 +119,11 @@ const ReportUser = ({route}) => {
           {/* Report submmit button */}
           <View style={styles.submitButton_container}>
             <TouchableOpacity
-              style={styles.submittButton}
+              style={[styles.submittButton, {backgroundColor: !reportTitle || !reportDescription ? "#ccc" : ThemeDefaults.themeOrange}]}
               activeOpacity={0.5}
+              disabled={
+                !reportTitle || !reportDescription
+              }
               onPress={() => {
                 console.log("Submit report button")
                 setViewSubmitModal(true)
@@ -128,7 +149,7 @@ const ReportUser = ({route}) => {
           secondMessage={"Thank you for sending a report. HanapLingkod will review your submitted report and shall apply necessary actions"}
           visible={reportSubmitted}
           numBtn={1}
-          onDecline={setReportSubmitted}
+          onDecline={handleSubmited}
         />
 
     </ScrollView>
@@ -231,6 +252,7 @@ const styles = StyleSheet.create({
   submitButton_container: {
     marginTop: 100,
     paddingHorizontal: 40,
+    marginBottom: 50
   },
   submittButton: {
     backgroundColor: ThemeDefaults.themeOrange,

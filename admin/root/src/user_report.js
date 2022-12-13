@@ -229,6 +229,13 @@ const UserReport = () => {
         return day > 1 ? `${day} days ago` : `${day} day ago`
       }
 
+      const handleVisitProfileReportedUser = () => {
+        sessionStorage.setItem("viewUserProfile_role", reportedUser.role)
+        sessionStorage.setItem("viewUserProfile_Id", reportedUser._id)
+
+        window.location.assign("./UserProfile.html")
+      }
+
       const handleLogout = () => {
         sessionStorage.removeItem("adminAccessToken")
         sessionStorage.removeItem("adminUsername")
@@ -327,7 +334,7 @@ const UserReport = () => {
                                 </div>
                             </div>
 
-                            <button class="report-user-view-profile" onClick={() => {window.location.assign("./AccountInformation.html")}}>View</button>
+                            <button class="report-user-view-profile" onClick={() => handleVisitProfileReportedUser()}>View</button>
                         </div>
                         <h4><img class="reported-desc-icon" src="./assets/icons/description.png"/>Report Description</h4>
                         <p class="report-description">"{reportInformation.description}"</p>

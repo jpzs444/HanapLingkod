@@ -40,6 +40,8 @@ export default function OTPVerification(props) {
 
     const [isLoading, setIsLoading] = useState(false);
 
+    const [loadingLogin, setLoadingLogin] = useState(false)
+
     const [isotpMatch, setotpMatch] = useState(0)
 
     const [otpNum, setotpNum] = useState({
@@ -119,6 +121,7 @@ export default function OTPVerification(props) {
         firebase.auth().signInWithCredential(credential)
         .then(() => {
             // reset state of inputs
+            setLoadingLogin(true)
             setCode('');
             setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
             setInvalidOTP(false)
@@ -205,8 +208,9 @@ export default function OTPVerification(props) {
           },
         }).then(() => {
             console.log("Account created | recruiter");
+            setLoadingLogin(false)
             navigation.navigate("WelcomePage", {role: "recruiter", user: user})
-        }).catch((er) => {console.log("error: ", er)})
+        }).catch((er) => {console.log("error: sign recruiter:  ", er)})
       }
 
 
@@ -220,33 +224,37 @@ export default function OTPVerification(props) {
         let localUri = singleImage;
         let filename = localUri.split("/").pop();
 
-        // License Pic
-        let uriLicense = imagelicense;
-        let licensefilename = uriLicense.split("/").pop();
-  
         // Infer the type of the image
         let match = /\.(\w+)$/.exec(filename);
         let type = match ? `image/${match[1]}` : `image`;
-  
+        
         // Upload the image using the fetch and FormData APIs
         let formData = new FormData();
-  
+        
+        // ID
         // Assume "photo" is the name of the form field the server expects
         formData.append("govId", {
-          uri: localUri,
-          name: filename,
-          type,
-        });
-
-        match = /\.(\w+)$/.exec(licensefilename);
-        type = match ? `image/${match[1]}` : `image`;
-
-        // pass certificate images
-        formData.append("certificate", {
-            uri: uriLicense,
-            name: licensefilename,
+            uri: localUri,
+            name: filename,
             type,
-          });
+        });
+        
+        // License Pic
+        if(imagelicense){
+            let uriLicense = imagelicense;
+            let licensefilename = uriLicense.split("/").pop();
+    
+            match = /\.(\w+)$/.exec(licensefilename);
+            type = match ? `image/${match[1]}` : `image`;
+    
+            // license/certificate
+            // pass certificate images
+            formData.append("certificate", {
+                uri: uriLicense,
+                name: licensefilename,
+                type,
+            });
+        }
   
         formData.append("username", user.username);
         formData.append("password", user.password);
@@ -263,18 +271,13 @@ export default function OTPVerification(props) {
         formData.append("city", user.city);
         formData.append("province", user.province);
         formData.append("phoneNumber", user.phonenumber);
-        formData.append("workDescription", user.workDescription);
-        // formData.append("emailAddress", user.email);
-        formData.append("GovId", filename);
-        // formData.append("Category", work.Category === "unlisted" ? work.Category : "");
-        // formData.append("ServiceSubCategory", work[0].service);
-        // formData.append("minPrice", work[0].lowestPrice);
-        // formData.append("maxPrice", work[0].highestPrice);
+        formData.append("workDescription", user.workDescription ? user.workDescription : "");
+        // formData.append("GovId", filename);
 
           console.log("work length: ", work.length)
         // append work information listed by the worker from the registration
         for (let i = 0; i < work.length; i++){
-            formData.append("Category", work[i].Category === "unlisted" ? work[i].Category : "");
+            formData.append("Category", work[i].category === "unlisted" ? "unlisted" : "");
             formData.append("ServiceSubCategory", work[i].service);
             formData.append("minPrice", work[i].lowestPrice);
             formData.append("maxPrice", work[i].highestPrice);
@@ -282,18 +285,16 @@ export default function OTPVerification(props) {
             console.log("work service: ", work[i].service)
         }
 
+        setLoadingLogin(false)
   
         fetch("https://hanaplingkod.onrender.com/signup/worker?username=" + user.username, {
           method: "POST",
           body: formData,
-          headers: {
-            "content-type": "multipart/form-data",
-          },
         }).then(() => {
             console.log("Account created | worker");
             //props.navigation.navigate("OTPVerification", {role: user.role});
             navigation.navigate("WelcomePage", {role: 'worker', user: user})
-        }).catch((er) => {console.log("error: ", er.message)})
+        }).catch((er) => {console.log("error: sign up worker: ", er.message)})
       }
 
     const updateUserInformation = () => {
@@ -306,8 +307,11 @@ export default function OTPVerification(props) {
                     "content-type": "application/json",
                     "Authorization": global.accessToken
                 },
-            }).then((res) => console.log("old work set deleted successfully   ", res.message))
-            .catch((error) => console.log(error.message))
+            }).then((res) => {
+                setLoadingLogin(false)
+                console.log("old work set deleted successfully   ", res.message)
+            })
+            .catch((error) => console.log("error upldate services: ", error.message))
         }
 
         // upload pasworks images upload by the worker
@@ -318,8 +322,11 @@ export default function OTPVerification(props) {
                 "Authorization": global.accessToken
             },
             body: formDataPastWorks
-        }).then((res) => console.log("successfully uploaded past work images"))
-        .catch((error) => console.log(error.message))
+        }).then((res) => {
+            setLoadingLogin(false)
+            console.log("successfully uploaded past work images")
+        })
+        .catch((error) => console.log("error prevworks: ", error.message))
 
         // upload new and updated set of works
         fetch("https://hanaplingkod.onrender.com/Work", {
@@ -329,8 +336,11 @@ export default function OTPVerification(props) {
                 "Authorization": global.accessToken
             },
             body: formDataSetOfWorks
-        }).then((res) => console.log("successfully uploaded and updated works"))
-        .catch((error) => console.log(error.message))
+        }).then((res) => {
+            setLoadingLogin(false)
+            console.log("successfully uploaded and updated works")
+        })
+        .catch((error) => console.log("error upload new works: ", error.message))
 
         // update recruiter and worker profile picture and basic information
         fetch("https://hanaplingkod.onrender.com/" + global.userData.role === 'recruiter' ? "Recruiter/" : "Worker/" + global.userData._id, {
@@ -340,8 +350,11 @@ export default function OTPVerification(props) {
                 "Authorization": global.accessToken
             },
             body: formDataUserInfo,
-        }).then((response) => console.log("successfully updated user basic information"))
-        .catch((error) => console.log(error.message))
+        }).then((response) => {
+            setLoadingLogin(false)
+            console.log("successfully updated user basic information")
+        })
+        .catch((error) => console.log("error update picture: ", error.message))
 
         navigation.navigate("UserProfileScreen")
     }
@@ -363,9 +376,16 @@ export default function OTPVerification(props) {
             <TText style={styles.headerTitle}>Verification</TText>
             {/* header description */}
             <View style={styles.headerDesc}>
-                <TText style={{textAlign: 'center', fontSize: 18, lineHeight: 26}}>Please enter the 6-digit OTP that we have sent to your registered phone number +63{phoneNum}.</TText>
+                <TText style={{textAlign: 'center', fontSize: 18, lineHeight: 26}}>Please enter the 6-digit OTP that we have sent to your registered phone number +63{phoneNum}</TText>
             </View>
         </View>
+
+        {
+            loadingLogin &&
+            <View style={{position: 'absolute', top: 0, right: 0, flexGrow: 1, width: '100%', height: '100%', alignItems: 'center', justifyContent: "center", backgroundColor: 'rgba(255,255,255,0.9)', zIndex: 5}}>
+                <ActivityIndicator size={'large'} />
+            </View>
+        }
 
         {/* body | input  */}
          <View style={styles.inputContainer}>
