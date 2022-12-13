@@ -82,7 +82,7 @@ router
 router
   .route("/service-category/:id")
   .put(authenticateToken, upload.single("image"), async function (req, res) {
-    console.log("asdsad");
+    console.log("Service-Category Put Request");
     const image = await cloudinary.uploader.upload(req.file.path, {
       folder: "HanapLingkod/Category",
     });

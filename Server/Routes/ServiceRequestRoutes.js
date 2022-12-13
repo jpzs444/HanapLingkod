@@ -310,7 +310,7 @@ router
       }
 
       if (req.body.requestStatus == 3) {
-        console.log("asdscanel");
+        console.log("Rejected");
         await ServiceRequest.findOneAndUpdate(
           { _id: req.params.id },
           {
@@ -333,7 +333,7 @@ router
       }
 
       if (req.body.requestStatus == 4) {
-        console.log("ssss");
+        console.log("Cancel");
         await ServiceRequest.findOneAndUpdate(
           { _id: req.params.id },
           {

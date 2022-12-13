@@ -110,7 +110,7 @@ router
     }
   })
   .put(authenticateToken, async function (req, res) {
-    console.log("asd");
+    console.log("Request Post Edit");
     RequestPost.findOneAndUpdate(
       { _id: req.params.id },
       {

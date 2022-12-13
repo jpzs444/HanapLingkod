@@ -34,7 +34,7 @@ router
 
 router.route("/setToken/:userID").put(authenticateToken, function (req, res) {
   console.log(req.params.userID);
-  console.log(req.body);
+  // console.log(req.body);
   Worker.updateOne(
     { _id: { $eq: req.params.userID } },
     { pushtoken: req.body.pushtoken },
