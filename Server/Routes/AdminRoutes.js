@@ -261,6 +261,18 @@ router
       });
       const savedbannedRecruiter = await bannedRecruiter.save();
 
+      ServiceRequest.updateMany(
+        { recruiterId: req.body.id },
+        { requestStatus: 4 },
+        function (err) {
+          if (!err) {
+            console.log("all req cancelled");
+          } else {
+            console.log(err);
+          }
+        }
+      );
+
       res.status(200).json(savedbannedRecruiter);
     } else if (req.params.role === "worker") {
       let ban = true;
