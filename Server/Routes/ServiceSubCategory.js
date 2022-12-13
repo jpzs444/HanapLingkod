@@ -92,7 +92,7 @@ router
   })
 
   .delete(async function (req, res) {
-    console.log("asd");
+    console.log("Service Sub Category Delete");
     const workQuery = await Work.find(
       {
         ServiceSubId: req.params.id,

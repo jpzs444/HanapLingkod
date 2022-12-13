@@ -306,7 +306,7 @@ app.post("/isUsernameUnique", async function (req, res) {
 
 //Login
 app.post("/login", async (req, res) => {
-  console.log(req.body);
+  console.log("Request: " + req.body.username);
   try {
     const { username, password } = req.body;
 
@@ -352,7 +352,7 @@ app.post("/login", async (req, res) => {
       const token = generateAccessToken(String(user._id), user.role);
       user["accessToken"] = "Bearer " + token;
       delete user.password;
-      console.log(user);
+      console.log(user.username + " Logged In");
       res.send(user);
     }
   } catch (error) {
@@ -526,6 +526,7 @@ app.post(
         if (err) {
           res.json({ message: err.message, type: "danger" });
         } else {
+          console.log("Recruiter account created");
           res.send("Recruiter account created");
         }
       });
