@@ -10,7 +10,7 @@ import { io } from 'socket.io-client'
 
 // import { socketContext } from '../Components/DrawerNavigation'
 
-
+const WIDTH = Dimensions.get('window').width
 
 const ConversationThread = ({route}) => {
 
@@ -35,10 +35,15 @@ const ConversationThread = ({route}) => {
     let scrollRef;
     const [canScroll, setCanScroll] = useState(false)
 
-
+    
     useEffect(() => {
         handleSeenByMe()
     }, [isFocused]);
+
+    useEffect(() => {
+        handleSeenByMe()
+        getMessages()
+    }, []);
 
     useEffect(() => {
         if(canScroll){
@@ -50,70 +55,38 @@ const ConversationThread = ({route}) => {
     
 
     useEffect(() => {
-        // socket.current = io(`ws://localhost:8900`)
         socket.current = io(`https://hanaplingkodchat.onrender.com/`)
-        // console.log("type of socketCOntextref: " , typeof )
+        socket.current.emit("addUser", global.userData._id)
         socket.current.on("getMessage", data => {
-            setIncomingMessage({
-                sender: data.senderId,
-                text: data.text,
-                createdAt: Date.now(),
-            })
+            // setIncomingMessage({
+            //     sender: data.senderId,
+            //     text: data.text,
+            //     createdAt: Date.now(),
+            // })
+            getMessages()
         })
-    }, [messages, incomingMessage]);
+    }, [messages, isFocused]);
+    
+    useEffect(() => {
+        socket.current.on("getUsers", users => {
+            // console.log("online users(convo thread): ", users)
+            setOnlineUsers([...users])
+        })
+    }, [isFocused]);
 
     useEffect(() => {
         incomingMessage && conversation?.members.includes(incomingMessage.sender) &&
         setMessages(prev => [...prev, incomingMessage])
     }, [incomingMessage, conversation]);
 
-    useEffect(() => {
-        socket.current.emit("addUser", global.userData._id)
-        socket.current.on("getUsers", users => {
-            // console.log("online users(convo thread): ", users)
-            setOnlineUsers([...users])
-        })
-    }, [route]);
 
 
-    useEffect(() => {
-        // console.log("from route: ", conversation)
-        // console.log("from route: ", otherUser)
-        // getConversation()
-        handleSeenByMe()
-        getMessages()
-    }, []);
 
-
-    // const getConversation = () => {
-    //     try {
-    //         fetch(`https://hanaplingkod.onrender.com/conversations/find/${conversation.members[0]}/${conversation.members[1]}`, {
-    //             method: "GET",
-    //             headers: {
-    //                 "content-type": "application/json",
-    //                 "Authorization": global.accessToken
-    //             }
-    //         }).then(res => res.json())
-    //         .then(data => {
-    //             console.log("data conversation: ", data)
-    //             setConvo({...data})
-    //         })
-    //     } catch (error) {
-    //         console.log("error fetch conversaton from convo thread: ", error)
-    //     }
-    // }
 
     const handleSeenByMe = () => {
         try {
             let index = conversation.members.indexOf(global.userData._id)
             let updateWho = index === 0 ? {senderSeen: true} : {receiverSeen: true}
-
-            // console.log("convo id index: ", index)
-            // console.log("user id: ", global.userData._id)
-
-
-            // console.log("convo id: ", conversation._id)
-            // console.log("updatewho: ", updateWho)
 
             fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversation._id}`, {
                 method: "PUT",
@@ -164,8 +137,8 @@ const ConversationThread = ({route}) => {
                 }
             }).then(res => res.json())
             .then(data => {
-                // console.log("convo from messages: ", data)
-                data ? setMessages([...data]) : null
+                console.log("convo from messages: ", data)
+                setMessages([...data])
                 setCanScroll(true)
             })
         } catch (error) {
@@ -351,7 +324,7 @@ const ConversationThread = ({route}) => {
         <View style={{flexGrow: 1}}>
             <FlashList 
                 data={messages}
-                keyExtractor={item => item._id}
+                keyExtractor={(item) => item._id}
                 estimatedItemSize={80}
                 contentContainerStyle={{paddingVertical: 60}}
                 ListEmptyComponent={() => (<View><TText> </TText></View>)}
@@ -370,12 +343,12 @@ const ConversationThread = ({route}) => {
       {/* <TextInputContainer /> */}
 
 
-      <View style={[styles.inputContainer, styles.flexRow]}>
-            <View style={styles.getImage}>
+        <View style={[styles.inputContainer, styles.flexRow]}>
+            {/* <View style={styles.getImage}>
                 <TouchableOpacity style={styles.getImageBtn}>
                     <Icon name="image-multiple" color={"#434343"} size={25} />
                 </TouchableOpacity>
-            </View>
+            </View> */}
             <View style={styles.inputBox}>
                 <TextInput 
                     placeholder='Write a message'
@@ -457,7 +430,7 @@ const styles = StyleSheet.create({
         // bottom: 0,
         // left: 0,
         // right: 0,
-        width: '100%',
+        width: WIDTH,
         borderTopColor: '#ddd',
         borderTopWidth: 1.5,
         backgroundColor: '#fefefe',
@@ -474,7 +447,8 @@ const styles = StyleSheet.create({
         marginRight: 10
     },
     inputBox: {
-        flexGrow: 1,
+        // flexGrow: 1,
+        width: WIDTH*0.83,
         padding: 5,
         paddingHorizontal: 20,
         borderRadius: 10,
@@ -482,7 +456,7 @@ const styles = StyleSheet.create({
     },
     input: {
         fontFamily: "LexendDeca",
-        fontSize: 16
+        fontSize: 16,
     },
     sendContainer: {
 

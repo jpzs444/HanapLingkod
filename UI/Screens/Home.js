@@ -169,12 +169,13 @@ export default function Home() {
       }).then((res) => res.json())
       .then((data) => {
         console.log("home accesstoken: ", data)
-        if(data === "Forbidden: User is banned"){
+        if(data === "Forbidden: User is Banned"){
           setIsBanned(true)
           setViewModalBanned(true)
+          setCategory([])
         } else {
           setCategory([...data])
-          console.log("sub-cat:", data)
+          console.log("cat:", data)
         }
       })
     } catch (error) {
@@ -326,53 +327,59 @@ export default function Home() {
         {/* Services Offered */}
         <View style={styles.services_body}>
           {/* Header title */}
-          <View style={styles.services_header}>
-            <TText style={styles.services_title}>Services Offered</TText>
-          </View>
 
           {/* Search bar */}
-          <View style={styles.services_searchBarContainer}>
-            <TouchableOpacity style={[styles.services_searchbar, {justifyContent: searchBtnPressed ? 'flex-start' : null, paddingLeft: searchBtnPressed ? 10 : null,}]}
-              onPress={() => {
-                setSearchBtnPressed(true)
-                searchW = ''
-                setSearchWord("")
-                searchInput.current.focus()
-              }}
-            >
-              <Icon name="magnify" size={25} color="#8A8B97" style={{marginLeft: 10}} />
-              <TextInput style={[styles.services_searchbarTextInput]} 
-                placeholder={"Search for a Service or Worker"}
-                placeholderTextColor="#8A8B97"
-                keyboardType="default"
-                returnKeyType='search'
-                // value={searchW ? searchW : searchWord}
-                enablesReturnKeyAutomatically={true}
-                // onChangeText={(val) => {
-                //   setSearchWord(val)
-                //   console.log(val)
-                // }}
-                onChange={handleSearchWord}
-                onSubmitEditing={lookforResults}
-                ref={searchInput}
-              />
-              {
-                userHasSearched ? 
-                  <TouchableOpacity
-                    onPress={() => {
-                      searchW = ""
-                      setSearchWord("")
-                      setuserHasSearched(false)
-                      getAllCategory()
-                    }}
-                    style={{paddingRight: 5}}
-                  >
-                    <Icon name='close-circle' size={22} />
-                  </TouchableOpacity>
-                : null
-              }
-            </TouchableOpacity>
-          </View>
+          {
+            !isBanned &&
+            <>
+              <View style={styles.services_header}>
+                <TText style={styles.services_title}>Services Offered</TText>
+              </View>
+
+              <View style={styles.services_searchBarContainer}>
+                <TouchableOpacity style={[styles.services_searchbar, {justifyContent: searchBtnPressed ? 'flex-start' : null, paddingLeft: searchBtnPressed ? 10 : null,}]}
+                  onPress={() => {
+                    setSearchBtnPressed(true)
+                    searchW = ''
+                    setSearchWord("")
+                    searchInput.current.focus()
+                  }}
+                >
+                  <Icon name="magnify" size={25} color="#8A8B97" style={{marginLeft: 10}} />
+                  <TextInput style={[styles.services_searchbarTextInput]} 
+                    placeholder={"Search for a Service or Worker"}
+                    placeholderTextColor="#8A8B97"
+                    keyboardType="default"
+                    returnKeyType='search'
+                    // value={searchW ? searchW : searchWord}
+                    enablesReturnKeyAutomatically={true}
+                    // onChangeText={(val) => {
+                    //   setSearchWord(val)
+                    //   console.log(val)
+                    // }}
+                    onChange={handleSearchWord}
+                    onSubmitEditing={lookforResults}
+                    ref={searchInput}
+                  />
+                  {
+                    userHasSearched ? 
+                      <TouchableOpacity
+                        onPress={() => {
+                          searchW = ""
+                          setSearchWord("")
+                          setuserHasSearched(false)
+                          getAllCategory()
+                        }}
+                        style={{paddingRight: 5}}
+                      >
+                        <Icon name='close-circle' size={22} />
+                      </TouchableOpacity>
+                    : null
+                  }
+                </TouchableOpacity>
+              </View>
+            </>
+          }
 
           {
             userHasSearched ? 
@@ -615,19 +622,25 @@ export default function Home() {
   return (
     <SafeAreaView style={styles.mainContainer}>
           <View style={styles.category_container}>
+          <ScreenHeaderComponent />
+          {
+            isBanned ?
+            <View style={{alignItems: 'center', backgroundColor: ThemeDefaults.themeRed, padding:20}}>
+                <TText style={{color: "#fff", textAlign: 'center', fontFamily: "LexendDeca_Medium"}}>You are currently banned. Despite being banned, you must tend your scheduled bookings</TText>
+            </View>
+            :
             <FlashList 
+              data={category}
               refreshing={isRefreshing} 
               onRefresh={onRefresh}
-              data={category}
-              keyExtractor={item => item._id}
+              keyExtractor={item => item?._id}
               estimatedItemSize={50}
               // keyboardDismissMode='none'
               // keyboardShouldPersistTaps={'always'}
               showsVerticalScrollIndicator={false}
               ListFooterComponent={() => (<View style={{height: 120}}></View>)}
-              ListHeaderComponent={() => (
-                <ScreenHeaderComponent />
-              )}
+              // ListHeaderComponent={() => (
+              // )}
               renderItem={({item}) => (
                 searchResults ? 
                 <View>
@@ -732,6 +745,7 @@ export default function Home() {
                   : null
               )}
             /> 
+          }
           </View>
     </SafeAreaView>
   )

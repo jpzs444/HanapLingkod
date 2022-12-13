@@ -63,7 +63,7 @@ function SignUpForm() {
                 }),
             }).then(res => {
                 if(res.ok){
-                    window.location.assign("./login.html")
+                    window.location.assign("./index.html")
                     return res.json()
                 } else {
                     throw res
@@ -200,7 +200,7 @@ function SignUpForm() {
                         <div className="button-container">
                             <button id="button_create-account" type="submit" >Create Account</button>
                             {/* <input type="submit" value="Create Account" id="button_create-account" onclick /> */}
-                            <p className="hasAccount">Already have an account? <a className="link_signin" href="./login.html">Sign in</a></p>
+                            <p className="hasAccount">Already have an account? <a className="link_signin" href="./index.html">Sign in</a></p>
                         </div>
                     </form>
                 </div>

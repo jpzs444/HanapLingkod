@@ -222,7 +222,7 @@ const AccountInformation = () => {
                                 <p>Verification</p>
                                 <div class="info-indiv">
                                     <img src="./assets/icons/verification.png"/>
-                                    <p class="userprof-info">{user.verification ? "Verified" : "Needs Verification"}</p>
+                                    <p class="userprof-info">{user.verification ? "Verified" : "Unverified"}</p>
                                 </div>
                             </div>
                         </div>

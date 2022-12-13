@@ -5,11 +5,12 @@ import TText from '../Components/TText'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
 import DialogueModal from '../Components/DialogueModal'
-import { useNavigation } from '@react-navigation/native'
+import { useIsFocused, useNavigation } from '@react-navigation/native'
 
 const SubmitSupport = () => {
 
     const navigation = useNavigation()
+    const isFocused = useIsFocused()
 
     const [email, setEmail] = useState("")
     const [subject, setSubject] = useState("")
@@ -22,12 +23,13 @@ const SubmitSupport = () => {
 
     useEffect(() => {
         setEmail("")
+        global.userData?.emailAddress && setEmail(global.userData.emailAddress)
         setSubject("")
         setMessage("")
         setInvalidEmail(false)
         setViewInvalidEmailModal(false)
         setViewSubmitModal(false)
-    }, []);
+    }, [isFocused]);
 
     const handleSubmitSupportMail = async () => {
         try {
@@ -43,12 +45,22 @@ const SubmitSupport = () => {
                     text: message
                 })
             })
-            console.log("handleSubmitSupport")
-            setViewSubmitModal(false)
-            navigation.navigate("Home_Drawer")
+            .then(() => {
+                console.log("handleSubmitSupport")
+                handleCloseModal()
+                handleGoToHome()
+            })
         } catch (error) {
             console.log("submit support email: ", error)
         }
+    }
+    
+    const handleCloseModal = () => {
+        setViewSubmitModal(false)
+    }
+    
+    const handleGoToHome = () => {
+        navigation.navigate("Home_Drawer")
     }
 
     const handleVerifyEmail = (val) => {
@@ -79,7 +91,7 @@ const SubmitSupport = () => {
                                 setEmail(val)
                             }}
                             keyboardType={"email-address"}
-                            value={email ? email : ""}
+                            value={global.userData?.emailAddress ? global.userData?.emailAddress : email}
                             style={styles.input_email}
                         />
                     </View>

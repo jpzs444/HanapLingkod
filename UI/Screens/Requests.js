@@ -26,6 +26,7 @@ const Requests = () => {
     const [page, setPage] = useState(1)
 
     const [loading, setLoading] = useState(false)
+    const [isBanned, setIsBanned] = useState(false)
 
     // useEffect(() => {
         // BackHandler.addEventListener("hardwareBackPress", () => {
@@ -76,23 +77,29 @@ const Requests = () => {
             })
             .then((res) => res.json())
             .then((data) => {
+                console.log("isbanned: ", data)
                 console.log("request list data: ", data.recruiter)
-                
-                // place to state all rejected/declined requests
-                let list = []
-                let decList = []
-                if (global.userData.role === 'recruiter') {
-                    list = [...data.recruiter]
-                    console.log("relist: ", list)
-                    decList = [...data.status3_Recruiter]
-                    setRequestList([...list])
-                    setDeclinedRequests([...decList])
-                    // setLoading(false)                    
+                if(data === "Forbidden: User is Banned"){
+                    setRequestList([])
+                    setDeclinedRequests([])
+                    setIsBanned(true)
                 } else {
-                    decList = [...data.status3_Worker]
-                    list = [...data.worker]
-                    setRequestList([...list])
-                    setDeclinedRequests([...decList])
+                    // place to state all rejected/declined requests
+                    let list = []
+                    let decList = []
+                    if (global.userData.role === 'recruiter') {
+                        list = [...data.recruiter]
+                        console.log("relist: ", list)
+                        decList = [...data.status3_Recruiter]
+                        setRequestList([...list])
+                        setDeclinedRequests([...decList])
+                        // setLoading(false)                    
+                    } else {
+                        decList = [...data.status3_Worker]
+                        list = [...data.worker]
+                        setRequestList([...list])
+                        setDeclinedRequests([...decList])
+                    }
                 }
                 setLoading(false)
             })
@@ -210,88 +217,96 @@ const Requests = () => {
     <SafeAreaView style={styles.mainContainer}>
 
         <View style={{flex: 1, width: '100%'}}>
-            <FlashList 
-                data={requestList}
-                keyExtractor={item => item._id}
-                estimatedItemSize={60}
-                onEndReachedThreshold={0.5}
-                onEndReached={() => setPage(p => p + 1)}
-                ListEmptyComponent={() => (
-                    <View style={{alignItems: 'center'}}>
-                        {
-                            loading ?
-                            <View style={{width: '100%', height: 60, alignItems: 'center', marginTop: 50}}>
-                                <ActivityIndicator size="large" />
-                            </View>
-                            :
-                            <TText style={{color: '#c2c2c2', marginTop: 50}}>There is no pending request at the moment</TText>
-                        }
-                    </View>
-                )}
-                ListHeaderComponent={() => (<ScreenHeaderComponent />)}
-                ListFooterComponent={() => (<ScreenFooterComponent />)}
-                renderItem={({item}) => (
-                    <>
-                        
-                        <TouchableOpacity style={[styles.requestCard, {backgroundColor: item.requestStatus == '4' ? "#999" : ThemeDefaults.themeWhite }]}
-                            activeOpacity={0.5}
-                            onPress={() => {
-                                navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
-                            }}
-                        >
-
-                        {/* card */}
-                        <View style={[styles.cardUserImage]}>
-                            {/* <Image source={global.userData.profilePic ? {uri: global.userData.role === "recruiter" ? item.workerId.profilePic : item.recruiterId.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} /> */}
+            <ScreenHeaderComponent />
+            {
+                isBanned ?
+                <View style={{marginTop: 30, alignItems: 'center', backgroundColor: ThemeDefaults.themeRed, padding:20}}>
+                    <TText style={{color: "#fff", textAlign: 'center', fontFamily: "LexendDeca_Medium"}}>While banned, you will not be able to receive requests from recruiters</TText>
+                </View>
+                :
+                <FlashList 
+                    data={requestList}
+                    keyExtractor={item => item._id}
+                    estimatedItemSize={60}
+                    onEndReachedThreshold={0.5}
+                    onEndReached={() => setPage(p => p + 1)}
+                    ListEmptyComponent={() => (
+                        <View style={{alignItems: 'center'}}>
                             {
-                                global.userData.role === 'recruiter' ?
-                                    <Image style={styles.cardimageStyle} source={item.workerId.profilePic == "pic" ? require('../assets/images/default-profile.png') : {uri: item.workerId.profilePic}} />
-                                    :
-                                    <Image style={styles.cardimageStyle} source={item.recruiterId.profilePic == "pic" ? require('../assets/images/default-profile.png') : {uri: item.workerId.profilePic}} />
+                                loading ?
+                                <View style={{width: '100%', height: 60, alignItems: 'center', marginTop: 50}}>
+                                    <ActivityIndicator size="large" />
+                                </View>
+                                :
+                                <TText style={{color: '#c2c2c2', marginTop: 50}}>There is no pending request at the moment</TText>
                             }
                         </View>
-                        <View style={styles.requestInformationContainer}>
-                            <View style={styles.cardTop}>
+                    )}
+                    // ListHeaderComponent={() => ()}
+                    ListFooterComponent={() => (<ScreenFooterComponent />)}
+                    renderItem={({item}) => (
+                        <>
+                            
+                            <TouchableOpacity style={[styles.requestCard, {backgroundColor: item.requestStatus == '4' ? "#999" : ThemeDefaults.themeWhite }]}
+                                activeOpacity={0.5}
+                                onPress={() => {
+                                    navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
+                                }}
+                            >
+
+                            {/* card */}
+                            <View style={[styles.cardUserImage]}>
+                                {/* <Image source={global.userData.profilePic ? {uri: global.userData.role === "recruiter" ? item.workerId.profilePic : item.recruiterId.profilePic} : require("../assets/images/default-profile.png")} style={styles.cardimageStyle} /> */}
                                 {
                                     global.userData.role === 'recruiter' ?
-                                    <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.workerId.firstname} {item.workerId.lastname}</Text>
-                                    :
-                                    <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.recruiterId.firstname} {item.recruiterId.lastname}</Text>
+                                        <Image style={styles.cardimageStyle} source={item.workerId.profilePic == "pic" ? require('../assets/images/default-profile.png') : {uri: item.workerId.profilePic}} />
+                                        :
+                                        <Image style={styles.cardimageStyle} source={item.recruiterId.profilePic == "pic" ? require('../assets/images/default-profile.png') : {uri: item.workerId.profilePic}} />
                                 }
-                                <View style={styles.cardUserrating}>
-                                    <Icon name='star' size={20} color="gold" />
-                                    <TText style={[styles.cardUserRatingTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>4.7</TText>
+                            </View>
+                            <View style={styles.requestInformationContainer}>
+                                <View style={styles.cardTop}>
+                                    {
+                                        global.userData.role === 'recruiter' ?
+                                        <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.workerId.firstname} {item.workerId.lastname}</Text>
+                                        :
+                                        <Text style={[styles.carUserNameTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.recruiterId.firstname} {item.recruiterId.lastname}</Text>
+                                    }
+                                    <View style={styles.cardUserrating}>
+                                        <Icon name='star' size={20} color="gold" />
+                                        <TText style={[styles.cardUserRatingTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>4.7</TText>
+                                    </View>
+                                </View>
+                                <View style={styles.cardUserName}>
+                                    <Text style={[styles.cardRequestCategoryTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.subCategory}</Text>
+                                </View>
+                                <View style={styles.cardBottom}>
+                                    <View style={styles.requestDate}>
+                                        <Icon name='calendar-multiselect' size={18} color={item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'} />
+                                        <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
+                                    </View>
+                                    <View style={styles.requestDate}>
+                                        <Icon name='clock-time-five-outline' size={18} color={item.requestStatus == '4' ? ThemeDefaults.themeWhite: 'black'} />
+                                        <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{dayjs(item.startTime).format("hh:mm A")}</TText>
+                                    </View>
+                                    <View style={styles.cardViewRequest}>
+                                        <TouchableOpacity style={[styles.cardViewRequestBtn, {borderWidth: item.requestStatus != '1' ? 0 : 1.3, paddingVertical: item.requestStatus != '1' ? 4 : 2}]}
+                                            activeOpacity={0.5}
+                                            onPress={() => {
+                                                navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
+                                            }}
+                                        >
+                                            <TText style={styles.cardViewRequestTxt}>View</TText>
+                                            <Icon name='arrow-right' size={18} />
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
-                            <View style={styles.cardUserName}>
-                                <Text style={[styles.cardRequestCategoryTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.subCategory}</Text>
-                            </View>
-                            <View style={styles.cardBottom}>
-                                <View style={styles.requestDate}>
-                                    <Icon name='calendar-multiselect' size={18} color={item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'} />
-                                    <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
-                                </View>
-                                <View style={styles.requestDate}>
-                                    <Icon name='clock-time-five-outline' size={18} color={item.requestStatus == '4' ? ThemeDefaults.themeWhite: 'black'} />
-                                    <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{dayjs(item.startTime).format("hh:mm A")}</TText>
-                                </View>
-                                <View style={styles.cardViewRequest}>
-                                    <TouchableOpacity style={[styles.cardViewRequestBtn, {borderWidth: item.requestStatus != '1' ? 0 : 1.3, paddingVertical: item.requestStatus != '1' ? 4 : 2}]}
-                                        activeOpacity={0.5}
-                                        onPress={() => {
-                                            navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
-                                        }}
-                                    >
-                                        <TText style={styles.cardViewRequestTxt}>View</TText>
-                                        <Icon name='arrow-right' size={18} />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                </>
-                )}
-            />
+                        </TouchableOpacity>
+                    </>
+                    )}
+                />
+            }
         </View>
 
        
