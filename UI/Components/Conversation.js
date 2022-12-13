@@ -65,7 +65,7 @@ const Conversation = ({tab, conversation}) => {
             <TText style={[styles.name, {fontFamily: conversation.members.indexOf(global.userData._id) === 0 ? conversation.senderSeen ? "LexendDeca" : "LexendDeca_SemiBold" : conversation.receiverSeen ? "LexendDeca" : "LexendDeca_SemiBold"}]}>{`${otherUser.firstname} ${otherUser.lastname}`}</TText>
             <TText style={styles.date}>  &#x2022;  Nov 11</TText>
         </View>
-        <TText style={[styles.message, tab === "Unread" && styles.unreadMessage]}>{conversation.latestMessage}</TText>
+        <TText style={[styles.message, {fontFamily: conversation.members.indexOf(global.userData._id) === 0 ? conversation.senderSeen ? "LexendDeca" : "LexendDeca_SemiBold" : conversation.receiverSeen ? "LexendDeca" : "LexendDeca_SemiBold"}]}>{conversation.latestMessage}</TText>
       </View>
     </TouchableOpacity>
   )
