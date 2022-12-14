@@ -14,11 +14,11 @@ const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 const BookingEmail = require("../Helpers/BookingEmail");
 
 
-const utc = require("dayjs/plugin/utc");
-const timezone = require("dayjs/plugin/timezone");
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.tz.setDefault("Asia/Manila");
+// const utc = require("dayjs/plugin/utc");
+// const timezone = require("dayjs/plugin/timezone");
+// dayjs.extend(utc);
+// dayjs.extend(timezone);
+// dayjs.tz.setDefault("Asia/Manila");
 
 
 // CORS
@@ -92,17 +92,13 @@ router
       console.log(pendingRequest);
       if (pendingRequest === 0) {
         console.log("true");
-        
-        console.log(req.body.serviceDate)
-        console.log(typeof req.body.serviceDate)
-console.log(req.body.serviceDate + " " + req.body.startTime)
-console.log(typeof req.body.serviceDate + " " + req.body.startTime)
-
-
-          let startTime = dayjs(
-          req.body.serviceDate + " " + req.body.startTime
+        let sd =req.body.serviceDate
+        let  st =req.body.startTime
+        console.log(sd+st)
+        let startTime = dayjs(
+          sd + st
         ).toISOString();
-        console.log("newtrial")
+        console.log("newssss")
         console.log(startTime)
         const pushID = await Worker.findOne(
           { _id: req.body.workerId },
