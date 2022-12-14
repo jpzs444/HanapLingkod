@@ -13,6 +13,14 @@ const { CheckIfBan } = require("../Helpers/banChecker");
 const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 const BookingEmail = require("../Helpers/BookingEmail");
 
+
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone");
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Manila");
+
+
 // CORS
 const cors = require("cors");
 router.use(cors({ origin: "*" }));
@@ -84,9 +92,11 @@ router
       console.log(pendingRequest);
       if (pendingRequest === 0) {
         console.log("true");
+        console.log(req.body.serviceDate + " " + req.body.startTime)
         let startTime = dayjs(
           req.body.serviceDate + " " + req.body.startTime
         ).toISOString();
+        console.log(startTime)
         const pushID = await Worker.findOne(
           { _id: req.body.workerId },
           { pushtoken: 1, _id: 0 }
