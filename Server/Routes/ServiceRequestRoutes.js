@@ -91,13 +91,15 @@ router
         .exec();
       console.log(pendingRequest);
       if (pendingRequest === 0) {
+        var utc = require('dayjs/plugin/utc')
+        dayjs.extend(utc)
         console.log("true");
         let sd =req.body.serviceDate
         let  st =req.body.startTime
         console.log(sd+st)
         let startTime = dayjs(
           sd + st
-        ).toISOString();
+        ).utc().toISOString();
         console.log("newssss")
         console.log(startTime)
         const pushID = await Worker.findOne(
