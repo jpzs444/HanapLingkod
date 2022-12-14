@@ -96,6 +96,7 @@ router
         let startTime = dayjs(
           req.body.serviceDate + " " + req.body.startTime
         ).toISOString();
+        console.log("newtrial")
         console.log(startTime)
         const pushID = await Worker.findOne(
           { _id: req.body.workerId },
