@@ -21,6 +21,7 @@ const BookingEmail = require("../Helpers/BookingEmail");
 
 // CORS
 const cors = require("cors");
+const { now } = require("mongoose");
 router.use(cors({ origin: "*" }));
 
 router
@@ -87,14 +88,14 @@ router.route("/service-request").post(
       })
         .lean()
         .exec();
-      console.log(pendingRequest);
+      // console.log(pendingRequest);
       // if (pendingRequest === 0) {
-      console.log("true");
+      // console.log("true");
       let sd = String(req.body.serviceDate);
       let st = String(req.body.startTime);
-      console.log(sd + st);
-      let startTime = dayjs(sd + st).toISOString();
-      console.log("newssss");
+      console.log(sd);
+      let startTime = new Date(sd + " " + st).toISOString();
+
       console.log(startTime);
       // const pushID = await Worker.findOne(
       //   { _id: req.body.workerId },
