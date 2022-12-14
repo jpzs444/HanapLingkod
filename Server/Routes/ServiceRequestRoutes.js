@@ -92,8 +92,14 @@ router
       console.log(pendingRequest);
       if (pendingRequest === 0) {
         console.log("true");
-        console.log(req.body.serviceDate + " " + req.body.startTime)
-        let startTime = dayjs(
+        
+        console.log(req.body.serviceDate)
+        console.log(typeof req.body.serviceDate)
+console.log(req.body.serviceDate + " " + req.body.startTime)
+console.log(typeof req.body.serviceDate + " " + req.body.startTime)
+
+
+          let startTime = dayjs(
           req.body.serviceDate + " " + req.body.startTime
         ).toISOString();
         console.log("newtrial")
