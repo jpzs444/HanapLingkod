@@ -9,6 +9,12 @@ import ThemeDefaults from '../Components/ThemeDefaults'
 import dayjs from 'dayjs'
 import { useNavigation, useFocusEffect, useIsFocused } from '@react-navigation/native'
 
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault("Asia/Manila")
+
 // import 'react-native-console-time-polyfill';
 
 const Bookings = () => {

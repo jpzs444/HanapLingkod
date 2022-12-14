@@ -3,7 +3,7 @@ import TText from './TText'
 import React from 'react'
 import ThemeDefaults from './ThemeDefaults'
 
-const DialogueModal = ({firstMessage, secondMessage, thirdMessage, visible, onAccept, onDecline, numBtn, warning}) => {
+const DialogueModal = ({firstMessage, secondMessage, thirdMessage, visible, onAccept, onDecline, numBtn, warning, declineButtonText, confirmButtonText}) => {
   return (
     <Modal
         transparent={true}
@@ -41,13 +41,13 @@ const DialogueModal = ({firstMessage, secondMessage, thirdMessage, visible, onAc
                                     onAccept()
                                 }}
                             >
-                                <TText style={styles.dialogueCancel}>Yes</TText>
+                                <TText style={styles.dialogueCancel}>{confirmButtonText ? confirmButtonText : "Okay"}</TText>
                             </TouchableOpacity>
                             <TouchableOpacity 
                                 style={styles.dialogueBtn}
                                 onPress={() => { onDecline(false) }}
                             >
-                                <TText style={styles.dialogueConfirm}>No</TText>
+                                <TText style={styles.dialogueConfirm}>{declineButtonText ? declineButtonText : "No"}</TText>
                             </TouchableOpacity>
                         </>
                         :
@@ -55,7 +55,7 @@ const DialogueModal = ({firstMessage, secondMessage, thirdMessage, visible, onAc
                             style={styles.dialogueBtn}
                             onPress={() => { onDecline(false) }}
                         >
-                            <TText style={styles.dialogueConfirm}>Okay</TText>
+                            <TText style={styles.dialogueConfirm}>{confirmButtonText ? confirmButtonText : "Okay"}</TText>
                         </TouchableOpacity>
                     }
                 </View>

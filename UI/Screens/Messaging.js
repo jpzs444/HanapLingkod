@@ -94,31 +94,6 @@ const Messaging = () => {
       <View style={styles.body}>
         <ScreenHeader />
 
-        {/*
-          conversations.length > 0 ?
-          conversations.map(conversationItem => {
-            console.log("convo id: ", conversationItem._id)
-            return (
-            <Conversation key={conversationItem._id} tab={activeBtn} conversation={conversationItem} />
-          )})
-          :
-          <View style={{alignItems: 'center', marginTop: 50}}>
-            <TText style={{color: '#bbb'}}>No conversations at the moment</TText>
-          </View>
-        */}
-
-        {/* <Conversation tab={activeBtn} conversation={} />
-        <Conversation tab={activeBtn} />
-        <Conversation tab={activeBtn} />
-        <Conversation tab={activeBtn} /> */}
-        {/* <TouchableOpacity
-          onPress={() => {
-            addConversation()
-          }}
-        >
-          <TText>Add convo</TText>
-        </TouchableOpacity> */}
-
         <FlashList 
             data={conversations}
             keyExtractor={key => key._id}

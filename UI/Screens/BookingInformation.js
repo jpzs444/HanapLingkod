@@ -10,9 +10,16 @@ import { useNavigation } from '@react-navigation/native'
 import RatingForm from '../Components/RatingForm'
 import RatingFeedbackCard from '../Components/RatingFeedbackCard'
 import CreateConversation from '../Components/CreateConversation'
+import * as Clipboard from 'expo-clipboard';
 
 // let dayOfYear = require('dayjs/plugin/dayOfYear')
 // dayjs.extend(dayOfYear)
+
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault("Asia/Manila")
 
 const BookingInformation = ({route}) => {
 
@@ -45,6 +52,8 @@ const BookingInformation = ({route}) => {
     const [viewWrongScheduleModal, setViewWrongScheduleModal] = useState(false)
 
     const [conversation, setConversation] = useState({})
+
+    const [copied, setCopied] = useState(false)
 
     useEffect(() => {
         setRatingLoading(true)
@@ -251,26 +260,21 @@ const BookingInformation = ({route}) => {
 
     return (
         <ScrollView contentContainerStyle={styles.mainContainer}>
-            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromCB={fromCB} />
+            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromCB={true} />
             <TText style={styles.mainHeader}>Booking Information</TText>
 
-            {/* {
-                (bookingInformation.bookingStatus == '2' || bookingInformation.bookingStatus == '4' || bookingInformation.bookingStatus == '5') &&
-                <View style={{position: 'absolute', bottom: 40, left: 0, right: 0, }}>
-                    <TouchableOpacity style={{padding: 10}}
-                        onPress={() => {
-                            {
-                                global.userData.role ==="recruiter" ?
-                                navigation.navigate("ReportUserDrawer", {userReportedID: bookingItem.workerId._id, userFullName: `${bookingItem.workerId.firstname} ${bookingItem.workerId.lastname}`, userRole: "Worker", userProfilePicture: bookingItem.workerId.profilePic})
-                                :
-                                navigation.navigate("ReportUserDrawer", {userReportedID: bookingItem.recruiterId._id, userFullName: `${bookingItem.recruiterId.firstname} ${bookingItem.recruiterId.lastname}`, userRole: "Recruiter", userProfilePicture: bookingItem.recruiterId.profilePic})
-                            }
-                        }}
-                    >
-                        <TText style={{textAlign: 'center', color: ThemeDefaults.themeRed}}>Report this {global.userData.role === "recruiter"? "worker": "recruiter"}</TText>
-                    </TouchableOpacity>
+
+            <Modal
+                transparent
+                animationType="slide"
+                visible={copied}
+            >
+                <View style={{alignItems: 'center', justifyContent: 'center', position: 'absolute', bottom: 100, right: 0, left: 0, }}>
+                    <View style={{alignItems: 'center'}}>
+                        <TText style={{paddingVertical: 10, paddingHorizontal: 20, textAlign: 'center', backgroundColor: '#E3E3E3', borderRadius: 20}}>Phone number copied</TText>
+                    </View>
                 </View>
-            } */}
+            </Modal>
 
             {/* 
             
@@ -483,6 +487,34 @@ const BookingInformation = ({route}) => {
                     <View style={styles.bookingDescription}>
                         <TText style={styles.bookingDescriptionHeader}>Additional description</TText>
                         <TText style={styles.bookingDescriptionText}>{bookingItem.description ? bookingItem.description : " --"}</TText>
+                    </View>
+
+                    <View style={styles.bookingDescription}>
+                        <TText style={styles.bookingDescriptionHeader}>Phone Number { global.userData.role === 'recruiter' ? "(Worker)" : "(Recruiter)"}</TText>
+                        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                            <TText style={styles.bookingDescriptionText}>
+                                {
+                                    global.userData.role === 'recruiter' ?
+                                    `+63${bookingItem?.workerId.phoneNumber}`
+                                    :
+                                    `+63${bookingItem?.recruiterId.phoneNumber}`
+                                }
+                            </TText>
+                            <TouchableOpacity 
+                                onPress={() => {
+                                    setCopied(true)
+                                    setTimeout(() => setCopied(false), 1000)
+
+                                    if(global.userData.role === 'recruiter'){
+                                        Clipboard.setString(`+63${bookingItem?.workerId.phoneNumber}`);
+                                    } else {
+                                        Clipboard.setString(`+63${bookingItem?.recruiterId.phoneNumber}`);
+                                    }
+                                }}
+                            >
+                                <Icon name="content-copy" size={18} color={"gray"} />
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <View style={styles.recruiterCard}>

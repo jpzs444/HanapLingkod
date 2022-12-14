@@ -11,13 +11,15 @@ import Appbar from '../Components/Appbar';
 import ThemeDefaults from '../Components/ThemeDefaults';
 import TText from '../Components/TText';
 
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { IPAddress } from '../global/global';
 
 import RnOtpTimer from 'react-native-otp-timer';
+import DialogueModal from '../Components/DialogueModal';
 
 export default function OTPVerification(props) {
     const navigation = useNavigation();
+    const isFocused = useIsFocused()
     
     const route = useRoute()
 
@@ -48,6 +50,9 @@ export default function OTPVerification(props) {
         n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",
     })
 
+    const [tooManyOTPRequests, setTooManyOTPRequests] = useState(false)
+    const [startTimer, setStartTimer] = useState(true)
+
 
     const num1 = useRef();
     const num2 = useRef();
@@ -58,38 +63,54 @@ export default function OTPVerification(props) {
 
     // Send Verification with given number on the registration
     useEffect(() => {
+        setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
+        setStartTimer(true)
         sendVerification();
-    },[])
+    },[isFocused])
 
     // update resend otp code countdown timer
     useEffect(() => {
-        const timerId = setInterval(() => {
-            if (timerRef.current !== 0 && timerPressed) {
-                timerRef.current -= 1;
-                setTimerCountdown(timerRef.current);
-            //   sendVerification();
-            } else {
-                clearInterval(timerId);
-                setTimerCountdown(60)
-            }
-        }, 1000);
-    }, [timerPressed]);
+        // const timerId = setInterval(() => {
+        //     if (timerRef.current !== 0 && timerPressed) {
+        //         timerRef.current -= 1;
+        //         setTimerCountdown(timerRef.current);
+        //     //   sendVerification();
+        //     } else {
+        //         clearInterval(timerId);
+        //         setTimerCountdown(60)
+        //     }
+        // }, 1000);
+
+        const tim = setInterval(() => setTimerCountdown(prev => prev - 1), 1000)
+
+        if(Number(timerCountdown) === 0){
+            setStartTimer(false)
+            setTimerCountdown(60)
+        }
+
+        return () => {
+            clearInterval(tim)
+        }
+    }, [timerPressed, isFocused, timerCountdown]);
   
     // is invalid otp
     useEffect(() => {
         setshowInvalidMsg(!isInvalidOTP)
     }, [isInvalidOTP]);
 
+
+    // system back button handler
     useEffect(() => {
         BackHandler.addEventListener("hardwareBackPress", () => handleSystemBackButton())
 
-        return () => {
-            BackHandler.removeEventListener("hardwareBackPress", () => handleSystemBackButton())
-        }
+        // return () => {
+        //     BackHandler.removeEventListener("hardwareBackPress", () => handleSystemBackButton())
+        // }
     }, [])
 
     const handleSystemBackButton = () => {
         navigation.navigate("Login")
+        return true
     }
 
 
@@ -106,446 +127,279 @@ export default function OTPVerification(props) {
         const phoneProvider = new firebase.auth.PhoneAuthProvider();
         phoneProvider
             .verifyPhoneNumber(isLogin ? `+63${global.userData.phoneNumber}` : `+63${phoneNum}` , recaptchaVerifier.current)
-            .then(setVerificationId);
+            .then(setVerificationId)
+            .catch((error) => {
+                console.log("error confirm code", error.message)
+                // setTooManyOTPRequests(true)
+                // navigation.goBack()
+            })
     }
 
     const confirmCode = () => {
         setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
-        setIsLoading(true)
         const credential = firebase.auth.PhoneAuthProvider.credential(
             verificationId,
             code
         );
+        
+        setStartTimer(true)
+
         console.log(`otp code is: ${code}`)
         console.log(typeof code)
+
         firebase.auth().signInWithCredential(credential)
-        .then(() => {
-            // reset state of inputs
-            setLoadingLogin(true)
-            setCode('');
-            setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
-            setInvalidOTP(false)
+            .then(() => {
+                // reset state of inputs
+                setCode('');
+                setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
+                setInvalidOTP(false)
 
-            // if authenticated, create the account/login
-            console.log('auth successful..');
-
-            forgotPassword && navigation.navigate("FP_Reset", {token: token})
-
-            global.isPhoneNumVerified = true
-            fromEditUserInfo ? updateUserInformation() : null
-
-            // if authentication is successful, continue to the welcome screen
-            isLogin ? console.log(" going to home screen") : null
-            
-            console.log("confirm code | account type: ", role)
-            role === 'recruiter' ? createRecruiterAccount() : null
-            role === 'worker' ? createWorkerAccount() : null
-            
-            setIsLoading(false)
-            isLogin && navigation.replace("HomeStack");
-            isLogin && fromWelcome && navigation.replace("HomeStack");
-        })
+                forgotPassword ? navigation.navigate("ResetPassword_LS", {token: token})
+                :
+                // go to create accout screen
+                navigation.navigate("CreateAccountLoading", {
+                    phoneNum: phoneNum, 
+                    role: role, 
+                    user: user, 
+                    singleImage: singleImage, 
+                    image: image, 
+                    token: token,
+                    isLogin: isLogin, 
+                    work: work, 
+                    imagelicense: imagelicense, 
+                    fromWelcome: fromWelcome, 
+                    forgotPassword: forgotPassword,
+                    fromEditUserInfo: fromEditUserInfo, 
+                    formDataUserInfo: formDataUserInfo, 
+                    formDataPastWorks: formDataPastWorks, 
+                    formDataSetOfWorks: formDataSetOfWorks, 
+                    workList: workList
+                })
+                
+            })
         .catch((error) => {
             setCode("")
             setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
-            setIsLoading(false)
             setInvalidOTP(true)
 
             // alert(error);
-            console.log("error: ", error.message)
+            console.log("error otp verification: ", error.message)
         })
+    }
+
+    const handleTooManyRequestsModal = () => {
+        setTooManyOTPRequests(false)
+        handleNavGoBack()
+    }
+
+    const handleNavGoBack = () => {
+        navigation.goBack()
     }
 
 
 
-    // CREATE ACCOUNT
-
-
-    // CREATE RECRUITER ACCOUNT
-
-    const createRecruiterAccount = () => {
-        console.log("userType: recruiter | creater user")
-        let localUri = singleImage;
-        let filename = localUri.split("/").pop();
-  
-        // Infer the type of the image
-        let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : `image`;
-  
-        // Upload the image using the fetch and FormData APIs
-        let formData = new FormData();
-  
-        // Assume "photo" is the name of the form field the server expects
-        formData.append("govId", {
-          uri: localUri,
-          name: filename,
-          type,
-        });
-  
-        formData.append("username", user.username);
-        formData.append("password", user.password);
-        formData.append("firstname", user.firstname);
-        formData.append("lastname", user.lastname);
-        formData.append("middlename", user.middlename ? user.middlename : "");
-        formData.append("emailAddress", user.email);
-        formData.append("birthday", user.birthday);
-        formData.append("age", user.age);
-        formData.append("sex", user.gender);
-        formData.append("street", user.street);
-        formData.append("purok", user.purok);
-        formData.append("barangay", user.barangay);
-        formData.append("city", user.city);
-        formData.append("province", user.province);
-        formData.append("phoneNumber", user.phonenumber);
-        // formData.append("emailAddress", user.email);
-        formData.append("GovId", filename);
-  
-        fetch("https://hanaplingkod.onrender.com/signup/recruiter?username=" + user.username, {
-          method: "POST",
-          body: formData,
-          headers: {
-            "content-type": "multipart/form-data",
-          },
-        }).then(() => {
-            console.log("Account created | recruiter");
-            setLoadingLogin(false)
-            navigation.navigate("WelcomePage", {role: "recruiter", user: user})
-        }).catch((er) => {console.log("error: sign recruiter:  ", er)})
-      }
-
-
-
-      // CREATE WORKER ACCOUNT
-
-    const createWorkerAccount = () => {
-        console.log("userType: worker | creater user")
-
-        // Govt ID
-        let localUri = singleImage;
-        let filename = localUri.split("/").pop();
-
-        // Infer the type of the image
-        let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : `image`;
-        
-        // Upload the image using the fetch and FormData APIs
-        let formData = new FormData();
-        
-        // ID
-        // Assume "photo" is the name of the form field the server expects
-        formData.append("govId", {
-            uri: localUri,
-            name: filename,
-            type,
-        });
-        
-        // License Pic
-        if(imagelicense){
-            let uriLicense = imagelicense;
-            let licensefilename = uriLicense.split("/").pop();
-    
-            match = /\.(\w+)$/.exec(licensefilename);
-            type = match ? `image/${match[1]}` : `image`;
-    
-            // license/certificate
-            // pass certificate images
-            formData.append("certificate", {
-                uri: uriLicense,
-                name: licensefilename,
-                type,
-            });
-        }
-  
-        formData.append("username", user.username);
-        formData.append("password", user.password);
-        formData.append("firstname", user.firstname);
-        formData.append("lastname", user.lastname);
-        formData.append("middlename", user.middlename ? user.middlename : "");
-        formData.append("emailAddress", user.email);
-        formData.append("birthday", user.birthday);
-        formData.append("age", user.age);
-        formData.append("sex", user.gender);
-        formData.append("street", user.street);
-        formData.append("purok", user.purok);
-        formData.append("barangay", user.barangay);
-        formData.append("city", user.city);
-        formData.append("province", user.province);
-        formData.append("phoneNumber", user.phonenumber);
-        formData.append("workDescription", user.workDescription ? user.workDescription : "");
-        // formData.append("GovId", filename);
-
-          console.log("work length: ", work.length)
-        // append work information listed by the worker from the registration
-        for (let i = 0; i < work.length; i++){
-            formData.append("Category", work[i].category === "unlisted" ? "unlisted" : "");
-            formData.append("ServiceSubCategory", work[i].service);
-            formData.append("minPrice", work[i].lowestPrice);
-            formData.append("maxPrice", work[i].highestPrice);
-
-            console.log("work service: ", work[i].service)
-        }
-
-        setLoadingLogin(false)
-  
-        fetch("https://hanaplingkod.onrender.com/signup/worker?username=" + user.username, {
-          method: "POST",
-          body: formData,
-        }).then(() => {
-            console.log("Account created | worker");
-            //props.navigation.navigate("OTPVerification", {role: user.role});
-            navigation.navigate("WelcomePage", {role: 'worker', user: user})
-        }).catch((er) => {console.log("error: sign up worker: ", er.message)})
-      }
-
-    const updateUserInformation = () => {
-
-        // DELETE  Update/Upload Works/Services offered by the Worker
-        for(let i = 0; i < workList.length; i++){
-            fetch("https://hanaplingkod.onrender.com/Work/" + workList[i].ServiceSubId.ServiceSubCategory + "/" + workList[i]._id, {
-                method: "DELETE",
-                headers: {
-                    "content-type": "application/json",
-                    "Authorization": global.accessToken
-                },
-            }).then((res) => {
-                setLoadingLogin(false)
-                console.log("old work set deleted successfully   ", res.message)
-            })
-            .catch((error) => console.log("error upldate services: ", error.message))
-        }
-
-        // upload pasworks images upload by the worker
-        fetch("https://hanaplingkod.onrender.com/prevWorks/" + global.userData._id, {
-            method: "PUT",
-            headers: {
-                "content-type": "multipart/form-data",
-                "Authorization": global.accessToken
-            },
-            body: formDataPastWorks
-        }).then((res) => {
-            setLoadingLogin(false)
-            console.log("successfully uploaded past work images")
-        })
-        .catch((error) => console.log("error prevworks: ", error.message))
-
-        // upload new and updated set of works
-        fetch("https://hanaplingkod.onrender.com/Work", {
-            method: "PUT",
-            headers: {
-                "content-type": "multipart/form-data",
-                "Authorization": global.accessToken
-            },
-            body: formDataSetOfWorks
-        }).then((res) => {
-            setLoadingLogin(false)
-            console.log("successfully uploaded and updated works")
-        })
-        .catch((error) => console.log("error upload new works: ", error.message))
-
-        // update recruiter and worker profile picture and basic information
-        fetch("https://hanaplingkod.onrender.com/" + global.userData.role === 'recruiter' ? "Recruiter/" : "Worker/" + global.userData._id, {
-            method: "PUT",
-            headers: {
-                "content-type": "multipart/form-data",
-                "Authorization": global.accessToken
-            },
-            body: formDataUserInfo,
-        }).then((response) => {
-            setLoadingLogin(false)
-            console.log("successfully updated user basic information")
-        })
-        .catch((error) => console.log("error update picture: ", error.message))
-
-        navigation.navigate("UserProfileScreen")
-    }
-
-
-  return (
-    <SafeAreaView style={styles.container}>        
-        
-        <FirebaseRecaptchaVerifierModal 
+    return (
+        <SafeAreaView style={styles.container}>        
+            
+            <FirebaseRecaptchaVerifierModal 
                 ref={recaptchaVerifier}
                 firebaseConfig={firebaseConfig}
-        />
+                title="Prove you are human"
+            />
 
-        <Appbar backBtn={true} hasPicture={false} otpverificationpage={true} />
+            <DialogueModal 
+                firstMessage={"Invalid OTP!"}
+                secondMessage={"Please enter the OTP we sent you"}
+                warning
+                numBtn={1}
+                visible={isInvalidOTP}
+                onDecline={setInvalidOTP}
+            />
 
-        {/* header */}
-        <View style={styles.body}>
-            <TText style={styles.headerTitle}>Phone Number</TText>
-            <TText style={styles.headerTitle}>Verification</TText>
-            {/* header description */}
-            <View style={styles.headerDesc}>
-                <TText style={{textAlign: 'center', fontSize: 18, lineHeight: 26}}>Please enter the 6-digit OTP that we have sent to your registered phone number +63{phoneNum}</TText>
+            <DialogueModal 
+                firstMessage={"Too many OTP requests. Please try again later"}
+                secondMessage={""}
+                visible={tooManyOTPRequests}
+                numBtn={1}
+                onDecline={handleTooManyRequestsModal}
+            />
+
+            <Appbar onlyBackBtn={true} otpverificationpage={!isLogin} fromLogin={isLogin} />
+
+            {/* header */}
+            <View style={styles.body}>
+                <TText style={styles.headerTitle}>Phone Number</TText>
+                <TText style={styles.headerTitle}>Verification</TText>
+                {/* header description */}
+                <View style={styles.headerDesc}>
+                    <TText style={{textAlign: 'center', fontSize: 18, lineHeight: 26}}>Please enter the 6-digit OTP that we have sent to your registered phone number +63{phoneNum}</TText>
+                </View>
             </View>
-        </View>
 
-        {
-            loadingLogin &&
-            <View style={{position: 'absolute', top: 0, right: 0, flexGrow: 1, width: '100%', height: '100%', alignItems: 'center', justifyContent: "center", backgroundColor: 'rgba(255,255,255,0.9)', zIndex: 5}}>
-                <ActivityIndicator size={'large'} />
+            {
+                loadingLogin &&
+                <View style={{position: 'absolute', top: 0, right: 0, flexGrow: 1, width: '100%', height: '100%', alignItems: 'center', justifyContent: "center", backgroundColor: 'rgba(255,255,255,0.9)', zIndex: 5}}>
+                    <ActivityIndicator size={'large'} />
+                </View>
+            }
+
+            {/* body | input  */}
+            <View style={styles.inputContainer}>
+                <View style={styles.inputBox}>
+                    <TextInput 
+                        style={styles.input}
+                        keyboardType={'numeric'}
+                        returnKeyType={"next"}
+                        textContentType={'number'}
+                        val={otpNum.n1 ? otpNum.n1 : ""}
+                        maxLength={1}
+                        onChangeText={(val) => {
+                            setotpNum({...otpNum, n1: val})
+                            val ? num2.current.focus() : null
+
+                            // setCode((prev) => `${prev}${val}`)
+                            setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
+                        }}
+                        ref={num1}
+                    />
+                </View>
+                <View style={styles.inputBox}>
+                    <TextInput 
+                        style={styles.input}
+                        keyboardType={'numeric'}
+                        returnKeyType={"next"}
+                        textContentType={'number'}
+                        val={otpNum.n2 ? otpNum.n2 : ""}
+                        maxLength={1}
+                        onChangeText={(val) => {
+                            setotpNum({...otpNum, n2: val})
+                            val ? num3.current.focus() : num1.current.focus()
+
+                            // setCode((prev) => `${prev}${val}`)
+                            setCode((prev) => `${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
+                        }}
+                        ref={num2}
+                    />
+                </View>
+                <View style={styles.inputBox}>
+                    <TextInput 
+                        style={styles.input}
+                        keyboardType={'numeric'}
+                        returnKeyType={"next"}
+                        textContentType={'number'}
+                        val={otpNum.n3 ? otpNum.n3 : ""}
+                        maxLength={1}
+                        onChangeText={(val) => {
+                            setotpNum({...otpNum, n3: val})
+                            val ? num4.current.focus() : num2.current.focus()
+                            // setCode((prev) => `${prev}${val}`)
+                            setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
+
+                        }}
+                        ref={num3}
+                    />
+                </View>
+                <View style={styles.inputBox}>
+                    <TextInput 
+                        style={styles.input}
+                        keyboardType={'numeric'}
+                        returnKeyType={"next"}
+                        textContentType={'number'}
+                        val={otpNum.n4 ? otpNum.n4 : ""}
+                        maxLength={1}
+                        onChangeText={(val) => {
+                            setotpNum({...otpNum, n4: val})
+                            val ? num5.current.focus() : num3.current.focus()
+                            // setCode((prev) => `${prev}${val}`)
+                            setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
+                        }}
+                        ref={num4}
+                    />
+                </View>
+                <View style={styles.inputBox}>
+                    <TextInput 
+                        style={styles.input}
+                        keyboardType={'numeric'}
+                        returnKeyType={"next"}
+                        textContentType={'number'}
+                        val={otpNum.n5 ? otpNum.n5 : ""}
+                        maxLength={1}
+                        onChangeText={(val) => {
+                            setotpNum({...otpNum, n5: val})
+                            val ? num6.current.focus() : num4.current.focus()
+                            // setCode((prev) => `${prev}${val}`)
+                            setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
+
+                        }}
+                        ref={num5}
+                    />
+                </View>
+                <View style={styles.inputBox}>
+                    <TextInput 
+                        style={styles.input}
+                        keyboardType={'numeric'}
+                        returnKeyType={"next"}
+                        textContentType={'number'}
+                        val={otpNum.n6 ? otpNum.n6 : ""}
+                        maxLength={1}
+                        onChangeText={(val) => {
+                            setotpNum({...otpNum, n6: val})
+                            !val && num5.current.focus()
+                            console.log(otpNum.n6)
+                            console.log(val)
+                            // setCode((prev) => `${prev}${val}`)
+                            setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${val}`)
+
+                        }}
+                        ref={num6}
+                    />
+                </View>
             </View>
-        }
 
-        {/* body | input  */}
-         <View style={styles.inputContainer}>
-            <View style={styles.inputBox}>
-                <TextInput 
-                    style={styles.input}
-                    keyboardType={'numeric'}
-                    returnKeyType={"next"}
-                    textContentType={'number'}
-                    maxLength={1}
-                    onChangeText={(val) => {
-                        setotpNum({...otpNum, n1: val})
-                        val ? num2.current.focus() : null
 
-                        // setCode((prev) => `${prev}${val}`)
+            {/* button | countdown/resend */}
+            <View style={styles.submitContainer}>
+                <TouchableOpacity 
+                    onPress={()=> {
+                        
+                        // transform number inputs into a string for phone verification
+                        setCode("")
                         setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
-
+                        console.log("input otp: ", code)
+                        confirmCode()
+                        // navigation.navigate("HomeStack")
                     }}
-                    ref={num1}
-                />
-            </View>
-            <View style={styles.inputBox}>
-                <TextInput 
-                    style={styles.input}
-                    keyboardType={'numeric'}
-                    returnKeyType={"next"}
-                    textContentType={'number'}
-                    maxLength={1}
-                    onChangeText={(val) => {
-                        setotpNum({...otpNum, n2: val})
-                        val ? num3.current.focus() : num1.current.focus()
-
-                        // setCode((prev) => `${prev}${val}`)
-                        setCode((prev) => `${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
-
+                    style={styles.submitBtn}
+                >
+                    <TText style={styles.submitText}>Verify</TText>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.resendCode} 
+                    disabled={startTimer}
+                    onPress={()=> {
+                        setStartTimer(true)
+                        setTimerCountdown(60);
+                        setTimerPressed(true);
+                        if(!startTimer){
+                            sendVerification();
+                        }
                     }}
-                    ref={num2}
-                />
+                >
+                    {!startTimer ? 
+                        <TText style={[styles.resendCodeText, {color: ThemeDefaults.appIcon, fontSize: 18}]}>Resend OTP</TText> 
+                        : <TText style={styles.resendCodeText}>{timerCountdown < 60 && timerCountdown > 9 ? `Resend OTP in 0:${timerCountdown}` : `Resend OTP in 0:0${timerCountdown}`}</TText>}
+                </TouchableOpacity>
             </View>
-            <View style={styles.inputBox}>
-                <TextInput 
-                    style={styles.input}
-                    keyboardType={'numeric'}
-                    returnKeyType={"next"}
-                    textContentType={'number'}
-                    maxLength={1}
-                    onChangeText={(val) => {
-                        setotpNum({...otpNum, n3: val})
-                        val ? num4.current.focus() : num2.current.focus()
-                        // setCode((prev) => `${prev}${val}`)
-                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
 
-
-                    }}
-                    ref={num3}
-                />
+            <View>
+                {/* <TText>{code}</TText> */}
             </View>
-            <View style={styles.inputBox}>
-                <TextInput 
-                    style={styles.input}
-                    keyboardType={'numeric'}
-                    returnKeyType={"next"}
-                    textContentType={'number'}
-                    maxLength={1}
-                    onChangeText={(val) => {
-                        setotpNum({...otpNum, n4: val})
-                        val ? num5.current.focus() : num3.current.focus()
-                        // setCode((prev) => `${prev}${val}`)
-                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
 
-                    }}
-                    ref={num4}
-                />
-            </View>
-            <View style={styles.inputBox}>
-                <TextInput 
-                    style={styles.input}
-                    keyboardType={'numeric'}
-                    returnKeyType={"next"}
-                    textContentType={'number'}
-                    maxLength={1}
-                    onChangeText={(val) => {
-                        setotpNum({...otpNum, n5: val})
-                        val ? num6.current.focus() : num4.current.focus()
-                        // setCode((prev) => `${prev}${val}`)
-                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
-
-                    }}
-                    ref={num5}
-                />
-            </View>
-            <View style={styles.inputBox}>
-                <TextInput 
-                    style={styles.input}
-                    keyboardType={'numeric'}
-                    returnKeyType={"next"}
-                    textContentType={'number'}
-                    maxLength={1}
-                    onChangeText={(val) => {
-                        setotpNum({...otpNum, n6: val})
-                        !val && num5.current.focus()
-                        console.log(otpNum.n6)
-                        console.log(val)
-                        // setCode((prev) => `${prev}${val}`)
-                        setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${val}`)
-
-                    }}
-                    ref={num6}
-                />
-            </View>
-        </View>
-
-        {/* If OTP is incorrect */}
-        {
-            !showInvalidMsg ? 
-            <View style={{marginBottom: 30}}>
-                <TText style={{
-                    color: ThemeDefaults.appIcon,
-                    fontFamily: 'LexendDeca_Medium',
-                    fontSize: 18
-                }}>
-                    Login failed, please re-enter the OTP
-                </TText>
-            </View> 
-        : null
-        }
-
-        {/* button | countdown/resend */}
-        <View style={styles.submitContainer}>
-            <TouchableOpacity 
-                onPress={()=> {
-                    
-                    // transform number inputs into a string for phone verification
-                    setCode("")
-                    setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
-                    console.log("input otp: ", code)
-                    confirmCode()
-                    // navigation.navigate("HomeStack")
-                }}
-                style={styles.submitBtn}
-            >
-                <TText style={styles.submitText}>Verify</TText>
-            </TouchableOpacity>
-            <Pressable style={styles.resendCode} onPress={()=> {
-                setTimerCountdown(60);
-                setTimerPressed(true);
-                sendVerification();
-            }}>
-                {timerCountdown === 60 ? 
-                    <TText style={[styles.resendCodeText, {color: ThemeDefaults.appIcon, fontSize: 18}]}>Resend OTP</TText> 
-                    : <TText style={styles.resendCodeText}>{timerCountdown < 60 && timerCountdown > 9 ? `Resend OTP in 0:${timerCountdown}` : `Resend OTP in 0:0${timerCountdown}`}</TText>}
-            </Pressable>
-        </View>
-
-        <View>
-            {/* <TText>{code}</TText> */}
-        </View>
-
-    </SafeAreaView>
-  )
+        </SafeAreaView>
+    )
 }
 
 const styles = StyleSheet.create({

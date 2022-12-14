@@ -83,7 +83,7 @@ const SubmitSupport = () => {
             <View style={styles.body}>
 
                 <View style={styles.input_section}>
-                    <TText style={styles.inputTitle}>From:</TText>
+                    <TText style={styles.inputTitle}>From: <TText style={{color: ThemeDefaults.themeRed}}>*</TText></TText>
                     <View style={styles.container_input}>
                         <TextInput 
                             placeholder='Enter your email here'
@@ -98,7 +98,7 @@ const SubmitSupport = () => {
                 </View>
 
                 <View style={styles.input_section}>
-                    <TText style={styles.inputTitle}>Subject:</TText>
+                    <TText style={styles.inputTitle}>Subject: <TText style={{color: ThemeDefaults.themeRed}}>*</TText></TText>
                     <View style={styles.container_input}>
                         <TextInput 
                             placeholder='Enter subject here'
@@ -110,7 +110,7 @@ const SubmitSupport = () => {
                 </View>
 
                 <View style={styles.input_section}>
-                    <TText style={styles.inputTitle}>Message:</TText>
+                    <TText style={styles.inputTitle}>Message: <TText style={{color: ThemeDefaults.themeRed}}>*</TText></TText>
                     <View style={styles.container_input}>
                         <TextInput 
                             placeholder='Enter description here'

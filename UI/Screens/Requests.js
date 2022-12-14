@@ -7,11 +7,16 @@ import React, {useState, useEffect, useCallback} from 'react'
 import ThemeDefaults from '../Components/ThemeDefaults';
 import { IPAddress } from '../global/global';
 import dayjs from 'dayjs';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useIsFocused } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useIsFocused } from '@react-navigation/native';
 
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
+
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault("Asia/Manila")
 
 // SHOULD FETCH AND REFRESH EVERY 5 SECONDS
 
@@ -28,19 +33,14 @@ const Requests = () => {
     const [loading, setLoading] = useState(false)
     const [isBanned, setIsBanned] = useState(false)
 
-    // useEffect(() => {
-        // BackHandler.addEventListener("hardwareBackPress", () => {
-        //     navigation.navigate("HomeScreen")
-        //     return true
-        // })
+    useEffect(() => {
+        BackHandler.addEventListener("hardwareBackPress", () => handleSystemBackButton())
 
         // componentDismount
-        // return () => {
-        //     BackHandler.removeEventListener("hardwareBackPress", () => {
-        //         return false
-        //     })
-        // };
-    // }, []);
+        return () => {
+            BackHandler.removeEventListener("hardwareBackPress", () => handleSystemBackButton())
+        };
+    }, []);
 
     useEffect(() => {
         setPage(1)        
@@ -50,6 +50,7 @@ const Requests = () => {
         let reqReq = setInterval(fetchRequestList, 15000)
         return () => {
             clearInterval(reqReq)
+            return true
         };
     }, []);
     
@@ -62,6 +63,11 @@ const Requests = () => {
     useEffect(() => {
         fetchRequestList()
     }, [page]);
+
+    const handleSystemBackButton = () => {
+        navigation.navigate("HomeScreen")
+        return true
+    }
 
     const fetchRequestList = async () => {
  
