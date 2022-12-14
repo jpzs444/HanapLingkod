@@ -13,11 +13,11 @@ const { CheckIfBan } = require("../Helpers/banChecker");
 const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 const BookingEmail = require("../Helpers/BookingEmail");
 
-// const utc = require("dayjs/plugin/utc");
-// const timezone = require("dayjs/plugin/timezone");
-// dayjs.extend(utc);
-// dayjs.extend(timezone);
-// dayjs.tz.setDefault("Asia/Manila");
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone");
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Manila");
 
 // CORS
 const cors = require("cors");
@@ -88,59 +88,58 @@ router.route("/service-request").post(
       })
         .lean()
         .exec();
-      // console.log(pendingRequest);
-      // if (pendingRequest === 0) {
-      // console.log("true");
-      let sd = String(req.body.serviceDate);
-      let st = String(req.body.startTime);
-      console.log(sd);
-      console.log("tz");
-      let startTime = dayjs(sd + " " + st).tz("Asia/Manila");
+      console.log(pendingRequest);
+      if (pendingRequest === 0) {
+        console.log("true");
+        let sd = String(req.body.serviceDate);
+        let st = String(req.body.startTime);
+        console.log("Default tz");
+        let startTime = dayjs(sd + " " + st).toISOString();
 
-      console.log(startTime);
-      // const pushID = await Worker.findOne(
-      //   { _id: req.body.workerId },
-      //   { pushtoken: 1, _id: 0 }
-      // ).lean();
-      // const serviceRequest = new ServiceRequest({
-      //   workerId: req.body.workerId,
-      //   recruiterId: req.body.recruiterId,
-      //   workId: req.body.workId,
-      //   subCategory: req.body.subCategory,
-      //   address: req.body.address,
-      //   minPrice: req.body.minPrice,
-      //   maxPrice: req.body.maxPrice,
-      //   serviceDate: req.body.serviceDate,
-      //   startTime: startTime,
-      //   description: req.body.description,
-      //   geometry: {
-      //     type: "point",
-      //     coordinates: [req.body.long, req.body.lat],
-      //   },
-      //   requestStatus: 1,
-      // });
-      // console.log(serviceRequest._id);
-      // serviceRequest.save(function (err) {
-      //   if (!err) {
-      //     console.log("new request created");
-      //     res.send("true");
-      //     notification(
-      //       [pushID.pushtoken],
-      //       "A new request has been sent to you!",
-      //       " Kindly check your requests on the homepage or in the three-line menu.",
-      //       { Type: "New Service Request", id: serviceRequest._id },
-      //       req.body.workerId
-      //     );
-      //   } else {
-      //     res.send(err);
-      //   }
-      // });
-      // } else {
-      //   console.log("false");
-      //   res.send("false");
+        console.log(startTime);
+        const pushID = await Worker.findOne(
+          { _id: req.body.workerId },
+          { pushtoken: 1, _id: 0 }
+        ).lean();
+        const serviceRequest = new ServiceRequest({
+          workerId: req.body.workerId,
+          recruiterId: req.body.recruiterId,
+          workId: req.body.workId,
+          subCategory: req.body.subCategory,
+          address: req.body.address,
+          minPrice: req.body.minPrice,
+          maxPrice: req.body.maxPrice,
+          serviceDate: req.body.serviceDate,
+          startTime: startTime,
+          description: req.body.description,
+          geometry: {
+            type: "point",
+            coordinates: [req.body.long, req.body.lat],
+          },
+          requestStatus: 1,
+        });
+        console.log(serviceRequest._id);
+        serviceRequest.save(function (err) {
+          if (!err) {
+            console.log("new request created");
+            res.send("true");
+            notification(
+              [pushID.pushtoken],
+              "A new request has been sent to you!",
+              " Kindly check your requests on the homepage or in the three-line menu.",
+              { Type: "New Service Request", id: serviceRequest._id },
+              req.body.workerId
+            );
+          } else {
+            res.send(err);
+          }
+        });
+      } else {
+        console.log("false");
+        res.send("false");
 
-      //   console.log("A pending request is still existing");
-      // }
+        console.log("A pending request is still existing");
+      }
     } catch (error) {
       res.send(error);
     }
