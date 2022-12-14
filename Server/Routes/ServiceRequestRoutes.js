@@ -90,8 +90,8 @@ router.route("/service-request").post(
       console.log(pendingRequest);
       // if (pendingRequest === 0) {
       console.log("true");
-      let sd = req.body.serviceDate;
-      let st = req.body.startTime;
+      let sd = String(req.body.serviceDate);
+      let st = String(req.body.startTime);
       console.log(sd + st);
       let startTime = dayjs(sd + st).toISOString();
       console.log("newssss");
