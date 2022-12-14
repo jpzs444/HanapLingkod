@@ -16,11 +16,11 @@ const WorkerComment = require("../Models/WorkerComment");
 const RecruiterComment = require("../Models/RecruiterComment");
 const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 
-const utc = require("dayjs/plugin/utc");
-const timezone = require("dayjs/plugin/timezone");
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.tz.setDefault("Asia/Manila");
+// const utc = require("dayjs/plugin/utc");
+// const timezone = require("dayjs/plugin/timezone");
+// dayjs.extend(utc);
+// dayjs.extend(timezone);
+// dayjs.tz.setDefault("Asia/Manila");
 
 // CORS
 const cors = require("cors");
