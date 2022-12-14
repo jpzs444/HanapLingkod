@@ -95,7 +95,7 @@ router
         console.log(req.body.serviceDate + " " + req.body.startTime)
         let startTime = dayjs(
           req.body.serviceDate + " " + req.body.startTime
-        ).toISOString();
+        )
         console.log(startTime)
         const pushID = await Worker.findOne(
           { _id: req.body.workerId },
