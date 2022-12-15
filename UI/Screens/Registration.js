@@ -112,7 +112,7 @@ export default function Registration({route}) {
     }, [isUsernameUnique, pwMatch])
 
     useEffect(() => {
-      console.log(user.username)
+      // console.log(user.username)
       fetch('https://hanaplingkod.onrender.com/isUsernameUnique', {
         method: "POST",
         headers: {
@@ -125,14 +125,14 @@ export default function Registration({route}) {
       }).then((response) => response.json())
       .then((isUnique) => {
         setIsUsernameUnique(isUnique)
-        console.log(isUnique)
+        // console.log(isUnique)
       }).catch((error) => console.log(error.message))
     }, [user.username])
 
     // componentdidmount
     // use effect is for back button found on the phone
     useEffect(() => {
-      console.log("backbtn pressed");
+      // console.log("backbtn pressed");
       BackHandler.addEventListener("hardwareBackPress", ()=>handleSystemBackButton())
       
       // componentwillunmount
@@ -172,13 +172,13 @@ export default function Registration({route}) {
     const handleServiceSelect = (val, index) => {
       // const {value} = val.value;
       const list = [...services];
-      console.log("val handle service: ", val)
+      // console.log("val handle service: ", val)
 
       if(val.sub_category == "unlisted" || val == "unlisted"){
         list[index]['category'] = 'unlisted'
-        console.log("val --- unlisted")
+        // console.log("val --- unlisted")
       } else {
-        console.log("val: ", val.Category)
+        // console.log("val: ", val.Category)
   
         list[index]['service'] = val.ServiceSubCategory;
         list[index]['category'] = "";
@@ -186,7 +186,7 @@ export default function Registration({route}) {
       }
       haveBlanks()
 
-      console.log(services)
+      // console.log(services)
     }
 
     const handleServiceChange = (val, index) => {
@@ -209,7 +209,7 @@ export default function Registration({route}) {
       setServices(list)
       haveBlanks()
 
-      console.log(services)
+      // console.log(services)
     }
 
     const handleServiceLowPrice = (val, index) => {
@@ -217,7 +217,7 @@ export default function Registration({route}) {
       const list = [...services];
       list[index]['lowestPrice'] = val;
       setServices(list)
-      console.log("lowPrice: ", services)
+      // console.log("lowPrice: ", services)
       if(Number(list[index]['lowestPrice']) < Number(list[index]['highestPrice'])){
         setIsPriceValid(true)
       } else {
@@ -231,7 +231,7 @@ export default function Registration({route}) {
       const list = [...services];
       list[index]['highestPrice'] = val;
       setServices(list)
-      console.log("highPrice: ", services)
+      // console.log("highPrice: ", services)
       if(Number(list[index]['lowestPrice']) < Number(list[index]['highestPrice'])){
         setIsPriceValid(true)
       } else {
@@ -244,16 +244,16 @@ export default function Registration({route}) {
       const list = [...services];
       list[index]['service'] = val
       setServices(list)
-      console.log("unlisted: ", services)
+      // console.log("unlisted: ", services)
       haveBlanks()
     }
 
     const handleServiceRemove = (index) => {
       const list = [...services];
-      console.log(list)
+      // console.log(list)
       list.splice(index, 1);
       setServices(list)
-      console.log(list)
+      // console.log(list)
 
       haveBlanks()
     }
@@ -262,7 +262,7 @@ export default function Registration({route}) {
       const list = [...image]
 
       list.splice(index, 1)
-      console.log(list)
+      // console.log(list)
       
       setImage(list)
     }
@@ -273,8 +273,8 @@ export default function Registration({route}) {
       let arrUser2 = Object.values(arrUser)
       let userJ = 1, job;
 
-      console.log("arr services: ", arr)
-      console.log("arrUser: ", Object.values(arrUser2))
+      // console.log("arr services: ", arr)
+      // console.log("arrUser: ", Object.values(arrUser2))
 
       for(let el of arrUser){
         job = Object.values(el).includes("") ? 0 : 1
@@ -300,7 +300,7 @@ export default function Registration({route}) {
 
         // console.log("userJ: ", r)
       } else (job+userJ) === 2 ? sethasBlanks(true) : sethasBlanks(false)
-      console.log(job + " " + userJ)
+      // console.log(job + " " + userJ)
     }
 
     const setData = (option) => {
@@ -322,7 +322,7 @@ export default function Registration({route}) {
     const didConfirm = (isConfirmed) => {
       setShowDialog(false)
       setisConfirmed(true)
-      console.log("didConfirm")
+      // console.log("didConfirm")
     }
    
     const changeModalVisibility = (bool) => {
@@ -360,7 +360,7 @@ export default function Registration({route}) {
       setUser((prev) => ({...prev, birthday: dateString}))
 
       haveBlanks()
-      console.log(dateString)
+      // console.log(dateString)
     };
 
     // OPEN IMAGE PICKER
@@ -379,7 +379,7 @@ export default function Registration({route}) {
 
     const [isPriceGreater, setIsPriceGreater] = useState(true)
     useEffect(() => {
-      console.log("hp", services[0].highestPrice)
+      // console.log("hp", services[0].highestPrice)
       if(services[0].highestPrice > services[0].lowestPrice){
         setIsPriceGreater(true)
       } else {
@@ -422,7 +422,7 @@ export default function Registration({route}) {
         quality: 0.5,
       });
 
-      console.log("selected", result.selected);
+      // console.log("selected", result.selected);
 
       if (!result.cancelled) {
         if(!result.selected && next !== 3) {
@@ -444,7 +444,7 @@ export default function Registration({route}) {
           setSingleImage("")
         }
       }
-      console.log("Image state: ", image)
+      // console.log("Image state: ", image)
     };
 
     // references for textinput onSubmit
@@ -480,7 +480,7 @@ export default function Registration({route}) {
         }),
       }).then((response) => response.json())
       .then((isUnique) => {
-        console.log("username taken: ", isUnique)
+        // console.log("username taken: ", isUnique)
         setIsUsernameUnique(isUnique)
       })
       .catch((error) => console.log(error.message))
@@ -726,7 +726,7 @@ export default function Registration({route}) {
                       onPress={() => {
                         setDidClickCreateAccountButton(true)
                         setShowDialog(true)
-                        console.log("confirm from worker information work description")
+                        // console.log("confirm from worker information work description")
                       }}
                     >
                       <TText style={{fontFamily: 'LexendDeca_SemiBold', fontSize: 18, color: ThemeDefaults.themeWhite}}>
@@ -1037,10 +1037,10 @@ export default function Registration({route}) {
                       </>
                     :
                     image.map(function(item, index) {
-                      console.log("item: ", item)
+                      {/* console.log("item: ", item) */}
                       {/* console.log("image length: ", item.length) */}
-                      console.log("index: ", index)
-                      console.log("image uri: ", item.uri)
+                      {/* console.log("index: ", index)
+                      console.log("image uri: ", item.uri) */}
                       return (
                         <View key={index}>
                             <TouchableOpacity 
@@ -1234,8 +1234,8 @@ export default function Registration({route}) {
                     onChangeText={(val) => {
                       setConfirmPW(val)
                       // setPWMatch([...user.password === confirmPW])
-                      console.log("pwMatch: ", pwMatch)
-                      console.log("confirmpw: ", confirmPW)
+                      // console.log("pwMatch: ", pwMatch)
+                      // console.log("confirmpw: ", confirmPW)
                     }}
                     onSubmitEditing={ () => ref_fn.current.focus() }
                     ref={ref_cpw} />

@@ -67,7 +67,7 @@ const Bookings = () => {
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log("Bookings data: ", data)
+                // console.log("Bookings data: ", data)
 
                 // grab bookings which have the status of active(1) and ongoing(2)
                 if(global.userData.role === "recruiter") {
@@ -79,7 +79,7 @@ const Bookings = () => {
                 setLoading(false)
             })
             
-            console.log("bookings state: ", bookings)
+            // console.log("bookings state: ", bookings)
         } catch (error) {
             console.log("error fetch bookings: ", error) 
         }  
@@ -107,7 +107,7 @@ const Bookings = () => {
             <>
                     <TouchableOpacity style={[styles.bookingItem, item.bookingStatus != '1' && item.bookingStatus != '4' && {borderWidth: 1.5, borderColor: ThemeDefaults.themeLighterBlue }, item.bookingStatus == 4 && {backgroundColor: 'rgba(153,153,153,1)'}, item.bookingStatus == '5' && styles.serviceOngoing]}
                         onPress={() => {
-                            console.log("Item ID: ", item._id)
+                            // console.log("Item ID: ", item._id)
                             navigation.navigate("BookingInformationDrawer", {bookingID: item._id, bookingItem: item})
                         }}
                     >

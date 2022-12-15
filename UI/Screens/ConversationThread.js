@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, View, TouchableOpacity, Image, StatusBar, FlatList, ScrollView, Dimensions } from 'react-native'
+import { StyleSheet, TextInput, View, TouchableOpacity, Image, StatusBar, FlatList, ScrollView, Dimensions, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import ThemeDefaults from '../Components/ThemeDefaults'
@@ -26,6 +26,8 @@ const ConversationThread = ({route}) => {
     const [page, setPage] = useState(1)
     const [conversationObj, setConversationObj] = useState({})
 
+    const [loadingMessages, setLoadingMessages] = useState(false)
+
     const [onlineUsers, setOnlineUsers] = useState([])
     const [receiverOnline, setReceiverOnline] = useState(true)
 
@@ -38,19 +40,22 @@ const ConversationThread = ({route}) => {
 
 
     useEffect(() => {
-        console.log("conversation item: ", conversation)
-        handleFetchConversation()
-        getMessages()
-
         setMessages([])
+        getMessages()
         
     }, [isFocused]);
-
     
     useEffect(() => {
+        setLoadingMessages(true)
+    }, []);
+
+
+    useEffect(() => {
         handleSeenByMe()
-        // getMessages()
     }, [isFocused]);
+
+
+    
 
     // useEffect(() => {
     //     handleSeenByMe()
@@ -85,9 +90,9 @@ const ConversationThread = ({route}) => {
     }, [isFocused]);
 
     useEffect(() => {
-        incomingMessage && conversationObj?.members.includes(incomingMessage.sender) &&
+        incomingMessage && conversation?.members.includes(incomingMessage.sender) &&
         setMessages(prev => [...prev, incomingMessage])
-    }, [incomingMessage, conversationObj]);
+    }, [incomingMessage, conversation]);
 
 
 
@@ -102,8 +107,8 @@ const ConversationThread = ({route}) => {
             }).then(res => res.json())
             .then(data => {
                 setConversationObj({...data})
+                getMessages()
             })
-            getMessages()
         } catch (error) {
             console.log("error fetch conversation from two people: ", error)
         }
@@ -112,10 +117,10 @@ const ConversationThread = ({route}) => {
 
     const handleSeenByMe = () => {
         try {
-            let index = conversationObj?.members.indexOf(global.userData._id)
+            let index = conversation?.members.indexOf(global.userData._id)
             let updateWho = index === 0 ? {senderSeen: true} : {receiverSeen: true}
 
-            fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversationObj?._id}`, {
+            fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversation?._id}`, {
                 method: "PUT",
                 headers: {
                     'content-type': 'application/json',
@@ -123,7 +128,7 @@ const ConversationThread = ({route}) => {
                 },
                 body: JSON.stringify({...updateWho})
             })
-            .then(() => console.log("did seen"))
+            .then(() => console.log("You've seen all the messages"))
         } catch (error) {
             console.log("!!!!!!!error update seen(convo): ", error)
         }
@@ -134,13 +139,13 @@ const ConversationThread = ({route}) => {
         // index 1 receiver
 
         try {
-            let index = conversationObj?.members.indexOf(global.userData._id)
+            let index = conversation?.members.indexOf(global.userData._id)
             let updateWho = index === 0 ? {receiverSeen: false, latestMessage: message} : {senderSeen: false, latestMessage: message}
 
 
-            console.log("convo id: ", conversationObj._id)
+            // console.log("convo id: ", conversation._id)
 
-            await fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversationObj?._id}`, {
+            await fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversation?._id}`, {
                 method: "PUT",
                 headers: {
                     'content-type': 'application/json',
@@ -158,8 +163,10 @@ const ConversationThread = ({route}) => {
 
 
     const getMessages = () => {
+        setLoadingMessages(true)
+
         try {
-            fetch(`https://hanaplingkod.onrender.com/messages/${conversationObj?._id}`, {
+            fetch(`https://hanaplingkod.onrender.com/messages/${conversation?._id}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
@@ -167,10 +174,12 @@ const ConversationThread = ({route}) => {
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log("convo from messages: ", data)
+                // console.log("convo from messages: ", data)
                 setMessages([...data])
+                setLoadingMessages(false)
                 setCanScroll(true)
             })
+
         } catch (error) {
             console.log("get messages of convo: ", error)
         }
@@ -181,11 +190,11 @@ const ConversationThread = ({route}) => {
 
     const handleSendMessage = () => {
 
-        const receiver_id = conversationObj?.members.find(member => member !== global.userData._id)
+        const receiver_id = conversation?.members.find(member => member !== global.userData._id)
         
         const isOnline = onlineUsers.find(user => user.userId === receiver_id)
         
-        console.log("isOnline: ", isOnline)
+        // console.log("isOnline: ", isOnline)
         setReceiverOnline(isOnline)
         if(isOnline){
             setReceiverOnline(true)
@@ -196,7 +205,7 @@ const ConversationThread = ({route}) => {
             });
             
         } else {
-            console.log("no ones there")
+            // console.log("no ones here")
             setReceiverOnline(false)
         }
         
@@ -209,7 +218,7 @@ const ConversationThread = ({route}) => {
                     "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
-                    conversationId: conversationObj?._id,
+                    conversationId: conversation?._id,
                     sender: global.userData._id,
                     text: message,
                 })
@@ -217,7 +226,7 @@ const ConversationThread = ({route}) => {
             .then(res => res.json())
             .then(newMessage => {
                 setMessage("")
-                console.log("new message data: ", newMessage)
+                // console.log("new message data: ", newMessage)
                 setMessages([...messages, newMessage])
                 setCanScroll(true)
                 handleSetReceiverSeen()
@@ -260,7 +269,7 @@ const ConversationThread = ({route}) => {
                 style={{marginLeft: 'auto', marginRight: 10, elevation: 4}}
                 activeOpacity={0.5}
                 onPress={() => {
-                    console.log("report user")
+                    // console.log("report user")
                     {
                         global.userData.role ==="recruiter" ?
                         navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Worker", userProfilePicture: otherUser.profilePic})
@@ -352,14 +361,23 @@ const ConversationThread = ({route}) => {
         </ScrollView> */}
 
         <View style={{flexGrow: 1}}>
-            {
-                messages.length > 0 &&
                 <FlashList 
                     data={messages}
                     keyExtractor={(item) => item._id}
                     estimatedItemSize={80}
                     contentContainerStyle={{paddingVertical: 60}}
-                    ListEmptyComponent={() => (<View style={{marginTop: 50, alignItems: 'center'}}><TText style={{color: "#c5c5c5", textAlign: 'center'}}>Send a message to start a conversation</TText></View>)}
+                    ListEmptyComponent={() => (
+                        <View style={{marginTop: 50, alignItems: 'center'}}>
+                            {
+                                loadingMessages ? 
+                                <View style={{width: '100%', alignItems: 'center', marginTop: -40}}>
+                                    <ActivityIndicator size={'large'} />
+                                </View>
+                                :
+                                <TText style={{color: "#c5c5c5", textAlign: 'center'}}>Send a message to start a conversation</TText>
+                            }
+                        </View>
+                    )}
                     renderItem={({item}) => (
                         <Messagebox message={item?.text} fromMe={item?.sender === global.userData._id} />
                     )}
@@ -368,7 +386,6 @@ const ConversationThread = ({route}) => {
                         // console.log("ref: ",ref)
                     }}
                 />
-            }
         </View>
 
         

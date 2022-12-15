@@ -19,7 +19,7 @@ const ViewComments = ({route}) => {
 
     const {item, postID} = route.params
     let kk = item._id
-    console.log("post id: ", item._id)
+    // console.log("post id: ", item._id)
 
     const [commentText, setCommentText] = useState("")
     const [commentList, setCommentList] = useState([])
@@ -57,7 +57,7 @@ const ViewComments = ({route}) => {
             }).then((res) => res.json())
             .then(data => {
                 setIsLoading(false)
-                console.log('posts: ', data.post[0].maxPrice)
+                // console.log('posts: ', data.post[0].maxPrice)
                 setCommentList(prev => [...data.comment])
                 setPostInformation([...data.post])
                 
@@ -79,7 +79,7 @@ const ViewComments = ({route}) => {
                 message: commentText
             })
         }).then(res => {
-            console.log("Submitted the comment")
+            // console.log("Submitted the comment")
             setCommentText(null)
             fetchCommentsFromPost()
             setCommentText(null)
@@ -89,7 +89,7 @@ const ViewComments = ({route}) => {
     }
 
     const handleDeleteComment = (item) => {
-        console.log("waddup")
+        // console.log("waddup")
         fetch(`https://hanaplingkod.onrender.com/request-post-comment/${postID}`, {
             method: 'DELETE',
             headers: {
@@ -105,7 +105,7 @@ const ViewComments = ({route}) => {
 
     const handleCreatedAge = (createdAt) => {
 
-        console.log("createdAt: ", createdAt)
+        // console.log("createdAt: ", createdAt)
         let notifDate = new Date(createdAt)
         let dateNow = new Date()
         let dateDiff = Math.abs(dateNow.getTime() - notifDate.getTime())
@@ -249,7 +249,7 @@ const ViewComments = ({route}) => {
                                             <TouchableOpacity
                                                 activeOpacity={0.4}
                                                 onPress={()=> {
-                                                    console.log("postInformation: ", postInformation.maxPrice)
+                                                    // console.log("postInformation: ", postInformation.maxPrice)
                                                     setOpenContextMenu(true)
                                                     // navigation.navigate("RequestFormDrawer", {
                                                     //     'workerID': item.workerId._id, 
@@ -276,7 +276,7 @@ const ViewComments = ({route}) => {
                                                     <ModalPicker 
                                                         changeModalVisibility={setOpenContextMenu}
                                                         setData={(filter) => {
-                                                            console.log(filter)
+                                                            // console.log(filter)
                                                             setRequestCategory({...filter})
                                                             }}
                                                         contextMenu={true}
@@ -293,7 +293,7 @@ const ViewComments = ({route}) => {
                                         <View style={{flex: 1, alignItems: 'flex-end'}}>
                                             <TouchableOpacity style={styles.deleteCommentBtn}
                                                 onPress={() => {
-                                                    console.log("item comment id: ", item._id)
+                                                    // console.log("item comment id: ", item._id)
                                                     handleDeleteComment(item._id)
                                                 }}
                                             >
@@ -321,7 +321,7 @@ const ViewComments = ({route}) => {
                                     <TouchableOpacity style={styles.requestBtn}
                                         activeOpacity={0.4}
                                         onPress={()=> {
-                                            console.log("postInformation: ", postInformation.maxPrice)
+                                            // console.log("postInformation: ", postInformation.maxPrice)
                                             navigation.navigate("RequestFormDrawer", {
                                                 'workerID': item.workerId._id, 
                                                 'workID': item._id, 

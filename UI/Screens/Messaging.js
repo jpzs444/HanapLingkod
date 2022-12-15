@@ -20,7 +20,7 @@ const Messaging = () => {
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    console.log("hi messaging")
+    // console.log("hi messaging")
 
     navigation.addListener("focus", () => {
       setPage(1)
@@ -42,7 +42,7 @@ const Messaging = () => {
       }).then(res => res.json())
       .then(data => {
         setConversations([...data])
-        console.log("conversations: ", data)
+        // console.log("conversations: ", data)
       })
 
     } catch (error) {
@@ -54,7 +54,7 @@ const Messaging = () => {
     <TouchableOpacity style={styles.selectorBtn}
       activeOpacity={0.5}
       onPress={() => {
-        console.log("selector btn: ", label)
+        // console.log("selector btn: ", label)
         setActiveBtn(label)
       }}
     >

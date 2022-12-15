@@ -99,7 +99,7 @@ const RequestForm = ({route, navigation}) => {
     let lll = []
 
     useEffect(() => {
-        console.log("Worker infromation: ", workID)
+        // console.log("Worker infromation: ", workID)
         // setWorkWorkID(workID)
         setLoadedWorkerInfo({...workerInformation})
 
@@ -194,7 +194,7 @@ const RequestForm = ({route, navigation}) => {
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log("worker data (UT): ", data)
+                // console.log("worker data (UT): ", data)
             })
         } catch (error) {
             console.log("error fetch worker ut: ", error)
@@ -366,8 +366,8 @@ const RequestForm = ({route, navigation}) => {
         let nn = dayjs(date).format("YYYY-MM-DD")
         
         let dd_js = dayjs(date)
-        console.log("date formated js: ", dd_js)
-        console.log("date formated js: ", date)
+        // console.log("date formated js: ", dd_js)
+        // console.log("date formated js: ", date)
         setFormatedDate(dd_js);
 
         setDisplayDate(dayjs(date).format("MMMM D, YYYY"));
@@ -466,19 +466,19 @@ const RequestForm = ({route, navigation}) => {
         setTimePickerVisibility(false)
         setTimeSelected(true)
 
-        console.log("selected time: ", timetime)
+        // console.log("selected time: ", timetime)
         
         let dd = new Date(formatedDate)
         let tt = new Date(time)
         
-        console.log("formated date: rqf: ", dd)
+        // console.log("formated date: rqf: ", dd)
 
         // combine
         let dd_date = dayjs(dd).format("YYYY-MM-DD")
         let tt_time = dayjs(tt).format("HH:mm")
         
         let combined = dayjs(dd_date.toString() + "" + tt_time.toString())
-        console.log("combined: ", combined)
+        // console.log("combined: ", combined)
         setFormatedTime(combined)
 
     }
@@ -488,7 +488,7 @@ const RequestForm = ({route, navigation}) => {
     }
 
     const handlePendingRequestChecker = async () => {
-        console.log("pending func")
+        // console.log("pending func")
         setIsLoading(true)
 
         try {
@@ -500,7 +500,7 @@ const RequestForm = ({route, navigation}) => {
                 },
             }).then(res => res.json())
             .then(data => {
-                console.log("pending checker: ", data)
+                // console.log("pending checker: ", data)
                 let list = [...data.recruiter]
                 list = list.filter(e => e.requestStatus == '1')
     
@@ -513,17 +513,7 @@ const RequestForm = ({route, navigation}) => {
     }
 
     const postRequest = async () => {
-        console.log("post req func")
         setIsLoading(false)
-        console.log("worker id", workerInformation._id)
-        console.log("user id: ", global.userData._id)
-        console.log(selectedJob)
-        // console.log(workSelected.ServiceSubId.ServiceSubCategory)
-        console.log(workID)
-        console.log(minPrice)
-        console.log(maxPrice)
-        console.log(formatedDate)
-        console.log(formatedTime)
 
         let user = global.userData
 
@@ -556,7 +546,7 @@ const RequestForm = ({route, navigation}) => {
                 // false = has pending request
                 // true = can create a request
                 if(data == 'false'){
-                    console.log("req post data: ", data)
+                    // console.log("req post data: ", data)
                     sethasPendingRequest(true)
                 } else {
                     setRequestPostedModal(true)
@@ -566,7 +556,7 @@ const RequestForm = ({route, navigation}) => {
                 // }
             })
 
-            console.log("Service Request Posted! ")
+            // console.log("Service Request Posted! ")
             // global.serviceRequestPosted = true
             setRequestDescription("")
             setFormatedDate(new Date())

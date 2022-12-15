@@ -31,7 +31,7 @@ const ForgotPassword = () => {
             })
             .then(res => res.json())
             .then(data => {
-                console.log("Success(user exist fp): ", data)
+                // console.log("Success(user exist fp): ", data)
                 setLoading(false)
                 navigation.navigate("OTPVerification", {token: data.token, phoneNum: data.user.phoneNumber, role: data.user.role, forgotPassword: true})
             })

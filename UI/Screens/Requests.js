@@ -83,8 +83,8 @@ const Requests = () => {
             })
             .then((res) => res.json())
             .then((data) => {
-                console.log("isbanned: ", data)
-                console.log("request list data: ", data.recruiter)
+                // console.log("isbanned: ", data)
+                // console.log("request list data: ", data.recruiter)
                 if(data === "Forbidden: User is Banned"){
                     setRequestList([])
                     setDeclinedRequests([])
@@ -95,7 +95,7 @@ const Requests = () => {
                     let decList = []
                     if (global.userData.role === 'recruiter') {
                         list = [...data.recruiter]
-                        console.log("relist: ", list)
+                        // console.log("relist: ", list)
                         decList = [...data.status3_Recruiter]
                         setRequestList([...list])
                         setDeclinedRequests([...decList])
@@ -109,11 +109,11 @@ const Requests = () => {
                 }
                 setLoading(false)
             })
-            console.log("fetchRequestList")
+            // console.log("fetchRequestList")
         } catch (error) {
             console.log("error Fetch request list: ", error)
         } 
-        console.log("reqlistttt: ", requestList)      
+        // console.log("reqlistttt: ", requestList)      
 
     }
 
@@ -192,7 +192,7 @@ const Requests = () => {
                                                         <TouchableOpacity style={[styles.cardViewRequestBtn, styles.cardViewDeclined]}
                                                             activeOpacity={0.5}
                                                             onPress={() => {
-                                                                console.log("reuqest id: ", item._id)
+                                                                // console.log("reuqest id: ", item._id)
                                                                 navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
                                                             }}
                                                         >

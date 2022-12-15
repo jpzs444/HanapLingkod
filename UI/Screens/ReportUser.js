@@ -42,10 +42,10 @@ const ReportUser = ({route}) => {
         })
       }).then(res => res.json())
       .then(data => {
-        console.log("Successfully reported user: ", data)
+        // console.log("Successfully reported user: ", data)
         setReportSubmitted(true)
       })
-      console.log("handleSubmiReport button")
+      // console.log("handleSubmiReport button")
     } catch (error) {
       console.log("submit report error: ", error)
     }
@@ -125,7 +125,7 @@ const ReportUser = ({route}) => {
                 !reportTitle || !reportDescription
               }
               onPress={() => {
-                console.log("Submit report button")
+                // console.log("Submit report button")
                 setViewSubmitModal(true)
               }}
             >
