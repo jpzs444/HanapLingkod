@@ -352,7 +352,7 @@ const UserReport = () => {
             <div class={isPermabanModalOpen ? "permaban-modal-container show-modal" : "permaban-modal-container hide-modal"}>
                 <div class="permaban-modal">
                     <h2 class="modal-title">Permanently Ban User?</h2>
-                    <p class="modal-description">By clicking "Yes", the account of the reported user will be permanently deleted in HanapLingkod.</p>
+                    <p class="modal-description">By clicking "Yes", the account of the reported user will be permanently banned in HanapLingkod.</p>
                     <div class="modal-buttons">
                         <button type="button" class="modal-button" id="permaban-yes" onClick={() => handlePermanentlyBanReportedUser()}>Yes</button>
                         <button type="button" class="modal-button modal-button-cancel" onClick={() => setIsPermabanModalOpen(false)}>Cancel</button>

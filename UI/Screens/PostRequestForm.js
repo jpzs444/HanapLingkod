@@ -95,7 +95,9 @@ const PostRequestForm = () => {
 
     const handleDateConfirm = (date) => {
         let dateString = dayjs(date).format("YYYY-MM-DD")
-        setFormatedDate(dateString);
+
+        let dd_js = dayjs(date)
+        setFormatedDate(dd_js);
 
         setDisplayDate(dayjs(date).format("MMM D, YYYY").toString());
         setDatePickerVisibility(false);
@@ -108,11 +110,20 @@ const PostRequestForm = () => {
         let timeString = dayjs(time).format("hh:mm A")
         setDisplayTime(timeString.toString())
 
-        setFormatedTime(dayjs(time).format("HH:mm"))
+        let dd = new Date(formatedDate)
+        let tt = new Date(time)
+        
+        // combine
+        let dd_date = dayjs(dd).format("YYYY-MM-DD")
+        let tt_time = dayjs(tt).format("HH:mm")
+        
+        let combined = dayjs(dd_date.toString() + "" + tt_time.toString())
+        console.log("combined pr: ", combined)
+
+        setFormatedTime(combined)
         setTimePickerVisibility(false)
         setTimeSelected(true)
 
-        console.log(displayTime)
 
     }
 
@@ -149,7 +160,7 @@ const PostRequestForm = () => {
             <View style={styles.userInfoCont}>
                 <Text numberOfLines={1} ellipsizeMode="tail" style={styles.userInfoName}>{global.userData.firstname}{global.userData.middlename !== 'undefined' ? ` ${global.userData.middlename.charAt(0).toUpperCase()}` : ""} {global.userData.lastname}</Text>
                 <View style={styles.addressCont}>
-                    <Icon name='map' size={20} />
+                    <Icon name='map' size={20} color={"#434343"} />
                     <Text numberOfLines={1} ellipsizeMode="tail" style={styles.addressText}>{global.userData.street}, {global.userData.purok}, {global.userData.barangay}, {global.userData.city}, {global.userData.province}</Text>
                 </View>
             </View>
@@ -162,12 +173,12 @@ const PostRequestForm = () => {
                     setCategoryModal(true)
                 }}
             >
-                <Icon name='shape' size={20} />
+                <Icon name='shape' size={20} color={"#888"} />
                 <View style={styles.rowGrpTxt}>
                     <TText style={styles.categoryText}>{requestCategory ? requestCategory === "unlisted" ? "Unlisted" : requestCategory.Category : 'Select Category'}</TText>
                     <TText style={styles.requirement}>{requestCategory ? "" : "*"}</TText>
                 </View>
-                <Icon name='chevron-down' size={20} />
+                <Icon name='chevron-down' size={20} color={"#434343"} />
             </TouchableOpacity>
 
             <Modal
@@ -212,7 +223,7 @@ const PostRequestForm = () => {
                         minPriceInput.current.focus()
                     }}
                 >
-                    <Icon name='arrow-down-box' size={22} style={{marginRight: minPressed ? 12 : 0}} />
+                    <Icon name='arrow-down-box' size={22} style={{marginRight: minPressed ? 12 : 0}} color={"#666"} />
                    
                     <TextInput 
                         placeholder='Min. Labor Price'
@@ -237,7 +248,7 @@ const PostRequestForm = () => {
                         maxPriceInput.current.focus()
                     }}
                 >
-                    <Icon name='arrow-up-box' size={22} style={{marginRight: maxPressed ? 12 : 0}} />
+                    <Icon name='arrow-up-box' size={22} style={{marginRight: maxPressed ? 12 : 0}} color={"#666"} />
                     <TextInput 
                         placeholder='Min. Labor Price'
                         keyboardType='decimal-pad'
@@ -258,7 +269,7 @@ const PostRequestForm = () => {
             {/* Date Time Picker */}
             <View style={styles.rowContainer}>
                 <TouchableOpacity style={styles.priceBtn} onPress={() => setDatePickerVisibility(true)}>
-                    <Icon name='calendar-month' size={22} />
+                    <Icon name='calendar-month' size={22} color={"#666"} />
                     {
                         dateSelected ? 
                         <View style={[styles.rowGrpTxt, {flexGrow: 1}]}>
@@ -270,10 +281,10 @@ const PostRequestForm = () => {
                             <TText style={styles.requirement}>*</TText>
                         </View>
                     }
-                    <Icon name='chevron-down' size={20} />
+                    <Icon name='chevron-down' size={20} color={"#666"} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.priceBtn} onPress={() => setTimePickerVisibility(true)}>
-                    <Icon name='clock-outline' size={22} />
+                    <Icon name='clock-outline' size={22} color={"#666"} />
                     {
                         timeSelected ? 
                         <View style={[styles.rowGrpTxt, {flexGrow: 1}]}>
@@ -285,14 +296,14 @@ const PostRequestForm = () => {
                             <TText style={styles.requirement}>*</TText>
                         </View>
                     }
-                    <Icon name='chevron-down' size={20} />
+                    <Icon name='chevron-down' size={20} color={"#666"} />
                 </TouchableOpacity>
             </View>
             {/* Address Picker | Location Picker */}
             <View style={styles.rowContainer}>
                 <TouchableOpacity style={[styles.priceBtn, {flex: 1, paddingVertical: 10, paddingHorizontal: 14}]}>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <Icon name='map' size={22} />
+                        <Icon name='map' size={22} color={"#666"} />
                         <TextInput 
                             placeholder='Use a different address (Optional)'
                             onChangeText={val => setOtherAddress(val)}
@@ -407,7 +418,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         borderRadius: 10,
         borderWidth: 1.5,
-        borderColor: ThemeDefaults.themeLighterBlue,
+        borderColor: "#bbb",
     },
     categoryText: {
         fontSize: 14
@@ -436,7 +447,7 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         paddingHorizontal: 12,
         borderWidth: 1.5,
-        borderColor: ThemeDefaults.themeDarkBlue,
+        borderColor: "#bbb",
         borderRadius: 10,
     },
     rowGrpTxt: {

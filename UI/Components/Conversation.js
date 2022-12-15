@@ -28,7 +28,7 @@ const Conversation = ({tab, conversation}) => {
         // console.log(otherUser)
 
         let userType = global.userData.role === 'recruiter' ? "Worker" : "Recruiter"
-        console.log(userType)
+        console.log("other userType: ", userType)
         try {
             await fetch(`https://hanaplingkod.onrender.com/${userType}/${otherUseri}`, {
                 method: "GET",
@@ -54,18 +54,23 @@ const Conversation = ({tab, conversation}) => {
         activeOpacity={0.5}
         onPress={() => {
             // console.log("conversation contains: ", conversation)
-            navigation.navigate("ConversationThreadDrawer", {"otherUser": otherUser, "conversation": conversation})
+            navigation.navigate("ConversationThreadDrawer", {otherUser: otherUser, conversation: conversation})
         }}
     >
       <Image style={styles.image} 
         source={otherUser.profilePic == 'pic' ? require("../assets/images/default-profile.png") : {uri: otherUser.profilePic}}
       />
       <View style={[styles.convoInfo]}>
-        <View style={[styles.flexRow, {alignItems: 'center'}]}>
-            <TText style={[styles.name, {fontFamily: conversation.members.indexOf(global.userData._id) === 0 ? conversation.senderSeen ? "LexendDeca" : "LexendDeca_SemiBold" : conversation.receiverSeen ? "LexendDeca" : "LexendDeca_SemiBold"}]}>{`${otherUser.firstname} ${otherUser.lastname}`}</TText>
-            <TText style={styles.date}>  &#x2022;  Nov 11</TText>
-        </View>
-        <TText style={[styles.message, {fontFamily: conversation.members.indexOf(global.userData._id) === 0 ? conversation.senderSeen ? "LexendDeca" : "LexendDeca_SemiBold" : conversation.receiverSeen ? "LexendDeca" : "LexendDeca_SemiBold"}]}>{conversation.latestMessage}</TText>
+        {
+            otherUser && 
+            <>
+                <View style={[styles.flexRow, {alignItems: 'center'}]}>
+                    <TText style={[styles.name, {fontFamily: conversation.members.indexOf(global.userData._id) === 0 ? conversation.senderSeen ? "LexendDeca" : "LexendDeca_SemiBold" : conversation.receiverSeen ? "LexendDeca" : "LexendDeca_SemiBold"}]}>{`${otherUser?.firstname} ${otherUser?.lastname}`}</TText>
+                    <TText style={styles.date}>  &#x2022;  Nov 11</TText>
+                </View>
+                <TText style={[styles.message, {fontFamily: conversation.members.indexOf(global.userData._id) === 0 ? conversation.senderSeen ? "LexendDeca" : "LexendDeca_SemiBold" : conversation.receiverSeen ? "LexendDeca" : "LexendDeca_SemiBold"}]}>{conversation?.latestMessage}</TText>
+            </>
+        }
       </View>
     </TouchableOpacity>
   )

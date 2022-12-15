@@ -84,7 +84,7 @@ export default function Login({navigation}) {
             setIsLoading(false)
             setUser({username: "", password: ""});
             navigation.replace("HomeStack");
-            // navigation.navigate("OTPVerification", {isLogin: true, phoneNum: user.phoneNumber})
+            // handleGoToOTP(user.phoneNumber)
 
           } else {
             setIsLoading(false)
@@ -104,6 +104,10 @@ export default function Login({navigation}) {
         });
 
     };
+
+    const handleGoToOTP = (phoneNumber) => {
+      navigation.push("OTPVerification", {isLogin: true, phoneNum: phoneNumber})
+    }
 
 
   return (
@@ -132,7 +136,14 @@ export default function Login({navigation}) {
                   value={user.username && user.username}
                   returnKeyType={"next"}
                   textContentType={'username'}
-                  onChangeText={ (val) => setUser((prev) => ({...prev, username: val})) }
+                  onChangeText={ (val) => {
+                    // checks if input has whitespace/space
+                    if (val.includes(' ')) {
+                      setUser((prev) => ({...prev, username: val.trim()}))
+                    } else {
+                      setUser((prev) => ({...prev, username: val}))
+                    }
+                  }}
                   onSubmitEditing={ () => pw_ref.current.focus() } />
           </View>
 
@@ -147,7 +158,14 @@ export default function Login({navigation}) {
                   returnKeyType={"go"}
                   secureTextEntry={hidePW}
                   textContentType={'password'}
-                  onChangeText={ (val) => setUser((prev) => ({...prev, password: val})) }
+                  onChangeText={ (val) => {
+                    // checks input if it has a whitespace/space
+                    if (val.includes(' ')) {
+                      setUser((prev) => ({...prev, password: val.trim()}))
+                    } else {
+                      setUser((prev) => ({...prev, password: val}))
+                    }
+                  }}
                   onSubmitEditing={()=>login()}
                   ref={pw_ref} />
               {
