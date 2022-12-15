@@ -40,6 +40,8 @@ const ConversationThread = ({route}) => {
     useEffect(() => {
         console.log("conversation item: ", conversation)
         handleFetchConversation()
+        getMessages()
+
         setMessages([])
         
     }, [isFocused]);
@@ -47,7 +49,7 @@ const ConversationThread = ({route}) => {
     
     useEffect(() => {
         handleSeenByMe()
-        getMessages()
+        // getMessages()
     }, [isFocused]);
 
     // useEffect(() => {
@@ -101,6 +103,7 @@ const ConversationThread = ({route}) => {
             .then(data => {
                 setConversationObj({...data})
             })
+            getMessages()
         } catch (error) {
             console.log("error fetch conversation from two people: ", error)
         }
