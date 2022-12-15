@@ -128,6 +128,7 @@ router.route("/service-request").post(
               req.body.workerId
             );
           } else {
+            console.log(err);
             res.send(err);
           }
         });
