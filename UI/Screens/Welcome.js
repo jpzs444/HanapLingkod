@@ -39,8 +39,8 @@ export default function Welcome({route}) {
                             })
                                 .then((response) => response.json())
                                 .then((user) => {
-                                    console.log("data: ", user);
-                                    console.log("login from welcome screen")
+                                    // console.log("data: ", user);
+                                    // console.log("login from welcome screen")
 
                                     if(user._id){                                        
                                         global.userData = user;

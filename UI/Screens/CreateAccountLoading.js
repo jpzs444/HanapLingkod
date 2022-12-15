@@ -84,7 +84,7 @@ const CreateAccountLoading = ({route}) => {
           method: "POST",
           body: formData,
         }).then(() => {
-            console.log("Account created | recruiter");
+            // console.log("Account created | recruiter");
             // setLoadingLogin(false)
             navigation.navigate("WelcomePage", {role: "recruiter", user: user})
         }).catch((er) => {console.log("error: account creation - recruiter:  ", er)})
@@ -151,7 +151,7 @@ const CreateAccountLoading = ({route}) => {
         formData.append("workDescription", user.workDescription ? user.workDescription : "");
         // formData.append("GovId", filename);
 
-          console.log("work length: ", work.length)
+        //   console.log("work length: ", work.length)
         // append work information listed by the worker from the registration
         for (let i = 0; i < work.length; i++){
             formData.append("Category", work[i].category == "unlisted" ? "unlisted" : "");
@@ -159,7 +159,7 @@ const CreateAccountLoading = ({route}) => {
             formData.append("minPrice", work[i].lowestPrice);
             formData.append("maxPrice", work[i].highestPrice);
 
-            console.log("work service: ", work[i].service)
+            // console.log("work service: ", work[i].service)
         }
 
         // setLoadingLogin(false)
@@ -186,7 +186,7 @@ const CreateAccountLoading = ({route}) => {
                 },
             }).then((res) => {
                 // setLoadingLogin(false)
-                console.log("old work set deleted successfully   ", res.message)
+                // console.log("old work set deleted successfully   ")
             })
             .catch((error) => console.log("error upldate services: ", error.message))
         }
@@ -201,7 +201,7 @@ const CreateAccountLoading = ({route}) => {
             body: formDataPastWorks
         }).then((res) => {
             // setLoadingLogin(false)
-            console.log("successfully uploaded past work images")
+            // console.log("successfully uploaded past work images")
         })
         .catch((error) => console.log("error prevworks: ", error.message))
 
