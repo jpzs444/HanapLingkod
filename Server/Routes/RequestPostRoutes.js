@@ -38,9 +38,7 @@ router
   )
   .post(authenticateToken, CheckIfBan, async function (req, res) {
     try {
-      let startTime = dayjs(
-        req.body.serviceDate + " " + req.body.startTime
-      ).toISOString();
+      let startTime = req.body.startTime
 
       console.log(startTime);
       const requestPost = new RequestPost({
