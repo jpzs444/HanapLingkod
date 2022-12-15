@@ -263,7 +263,11 @@ router
           //email
           let date1 = dayjs(result.serviceDate).format("DD/MM/YYYY");
           console.log("result.startTime: " + result.startTime);
-          let time1 = dayjs(result.startTime).format("hh:mm A");
+          let time1 = dayjs(result.startTime)
+            .utc("z")
+            .local()
+            .tz("Asia/Manila")
+            .format("hh:mm A");
           console.log("dayjs converted: " + time1);
           //worker
           let subjectWorker = "Booking Confirmation " + date1 + " " + time1;
