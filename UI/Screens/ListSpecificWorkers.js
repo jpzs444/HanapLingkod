@@ -38,7 +38,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
         .then((res) => res.json())
         .then((data) => {
             setWorkers([...data])
-            console.log("Workrs list", data)
+            // console.log("Workrs list", data)
         }).catch((err) => console.log("error: ", err.message))
     }
 
@@ -68,9 +68,9 @@ const ListSpecificWorkers = ({route, navigation}) => {
                     {/* <TText>{item.workerId.age}</TText> */}
                     <TouchableOpacity style={styles.button}
                         onPress={() => {
-                            console.log("item: ", item)
-                            console.log("workerId._id: ", item.workerId._id)
-                            console.log("workId: ", item.ServiceSubId._id)
+                            // console.log("item: ", item)
+                            // console.log("workerId._id: ", item.workerId._id)
+                            // console.log("workId: ", item.ServiceSubId._id)
 
                             global.userData.role === "recruiter" ? 
                                 navigation.navigate("RequestFormDrawer", {workerID: item.workerId._id, workID: item.ServiceSubId._id, workerInformation: item.workerId, selectedJob: item.ServiceSubId.ServiceSubCategory, minPrice: item.minPrice, maxPrice: item.maxPrice, showMultiWorks: false, fromListSpecific: true})

@@ -61,7 +61,7 @@ const BookingInformation = ({route}) => {
         setBookingRatings([])
         handleFetchBookingInformation()
         // handleFetchRatingsOfBooking()
-        console.log("BookingItem: ", bookingItem)
+        // console.log("BookingItem: ", bookingItem)
 
         global.userData.role === 'recruiter' ?
                 bookingInformation.statusRecruiter == '3' ? setViewBookingInfo(false) : setViewBookingInfo(true)
@@ -231,6 +231,7 @@ const BookingInformation = ({route}) => {
     const handleCreateConversation = async () => {
         // create a conversation
 
+        let otherUser = global.userData.role === 'recruiter' ? bookingItem.workerId : bookingItem.recruiterId
         try {
             await fetch(`https://hanaplingkod.onrender.com/conversations`, {
                 method: "POST",
@@ -240,20 +241,45 @@ const BookingInformation = ({route}) => {
                 },
                 body: JSON.stringify({
                     senderId: global.userData._id,
-                    receiverId: global.userData.role === 'recruiter' ? bookingInformation.workerId._id : bookingInformation.recruiterId._id
+                    receiverId: otherUser._id
                 })
             }).then(res => res.json())
             .then(data => {
-                console.log("conversation data: ", data[0])
-                setConversation({...data[0]})
-                navigation.navigate("ConversationThreadDrawer", {
-                    "otherUser": global.userData.role === 'recruiter' ? bookingInformation.workerId : bookingInformation.recruiterId, 
-                    "conversation": data[0]
-                })
+                // console.log("conversation data from somewhere: ", data[0])
+                // console.log("otheruser data from somewhere: ", otherUser)
+
+                handleFetchConversation(otherUser)
             })
+            // console.log("conversations state: ", conversation)
         } catch (error) {
             console.log("Error creating new convo: ", error)
         }
+    }
+
+    const handleFetchConversation = async (otherUser) => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/conversations/find/${global.userData._id}/${otherUser._id}`, {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken
+                },
+            }).then(res => res.json())
+            .then(data => {
+                setConversation(data)
+                // console.log("data convo: ", data)
+                handleGoToConvo(data, otherUser)
+            })
+        } catch (error) {
+            console.log("error fetch conversation from two people: ", error)
+        }
+    }
+    
+    const handleGoToConvo = (conversation, otherUser) => {
+        navigation.navigate("ConversationThreadDrawer", { 
+            "otherUser": otherUser,
+            "conversation": conversation,
+        })
     }
 
 
@@ -349,7 +375,7 @@ const BookingInformation = ({route}) => {
                     <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 20, padding: 8, elevation: 4, position: 'absolute', right: 15, top: bookingInformation.bookingStatus != '1' ? 50 : 15, zIndex: 5}}
                         activeOpacity={0.5}
                         onPress={() => {
-                            console.log("HI")
+                            console.log("fetch conversation")
                             // go to convo
                             handleCreateConversation()
                         }}
@@ -400,7 +426,7 @@ const BookingInformation = ({route}) => {
                         style={styles.gotoProfileBtn}
                         activeOpacity={0.5}
                         onPress={() => {
-                            console.log("otherUser from bookingInfo: ", bookingItem.worker)
+                            // console.log("otherUser from bookingInfo: ", bookingItem.worker)
                             global.userData.role === 'recruiter' ? 
                             // console.log("Worker Profile")
                             navigation.navigate("WorkerProfileDrawer", {workerID: bookingInformation.workerId._id, userRole: false, otherUser: bookingItem.workerId})
@@ -824,7 +850,7 @@ const BookingInformation = ({route}) => {
                                     <TouchableOpacity
                                         style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                         onPress={() => {
-                                            console.log("Status 5")
+                                            // console.log("Status 5")
                                             handleUpdateBookingStatus(5)
                                             setViewOTPModal(false)
 

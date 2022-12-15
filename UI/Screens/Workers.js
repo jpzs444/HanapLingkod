@@ -67,7 +67,7 @@ const Workers = () => {
 
 
     const getAllWorkers = (url) => {
-        console.log("url: ", url)
+        // console.log("url: ", url)
         try {
             fetch(url, {
                 method: "GET",
@@ -83,7 +83,7 @@ const Workers = () => {
                 setListOfWorkers([...data])
                 setPrevListWorker([...data])
     
-                console.log("workers (with filters): ", data)
+                // console.log("workers (with filters): ", data)
                 setLoading(false)
                 // console.log("list of workers: ", data[3].works.join(', '))
             })
@@ -98,14 +98,14 @@ const Workers = () => {
 
         if(field === 'verification' || verifiedFilter) {
             baseURL = baseURL.concat(`?verification=${filter}`)
-            console.log("verification: ", filter)
+            // console.log("verification: ", filter)
         setLoading(true)
 
         }
 
         if(field === 'barangay' || barangayFilter) {
             baseURL = baseURL.concat(`?barangay=${filter}`)
-            console.log("barangay: ", filter)
+            // console.log("barangay: ", filter)
             setLoading(true)
 
         }
@@ -114,17 +114,17 @@ const Workers = () => {
             baseURL = baseURL.concat(`?works=${filter}`)
         setLoading(true)
          
-            console.log("category: ", filter)
+            // console.log("category: ", filter)
         }
 
         if(field === 'rating' || ratingFilter){
             baseURL = baseURL.concat(`?rating=${filter}`)
-            console.log("rating: ", filter)
+            // console.log("rating: ", filter)
         setLoading(true)
 
         }
 
-        console.log(baseURL)
+        // console.log(baseURL)
 
         getAllWorkers(baseURL)
         getAllWorkers(baseURL)
@@ -176,7 +176,7 @@ const Workers = () => {
         let workerStatus = []
 
         workerStatus = list.filter(worker => worker.verification === fil)
-        console.log("workerStatus: ", workerStatus)
+        // console.log("workerStatus: ", workerStatus)
         
         if(categoryFilter){
             console.log("verification has category filter")
@@ -228,10 +228,13 @@ const Workers = () => {
                                     changeModalVisibility={changeModalVisibility}
                                     setData={(filter) => {
                                         setLoading(true)
-
-                                        setVerifiedFilter(filter === "Verified" ? true : false )
-                                        filterCategoryWithSettings("verification", filter === "Verified" ? "true" : "false" )
-                                        // filter === "All" ? handleResetFilter() : filter === 'Verified' ? filterVerifiedList(true) : filterVerifiedList(false)
+                                        if (filter === "All") {
+                                            getAllWorkers("https://hanaplingkod.onrender.com/Worker")
+                                        } else {
+                                            setVerifiedFilter(filter === "Verified" ? true : false )
+                                            filterCategoryWithSettings("verification", filter === "Verified" ? "true" : "false" )
+                                            // filter === "All" ? handleResetFilter() : filter === 'Verified' ? filterVerifiedList(true) : filterVerifiedList(false)
+                                        }
                                     }}
                                     verifiedFilter={true}
                                 />
@@ -257,7 +260,7 @@ const Workers = () => {
                                         // setBarangayFilter("")
                                         setLoading(true)
 
-                                        console.log(filter)
+                                        // console.log(filter)
                                         setBarangayFilter(filter)
                                         filterCategoryWithSettings("barangay", filter)
                                         // filterBarangayList(filter)
@@ -283,7 +286,7 @@ const Workers = () => {
                                     setData={(filter) => {
                                         setLoading(true)
 
-                                        console.log(filter.ServiceSubCategory)
+                                        // console.log(filter.ServiceSubCategory)
                                         setCategoryFilter(filter.ServiceSubCategory)
                                         filterCategoryWithSettings("category", filter.ServiceSubCategory)
 
@@ -420,7 +423,7 @@ const Workers = () => {
                             <TouchableOpacity style={{width: '100%', paddingHorizontal: 30, height: 130, zIndex:10, backgroundColor: ThemeDefaults.themeWhite}}
                                 activeOpacity={0.5}
                                 onPress={() => {
-                                    console.log("workers clicked; ", item)
+                                    // console.log("workers clicked; ", item)
                                     // navigation.navigate("RequestFormDrawer", {workerID: item._id, workerInformation: item, selectedJob: '', showMultiWorks: true})
                                     navigation.navigate("WorkerProfileDrawer", {workerID: item._id, otherUser: item, userRole: false})
 

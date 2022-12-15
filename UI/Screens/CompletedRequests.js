@@ -56,7 +56,7 @@ const CompletedRequests = ({route}) => {
       })
       .then(res => res.json())
       .then(data => {
-        console.log("completed bookings data: ", data.worker)
+        // console.log("completed bookings data: ", data.worker)
 
         setLoading(false)
         global.userData.role === 'recruiter' ? setCompletedBookings([...data.recruiter]) : setCompletedBookings([...data.worker])
@@ -75,7 +75,7 @@ const CompletedRequests = ({route}) => {
                 
                 <TouchableOpacity style={[styles.bookingItem]}
                     onPress={() => {
-                        console.log("Item ID: ", item._id)
+                        // console.log("Item ID: ", item._id)
                         navigation.navigate("BookingInformationDrawer", {bookingID: item._id, bookingItem: item, fromCB: true})
                     }}
                 >

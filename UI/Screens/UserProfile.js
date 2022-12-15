@@ -50,7 +50,7 @@ const UserProfile = ({route}) => {
     }, [])
     
     useEffect(() => {
-        console.log("did load ratings: ", ratingFilter)
+        // console.log("did load ratings: ", ratingFilter)
         handleFetchUserRatings()
     }, [ratingFilter]);
     
@@ -110,7 +110,7 @@ const UserProfile = ({route}) => {
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log("user ratingfrom selfprofile: ", data)
+                // console.log("user ratingfrom selfprofile: ", data)
                 setUserRatings([...data.comments])
             })
         } catch (error) {
@@ -197,7 +197,7 @@ const UserProfile = ({route}) => {
                     (global.userData).hasOwnProperty('prevWorks') && global.userData.prevWorks.map(function(image, index){
                         return(
                             <View key={index} style={{flex:1, alignItems: 'center', justifyContent: 'center', width: WIDTH, }}>
-                                <Image source={{uri: `http://${IPAddress}:3000/images/${image}`}} style={{width: WIDTH - 50, height: HEIGHT / 2}} />
+                                <Image source={{uri: image}} style={{width: WIDTH - 50, height: HEIGHT / 2}} />
                             </View>
                         )
                     })

@@ -34,7 +34,7 @@ const Reports = () => {
             }).then(res => res.json())
             .then(data => {
                 setReports([...data])
-                console.log("user reports: ", data)
+                // console.log("user reports: ", data)
             })
         } catch (error) {
             console.log("error fetch user submitted reports: ", error)
@@ -59,7 +59,7 @@ const Reports = () => {
                         <TouchableOpacity style={styles.reportItem}
                             activeOpacity={0.5}
                             onPress={() => {
-                                console.log("view report item")
+                                // console.log("view report item")
                                 setViewReportItem(true)
                                 setViewReportItemMessage(item.description)
                             }}

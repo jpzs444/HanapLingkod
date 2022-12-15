@@ -71,7 +71,7 @@ export default function RegisterUserAccountType() {
           disabled={accType ? false : true} 
           style={styles.nextBtn}
           onPress={()=> { 
-            console.log(accType) 
+            // console.log(accType) 
             navigation.navigate("Register", {userType: accType})
             // else if(accType === "worker") navigation.navigate("")
           }}
