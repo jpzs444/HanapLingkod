@@ -91,10 +91,7 @@ router.route("/service-request").post(
       console.log(pendingRequest);
       if (pendingRequest === 0) {
         console.log("true");
-        let sd = String(req.body.serviceDate);
-        let st = String(req.body.startTime);
-        console.log("Default tz");
-        let startTime = dayjs(sd + " " + st).toISOString();
+        let startTime = req.body.startTime;
 
         console.log(startTime);
         const pushID = await Worker.findOne(
@@ -158,9 +155,7 @@ router
 
       if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
         console.log("inside endate end time combination");
-        endTime = dayjs(
-          req.body.endDate + " " + req.body.endTime
-        ).toISOString();
+        endTime = req.body.endTime;
       }
       result = await ServiceRequest.findOne({ _id: req.params.id });
 
