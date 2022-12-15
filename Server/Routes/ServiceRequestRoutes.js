@@ -158,7 +158,7 @@ router
         endTime = req.body.endTime;
       }
       result = await ServiceRequest.findOne({ _id: req.params.id });
-
+      console.log("result query: " + result);
       const { workerId, recruiterId } = result;
       const pushIDWorker = await Worker.findOne(
         { _id: workerId },
@@ -264,6 +264,7 @@ router
           let date1 = dayjs(result.serviceDate).format("DD/MM/YYYY");
           console.log("result.startTime: " + result.startTime);
           let time1 = dayjs(result.startTime).format("hh:mm A");
+          console.log("dayjs converted: " + time1);
           //worker
           let subjectWorker = "Booking Confirmation " + date1 + " " + time1;
           let textWorker =
