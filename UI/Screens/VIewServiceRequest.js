@@ -18,6 +18,12 @@ const WIDTH = Dimensions.get('window').width
 const relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
 
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault("Asia/Manila")
+
 const declinedMessageSuggestions = ["I'm unavailable", "I've already accepted another service just now, sorry", "Sorry, it doesn't fit my schedule", "I have to attend something urgent, sorry"]
 
 const VIewServiceRequest = ({route}) => {
@@ -217,8 +223,8 @@ const VIewServiceRequest = ({route}) => {
             },
             body: JSON.stringify({
                 requestStatus: 2,
-                endDate: dayjs(formatedDate).format("YYYY-MM-DD"),
-                endTime: dayjs(formatedDate).format("HH:mm:ss"),
+                endDate: dayjs(formatedDate).format("YYYY-MM-DD").toString(),
+                endTime: dayjs(formatedDate).format("HH:mm").toString(),
                 acceptMore: radioBtn.toString()
             })
         }).then(res => res.json())
@@ -242,7 +248,9 @@ const VIewServiceRequest = ({route}) => {
     }
 
     const handleDateConfirm = (date) => {
-        setFormatedDate(date);
+        let dd_js = dayjs(date)
+        console.log("accept date: ", dd_js)
+        setFormatedDate(dd_js);
 
         setDisplayDate(dayjs(date).format("MMM D, hh:mm A").toString());
         setDatePickerVisibility(false);

@@ -155,7 +155,7 @@ function SignUpForm() {
                                 
                             }
                             {
-                                password.length < 8 && passwordMatch &&
+                                (password.length < 8 && password.length > 0) && passwordMatch &&
                                 <p className="password_match">Password should be at least 8 characters long</p>
                             }
                         </div>

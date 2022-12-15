@@ -17,12 +17,13 @@ import dayjs from 'dayjs';
 import Schedule from './Schedule';
 import MapView, {Geojson} from 'react-native-maps';
 
+const HEIGTH = Dimensions.get('window').height
 
 const utc = require('dayjs/plugin/utc')
 const timezone = require('dayjs/plugin/timezone')
-const HEIGTH = Dimensions.get('window').height
 dayjs.extend(utc)
 dayjs.extend(timezone)
+dayjs.tz.setDefault("Asia/Manila")
 
 const RequestForm = ({route, navigation}) => {
 
@@ -364,7 +365,10 @@ const RequestForm = ({route, navigation}) => {
         let da = new Date(date).toISOString()
         let nn = dayjs(date).format("YYYY-MM-DD")
         
-        setFormatedDate(date);
+        let dd_js = dayjs(date)
+        console.log("date formated js: ", dd_js)
+        console.log("date formated js: ", date)
+        setFormatedDate(dd_js);
 
         setDisplayDate(dayjs(date).format("MMMM D, YYYY"));
         setDatePickerVisibility(false);
@@ -459,15 +463,23 @@ const RequestForm = ({route, navigation}) => {
         let timetime = dayjs(time).format("hh:mm")
         setDisplayTime(dayjs(time).format("hh:mm A"))
         
-        setFormatedTime(timetime)
         setTimePickerVisibility(false)
         setTimeSelected(true)
 
-        let newDate = new Date(formatedDate.getFullYear(), formatedDate.getMonth(), formatedDate.getDate(),
-                                formatedTime.getHours(), formatedTime.getMinutes(), formatedTime.getSeconds())
+        console.log("selected time: ", timetime)
+        
+        let dd = new Date(formatedDate)
+        let tt = new Date(time)
+        
+        console.log("formated date: rqf: ", dd)
 
-        // console.log(formatedTime)
-        // console.log("new date: ", newDate)
+        // combine
+        let dd_date = dayjs(dd).format("YYYY-MM-DD")
+        let tt_time = dayjs(tt).format("HH:mm")
+        
+        let combined = dayjs(dd_date.toString() + "" + tt_time.toString())
+        console.log("combined: ", combined)
+        setFormatedTime(combined)
 
     }
 
@@ -530,8 +542,8 @@ const RequestForm = ({route, navigation}) => {
                     "subCategory": selectedJob ? selectedJob : workSelected.ServiceSubId.ServiceSubCategory,
                     "minPrice": minPrice ? minPrice : workSelected.minPrice,
                     "maxPrice": maxPrice ? maxPrice : workSelected.maxPrice,
-                    "serviceDate": dayjs(formatedDate).format("YYYY-MM-DD"),
-                    "startTime": dayjs(formatedTime).format("HH:mm"),
+                    "serviceDate": formatedDate,
+                    "startTime": formatedTime,
                     "description": requestDescription,
                     "lat": coordLati,
                     "long": coordLongi,
@@ -606,7 +618,7 @@ const RequestForm = ({route, navigation}) => {
 
   return (
         <ScrollView contentContainerStyle={{flexGrow: 1, backgroundColor: ThemeDefaults.themeWhite, paddingTop: StatusBar.currentHeight, paddingBottom: 50}}>
-            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} />
+            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromRequestFormMain={true} />
 
             {/* Modals */}
             <Modal
@@ -755,6 +767,7 @@ const RequestForm = ({route, navigation}) => {
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
                                     setIsLoading(false)
+                                    sethasPendingRequest(false)
                                     navigation.navigate("HomeScreen")
                                 }}
                             >

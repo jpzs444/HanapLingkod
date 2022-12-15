@@ -71,6 +71,10 @@ export default function Appbar(props) {
                                 navigation.navigate("RequestFormDrawer", {workerInformation: props.workerInformation, selectedDay: props.selectedDate, selectedTime: props.selectedTime, selectedJob: props.selectedJob, minPrice: props.minPrice, maxPrice: props.maxPrice})
                             } else if(props.fromCB){
                                 navigation.navigate("CompletedBookingsDrawer")
+                            } else if(props.fromLogin) {
+                                navigation.navigate("Login")
+                            } else if(props.fromRequestFormMain) {
+                                navigation.goBack()
                             } else {
                                 navigation.goBack()
                             }
@@ -130,7 +134,7 @@ export default function Appbar(props) {
                     : null
             }
             {
-                props.otpverificationpage ? 
+                props.otpverificationpage && props.fromLogin ? 
                     <TouchableOpacity style={styles.left}
                         onPress={() => { navigation.replace("AccountTypeSelect") }}
                     >

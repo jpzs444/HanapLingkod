@@ -189,22 +189,26 @@ const WorkerProfile = ({route}) => {
                 },
                 body: JSON.stringify({
                     senderId: global.userData._id,
-                    receiverId: workerID
+                    receiverId: otherUser._id
                 })
             }).then(res => res.json())
             .then(data => {
                 console.log("conversation data from somewhere: ", data[0])
                 console.log("otheruser data from somewhere: ", otherUser)
-                navigation.navigate("ConversationThreadDrawer", { 
-                    "otherUser": otherUser,
-                    "conversation": data[0],
-                })
                 setConversation(data[0])
+                handleGoToConvo(data[0])
             })
             // console.log("conversations state: ", conversation)
         } catch (error) {
             console.log("Error creating new convo: ", error)
         }
+    }
+    
+    const handleGoToConvo = (conversation) => {
+        navigation.navigate("ConversationThreadDrawer", { 
+            "otherUser": otherUser,
+            "conversation": {...conversation},
+        })
     }
 
 
@@ -257,7 +261,7 @@ const WorkerProfile = ({route}) => {
                             workerInformation.prevWorks.map(function(image, index){
                                 return(
                                     <View key={index} style={{flex:1, alignItems: 'center', justifyContent: 'center', width: WIDTH, }}>
-                                        <Image source={{uri: `http://${IPAddress}:3000/images/${image}`}} style={{width: WIDTH - 50, height: HEIGHT / 2}} />
+                                        <Image source={{uri: image}} style={{width: WIDTH - 50, height: HEIGHT / 2}} />
                                     </View>
                                 )
                             })
@@ -336,7 +340,7 @@ const WorkerProfile = ({route}) => {
 
             {/* bio */}
             {
-                workerInformation.role === 'worker' && activeTab === 'works' ?
+                workerInformation.role === 'worker' && activeTab === 'works' && workerInformation.workDescription ?
                     <View style={{width: '100%', paddingHorizontal: 30}}>
                     <View style={{ marginTop: 25, marginBottom: workerInformation.role === 'worker' ? 0 : 50, padding: 18, backgroundColor: '#fff', borderRadius: 10, elevation: 2, marginHorizontal: 8,}}>
                         <TText style={{fontFamily: "LexendDeca_Medium", fontSize: 18, marginBottom: 8}}>{workerInformation.firstname}'s bio</TText>
@@ -493,7 +497,7 @@ const WorkerProfile = ({route}) => {
                                                         setInitialIndex(index)
                                                     }}
                                                 >
-                                                    <Image source={{uri: `http://${IPAddress}:3000/images/${item}`}} style={{width: '100%', height: '100%'}} />
+                                                    <Image source={{uri: item}} style={{width: '100%', height: '100%'}} />
                                                 </TouchableOpacity>
                                             )
                                         })

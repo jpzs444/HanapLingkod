@@ -24,6 +24,7 @@ const ConversationThread = ({route}) => {
     const [messages, setMessages] = useState([])
     const [incomingMessage, setIncomingMessage] = useState(null)
     const [page, setPage] = useState(1)
+    const [conversationObj, setConversationObj] = useState({})
 
     const [onlineUsers, setOnlineUsers] = useState([])
     const [receiverOnline, setReceiverOnline] = useState(true)
@@ -35,20 +36,27 @@ const ConversationThread = ({route}) => {
     let scrollRef;
     const [canScroll, setCanScroll] = useState(false)
 
+
+    useEffect(() => {
+        console.log("conversation item: ", conversation)
+        handleFetchConversation()
+        setMessages([])
+        
+    }, [isFocused]);
+
     
     useEffect(() => {
         handleSeenByMe()
+        getMessages()
     }, [isFocused]);
 
-    useEffect(() => {
-        handleSeenByMe()
-        getMessages()
-    }, []);
+    // useEffect(() => {
+    //     handleSeenByMe()
+    // }, []);
 
     useEffect(() => {
-        if(canScroll){
-            scrollRef.scrollToEnd({animated: true})
-            // scrollRef.scrollToEnd({animation: "smooth"})
+        if(canScroll && messages.length > 0){
+            // scrollRef.scrollToEnd({animated: true})
             setCanScroll(false)
         }
     }, [messages, incomingMessage]);
@@ -75,20 +83,36 @@ const ConversationThread = ({route}) => {
     }, [isFocused]);
 
     useEffect(() => {
-        incomingMessage && conversation?.members.includes(incomingMessage.sender) &&
+        incomingMessage && conversationObj?.members.includes(incomingMessage.sender) &&
         setMessages(prev => [...prev, incomingMessage])
-    }, [incomingMessage, conversation]);
+    }, [incomingMessage, conversationObj]);
 
 
 
+    const handleFetchConversation = async () => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/conversations/find/${global.userData._id}/${otherUser._id}`, {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken
+                },
+            }).then(res => res.json())
+            .then(data => {
+                setConversationObj({...data})
+            })
+        } catch (error) {
+            console.log("error fetch conversation from two people: ", error)
+        }
+    }
 
 
     const handleSeenByMe = () => {
         try {
-            let index = conversation.members.indexOf(global.userData._id)
+            let index = conversationObj?.members.indexOf(global.userData._id)
             let updateWho = index === 0 ? {senderSeen: true} : {receiverSeen: true}
 
-            fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversation._id}`, {
+            fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversationObj?._id}`, {
                 method: "PUT",
                 headers: {
                     'content-type': 'application/json',
@@ -107,20 +131,23 @@ const ConversationThread = ({route}) => {
         // index 1 receiver
 
         try {
-            let index = conversation.members.indexOf(global.userData._id)
+            let index = conversationObj?.members.indexOf(global.userData._id)
             let updateWho = index === 0 ? {receiverSeen: false, latestMessage: message} : {senderSeen: false, latestMessage: message}
 
 
-            console.log("convo id: ", conversation._id)
+            console.log("convo id: ", conversationObj._id)
 
-            await fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversation._id}`, {
+            await fetch(`https://hanaplingkod.onrender.com/conversations-Unread/${conversationObj?._id}`, {
                 method: "PUT",
                 headers: {
                     'content-type': 'application/json',
                     "Authorization": global.accessToken
                 },
                 body: JSON.stringify({...updateWho})
-            }).then(() => console.log("receiver seen updated"))
+            }).then(() => {
+                console.log("receiver seen updated")
+                scrollRef.scrollToEnd({animated: true})
+            })
         } catch (error) {
             console.log("!!!!!!!error update seen(convo): ", error)
         }
@@ -129,7 +156,7 @@ const ConversationThread = ({route}) => {
 
     const getMessages = () => {
         try {
-            fetch(`https://hanaplingkod.onrender.com/messages/${conversation._id}`, {
+            fetch(`https://hanaplingkod.onrender.com/messages/${conversationObj?._id}`, {
                 method: "GET",
                 headers: {
                     'content-type': 'application/json',
@@ -151,7 +178,7 @@ const ConversationThread = ({route}) => {
 
     const handleSendMessage = () => {
 
-        const receiver_id = conversation.members?.find(member => member !== global.userData._id)
+        const receiver_id = conversationObj?.members.find(member => member !== global.userData._id)
         
         const isOnline = onlineUsers.find(user => user.userId === receiver_id)
         
@@ -179,7 +206,7 @@ const ConversationThread = ({route}) => {
                     "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
-                    conversationId: conversation._id,
+                    conversationId: conversationObj?._id,
                     sender: global.userData._id,
                     text: message,
                 })
@@ -187,7 +214,7 @@ const ConversationThread = ({route}) => {
             .then(res => res.json())
             .then(newMessage => {
                 setMessage("")
-                // console.log("new message data: ", newMessage)
+                console.log("new message data: ", newMessage)
                 setMessages([...messages, newMessage])
                 setCanScroll(true)
                 handleSetReceiverSeen()
@@ -216,13 +243,13 @@ const ConversationThread = ({route}) => {
                 <Icon name="arrow-left" size={24} color={"white"} />
             </TouchableOpacity>
             <View style={[styles.receiver, styles.flexRow]}>
-                <Image style={styles.image} source={require("../assets/images/default-profile.png")} />
+                <Image style={styles.image} source={otherUser.profilePic === "pic" ? require("../assets/images/default-profile.png") : {uri: otherUser.profilePic}} />
                 <View style={styles.receiverInformation}>
                     <TText style={styles.receiverName}>{`${otherUser.firstname} ${otherUser.lastname}`}</TText>
-                    <View style={styles.flexRow}>
+                    {/* <View style={styles.flexRow}>
                         <TText style={{color: ThemeDefaults.themeWhite}}>&#x2022; </TText>
                         <TText style={styles.receiverOnline}>{receiverOnline ? "Online": "Offline"}</TText>
-                    </View>
+                    </View> */}
                 </View>
             </View>
             {/* report button */}
@@ -322,20 +349,23 @@ const ConversationThread = ({route}) => {
         </ScrollView> */}
 
         <View style={{flexGrow: 1}}>
-            <FlashList 
-                data={messages}
-                keyExtractor={(item) => item._id}
-                estimatedItemSize={80}
-                contentContainerStyle={{paddingVertical: 60}}
-                ListEmptyComponent={() => (<View><TText> </TText></View>)}
-                renderItem={({item}) => (
-                    <Messagebox message={item?.text} fromMe={item?.sender === global.userData._id} />
-                )}
-                ref={(ref) => {
-                    scrollRef = ref
-                    // console.log("ref: ",ref)
-                }}
-            />
+            {
+                messages.length > 0 &&
+                <FlashList 
+                    data={messages}
+                    keyExtractor={(item) => item._id}
+                    estimatedItemSize={80}
+                    contentContainerStyle={{paddingVertical: 60}}
+                    ListEmptyComponent={() => (<View style={{marginTop: 50, alignItems: 'center'}}><TText style={{color: "#c5c5c5", textAlign: 'center'}}>Send a message to start a conversation</TText></View>)}
+                    renderItem={({item}) => (
+                        <Messagebox message={item?.text} fromMe={item?.sender === global.userData._id} />
+                    )}
+                    ref={(ref) => {
+                        scrollRef = ref
+                        // console.log("ref: ",ref)
+                    }}
+                />
+            }
         </View>
 
         
@@ -356,7 +386,9 @@ const ConversationThread = ({route}) => {
                     cursorColor={ThemeDefaults.themeOrange}
                     onChangeText={text => setMessage(text)}
                     onFocus={() => {
-                        scrollRef.scrollToEnd({animated: true})
+                        if(messages.length > 0){
+                            scrollRef.scrollToEnd({animated: true})
+                        }
                     }}
                     style={styles.input}
                 />
@@ -418,7 +450,8 @@ const styles = StyleSheet.create({
     },
     receiverName: {
         color: ThemeDefaults.themeWhite,
-        fontFamily: "LexendDeca_Medium"
+        fontFamily: "LexendDeca_Medium",
+        fontSize: 18
     },
     receiverOnline: {
         color: 'rgba(255,255,255,0.7)',

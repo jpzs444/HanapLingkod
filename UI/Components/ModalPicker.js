@@ -50,17 +50,20 @@ const ModalPicker = (props) => {
     
     // categories
     useEffect(() => {
-        fetch("https://hanaplingkod.onrender.com/service-category", {
+        fetch(`https://hanaplingkod.onrender.com/service-category`, {
             method: "GET",
             headers: {
                 "content-type": "application/json",
                 "Authorization": global.accessToken
             },
-        }).then((response)=> response.json())
+        }).then((res) => res.json())
         .then((data) => {
+            console.log("categories picker: ", data)
             setCategories([...data])
-        }).catch((error) => console.log("error: ", error.message))
-    }, [])
+        }).catch(error => {          
+            console.log("error service cat: ", error)
+        }) 
+    },[])
 
     // worklist
     useEffect(() => {
@@ -158,6 +161,7 @@ const ModalPicker = (props) => {
     })
 
     const optionCategory = categories.map(function(item, index) {
+        // console.log(categories)
         return(
             <TouchableOpacity
                 style={styles.option}
@@ -165,7 +169,7 @@ const ModalPicker = (props) => {
                 onPress={() => onPressItem(item)}
             >
                 <TText style={styles.text}>
-                    {item.Category === "unlisted" ? "Unlisted" : item.Category}
+                    {item.Category}
                 </TText>
             </TouchableOpacity>
         )
@@ -231,12 +235,12 @@ const ModalPicker = (props) => {
         <View style={[styles.modal, {width: WIDTH - 80, maxHeight:  !props.sex ? HEIGHT/1.5: HEIGHT/4 }]}>
             <ScrollView>
                 {props.barangay ? optionBarangay : null}
+                {props.category ? optionCategory : null}
                 {props.verifiedFilter ? optionFilterVerified : null}
                 {props.categoryFilter ? serviceListOptions : null}
                 {props.ratingFilter ? optionFilterRating : null}
                 {props.services ? serviceListOptions : null}
                 {props.workList ? workListSelection : null}
-                {props.category ? optionCategory : null}
 
                 {
                     props.services ? 

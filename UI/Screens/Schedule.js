@@ -10,6 +10,13 @@ import { IPAddress } from '../global/global';
 import { useNavigation } from '@react-navigation/native';
 
 import { FlashList } from '@shopify/flash-list';
+// const HEIGTH = Dimensions.get('window').height
+
+let utc = require('dayjs/plugin/utc')
+let timezone = require('dayjs/plugin/timezone')
+dayjs.extend(utc)
+dayjs.extend(timezone)
+// dayjs.tz.setDefault("Asia/Manila")
 
 const Schedule = ({route}) => {
 
@@ -145,11 +152,27 @@ const Schedule = ({route}) => {
     }
 
     const handleTimeConfirm = (time) => {
-        let timeString = dayjs(time).format("YYYY-MM-DD hh:mm:ss")
+        // let timeString = dayjs(time).format("YYYY-MM-DD hh:mm:ss")
+        let timeString = dayjs(time).format(selectedDate + "" +  "hh:mm:ss")
         let timetime = dayjs(time).format("hh:mm")
         setDisplayTime(dayjs(time).format("hh:mm A"))
         
-        setFormatedTime(time)
+        
+        let dd = new Date(selectedDate)
+        let tt = new Date(time)
+        
+        // combine
+        
+        let dd_date = dayjs(dd).format("YYYY-MM-DD")
+        let tt_time = dayjs(tt).format("HH:mm")
+        
+        let combined = dayjs(dd_date.toString() + "" + tt_time.toString())
+        
+        console.log("dd_time: ", dd_date)
+        console.log("tt_time: ", tt_time)
+        console.log("combined: ", combined)
+        
+        setFormatedTime(combined)
         setTimePickerVisibility(false)
         setTimeSelected(true)
 

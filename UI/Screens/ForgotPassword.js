@@ -33,7 +33,7 @@ const ForgotPassword = () => {
             .then(data => {
                 console.log("Success(user exist fp): ", data)
                 setLoading(false)
-                navigation.navigate("FP_OTPVerification", {"token": data.token, "phoneNum": data.user.phoneNumber, "role": data.user.role, "forgotPassword": true})
+                navigation.navigate("OTPVerification", {token: data.token, phoneNum: data.user.phoneNumber, role: data.user.role, forgotPassword: true})
             })
             // navigation.navigate("FP_Reset")
         } catch (error) {
