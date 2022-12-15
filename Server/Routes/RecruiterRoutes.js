@@ -6,10 +6,6 @@ const { authenticateToken } = require("../Helpers/JWT");
 
 const multer = require("multer");
 
-// CORS
-const cors = require("cors");
-router.use(cors({ origin: "*" }));
-
 //store photos
 const storage = multer.diskStorage({
   //destination for files
@@ -26,11 +22,15 @@ const storage = multer.diskStorage({
 //upload the image
 const upload = multer({ storage: storage });
 
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 router.route("/Recruiter").get(authenticateToken, function (req, res) {
   Recruiter.find({}, function (err, found) {
     if (found) {
       res.send(found);
-      console.log(found)
+      console.log("Recruiter List");
     } else {
       res.send("No such data found");
     }

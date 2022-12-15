@@ -28,6 +28,10 @@ const storage = multer.diskStorage({
 //upload the image
 const upload = multer({ storage: storage });
 
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 router
   .route("/service-category")
   .get(authenticateToken, CheckIfBan, function (req, res) {
@@ -78,7 +82,7 @@ router
 router
   .route("/service-category/:id")
   .put(authenticateToken, upload.single("image"), async function (req, res) {
-    console.log("asdsad");
+    console.log("Service-Category Put Request");
     const image = await cloudinary.uploader.upload(req.file.path, {
       folder: "HanapLingkod/Category",
     });

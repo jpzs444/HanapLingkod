@@ -16,6 +16,10 @@ const WorkerComment = require("../Models/WorkerComment");
 const RecruiterComment = require("../Models/RecruiterComment");
 const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 router
   .route("/booking/:user")
   .get(authenticateToken, async function (req, res) {

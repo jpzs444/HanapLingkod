@@ -106,7 +106,7 @@ router.route("/Work/:category").get(
   // authenticateToken,
   async function (req, res) {
     try {
-      console.log("aaaaa");
+      console.log("Work Category: " + req.params.category);
       let page;
       if (req.query.page) {
         page = parseInt(req.query.page);
@@ -123,7 +123,7 @@ router.route("/Work/:category").get(
       bannedUsersResult.forEach((x) => {
         bannedUsers.push(x.workerId);
       });
-      console.log(bannedUsers);
+      console.log("Banned Users: " + bannedUsers);
       let subId = await ServiceSubCategory.findOne({
         ServiceSubCategory: req.params.category,
       }).lean();

@@ -12,6 +12,11 @@ const generateOTP = require("../Helpers/OTP_Generator");
 const { CheckIfBan } = require("../Helpers/banChecker");
 const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 const BookingEmail = require("../Helpers/BookingEmail");
+
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 router
   .route("/service-request/:user")
   .get(authenticateToken, CheckIfBan, async function (req, res) {
@@ -136,9 +141,12 @@ router
     try {
       let endTime;
       let result;
+      console.log(
+        "endDate:" + req.body.endDate + " end time " + req.body.endTime
+      );
 
       if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
-        // console.log("qq");
+        console.log("inside endate end time combination");
         endTime = dayjs(
           req.body.endDate + " " + req.body.endTime
         ).toISOString();
@@ -182,7 +190,12 @@ router
 
       // console.log(endTime);
       if (req.body.requestStatus == 2) {
+        console.log("time outside function: " + endTime);
         if (await checkConflict(req.params.user, req.params.id, endTime)) {
+          console.log(
+            "conflict cheker result:" +
+              (await checkConflict(req.params.user, req.params.id, endTime))
+          );
           console.log("Conflict Scheadule");
           res.status(400).send({ success: false });
         } else {
@@ -297,7 +310,7 @@ router
       }
 
       if (req.body.requestStatus == 3) {
-        console.log("asdscanel");
+        console.log("Rejected");
         await ServiceRequest.findOneAndUpdate(
           { _id: req.params.id },
           {
@@ -320,7 +333,7 @@ router
       }
 
       if (req.body.requestStatus == 4) {
-        console.log("ssss");
+        console.log("Cancel");
         await ServiceRequest.findOneAndUpdate(
           { _id: req.params.id },
           {

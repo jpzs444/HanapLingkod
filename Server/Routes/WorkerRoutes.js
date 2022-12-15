@@ -26,17 +26,21 @@ const storage = multer.diskStorage({
 //upload the image
 const upload = multer({ storage: storage });
 
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 router.route("/Worker").get(authenticateToken, async function (req, res) {
   // console.log("aa");
   let filter = {};
-  if (req.query.verified != undefined) {
-    filter["verification"] = req.query.verified;
+  if (req.query.verification != undefined) {
+    filter["verification"] = req.query.verification;
   }
   if (req.query.barangay != undefined) {
     filter["barangay"] = req.query.barangay;
   }
-  if (req.query.category != undefined) {
-    filter["works"] = req.query.category;
+  if (req.query.works != undefined) {
+    filter["works"] = req.query.works;
   }
   if (req.query.rating != undefined) {
     filter["rating"] = { $gte: parseFloat(req.query.rating) };
@@ -60,7 +64,8 @@ router.route("/Worker").get(authenticateToken, async function (req, res) {
   filter["_id"] = {
     $nin: bannedUsers,
   };
-  console.log(filter);
+
+  console.log("Worker List filter: " + filter);
   const result = await Worker.find(filter)
     .select(
       "-unavailableTime -licenseCertificate -GovId -pushtoken -password -accountStatus"

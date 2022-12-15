@@ -26,6 +26,10 @@ const storage = multer.diskStorage({
 //upload the image
 const upload = multer({ storage: storage });
 
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 router
   .route("/service-sub-category")
   .get(async function (req, res) {
@@ -39,9 +43,10 @@ router
     }
   })
   .post(authenticateToken, function (req, res) {
+    console.log(req.body);
     const SubCategory = new ServiceSubCategory({
       ServiceID: req.body.ServiceID,
-      ServiceSubCategory: req.body.ServiceID,
+      ServiceSubCategory: req.body.ServiceSubCategory,
     });
     SubCategory.save(function (err) {
       if (!err) {
@@ -87,7 +92,7 @@ router
   })
 
   .delete(async function (req, res) {
-    console.log("asd");
+    console.log("Service Sub Category Delete");
     const workQuery = await Work.find(
       {
         ServiceSubId: req.params.id,
@@ -168,5 +173,13 @@ router
       res.send("A Request is on going cannot delete");
     }
   });
+
+router.route("/moveCategory/:id").put(function (req, res) {
+  ServiceSubCategory.findByIdAndUpdate(
+    { _id: req.params.id },
+    { ServiceID: req.body.ServiceID }
+  ).exec();
+  res.send("Updated success");
+});
 
 module.exports = router;

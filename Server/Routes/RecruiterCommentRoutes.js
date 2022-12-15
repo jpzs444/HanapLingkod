@@ -4,6 +4,10 @@ const router = express.Router();
 const WorkerComment = require("../Models/WorkerComment");
 const { authenticateToken } = require("../Helpers/JWT");
 
+// CORS
+const cors = require("cors");
+router.use(cors({ origin: "*" }));
+
 router
   .route("/RecruiterComment/:user")
   .get(authenticateToken, async function (req, res) {
