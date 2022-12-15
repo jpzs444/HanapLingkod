@@ -38,7 +38,7 @@ router
   )
   .post(authenticateToken, CheckIfBan, async function (req, res) {
     try {
-      let startTime = req.body.startTime
+      let startTime = req.body.startTime;
 
       console.log(startTime);
       const requestPost = new RequestPost({
@@ -50,7 +50,7 @@ router
         minPrice: req.body.minPrice,
         maxPrice: req.body.maxPrice,
         address: req.body.address,
-        geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
+        // geometry: { type: "point", coordinates: [req.body.long, req.body.lat] },
         postToggle: 1,
       });
       requestPost.save(function (err) {
