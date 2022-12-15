@@ -223,8 +223,8 @@ const VIewServiceRequest = ({route}) => {
             },
             body: JSON.stringify({
                 requestStatus: 2,
-                endDate: dayjs(formatedDate).format("YYYY-MM-DD").toString(),
-                endTime: dayjs(formatedDate).format("HH:mm").toString(),
+                endDate: formatedDate,
+                endTime: formatedDate,
                 acceptMore: radioBtn.toString()
             })
         }).then(res => res.json())
@@ -252,7 +252,7 @@ const VIewServiceRequest = ({route}) => {
         console.log("accept date: ", dd_js)
         setFormatedDate(dd_js);
 
-        setDisplayDate(dayjs(date).format("MMM D, hh:mm A").toString());
+        setDisplayDate(dayjs(dd_js).format("MMM D, hh:mm A").toString());
         setDatePickerVisibility(false);
         setDateSelected(true)
     }
