@@ -262,8 +262,8 @@ router
 
           //email
           let date1 = dayjs(result.serviceDate).format("DD/MM/YYYY");
-
-          let time1 = dayjs(result.startTime).format("hh:mm:ss A");
+          console.log("result.startTime: " + result.startTime);
+          let time1 = dayjs(result.startTime).format("hh:mm A");
           //worker
           let subjectWorker = "Booking Confirmation " + date1 + " " + time1;
           let textWorker =
