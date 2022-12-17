@@ -109,10 +109,6 @@ router.route("/service-request").post(
           serviceDate: req.body.serviceDate,
           startTime: startTime,
           description: req.body.description,
-          geometry: {
-            type: "point",
-            coordinates: [req.body.long, req.body.lat],
-          },
           requestStatus: 1,
         });
         console.log(serviceRequest._id);
@@ -128,9 +124,11 @@ router.route("/service-request").post(
               req.body.workerId
             );
           } else {
+            console.log(err);
             res.send(err);
           }
         });
+        console.log("?");
       } else {
         console.log("false");
         res.send("false");
@@ -235,13 +233,6 @@ router
             otp: OTP,
             bookingStatus: 1,
             address: result.address,
-            geometry: {
-              type: "point",
-              coordinates: [
-                result.geometry.coordinates[0],
-                result.geometry.coordinates[1],
-              ],
-            },
           });
           AddToCalendar(newBooking);
           //put delete flag to true
