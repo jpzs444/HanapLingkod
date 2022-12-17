@@ -61,7 +61,7 @@ const Edit_UserProfile = () => {
     let arrayofImages = []
 
     useEffect(() => {
-        console.log("backbtn pressed");
+        // console.log("backbtn pressed");
         BackHandler.addEventListener("hardwareBackPress", ()=>handleBackButtonPressed())
         
         // componentwillunmount
@@ -243,7 +243,7 @@ const Edit_UserProfile = () => {
             else {
                 setPastAppointmentImages([...result.selected])
                 for(let i = 0; i < result.selected.length; i++){
-                    console.log("printf: ", result.selected[i].uri)
+                    // console.log("printf: ", result.selected[i].uri)
                     arrayofImages.push(result.selected[i].uri)
                     // setPrevArrayPrevWorks([...prevArrayPrevWorks, result.selected[i].uri])
                 }
@@ -251,7 +251,7 @@ const Edit_UserProfile = () => {
             }
         }
 
-        console.log("arrayofImages from multiselect: ", prevArrayPrevWorks)
+        // console.log("arrayofImages from multiselect: ", prevArrayPrevWorks)
         // console.log("Image state: ", pastAppointmentImages)
       };
 
@@ -268,8 +268,8 @@ const Edit_UserProfile = () => {
 
     const handleRemoveUploadedImage = () => {
         const list = [...prevArrayPrevWorks]
-        console.log("image to be deleted: ", list[indexToRemove])
-        console.log("updated image list: ", list)
+        // console.log("image to be deleted: ", list[indexToRemove])
+        // console.log("updated image list: ", list)
         
         fetch(`https://hanaplingkod.onrender.com/prevWorks/${ global.userData._id}`, {
             method: "DELETE",
@@ -282,10 +282,10 @@ const Edit_UserProfile = () => {
             })
         })
         .then((res) => console.log("Deleted Uploaded Image Successfully"))
-        .catch((error) => console.log(error.image))
+        .catch((error) => console.log(error.message))
         
         list.splice(indexToRemove, 1)
-        console.log("list after remove: ", list)
+        // console.log("list after remove: ", list)
         setPrevArrayPrevWorks(list)
 
         setEditHasChanges(true)
@@ -363,12 +363,12 @@ const Edit_UserProfile = () => {
                 .catch((error) => console.log(error.message))
             }
 
-            console.log("userWorkListEdit: ", userWorkListEdit)
+            // console.log("userWorkListEdit: ", userWorkListEdit)
             // Upload set of works
             for(let i = 0; i < userWorkListEdit.length; i++){
                 
                 if(userWorkListEdit[i].id){
-                    console.log("only update work: ", userWorkListEdit[i].id)
+                    // console.log("only update work: ", userWorkListEdit[i].id)
                     fetch(`https://hanaplingkod.onrender.com/Work/${userWorkListEdit[i].sub_category}/${userWorkListEdit[i].id}`, {
                         method: 'PUT',
                         headers: {
@@ -381,14 +381,14 @@ const Edit_UserProfile = () => {
                         })
                     }).then(res => res.json())
                     .then(res => {
-                        console.log("Update status: ")
+                        // console.log("Update status: ")
                         console.log("Success update existing work/s")
                     })
                     .catch(err => {
                         console.log("error Fetch work update: ", err.msg)
                     })
                 } else {
-                    console.log("only post work")
+                    // console.log("only post work")
                     fetch("https://hanaplingkod.onrender.com/Work", {
                         method: "POST",
                         headers: {
@@ -413,7 +413,7 @@ const Edit_UserProfile = () => {
                 console.log("workToDelete: ", workToDelete)
                 for(let i = 0; i < workToDelete.length; i= i+1){
                     // console.log("subcat delete: ", workToDelete[i].ServiceSubId.ServiceSubCategory)
-                    console.log("subcat delete: ", workToDelete[i].id)
+                    // console.log("subcat delete: ", workToDelete[i].id)
                     if(workToDelete[i].id){
                         fetch(`https://hanaplingkod.onrender.com/Work/${workToDelete[i].sub_category}/${workToDelete[i].id}`, {
                             method: "DELETE",

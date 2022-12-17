@@ -13,8 +13,15 @@ const { CheckIfBan } = require("../Helpers/banChecker");
 const { generateAccessToken, authenticateToken } = require("../Helpers/JWT");
 const BookingEmail = require("../Helpers/BookingEmail");
 
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone");
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Manila");
+
 // CORS
 const cors = require("cors");
+const { now } = require("mongoose");
 router.use(cors({ origin: "*" }));
 
 router
@@ -69,11 +76,11 @@ router
       res.send(error);
     }
   });
-router
-  .route("/service-request")
-  .post(authenticateToken, CheckIfBan, async function (req, res) {
+router.route("/service-request").post(
+  // authenticateToken, CheckIfBan,
+  async function (req, res) {
     try {
-      console.log("asd");
+      console.log(req.body);
       let pendingRequest = await ServiceRequest.count({
         recruiterId: req.body.recruiterId,
         requestStatus: 1,
@@ -84,9 +91,9 @@ router
       console.log(pendingRequest);
       if (pendingRequest === 0) {
         console.log("true");
-        let startTime = dayjs(
-          req.body.serviceDate + " " + req.body.startTime
-        ).toISOString();
+        let startTime = req.body.startTime;
+
+        console.log(startTime);
         const pushID = await Worker.findOne(
           { _id: req.body.workerId },
           { pushtoken: 1, _id: 0 }
@@ -133,7 +140,8 @@ router
     } catch (error) {
       res.send(error);
     }
-  });
+  }
+);
 //
 router
   .route("/service-request/:user/:id")
@@ -147,12 +155,10 @@ router
 
       if (req.body.endDate !== undefined && req.body.endTime !== undefined) {
         console.log("inside endate end time combination");
-        endTime = dayjs(
-          req.body.endDate + " " + req.body.endTime
-        ).toISOString();
+        endTime = req.body.endTime;
       }
       result = await ServiceRequest.findOne({ _id: req.params.id });
-
+      console.log("result query: " + result);
       const { workerId, recruiterId } = result;
       const pushIDWorker = await Worker.findOne(
         { _id: workerId },
@@ -256,8 +262,13 @@ router
 
           //email
           let date1 = dayjs(result.serviceDate).format("DD/MM/YYYY");
-
-          let time1 = dayjs(result.startTime).format("hh:mm:ss A");
+          console.log("result.startTime: " + result.startTime);
+          let time1 = dayjs(result.startTime)
+            .utc("z")
+            .local()
+            .tz("Asia/Manila")
+            .format("hh:mm A");
+          console.log("dayjs converted: " + time1);
           //worker
           let subjectWorker = "Booking Confirmation " + date1 + " " + time1;
           let textWorker =

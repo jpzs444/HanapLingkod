@@ -38,7 +38,7 @@ const ResetPassword = ({route}) => {
             }).then(res => res.json())
             .then(data => {
                 // console.log("fetch message: ", data)
-                console.log("reset password success!")
+                // console.log("reset password success!")
                 navigation.popToTop()
             })
         } catch (error) {

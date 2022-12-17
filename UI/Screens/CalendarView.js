@@ -239,7 +239,7 @@ const CalendarView = () => {
         setListUnavailableSched({})
 
         uunn = [...(global.userData.unavailableTime)]
-        console.log("listUnvSched uunn: ", uunn)
+        // console.log("listUnvSched uunn: ", uunn)
         // let lll = {}
 
 
@@ -287,7 +287,7 @@ const CalendarView = () => {
             }
         })
 
-        console.log("display lll: ", lll)
+        // console.log("display lll: ", lll)
         setListUnavailableSched({...lll})
         
     }
@@ -376,10 +376,10 @@ const CalendarView = () => {
                 listUnavailableSched      
             }
             onDayPress={day => {
-                console.log(day)
-                console.log(dayWeek[dayjs(day.timestamp).day()])
+                // console.log(day)
+                // console.log(dayWeek[dayjs(day.timestamp).day()])
 
-                console.log("")
+                // console.log("")
 
                 getUpdatedUserData()
                 handleDateConfirm(day.dateString)

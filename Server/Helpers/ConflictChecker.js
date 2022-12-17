@@ -11,6 +11,19 @@ async function checkConflict(user, workId, endTime) {
   const { startTime } = result;
   const { unavailableTime } = worker;
   for (item of unavailableTime) {
+    console.log(
+      "item.startTime(withDayjs): " +
+        dayjs(item.startTime) +
+        " item.endTime(withDayjs): " +
+        dayjs(item.endTime)
+    );
+    console.log(
+      "startTime(withDayjs): " +
+        dayjs(startTime) +
+        " endtime(withDayjs): " +
+        dayjs(endTime)
+    );
+
     if (
       dayjs(startTime).isBetween(
         item.startTime,
@@ -32,27 +45,31 @@ async function checkConflict(user, workId, endTime) {
       );
       console.log("startTime: " + startTime + " endtime " + dayjs(endTime));
       console.log(
-        dayjs(startTime).isBetween(
-          item.startTime,
-          dayjs(item.endTime),
-          null,
-          "[]"
-        )
+        "Req start time is in between existing unavailable time: " +
+          dayjs(startTime).isBetween(
+            item.startTime,
+            dayjs(item.endTime),
+            null,
+            "[]"
+          )
       );
       console.log(
-        dayjs(endTime).isBetween(
-          item.startTime,
-          dayjs(item.endTime),
-          null,
-          "[]"
-        )
+        "Req end time is in between existing unavailable time: " +
+          dayjs(endTime).isBetween(
+            item.startTime,
+            dayjs(item.endTime),
+            null,
+            "[]"
+          )
       );
 
       console.log(
-        dayjs(item.startTime).isBetween(startTime, dayjs(endTime), null, "[]")
+        "existing start unavailable time is in between req start and end time: " +
+          dayjs(item.startTime).isBetween(startTime, dayjs(endTime), null, "[]")
       );
       console.log(
-        dayjs(item.endTime).isBetween(startTime, dayjs(endTime), null, "[]")
+        "existing end unavailable time is in between req start and end time: " +
+          dayjs(item.endTime).isBetween(startTime, dayjs(endTime), null, "[]")
       );
       console.log("conflict sched");
       // return res.status(400).send("some text");

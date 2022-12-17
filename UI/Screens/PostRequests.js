@@ -51,7 +51,7 @@ const PostRequests = () => {
       }
     }).then((res) => res.json())
     .then((data) => {
-      console.log("request post1: ", data)
+      // console.log("request post1: ", data)
 
       let list = {...data}
       // list = list.reverse()
@@ -63,7 +63,7 @@ const PostRequests = () => {
   }
 
   const handleVisisbleModal = () => {
-    console.log("handle visible")
+    // console.log("handle visible")
     setPostHidden(!postHidden)
   }
 

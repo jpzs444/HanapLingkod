@@ -162,7 +162,7 @@ const AddEventCalendar = ({route}) => {
                     wholeday: "1" // radioBtn
                 })
             }).then(res => {
-                console.log("Successfull adding/updating an event: ", res.body)
+                console.log("Successfull adding/updating an event: ")
                 getUpdatedUserData()
                 setHasCreatedAnEvent(true)
             }).catch(err => console.log("error add event: ", err.message))
@@ -407,7 +407,7 @@ const AddEventCalendar = ({route}) => {
                     initial={eventItem ? initialRB : 1}
                     activeColor={ThemeDefaults.themeOrange}
                     selectedBtn={(e) => {
-                        console.log(e.label)
+                        // console.log(e.label)
                         setDateSelected(false)
                         setStartTimeSelected(false)
                         setEndTimeSelected(false)

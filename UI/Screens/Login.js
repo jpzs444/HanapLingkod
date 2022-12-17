@@ -47,13 +47,6 @@ export default function Login({navigation}) {
       return null;
     }
 
-    if(isLoading){
-      return(
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.6)'}}>
-          <ActivityIndicator size={'large'} />
-        </View>
-      )
-    }
 
     // FETCH DATA FROM SERVER
     const login = () => {
@@ -71,7 +64,7 @@ export default function Login({navigation}) {
         .then((response) => response.json())
         .then((user) => {
 
-          console.log("user data: ", user)
+          // console.log("user data: ", user)
 
           if(user._id){
             setIsLoading(true)
@@ -79,7 +72,7 @@ export default function Login({navigation}) {
             
             global.userData = user;
             global.accessToken = user.accessToken;
-            console.log("access token login: ", user.accessToken)
+            // console.log("access token login: ", user.accessToken)
             
             setIsLoading(false)
             setUser({username: "", password: ""});

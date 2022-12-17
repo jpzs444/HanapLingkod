@@ -56,7 +56,7 @@ export default function Notifications({route}) {
       },
     }).then((res) => res.json())
     .then((data) => {
-      console.log("notification list: ", data)
+      // console.log("notification list: ", data)
       // console.log("res length: ", data.length)
       
       let list = [...data]
@@ -72,7 +72,7 @@ export default function Notifications({route}) {
       global.notificationCount = notifCount
 
     }).catch((err) => {
-      console.log("error notif page: ", err.message)
+      console.log("error notif page: ", err)
     })
   }
 
@@ -163,7 +163,7 @@ export default function Notifications({route}) {
                         <TouchableOpacity style={ item.read ? styles.btnRead : styles.btnUnread}
                         onPress={() => {
                           setNotificationIDClick(item._id)
-                          console.log(item)
+                          // console.log(item)
                           setOpenNotif(true)
 
                           handleOpenNotificationItem(item)
@@ -176,7 +176,7 @@ export default function Notifications({route}) {
                               "Authorization": global.accessToken
                             }
                           }).then(() => {
-                            console.log("all notification read")
+                            // console.log("all notification read")
                             fetchNotificationList()
                           })
                           .catch((error) => console.log("error: ", error.message))

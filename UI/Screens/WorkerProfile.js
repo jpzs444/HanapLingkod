@@ -44,8 +44,8 @@ const WorkerProfile = ({route}) => {
     const [conversation, setConversation] = useState({})
 
     useEffect(() => {
-        console.log('worker profile screen: ', userRole)
-        console.log('worker profile screen: ', otherUser)
+        // console.log('worker profile screen: ', userRole)
+        // console.log('worker profile screen: ', otherUser)
         getUpdatedUserData()
 
         if(!userRole){
@@ -77,7 +77,7 @@ const WorkerProfile = ({route}) => {
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log("user rating: ", data)
+                // console.log("user rating: ", data)
                 setUserRatings([...data.comments])
             })
         } catch (error) {
@@ -97,7 +97,7 @@ const WorkerProfile = ({route}) => {
             },
         }).then((res) => res.json())
         .then((user) => {
-            console.log("worker new load: ", user)
+            // console.log("worker new load: ", user)
             setworkerInformation({...user})
             workk = user
 
@@ -123,8 +123,8 @@ const WorkerProfile = ({route}) => {
         }).then((res) => res.json())
         .then((data) => {
             setWorkList([...data])
-            console.log("new work list: ", data)
-            console.log("new work list: ", data[0].ServiceSubId._id)
+            // console.log("new work list: ", data)
+            // console.log("new work list: ", data[0].ServiceSubId._id)
         }).catch((error) => console.log("workList fetch: ", error.message))
     }
 
@@ -193,21 +193,40 @@ const WorkerProfile = ({route}) => {
                 })
             }).then(res => res.json())
             .then(data => {
-                console.log("conversation data from somewhere: ", data[0])
-                console.log("otheruser data from somewhere: ", otherUser)
-                setConversation(data[0])
-                handleGoToConvo(data[0])
+                // console.log("conversation data from somewhere: ", data[0])
+                // console.log("otheruser data from somewhere: ", otherUser)
+
+                handleFetchConversation()
             })
             // console.log("conversations state: ", conversation)
         } catch (error) {
             console.log("Error creating new convo: ", error)
         }
     }
+
+    const handleFetchConversation = async () => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/conversations/find/${global.userData._id}/${otherUser._id}`, {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken
+                },
+            }).then(res => res.json())
+            .then(data => {
+                setConversation(data)
+                // console.log("data convo: ", data)
+                handleGoToConvo(data)
+            })
+        } catch (error) {
+            console.log("error fetch conversation from two people: ", error)
+        }
+    }
     
     const handleGoToConvo = (conversation) => {
         navigation.navigate("ConversationThreadDrawer", { 
             "otherUser": otherUser,
-            "conversation": {...conversation},
+            "conversation": conversation,
         })
     }
 
@@ -221,7 +240,7 @@ const WorkerProfile = ({route}) => {
             <TouchableOpacity style={{backgroundColor: ThemeDefaults.themeOrange, borderRadius: 20, padding: 8, elevation: 4, position: 'absolute', right: 25, top: 60, zIndex: 5}}
                 activeOpacity={0.5}
                 onPress={() => {
-                    console.log("HI")
+                    // console.log("HI")
                     // go to convo
                     handleCreateConversation()
                 }}
@@ -377,10 +396,10 @@ const WorkerProfile = ({route}) => {
                                             <View style={{}}>
                                                 <TouchableOpacity style={{paddingVertical: 5, paddingHorizontal: 10, backgroundColor: ThemeDefaults.themeDarkBlue, borderRadius: 10, elevation: 4}}
                                                     onPress={() => {
-                                                        console.log("workItem work Id: ", workItem._id)
+                                                        // console.log("workItem work Id: ", workItem._id)
                                                         let i = workItem._id
-                                                        console.log("i: ", i)
-                                                        console.log("i: ", typeof i)
+                                                        // console.log("i: ", i)
+                                                        // console.log("i: ", typeof i)
                                                         navigation.navigate("RequestFormDrawer", {
                                                             workerID: workerID,
                                                             workID: workItem.ServiceSubId._id,
@@ -414,7 +433,7 @@ const WorkerProfile = ({route}) => {
                                         style={{marginTop: 0, marginBottom: 20}}
                                         activeOpacity={0.5}
                                         onPress={() => {
-                                            console.log("report user")
+                                            // console.log("report user")
                                             {
                                                 global.userData.role ==="recruiter" ?
                                                 navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Worker", userProfilePicture: otherUser.profilePic})
@@ -468,7 +487,7 @@ const WorkerProfile = ({route}) => {
                             style={{marginTop: 20, marginBottom: 30}}
                             activeOpacity={0.5}
                             onPress={() => {
-                                console.log("report user")
+                                // console.log("report user")
                                 {
                                     global.userData.role ==="recruiter" ?
                                     navigation.navigate("ReportUserDrawer", {userReportedID: otherUser._id, userFullName: `${otherUser.firstname} ${otherUser.lastname}`, userRole: "Worker", userProfilePicture: otherUser.profilePic})

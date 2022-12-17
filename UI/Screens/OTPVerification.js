@@ -129,7 +129,7 @@ export default function OTPVerification(props) {
             .verifyPhoneNumber(isLogin ? `+63${global.userData.phoneNumber}` : `+63${phoneNum}` , recaptchaVerifier.current)
             .then(setVerificationId)
             .catch((error) => {
-                console.log("error confirm code", error.message)
+                // console.log("error confirm code", error.message)
                 // setTooManyOTPRequests(true)
                 // navigation.goBack()
             })
@@ -144,8 +144,7 @@ export default function OTPVerification(props) {
         
         setStartTimer(true)
 
-        console.log(`otp code is: ${code}`)
-        console.log(typeof code)
+        // console.log(`otp code is: ${code}`)
 
         firebase.auth().signInWithCredential(credential)
             .then(() => {
@@ -349,8 +348,8 @@ export default function OTPVerification(props) {
                         onChangeText={(val) => {
                             setotpNum({...otpNum, n6: val})
                             !val && num5.current.focus()
-                            console.log(otpNum.n6)
-                            console.log(val)
+                            // console.log(otpNum.n6)
+                            // console.log(val)
                             // setCode((prev) => `${prev}${val}`)
                             setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${val}`)
 
@@ -369,7 +368,7 @@ export default function OTPVerification(props) {
                         // transform number inputs into a string for phone verification
                         setCode("")
                         setCode(`${otpNum.n1}${otpNum.n2}${otpNum.n3}${otpNum.n4}${otpNum.n5}${otpNum.n6}`)
-                        console.log("input otp: ", code)
+                        // console.log("input otp: ", code)
                         confirmCode()
                         // navigation.navigate("HomeStack")
                     }}

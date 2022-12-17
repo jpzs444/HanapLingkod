@@ -6,7 +6,7 @@ import React, {useState, useEffect} from 'react'
 import ThemeDefaults from '../Components/ThemeDefaults';
 import { IPAddress } from '../global/global';
 import dayjs from 'dayjs';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import RadioButtonRN from 'radio-buttons-react-native';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 // import SameDateBookings from '../Components/SameDateBookings';
@@ -29,6 +29,7 @@ const declinedMessageSuggestions = ["I'm unavailable", "I've already accepted an
 const VIewServiceRequest = ({route}) => {
 
     const navigation = useNavigation()
+    const isFocused = useIsFocused()
 
     const radioOptions1 = [
         {label: 'Yes'},
@@ -73,6 +74,9 @@ const VIewServiceRequest = ({route}) => {
 
     // resets all inputs on load
     useEffect(() => {
+        setDeclinationMessage("")
+        setHasSentMessage(false)
+
         setLoading(true)
         if(global.userData.role === "worker"){
             getSameDateBookings()
@@ -111,7 +115,7 @@ const VIewServiceRequest = ({route}) => {
 
             setRadioBtn(-1)
         }
-    }, [route])
+    }, [route, isFocused])
 
 
 
@@ -131,7 +135,7 @@ const VIewServiceRequest = ({route}) => {
                 list = list.filter(e => e.workerId._id !== requestItem.workerId._id && !e.deleteflag)
                 
                 setSimilarWorks([...list])
-                console.log("similar works: ", list)
+                // console.log("similar works: ", list)
             })
 
         } catch (error) {
@@ -148,9 +152,9 @@ const VIewServiceRequest = ({route}) => {
             }
         }).then(res => res.json())
         .then(data => {
-            console.log("fetching request service: ", data)
+            // console.log("fetching request service: ", data)
             let item = data.recruiter.find(e => e._id === requestItem._id)
-            console.log("returned item: ", item)
+            // console.log("returned item: ", item)
         }).catch(err => console.log("error fetch sr: ",err.msg))
     }
 
@@ -168,7 +172,7 @@ const VIewServiceRequest = ({route}) => {
             let list = data.worker.filter(e => e.serviceDate === requestItem.serviceDate && e.requestStatus == '2')
             setSameDateBooking([...list])
 
-            console.log("list same date accepted bookings", list)
+            // console.log("list same date accepted bookings", list)
         }).catch((err) => console.log("get same dates error", err.message))
     }
 
@@ -229,7 +233,7 @@ const VIewServiceRequest = ({route}) => {
             })
         }).then(res => res.json())
         .then((res) => {
-            console.log("res obj: ")
+            // console.log("res obj: ")
 
             if(res.success){
                 console.log("Success - Accepted Request Complete")
@@ -249,7 +253,7 @@ const VIewServiceRequest = ({route}) => {
 
     const handleDateConfirm = (date) => {
         let dd_js = dayjs(date)
-        console.log("accept date: ", dd_js)
+        // console.log("accept date: ", dd_js)
         setFormatedDate(dd_js);
 
         setDisplayDate(dayjs(dd_js).format("MMM D, hh:mm A").toString());
@@ -290,30 +294,55 @@ const VIewServiceRequest = ({route}) => {
 
     const handleCreateConversation = async () => {
         // create a conversation
-
+        let otherUser = global.userData.role === 'recruiter' ? requestItem.workerId : requestItem.recruiterId
         try {
             await fetch(`https://hanaplingkod.onrender.com/conversations`, {
                 method: "POST",
                 headers: {
-                    'content-type': 'application/json',
-                    "Authorization": global.accessToken
+                  'content-type': 'application/json',
+                  "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
                     senderId: global.userData._id,
-                    receiverId: global.userData.role === 'recruiter' ? requestItem.workerId._id : requestItem.recruiterId._id
+                    receiverId: otherUser._id
                 })
             }).then(res => res.json())
             .then(data => {
-                console.log("conversation data: ", data[0])
-                navigation.navigate("ConversationThreadDrawer", {
-                    "otherUser": global.userData.role === 'recruiter' ? requestItem.workerId : requestItem.recruiterId, 
-                    "conversation": data[0]
-                })
-                setConversation({...data[0]})
+                // console.log("conversation data from somewhere: ", data[0])
+                // console.log("otheruser data from somewhere: ", otherUser)
+
+                handleFetchConversation(otherUser)
             })
+            // console.log("conversations state: ", conversation)
         } catch (error) {
             console.log("Error creating new convo: ", error)
         }
+    }
+
+    const handleFetchConversation = async (otherUser) => {
+        try {
+            await fetch(`https://hanaplingkod.onrender.com/conversations/find/${global.userData._id}/${otherUser._id}`, {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json',
+                    "Authorization": global.accessToken
+                },
+            }).then(res => res.json())
+            .then(data => {
+                setConversation(data)
+                // console.log("data convo: ", data)
+                handleGoToConvo(data, otherUser)
+            })
+        } catch (error) {
+            console.log("error fetch conversation from two people: ", error)
+        }
+    }
+    
+    const handleGoToConvo = (conversation, otherUser) => {
+        navigation.navigate("ConversationThreadDrawer", { 
+            "otherUser": otherUser,
+            "conversation": conversation,
+        })
     }
 
 
@@ -691,7 +720,7 @@ const VIewServiceRequest = ({route}) => {
                     }}
                     activeOpacity={0.5}
                     onPress={() => {
-                        console.log("HI")
+                        // console.log("HI")
 
                         //create a conversation
                         handleCreateConversation()
@@ -908,7 +937,7 @@ const VIewServiceRequest = ({route}) => {
                                     initial={-1}
                                     activeColor={ThemeDefaults.themeOrange}
                                     selectedBtn={(e) => {
-                                        console.log(e.label)
+                                        // console.log(e.label)
                                         if(e.label === "Yes"){
                                             setRadioBtn(true)
                                             
@@ -1008,7 +1037,7 @@ const VIewServiceRequest = ({route}) => {
                                         <TouchableOpacity key={index} style={styles.msgTextContainer}
                                             activeOpacity={0.4}
                                             onPress={() => {
-                                                console.log(item)
+                                                // console.log(item)
                                                 setDeclinationMessage(item)
                                             }}
                                         >

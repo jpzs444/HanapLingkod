@@ -64,7 +64,7 @@ const PostRequestForm = () => {
     }, [isFocused])
 
     const handlePostRequest = () => {
-        console.log("handlePost")
+        // console.log("handlePost")
         fetch(`https://hanaplingkod.onrender.com/request-post`, {
             method: "POST",
             headers: {
@@ -86,8 +86,8 @@ const PostRequestForm = () => {
         }).then((res) => {
             res.json()
         }).then(data => {
-            console.log("res: ",)
-            console.log("Success: Added a request to your posts")
+            // console.log("res: ",)
+            // console.log("Success: Added a request to your posts")
             navigation.goBack()
         })
         .catch((err) => console.log("error post request: ", err.message))
@@ -103,7 +103,7 @@ const PostRequestForm = () => {
         setDatePickerVisibility(false);
         setDateSelected(true)
 
-        console.log(dateString)
+        // console.log(dateString)
     }
 
     const handleTimeConfirm = (time) => {
@@ -118,7 +118,7 @@ const PostRequestForm = () => {
         let tt_time = dayjs(tt).format("HH:mm")
         
         let combined = dayjs(dd_date.toString() + "" + tt_time.toString())
-        console.log("combined pr: ", combined)
+        // console.log("combined pr: ", combined)
 
         setFormatedTime(combined)
         setTimePickerVisibility(false)
@@ -190,7 +190,7 @@ const PostRequestForm = () => {
                 <ModalPicker 
                     changeModalVisibility={changeModalVisibility}
                     setData={(filter) => {
-                        console.log(filter)
+                        // console.log(filter)
                         setRequestCategory({...filter})
                         }}
                     category={true}

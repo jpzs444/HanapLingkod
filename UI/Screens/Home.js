@@ -61,8 +61,8 @@ export default function Home() {
 
       responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log("notification listener response: ", response.notification.request.content.data);
-        console.log("notification listener response: ", response.notification);
+        // console.log("notification listener response: ", response.notification.request.content.data);
+        // console.log("notification listener response: ", response.notification);
 
         let notif = response.notification.request.content.data
 
@@ -168,14 +168,14 @@ export default function Home() {
         },
       }).then((res) => res.json())
       .then((data) => {
-        console.log("home accesstoken: ", data)
+        // console.log("home accesstoken: ", data)
         if(data === "Forbidden: User is Banned"){
           setIsBanned(true)
           setViewModalBanned(true)
           setCategory([])
         } else {
           setCategory([...data])
-          console.log("cat:", data)
+          // console.log("cat:", data)
         }
       })
     } catch (error) {
@@ -212,7 +212,7 @@ export default function Home() {
   }
 
   const lookforResults = () => {
-    console.log("seach q: ", searchW)
+    // console.log("seach q: ", searchW)
 
     setuserHasSearched(true)
     setSearchBtnPressed(false)
@@ -258,7 +258,7 @@ export default function Home() {
     // setSearchWord(event.nativeEvent.text);
     searchW = event.nativeEvent.text
 
-    console.log('value is:', event.nativeEvent.text);
+    // console.log('value is:', event.nativeEvent.text);
   };
 
   const ScreenHeaderComponent = () => {
