@@ -14,7 +14,7 @@
 
 .reports-tr-title {
     display: grid;
-    grid-template-columns: 265px 150px 347px 140px;
+    grid-template-columns: 265px 150px 380px ;
     margin-top: 80px;
 }
 
@@ -36,7 +36,7 @@
 
 .reports-tr-data {
     display: grid;
-    grid-template-columns: 265px 150px 347px 140px;
+    grid-template-columns: 265px 150px 380px;
     transition: 150ms;
     cursor: pointer;
 }

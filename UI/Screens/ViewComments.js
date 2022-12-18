@@ -228,7 +228,7 @@ const ViewComments = ({route}) => {
                         :
                         <View style={styles.commentItem}>
                         <View style={{flex: 1, flexDirection: 'row', width:'100%'}}>
-                            <Image source={item.workerId.profilePic ? {uri: item.workerId.profilePic} : require("../assets/images/default-profile.png")} style={styles.commentUserImage} />
+                            <Image source={item.workerId.profilePic !== 'pic' ? {uri: item.workerId.profilePic} : require("../assets/images/default-profile.png")} style={styles.commentUserImage} />
                             <View style={{paddingLeft: 15, alignSelf: 'stretch', flexGrow: 1,}}>
                                 <View style={styles.nameSection}>
                                     {/* name */}

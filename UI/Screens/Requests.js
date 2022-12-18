@@ -223,7 +223,6 @@ const Requests = () => {
     <SafeAreaView style={styles.mainContainer}>
 
         <View style={{flex: 1, width: '100%'}}>
-            <ScreenHeaderComponent />
             {
                 isBanned ?
                 <View style={{marginTop: 30, alignItems: 'center', backgroundColor: ThemeDefaults.themeRed, padding:20}}>
@@ -236,6 +235,9 @@ const Requests = () => {
                     estimatedItemSize={60}
                     onEndReachedThreshold={0.5}
                     onEndReached={() => setPage(p => p + 1)}
+                    ListHeaderComponent={() => (
+                        <ScreenHeaderComponent />
+                    )}
                     ListEmptyComponent={() => (
                         <View style={{alignItems: 'center'}}>
                             {

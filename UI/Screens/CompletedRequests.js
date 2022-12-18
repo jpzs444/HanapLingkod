@@ -137,14 +137,14 @@ const CompletedRequests = ({route}) => {
                 estimatedItemSize={100}
                 onEndReached={() => setCurrentPage(page => page + 1)}
                 ListEmptyComponent={() => ( 
-                  <View style={{paddingVertical: 25, alignItems: 'center'}}>
+                  <View style={{paddingVertical: 25, alignItems: 'center',}}>
                     {
                       loading ? 
                       <View style={{alignItems: 'center', width: '100%'}}>
                         <ActivityIndicator size={'large'} />
                       </View>
                       :
-                      <TText style={{color: 'lightgray'}}>There are no Completed Requests as of the moment</TText>
+                      <TText style={{color: 'lightgray', textAlign: 'center'}}>There are no Completed Requests as of the moment</TText>
                     }
                   </View> )}
                 ListHeaderComponent={() => (<TText style={styles.headerText}>Completed Bookings</TText>)}

@@ -148,6 +148,7 @@ const Categories = () => {
     }
 
     const handleOpenEditModalSubCat = (item) => {
+        console.log("open edit sub-cat edit: ", item)
         setNewCategoryTitle(item.ServiceSubCategory)
         setSubCatSelected(item._id)
         setCategoryListed(item.ServiceID.Category)
@@ -657,8 +658,6 @@ const Categories = () => {
                         
                         <div class={"subcat-modal-view"}>
                                 <h3>Category Listed</h3>
-                                
-                                <h3>Sub-Category Title</h3>
                                 {
                                     categoryListed === 'unlisted' ?
                                     <>
@@ -674,8 +673,11 @@ const Categories = () => {
                                         }
                                     </>
                                     :
-                                    <p class={"category-title-edit-modal"}>{categoryListed}</p>
+                                    <p class={"category-listed-category-title"}>{categoryListed}</p>
                                 }
+                                
+                                <h3>Sub-Category Title</h3>
+                                    <p class={"category-title-edit-modal"}>{newCategoryTitle}</p>
                             <div>
                                     {/* <p class={"category-title-edit-modal"}>{newCategoryTitle}</p> */}
                                 
