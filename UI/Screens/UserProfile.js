@@ -374,7 +374,7 @@ const UserProfile = ({route}) => {
                         </View>
 
                         {
-                            global.userData.hasOwnProperty("prevWorks") && 
+                            global.userData.hasOwnProperty("prevWorks") || !global.userData.prevWorks && 
                             <View style={{alignItems: 'center'}}>
                                 <TText style={{color: '#ccc'}}>Pictures of previous works are not available</TText>
                             </View>

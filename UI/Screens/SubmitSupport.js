@@ -152,6 +152,7 @@ const SubmitSupport = () => {
                     visible={viewSubmitModal}
                     onAccept={handleSubmitSupportMail}
                     onDecline={setViewSubmitModal}
+                    confirmButtonText={"Yes"}
                 />
 
                 <DialogueModal 

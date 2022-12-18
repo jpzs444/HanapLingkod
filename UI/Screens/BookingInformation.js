@@ -283,7 +283,7 @@ const BookingInformation = ({route}) => {
         })
     }
 
-
+    
 
     return (
         <ScrollView contentContainerStyle={styles.mainContainer}>
@@ -766,6 +766,7 @@ const BookingInformation = ({route}) => {
                                 onPress={() => {
                                     handleUpdateBookingStatus(4)
                                     setViewCancelModal(false)
+                                    setBookingCanceled(false)
 
                                 }}
                             >

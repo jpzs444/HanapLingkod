@@ -1068,7 +1068,8 @@ const RequestForm = ({route, navigation}) => {
                     </View>
 
                     {/* Select Date */}
-                    <TouchableOpacity style={[styles.formAddressBar, { paddingTop: 12, borderWidth: 1.8, borderColor: 'rgba(0,0,0,0.4)', borderRadius: 10, marginTop: 20}]}
+                    <TouchableOpacity style={[styles.formAddressBar, { paddingTop: 12, borderWidth: 1.8, borderColor: fromPostReq ? "#ccc" : 'rgba(0,0,0,0.4)', borderRadius: 10, marginTop: 20}]}
+                        disabled={fromPostReq}
                         onPress={() => {
                             // setDatePickerVisibility(true)
                             setViewCalendarModal(true)
@@ -1076,30 +1077,48 @@ const RequestForm = ({route, navigation}) => {
                         }}
                     >
                         <View style={styles.formAddTxtContainer}>
-                            <Icon name='calendar-month' size={22} />
+                            <Icon name='calendar-month' size={22} color={fromPostReq ? "#888" : 'black'} />
                             <View style={styles.formAddTxt}>
-                                <TText style={styles.addressInfo}>{dateSelected ? displayDate : dateService ? dayjs(new Date(formatedDate)).format("MMMM D").toString() : "Date"}</TText>
+                                {
+                                    fromPostReq ? 
+                                        <TText style={[styles.addressInfo, fromPostReq && {color: "#888"}]}>{dayjs(dateService).format("MMMM DD")}</TText>
+                                        :
+                                        <TText style={styles.addressInfo}>{dateSelected ? dayjs(displayDate).format("MMM DD") : "Date"}</TText>
+                                }
                             </View>
                         </View>
-                        <Icon name='chevron-down' size={22} />
+                        {
+                            !fromPostReq &&
+                                <Icon name='chevron-down' size={22} />
+                        }
                     </TouchableOpacity>
 
                     {/* Time Select Schedule | ROW */}
                     <View style={styles.timeRowContainer}>
-                        <TouchableOpacity style={styles.timeAddressBar}
+                        <TouchableOpacity style={[styles.timeAddressBar, fromPostReq && {borderColor: "#ccc"}]}
+                            disabled={fromPostReq}
                             onPress={() => setTimePickerVisibility(true)}
                         >
                             <View style={styles.timeAddressContainer}>
-                                <Icon name='clock-outline' size={22} />
+                                <Icon name='clock-outline' size={22} color={fromPostReq ? "#888" : 'black'} />
                                 <View style={styles.formTimeTxt}>
-                                    <TText style={styles.timeTxt}>{ timeSelected ? displayTime : timeService ? dayjs(timeService).format("hh:mm A").toString() : "Time"}</TText>
+                                    {
+                                        fromPostReq ? 
+                                        <TText style={[styles.timeTxt, fromPostReq && {color: '#888'}]}>{dayjs(timeService).format("hh:mm A").toString()}</TText>
+                                        :
+                                        <TText style={styles.timeTxt}>{ timeSelected ? (displayTime).format("hh:mm A") : "Time"}</TText>
+
+                                    }
                                 </View>
                             </View>
-                            <Icon name='chevron-down' size={22} />
+                            {
+                                !fromPostReq &&
+                                    <Icon name='chevron-down' size={22} />
+                            }
                         </TouchableOpacity>
                         <View style={styles.checkScheduleContainer}>
-                            <TouchableOpacity style={[styles.checkScheduleBtn, {backgroundColor: dateSelected ? ThemeDefaults.themeLighterBlue : "#c2c2c2"}]}
-                                disabled={!dateSelected}
+                            <TouchableOpacity style={[styles.checkScheduleBtn, {backgroundColor: dateSelected && !fromPostReq ? ThemeDefaults.themeLighterBlue : "#c2c2c2"}]}
+                                disabled={!dateSelected || fromPostReq}
                                 onPress={()=> {
                                     if(dateSelected){
                                         // navigation.navigate("ScheduleDrawer", {selectedDate: new Date(formatedDate).toString(), workerInformation: workerInformation, selectedJob: selectedJob, fromRequestForm: true.valueOf, minPrice: minPrice, maxPrice: maxPrice})
