@@ -46,7 +46,7 @@ const ConversationThread = ({route}) => {
     }, [isFocused]);
     
     useEffect(() => {
-        setLoadingMessages(true)
+        // setLoadingMessages(true)
     }, []);
 
 
@@ -54,12 +54,6 @@ const ConversationThread = ({route}) => {
         handleSeenByMe()
     }, [isFocused]);
 
-
-    
-
-    // useEffect(() => {
-    //     handleSeenByMe()
-    // }, []);
 
     useEffect(() => {
         if(canScroll && messages.length > 0){
@@ -80,7 +74,7 @@ const ConversationThread = ({route}) => {
             // })
             getMessages()
         })
-    }, [messages, isFocused]);
+    }, [messages]);
     
     useEffect(() => {
         socket.current.on("getUsers", users => {
@@ -163,7 +157,7 @@ const ConversationThread = ({route}) => {
 
 
     const getMessages = () => {
-        setLoadingMessages(true)
+        // setLoadingMessages(true)
 
         try {
             fetch(`https://hanaplingkod.onrender.com/messages/${conversation?._id}`, {

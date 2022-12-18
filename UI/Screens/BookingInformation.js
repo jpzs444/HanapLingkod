@@ -286,7 +286,7 @@ const BookingInformation = ({route}) => {
 
     return (
         <ScrollView contentContainerStyle={styles.mainContainer}>
-            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromCB={true} />
+            <Appbar onlyBackBtn={true} showLogo={true} hasPicture={true} fromCB={false} />
             <TText style={styles.mainHeader}>Booking Information</TText>
 
 
