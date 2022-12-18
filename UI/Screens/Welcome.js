@@ -46,7 +46,7 @@ export default function Welcome({route}) {
                                         global.userData = user;
                                         global.accessToken = user.accessToken;
                                         
-                                        navigation.replace("HomeStack");
+                                        navigation.navigate("HomeStack");
                                         // navigation.navigate("OTPVerification", {isLogin: true, phoneNum: user.phoneNumber, fromWelcome: true})
                                     } 
 

@@ -74,7 +74,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
 
                             global.userData.role === "recruiter" ? 
                                 navigation.navigate("RequestFormDrawer", {workerID: item.workerId._id, workID: item.ServiceSubId._id, workerInformation: item.workerId, selectedJob: item.ServiceSubId.ServiceSubCategory, minPrice: item.minPrice, maxPrice: item.maxPrice, showMultiWorks: false, fromListSpecific: true})
-                                : navigation.navigate("WorkerProfileDrawer", {workerID: item.workerId._id})
+                                : navigation.navigate("WorkerProfileDrawer", {workerID: item._id, otherUser: item, userRole: false})
                             
                                 // navigation.navigate("RequestFormDrawer", {
                                 //     workerID: workerID,
@@ -102,7 +102,7 @@ const ListSpecificWorkers = ({route, navigation}) => {
                                         </View>
                                         <View style={styles.workerRatingsHolder}>
                                             <Icon name="star" color={"gold"} size={18} />
-                                            <TText style={styles.workerRatings}>4.5</TText>
+                                            <TText style={styles.workerRatings}>{item.workerId.rating ? item.workerId.rating : "0"}</TText>
                                         </View>                                     
                                     </View>
                                     <View style={styles.workerAddressBox}>

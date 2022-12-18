@@ -847,7 +847,7 @@ const Edit_UserProfile = () => {
                                                 >
                                                     <Icon name='close-circle' size={28} color={"#FF5353"} />
                                                 </TouchableOpacity>
-                                                <Image source={{uri: `http://${IPAddress}:3000/images/${image}`}} style={{height: '100%', width: '100%'}} resizeMode="cover" />
+                                                <Image source={{uri: image}} style={{height: '100%', width: '100%'}} resizeMode="cover" />
                                             </TouchableOpacity>
                                         )
                                     })

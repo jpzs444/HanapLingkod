@@ -230,7 +230,7 @@ const AccountInformation = () => {
                         <h3>Government-Issued/Valid ID</h3>
 
                         <div class="account-main-info">
-                            <img className={"govId-image"} src={user.GovId} />
+                            <img className={"govId-image"} src={user.GovId === 'pic' ? "./assets/icons/account.png" : user.GovId} />
                         </div>
 
                         {

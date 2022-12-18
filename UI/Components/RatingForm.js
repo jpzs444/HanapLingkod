@@ -120,6 +120,7 @@ const RatingForm = ({item, handleUpdate}) => {
                 numBtn={2}
                 onAccept={handleOnSubmit}
                 onDecline={setSubmitReviewModal}
+                confirmButtonText={'Yes'}
             />
 
         </View>

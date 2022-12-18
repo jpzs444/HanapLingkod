@@ -42,7 +42,7 @@ const Messaging = () => {
       }).then(res => res.json())
       .then(data => {
         setConversations([...data])
-        // console.log("conversations: ", data)
+        console.log("conversations: ", data)
       })
 
     } catch (error) {

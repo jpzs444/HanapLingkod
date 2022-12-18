@@ -190,6 +190,7 @@ const BookingInformation = ({route}) => {
             if(status == '4'){
                 setBookingCanceled(true)
                 setMessageInputVisibility(true)
+                handleSendCancelMessage()
             } else {
                 setBookingCanceled(false)
                 setMessageInputVisibility(false)
@@ -409,7 +410,7 @@ const BookingInformation = ({route}) => {
                             <TText style={styles.workerName}>{bookingItem.workerId.firstname} {bookingItem.workerId.lastname}  {bookingItem.workerId.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null} </TText>
                             <View style={styles.workerRating}>
                                 <Icon name='star' size={18} color={"gold"} />
-                                <TText style={styles.workerRatingText}>{bookingItem.workerId.rating ? bookingItem.workerId.rating : "no rating"}</TText>
+                                <TText style={styles.workerRatingText}>{bookingItem.workerId.rating ? bookingItem.workerId.rating : "0"}</TText>
                             </View>
                         </View>
                         :
@@ -417,7 +418,7 @@ const BookingInformation = ({route}) => {
                             <TText style={styles.workerName}>{bookingItem.recruiterId.firstname} {bookingItem.recruiterId.lastname}  {bookingItem.recruiterId.verification ? <Icon name="check-decagram" color={ThemeDefaults.appIcon} size={20} style={{marginLeft: 5}} /> : null} </TText>
                             <View style={styles.workerRating}>
                                 <Icon name='star' size={18} color={"gold"} />
-                                <TText style={styles.workerRatingText}>{bookingItem.recruiterId.rating ? bookingItem.recruiterId.rating : "no rating"}</TText>
+                                <TText style={styles.workerRatingText}>{bookingItem.recruiterId.rating ? bookingItem.recruiterId.rating : "0"}</TText>
                             </View>
                         </View>
                     }

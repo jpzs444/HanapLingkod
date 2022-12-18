@@ -68,6 +68,9 @@ const VIewServiceRequest = ({route}) => {
     const [similarWorks, setSimilarWorks] = useState([])
     const [messageFromWorker, setMessageFromWorker] = useState('')
 
+    const [canceledMessage, setCanceledMessage] = useState("")
+    const [hasSentCancelMessage, setHasSentCancelMessage] = useState(false)
+
     const [loading, setLoading] = useState(false)
 
     const [conversation, setConversation] = useState({})
@@ -152,7 +155,7 @@ const VIewServiceRequest = ({route}) => {
             }
         }).then(res => res.json())
         .then(data => {
-            // console.log("fetching request service: ", data)
+            console.log("fetching request service: ", data)
             let item = data.recruiter.find(e => e._id === requestItem._id)
             // console.log("returned item: ", item)
         }).catch(err => console.log("error fetch sr: ",err.msg))
@@ -191,10 +194,12 @@ const VIewServiceRequest = ({route}) => {
             setViewCancelModal(false)
             setHasCancelledRequest(true)
 
+            handleSendReasonDeclination(requestID)
             // navigation.navigate("RequestsScreen")
         })
         .catch((err) => console.log("Error cancelling request: ", err))
     }
+
 
     const handleDeclineRequest = (requestID) => {
         console.log("Decline function")
@@ -261,19 +266,25 @@ const VIewServiceRequest = ({route}) => {
         setDateSelected(true)
     }
 
-    const handleSendReasonDeclination = async () => {
+    const handleSendReasonDeclination = async (requestID) => {
         try {
-            await fetch(`https://hanaplingkod.onrender.com/service-request-comment/${serviceRequestID}`, {
+            await fetch(`https://hanaplingkod.onrender.com/service-request-comment/${requestID}`, {
                 method: "POST",
                 headers: {
                     'content-type': 'application/json',
                     "Authorization": global.accessToken
                 },
                 body: JSON.stringify({
-                    comment: declinationMessage
+                    comment: canceledMessage
                 })
+            }).then(() => {
+                setCanceledMessage("")
+                setViewCancelModal(false)
+                setHasCancelledRequest(false)
+                setHasSentCancelMessage(false)
+                setHasSentMessage(true)
+                console.log("Sucess sending message to recruiter | decline reason")
             })
-            console.log("Sucess sending message to recruiter | decline reason")
         } catch (error) {
             console.log("Error sending decline message: ", error.message)
         }
@@ -518,12 +529,14 @@ const VIewServiceRequest = ({route}) => {
                 </View>
             </Modal>
 
+           
+
             {/* Modal for successfull cancelation of request */}
             <Modal
                 transparent={true}
                 animationType='fade'
-                visible={hasCancelledRequest}
-                onRequestClose={() => setHasCancelledRequest(false)}
+                visible={hasSentCancelMessage}
+                onRequestClose={() => setHasSentCancelMessage(false)}
             >
                 {/* Modal View */}
                 <View style={styles.modalDialogue}>
@@ -539,7 +552,7 @@ const VIewServiceRequest = ({route}) => {
                             <TouchableOpacity
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
-                                    setHasCancelledRequest(false)
+                                    setHasSentCancelMessage(false)
                                     setDidCancelRequest(true)
                                     // navigation.navigate("RequestsScreen")
                                 }}
@@ -681,7 +694,7 @@ const VIewServiceRequest = ({route}) => {
                                             <Text style={styles.carUserNameTxt}>{requestItem.workerId.firstname} {requestItem.workerId.lastname}</Text>
                                             <View style={styles.ratingContainer}>
                                                 <Icon name='star' size={18} color={"gold"} />
-                                                <TText style={styles.ratingText}>{requestItem.workerId.rating}</TText>
+                                                <TText style={styles.ratingText}>{requestItem.workerId.rating ? requestItem.workerId.rating : "0"}</TText>
                                             </View>
                                         </>
                                         :
@@ -689,7 +702,7 @@ const VIewServiceRequest = ({route}) => {
                                             <Text style={styles.carUserNameTxt}>{requestItem.recruiterId.firstname} {requestItem.recruiterId.lastname}</Text>
                                             <View style={styles.ratingContainer}>
                                                 <Icon name='star' size={18} color={"gold"} />
-                                                <TText style={styles.ratingText}>{requestItem.recruiterId.rating}</TText>
+                                                <TText style={styles.ratingText}>{requestItem.recruiterId.rating ? requestItem.workerId.rating : "0"}</TText>
                                                 
                                             </View>
                                         </>
@@ -800,10 +813,11 @@ const VIewServiceRequest = ({route}) => {
 
             {/* <View style={styles.cancelBtnCont}> */}
                 {
-                    global.userData.role === "recruiter" && requestItem.requestStatus == '1' && !didCancelRequest ?
+                    global.userData.role === "recruiter" && requestItem.requestStatus == '1' && !didCancelRequest && !hasCancelledRequest ?
                     <TouchableOpacity style={styles.cancelBtn}
                         onPress={() => {
-                            setViewCancelModal(true)
+                            // setViewCancelModal(true)
+                            setHasCancelledRequest(true)
                         }}
                     >
                         <TText style={styles.cancelBtnText}>Cancel Request</TText>
@@ -811,15 +825,60 @@ const VIewServiceRequest = ({route}) => {
                     : null
                 }
 
+                {
+                hasCancelledRequest ? 
+                <>
+
+                    <TText style={{fontFamily: "LexendDeca_SemiBold", fontSize: 18, marginLeft: 30, marginBottom: 15, marginTop: 40}}>Confirm Cancelation</TText>
+                    <View style={styles.messagingContainer}>
+                        <TText style={styles.messageHeader}>State the reason of cancellation</TText>
+                        <View style={styles.inputContainer}>
+                            <View style={styles.messagingTextInputContainer}>
+                                <TextInput
+                                    numberOfLines={1}
+                                    placeholder='Write a message'
+                                    autoCorrect={false}
+                                    cursorColor={ThemeDefaults.themeDarkBlue}
+                                    style={styles.messagingTextInput}
+                                    onChangeText={(val) =>  setCanceledMessage(val)}
+                                />
+                            </View>
+                        </View>
+                    </View>
+
+                    <TouchableOpacity style={styles.confirmCancelationBtn}
+                        activeOpacity={0.5}
+                        onPress={() => {
+                            // setHasSentCancelMessage(true)
+                            setViewCancelModal(true)
+                        }}
+                    >
+                        <TText style={styles.confirmCancelationText}>Confirm Cancelation</TText>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.continueBookingBtn}
+                        activeOpacity={0.5}
+                        onPress={() => {
+                            // setBookingCanceled(false)
+                            setHasCancelledRequest(false)
+                            setHasSentCancelMessage(false)
+                            setViewCancelModal(false)
+                        }}
+                    >
+                        <TText style={styles.continueBookingText}>Continue Request</TText>
+                    </TouchableOpacity>
+                </>
+                : null
+            }
+
                 {/* Display sent message by worker */}
                 {
-                    hasSentMessage || (requestItem.requestStatus == '3' && requestItem.comment) ? 
+                    hasSentMessage || requestItem.comment ? 
                     <View style={{marginHorizontal: 28, marginTop: 40,}}>
-                        <TText style={{fontSize: 14}}>{global.userData.role === "recruiter" ? "Message from Worker" : "Message to Recruiter"}</TText>
+                        <TText style={{fontSize: 14}}>Message to Recruiter</TText>
                         <View style={{flexDirection: 'row', alignItems: "center", marginTop: 15, maxWidth: '90%'}}>
                         <Image source={requestItem.workerId.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: requestItem.workerId.profilePic }} style={{width: 40, height: 40, borderRadius: 20, elevation: 3}} />
                             <View style={{backgroundColor: '#eee', justifyContent: 'flex-start', marginLeft: 15, alignItems: 'center', paddingHorizontal: 30,paddingVertical: 7, borderRadius: 8}}>
-                                <TText>{requestItem.comment ? requestItem.comment : declinationMessage}</TText>
+                                <TText>{requestItem.comment ? requestItem.comment : canceledMessage}</TText>
                             </View>
                         </View>
                     </View>
@@ -898,7 +957,7 @@ const VIewServiceRequest = ({route}) => {
                                                 <TText style={{fontSize: 16}}>{e.workerId.firstname} {e.workerId.lastname}</TText>
                                                 <View style={{flexDirection: 'row', alignItems: 'center',}}>
                                                     <Icon name="star" size={18} color={"gold"} />
-                                                    <TText style={{marginLeft: 5, fontSize: 14}}>4.7</TText>
+                                                    <TText style={{marginLeft: 5, fontSize: 14}}>{e.workerId.rating ? e.workerId.rating : "0"}</TText>
                                                 </View>
                                             </View>
                                             <TouchableOpacity style={{position: 'absolute', right: 12,top: 26, width: 120, backgroundColor: ThemeDefaults.themeLighterBlue, borderRadius: 10, elevation: 3, alignItems: 'center', justifyContent: 'center', paddingVertical: 8}}
@@ -1392,19 +1451,19 @@ const styles = StyleSheet.create({
         right: 0,
 
     },
-    messagingContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 75,
-        paddingLeft: 20,
-        paddingRight: 10,
-        paddingBottom: 10,
-        backgroundColor: '#fff',
-        borderTopColor: 'rgba(0,0,0,0.1)',
-        borderTopWidth: 1.5,
+    // messagingContainer: {
+    //     flexDirection: 'row',
+    //     alignItems: 'center',
+    //     justifyContent: 'center',
+    //     height: 75,
+    //     paddingLeft: 20,
+    //     paddingRight: 10,
+    //     paddingBottom: 10,
+    //     backgroundColor: '#fff',
+    //     borderTopColor: 'rgba(0,0,0,0.1)',
+    //     borderTopWidth: 1.5,
         
-    },
+    // },
     messagingTextInputContainer: {
         width: '85%',
         backgroundColor: '#f0f0f0',
@@ -1484,5 +1543,59 @@ const styles = StyleSheet.create({
     bookingDateTimeText: {
         marginLeft: 8,
         // color: ThemeDefaults.themeOrange
+    },
+    messagingContainer: {
+        padding: 15,
+        marginHorizontal: 30,
+        marginTop: 0,
+        borderWidth: 1.5,
+        borderColor: '#d7d7d7',
+        borderRadius: 10,
+    },
+    messageHeader: {
+        marginBottom: 10,
+        fontSize: 14
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    messagingTextInputContainer: {
+        width: '100%',
+        backgroundColor: '#f0f0f0',
+        paddingVertical: 8,
+        paddingRight: 10,
+        borderRadius: 10,
+    },
+    messagingTextInput: {
+        paddingLeft: 10,
+        // paddingHorizontal: 0,
+        fontFamily: 'LexendDeca'
+    },
+    confirmCancelationBtn: {
+        marginHorizontal: 30,
+        marginTop: 15,
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderRadius: 10,
+        backgroundColor: ThemeDefaults.themeOrange,
+    },
+    confirmCancelationText: {
+        color: ThemeDefaults.themeWhite,
+        fontFamily: 'LexendDeca_Medium'
+    },
+    continueBookingBtn: {
+        marginHorizontal: 30,
+        marginTop: 15,
+        alignItems: 'center',
+        paddingVertical: 12,
+        borderRadius: 10,
+        borderWidth: 1.5,
+        borderColor: "#d7d7d7",
+        backgroundColor: ThemeDefaults.themeWhite,
+    },
+    continueBookingText: {
+        color: '#9D9D9D',
+        fontFamily: 'LexendDeca_Medium'
     },
 })
