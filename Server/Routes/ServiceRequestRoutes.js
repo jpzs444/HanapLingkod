@@ -402,6 +402,9 @@ router
 router
   .route("/service-request-comment/:id")
   .post(authenticateToken, async function (req, res) {
+    console.log("req.params.id:" + req.params.id);
+    console.log("req.body:" + req.body);
+
     ServiceRequest.findOneAndUpdate(
       { _id: req.params.id },
       {
