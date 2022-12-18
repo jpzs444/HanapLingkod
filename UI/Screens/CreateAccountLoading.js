@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, StatusBar } from 'react-native'
+import { StyleSheet, Text, View, StatusBar, BackHandler } from 'react-native'
 import React, {useEffect} from 'react'
 import LottieView from "lottie-react-native";
 import { useIsFocused, useNavigation } from '@react-navigation/native';
@@ -14,6 +14,16 @@ const CreateAccountLoading = ({route}) => {
         isLogin, work, imagelicense, fromWelcome, forgotPassword,
         fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, workList
     } = route.params;
+
+
+    // disable system/hardware back button
+    useEffect(() => {
+        BackHandler.addEventListener("hardwareBackPress", () => {return true})
+
+        return () => {
+            BackHandler.removeEventListener("hardwareBackPress", () => {return true})
+        }
+    }, []);
 
 
     // componentdidload
@@ -34,10 +44,10 @@ const CreateAccountLoading = ({route}) => {
         role === 'worker' ? createWorkerAccount() : null
         
         // setIsLoading(false)
-        isLogin && navigation.replace("HomeStack");
-        isLogin && fromWelcome && navigation.replace("HomeStack");
+        isLogin && navigation.navigate("HomeStack");
+        isLogin && fromWelcome && navigation.navigate("HomeStack");
 
-    }, [isFocused]);
+    }, []);
 
 
     // functions
@@ -110,14 +120,16 @@ const CreateAccountLoading = ({route}) => {
         
         // ID
         // Assume "photo" is the name of the form field the server expects
-        formData.append("govId", {
-            uri: localUri,
-            name: filename,
-            type,
-        });
+        if(singleImage) {
+            formData.append("govId", {
+                uri: localUri,
+                name: filename,
+                type,
+            });
+        }
         
         // License Pic
-        if(imagelicense){
+        if(imagelicense !== ""){
             let uriLicense = imagelicense;
             let licensefilename = uriLicense.split("/").pop();
     

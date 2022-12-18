@@ -84,7 +84,7 @@ const Requests = () => {
             .then((res) => res.json())
             .then((data) => {
                 // console.log("isbanned: ", data)
-                // console.log("request list data: ", data.recruiter)
+                console.log("request list data: ", data)
                 if(data === "Forbidden: User is Banned"){
                     setRequestList([])
                     setDeclinedRequests([])
@@ -173,7 +173,7 @@ const Requests = () => {
                                                     }
                                                     <View style={styles.cardUserrating}>
                                                         <Icon name='star' size={20} color="gold" />
-                                                        <TText style={[styles.cardUserRatingTxt, styles.requestDeclinedText]}>4.7</TText>
+                                                        <TText style={[styles.cardUserRatingTxt, styles.requestDeclinedText]}>{item.workerId.rating ? item.workerId.rating : "0"}</TText>
                                                     </View>
                                                 </View>
                                                 <View style={styles.cardUserName}>
@@ -280,7 +280,7 @@ const Requests = () => {
                                     }
                                     <View style={styles.cardUserrating}>
                                         <Icon name='star' size={20} color="gold" />
-                                        <TText style={[styles.cardUserRatingTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>4.7</TText>
+                                        <TText style={[styles.cardUserRatingTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{item.workerId.rating ? item.workerId.rating : "0"}</TText>
                                     </View>
                                 </View>
                                 <View style={styles.cardUserName}>
