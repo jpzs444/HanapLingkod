@@ -29,7 +29,9 @@ const RequestForm = ({route, navigation}) => {
 
     const screenFocused = useIsFocused()
 
-    const {workerID, workID, workerInformation, selectedJob, minPrice, maxPrice, showMultiWorks, dateService, timeService, fromPostReq, selectedDay, selectedTime, fromListSpecific} = route.params;
+    const {workerID, workID, workerInformation, selectedJob, 
+        minPrice, maxPrice, showMultiWorks, dateService, timeService, 
+        fromPostReq, selectedDay, selectedTime, fromListSpecific} = route.params;
     // console.log(workerInformation)
 
     const [loading, setIsLoading] = useState(false)

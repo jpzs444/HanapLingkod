@@ -3,6 +3,7 @@ import React, {useState, useEffect} from 'react'
 import TText from './TText'
 import { useNavigation } from '@react-navigation/native'
 import { IPAddress } from '../global/global'
+import dayjs from 'dayjs'
 
 const Conversation = ({tab, conversation}) => {
 
@@ -66,7 +67,7 @@ const Conversation = ({tab, conversation}) => {
             <>
                 <View style={[styles.flexRow, {alignItems: 'center'}]}>
                     <TText style={[styles.name, {fontFamily: conversation.members.indexOf(global.userData._id) === 0 ? conversation.senderSeen ? "LexendDeca" : "LexendDeca_SemiBold" : conversation.receiverSeen ? "LexendDeca" : "LexendDeca_SemiBold"}]}>{`${otherUser?.firstname} ${otherUser?.lastname}`}</TText>
-                    <TText style={styles.date}>  &#x2022;  Nov 11</TText>
+                    <TText style={styles.date}>  &#x2022;  {dayjs(conversation.updatedAt).format("MMM DD")}</TText>
                 </View>
                 <TText style={[styles.message, {fontFamily: conversation.members.indexOf(global.userData._id) === 0 ? conversation.senderSeen ? "LexendDeca" : "LexendDeca_SemiBold" : conversation.receiverSeen ? "LexendDeca" : "LexendDeca_SemiBold"}]}>{conversation?.latestMessage}</TText>
             </>
