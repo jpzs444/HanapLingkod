@@ -168,50 +168,6 @@ router
         { pushtoken: 1, emailAddress: 1, firstname: 1, lastname: 1, _id: 0 }
       ).lean();
 
-      if (req.body.acceptMore === "false") {
-        console.log(workerId);
-
-        let deltime = new Date(result.startTime);
-        WholeStartTIme =
-          deltime.getFullYear() +
-          "-" +
-          (deltime.getMonth() + 1) +
-          "-" +
-          (deltime.getDate() - 1) +
-          "T" +
-          "16:01:00.000Z";
-        WholeEndTIme =
-          deltime.getFullYear() +
-          "-" +
-          (deltime.getMonth() + 1) +
-          "-" +
-          deltime.getDate() +
-          "T" +
-          "15:59:00.000Z";
-
-        Worker.findOneAndUpdate(
-          { _id: workerId },
-          {
-            $push: {
-              unavailableTime: {
-                title: "Cannot Accept Anymore",
-                startTime: WholeStartTIme,
-                endTime: WholeEndTIme,
-                wholeDay: 1,
-                CannotDelete: 0,
-              },
-            },
-          },
-          function (err) {
-            if (!err) {
-              console.log("Cannot accept more today");
-            } else {
-              console.log(err);
-            }
-          }
-        );
-      }
-
       // console.log(endTime);
       if (req.body.requestStatus == 2) {
         console.log("time outside function: " + endTime);
@@ -373,6 +329,50 @@ router
           workerId
         );
         res.send("Successfully Updated to status 4 ");
+      }
+
+      if (req.body.acceptMore === "false") {
+        console.log(workerId);
+
+        let deltime = new Date(result.startTime);
+        WholeStartTIme =
+          deltime.getFullYear() +
+          "-" +
+          (deltime.getMonth() + 1) +
+          "-" +
+          (deltime.getDate() - 1) +
+          "T" +
+          "16:01:00.000Z";
+        WholeEndTIme =
+          deltime.getFullYear() +
+          "-" +
+          (deltime.getMonth() + 1) +
+          "-" +
+          deltime.getDate() +
+          "T" +
+          "15:59:00.000Z";
+
+        Worker.findOneAndUpdate(
+          { _id: workerId },
+          {
+            $push: {
+              unavailableTime: {
+                title: "Cannot Accept Anymore",
+                startTime: WholeStartTIme,
+                endTime: WholeEndTIme,
+                wholeDay: 1,
+                CannotDelete: 0,
+              },
+            },
+          },
+          function (err) {
+            if (!err) {
+              console.log("Cannot accept more today");
+            } else {
+              console.log(err);
+            }
+          }
+        );
       }
     } catch (error) {
       console.log(error);
