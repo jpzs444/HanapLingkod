@@ -54,15 +54,16 @@ const TabNavigation = () => {
     //   setNotificationCount(res.length)
       console.log('notif length: ', res.length)
       let notifCount = 0
-        for(read of data){
+        for(read of res){
         if(!read.read){
             notifCount = notifCount + 1
         }
         }
         global.notificationCount = notifCount
         setNotificationCount(notifCount)
+        console.log('notif c: ', notifCount)
     }).catch((err) => {
-      console.log("error: ", err.message)
+      console.log("error tab nav: ", err.message)
     })
     handleGetNotifCount()
   }, [])
@@ -145,7 +146,7 @@ const TabNavigation = () => {
         {/* Notification Tab */}
         <Tab.Screen name="NotificationsTab" component={Notifications} 
             options={{
-                tabBarBadge: global.notificationCount,
+                // tabBarBadge: notificationCount,
                 tabBarBadgeStyle: {
                     backgroundColor: '#BB1E00',
                 },
