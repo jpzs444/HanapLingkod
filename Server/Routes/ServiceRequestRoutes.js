@@ -170,13 +170,33 @@ router
 
       if (req.body.acceptMore === "false") {
         console.log(workerId);
+
+        let deltime = new Date(result.startTime);
+        WholeStartTIme =
+          deltime.getFullYear() +
+          "-" +
+          (deltime.getMonth() + 1) +
+          "-" +
+          (deltime.getDate() - 1) +
+          "T" +
+          "16:01:00.000Z";
+        WholeEndTIme =
+          deltime.getFullYear() +
+          "-" +
+          (deltime.getMonth() + 1) +
+          "-" +
+          deltime.getDate() +
+          "T" +
+          "15:59:00.000Z";
+
         Worker.findOneAndUpdate(
           { _id: workerId },
           {
             $push: {
               unavailableTime: {
                 title: "Cannot Accept Anymore",
-                startTime: result.startTime,
+                startTime: WholeStartTIme,
+                endTime: WholeEndTIme,
                 wholeDay: 1,
                 CannotDelete: 0,
               },
