@@ -1198,6 +1198,7 @@ const styles = StyleSheet.create({
         color: ThemeDefaults.themeWhite,
         fontFamily: 'LexendDeca_SemiBold',
         fontSize: 18,
+        textAlign: 'center'
     },
 
 

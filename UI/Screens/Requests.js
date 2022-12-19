@@ -291,11 +291,11 @@ const Requests = () => {
                                 <View style={styles.cardBottom}>
                                     <View style={styles.requestDate}>
                                         <Icon name='calendar-multiselect' size={18} color={item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'} />
-                                        <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
+                                        <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black', fontSize: WIDTH*0.034}]}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
                                     </View>
                                     <View style={styles.requestDate}>
                                         <Icon name='clock-time-five-outline' size={18} color={item.requestStatus == '4' ? ThemeDefaults.themeWhite: 'black'} />
-                                        <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black'}]}>{dayjs(item.startTime).format("hh:mm A")}</TText>
+                                        <TText style={[styles.requestDateTxt, {color: item.requestStatus == '4' ? ThemeDefaults.themeWhite : 'black',  fontSize: WIDTH*0.034}]}>{dayjs(item.startTime).format("hh:mm A")}</TText>
                                     </View>
                                     <View style={styles.cardViewRequest}>
                                         <TouchableOpacity style={[styles.cardViewRequestBtn, {borderWidth: item.requestStatus != '1' ? 0 : 1.3, paddingVertical: item.requestStatus != '1' ? 4 : 2}]}
@@ -304,7 +304,7 @@ const Requests = () => {
                                                 navigation.navigate("ViewServiceRequestDrawer", {serviceRequestID: item._id, requestItem: item})
                                             }}
                                         >
-                                            <TText style={styles.cardViewRequestTxt}>View</TText>
+                                            <TText style={[styles.cardViewRequestTxt, { fontSize: WIDTH*0.03}]}>View</TText>
                                             <Icon name='arrow-right' size={18} />
                                         </TouchableOpacity>
                                     </View>

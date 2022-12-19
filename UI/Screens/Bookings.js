@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimension, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, StatusBar, Dimensions, Image, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useState, useEffect, useCallback } from 'react'
 import Appbar from '../Components/Appbar'
 import { FlashList } from '@shopify/flash-list'
@@ -16,6 +16,8 @@ dayjs.extend(timezone)
 dayjs.tz.setDefault("Asia/Manila")
 
 // import 'react-native-console-time-polyfill';
+const WIDTH = Dimensions.get('window').width
+
 
 const Bookings = () => {
 
@@ -129,12 +131,12 @@ const Bookings = () => {
                                 <TText style={[styles.subCategory, item.bookingStatus == '4' ? {color: ThemeDefaults.themeWhite}: null]}>{item.subCategory}</TText>
                                 <View style={[styles.dateTime,]}>
                                     <View style={styles.dateTimeItem}>
-                                        <Icon name="calendar-month" size={20} color={item.bookingStatus == '4' ? ThemeDefaults.themeWhite : "black"} />
-                                        <TText style={[styles.dateTimeInfo, item.bookingStatus == '4' ? {color: ThemeDefaults.themeWhite} : null]}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
+                                        <Icon name="calendar-month" size={18} color={item.bookingStatus == '4' ? ThemeDefaults.themeWhite : "black"} />
+                                        <TText style={[styles.dateTimeInfo, { fontSize: WIDTH*0.034}, item.bookingStatus == '4' ? {color: ThemeDefaults.themeWhite} : null]}>{dayjs(item.serviceDate).format("MMM DD")}</TText>
                                     </View>
                                     <View style={styles.dateTimeItem}>
-                                        <Icon name="clock-outline" size={20} color={item.bookingStatus == '4' ? ThemeDefaults.themeWhite : 'black'} />
-                                        <TText style={[styles.dateTimeInfo, item.bookingStatus == '4' ? {color: ThemeDefaults.themeWhite}: null]}>{dayjs(item.startTime).format("hh:mm A")}</TText>
+                                        <Icon name="clock-outline" size={18} color={item.bookingStatus == '4' ? ThemeDefaults.themeWhite : 'black'} />
+                                        <TText style={[styles.dateTimeInfo, { fontSize: WIDTH*0.034}, item.bookingStatus == '4' ? {color: ThemeDefaults.themeWhite}: null]}>{dayjs(item.startTime).format("hh:mm A")}</TText>
                                     </View>
                                     {
                                         (item.statusRecruiter != '3' && item.statusWorker != '3') ?
@@ -144,7 +146,7 @@ const Bookings = () => {
                                                 navigation.navigate("BookingInformationDrawer", {bookingID: item._id, bookingItem: item})
                                             }}
                                         >
-                                            <TText style={[styles.viewBtnText,]}>View</TText>
+                                            <TText style={[styles.viewBtnText, { fontSize: WIDTH*0.03}]}>View</TText>
                                             <Icon name="arrow-right" color={"black"} size={18} />
                                         </TouchableOpacity>
                                         :
@@ -253,10 +255,11 @@ const styles = StyleSheet.create({
         elevation: 3
     },
     image: {
-        width: 70,
-        height: 70, 
+        width: 60,
+        height: 60, 
         borderRadius: 15,
-        elevation: 2
+        elevation: 2,
+        alignSelf: 'center'
     },
     requestInformation: {
         paddingLeft: 15,
@@ -279,7 +282,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: 15
+        marginRight: 5
     },
     dateTimeInfo: {
         fontSize: 17,
@@ -293,7 +296,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         paddingHorizontal: 15, 
         paddingVertical: 5,
-        marginLeft: 5,
+        marginLeft: 'auto',
         elevation: 3
     },
     viewBtnText: {

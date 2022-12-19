@@ -131,9 +131,9 @@ const RequestForm = ({route, navigation}) => {
             setDateSelected(true)
         }
 
-        if(selectedTime){
+        if(selectedTime !== undefined){
             setFormatedTime(selectedTime)
-            setDisplayTime(dayjs(new Date(selectedTime)).format("hh:mm A"))
+            setDisplayTime(dayjs(selectedTime).format("hh:mm A"))
             setTimeSelected(true)
         }
         
@@ -1104,9 +1104,12 @@ const RequestForm = ({route, navigation}) => {
                                 <View style={styles.formTimeTxt}>
                                     {
                                         fromPostReq ? 
-                                        <TText style={[styles.timeTxt, fromPostReq && {color: '#888'}]}>{dayjs(timeService).format("hh:mm A").toString()}</TText>
+                                        <TText style={[styles.timeTxt, fromPostReq && {color: '#888'}]}>{timeService ? dayjs(timeService).format("hh:mm A").toString() : "Time"}</TText>
                                         :
-                                        <TText style={styles.timeTxt}>{ timeSelected ? (displayTime).format("hh:mm A") : "Time"}</TText>
+                                        <>
+                                        {/* <TText style={styles.timeTxt}>{ timeSelected ? dayjs(selectedTime).format("hh:mm A") : "Time"}</TText> */}
+                                        <TText style={styles.timeTxt}>{ timeSelected ? displayTime : timeService ? dayjs(timeService).format("hh:mm A").toString() : "Time"}</TText>
+                                        </>
 
                                     }
                                 </View>

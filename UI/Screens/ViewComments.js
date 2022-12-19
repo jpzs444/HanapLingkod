@@ -60,6 +60,8 @@ const ViewComments = ({route}) => {
                 // console.log('posts: ', data.post[0].maxPrice)
                 setCommentList(prev => [...data.comment])
                 setPostInformation([...data.post])
+                // let dd = dayjs(data.post.startTime).format("hh:mm A")
+                // console.log("data post: ", dd)
                 
                 // let io = setTimeout(setIsLoading(false), 1000)
                 // clearTimeout(io)
@@ -326,7 +328,7 @@ const ViewComments = ({route}) => {
                                                 'workerID': item.workerId._id, 
                                                 'workID': item._id, 
                                                 'workerInformation': item.workerId, 
-                                                'selectedJob': postInformation[0].postDescription, 
+                                                'selectedJob': item.postDescription, 
                                                 'minPrice': postInformation[0].minPrice, 
                                                 'maxPrice': postInformation[0].maxPrice, 
                                                 'dateService': postInformation[0].serviceDate, 
