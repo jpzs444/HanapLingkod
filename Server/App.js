@@ -372,9 +372,9 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
 
     //cloudinary upload
 
-    // const GovIdURL = await cloudinary.uploader.upload(req.files.govId[0].path, {
-    //   folder: "HanapLingkod/GovId",
-    // });
+    const GovIdURL = await cloudinary.uploader.upload(req.files.govId[0].path, {
+      folder: "HanapLingkod/GovId",
+    });
 
     //hash the password using bcrypt
     const salt = await bcrypt.genSalt(10);
@@ -398,7 +398,7 @@ app.post("/signup/worker", multipleFile, async (req, res) => {
       phoneNumber: req.body.phoneNumber,
       emailAddress: req.body.emailAddress,
       profilePic: "pic",
-      // GovId: GovIdURL.url,
+      GovId: GovIdURL.url,
       workDescription: req.body.workDescription,
       works: SubCategory,
       role: "worker",

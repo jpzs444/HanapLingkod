@@ -16,10 +16,9 @@ router.route("/schedule/:user").get(async function (req, res) {
 router.route("/add-schedule/:user").post(async function (req, res) {
   dayjs.extend(isBetween);
 
-  let startTime = dayjs(
-    req.body.startDate + " " + req.body.startTime
-  ).toISOString();
-  let endTime = dayjs(req.body.endDate + " " + req.body.endTime).toISOString();
+  let startTime = req.body.startTime;
+
+  let endTime = req.body.endTime;
 
   //coflict checker di ko ginamit isang function dahil di sya pwde hehezz
   const worker = await Worker.findOne({ _id: req.params.user });
