@@ -283,7 +283,7 @@ const BookingInformation = ({route}) => {
         })
     }
 
-
+    
 
     return (
         <ScrollView contentContainerStyle={styles.mainContainer}>
@@ -766,6 +766,7 @@ const BookingInformation = ({route}) => {
                                 onPress={() => {
                                     handleUpdateBookingStatus(4)
                                     setViewCancelModal(false)
+                                    setBookingCanceled(false)
 
                                 }}
                             >
@@ -1197,6 +1198,7 @@ const styles = StyleSheet.create({
         color: ThemeDefaults.themeWhite,
         fontFamily: 'LexendDeca_SemiBold',
         fontSize: 18,
+        textAlign: 'center'
     },
 
 

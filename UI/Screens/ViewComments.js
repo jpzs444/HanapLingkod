@@ -60,6 +60,8 @@ const ViewComments = ({route}) => {
                 // console.log('posts: ', data.post[0].maxPrice)
                 setCommentList(prev => [...data.comment])
                 setPostInformation([...data.post])
+                // let dd = dayjs(data.post.startTime).format("hh:mm A")
+                // console.log("data post: ", dd)
                 
                 // let io = setTimeout(setIsLoading(false), 1000)
                 // clearTimeout(io)
@@ -228,7 +230,7 @@ const ViewComments = ({route}) => {
                         :
                         <View style={styles.commentItem}>
                         <View style={{flex: 1, flexDirection: 'row', width:'100%'}}>
-                            <Image source={item.workerId.profilePic ? {uri: item.workerId.profilePic} : require("../assets/images/default-profile.png")} style={styles.commentUserImage} />
+                            <Image source={item.workerId.profilePic !== 'pic' ? {uri: item.workerId.profilePic} : require("../assets/images/default-profile.png")} style={styles.commentUserImage} />
                             <View style={{paddingLeft: 15, alignSelf: 'stretch', flexGrow: 1,}}>
                                 <View style={styles.nameSection}>
                                     {/* name */}
@@ -326,7 +328,7 @@ const ViewComments = ({route}) => {
                                                 'workerID': item.workerId._id, 
                                                 'workID': item._id, 
                                                 'workerInformation': item.workerId, 
-                                                'selectedJob': postInformation[0].postDescription, 
+                                                'selectedJob': item.postDescription, 
                                                 'minPrice': postInformation[0].minPrice, 
                                                 'maxPrice': postInformation[0].maxPrice, 
                                                 'dateService': postInformation[0].serviceDate, 

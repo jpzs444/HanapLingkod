@@ -113,12 +113,13 @@ const Edit_UserProfile = () => {
     useEffect(() => {
         setPrevArrayPrevWorks([])
 
-        if(global.userData.prevWorks && global.userData.role === "worker"){
+        if(global.userData.role === "worker"){
             // console.log("not null")
             global.userData.prevWorks.map(image => arrayofImages.push(image))
             setPrevArrayPrevWorks([...arrayofImages])
 
-            // arrayofImages = []
+            console.log("array of prev images: ", arrayofImages)
+            arrayofImages = []
         }
     }, [])
 
@@ -238,7 +239,7 @@ const Edit_UserProfile = () => {
         if (!result.cancelled) {
             if(!result.selected) {
                 setPastAppointmentSingleImage(result.uri)
-                setPrevArrayPrevWorks([...prevArrayPrevWorks, result.uri])
+                // setPrevArrayPrevWorks([...prevArrayPrevWorks, result.uri])
             }
             else {
                 setPastAppointmentImages([...result.selected])

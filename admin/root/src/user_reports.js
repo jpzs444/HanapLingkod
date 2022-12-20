@@ -40,7 +40,6 @@ const UserReports = () => {
                 "role": "",
             }, 
             "title": "",
-            "deleteflag": ""
         },
         {
             "user": {
@@ -50,7 +49,6 @@ const UserReports = () => {
                 "role": "",
             }, 
             "title": "",
-            "deleteflag": ""
         },
         {
             "user": {
@@ -60,7 +58,6 @@ const UserReports = () => {
                 "role": "",
             }, 
             "title": "",
-            "deleteflag": ""
         },
         {
             "user": {
@@ -70,7 +67,6 @@ const UserReports = () => {
                 "role": "",
             }, 
             "title": "",
-            "deleteflag": ""
         },
         {
             "user": {
@@ -80,7 +76,6 @@ const UserReports = () => {
                 "role": "",
             }, 
             "title": "",
-            "deleteflag": ""
         },
     ]
 
@@ -211,12 +206,12 @@ const UserReports = () => {
                                     </div>
                                     <div class="reports-th-title">Report Title</div>
                                 </th>
-                                <th class="reports-th">
+                                {/* <th class="reports-th">
                                     <div class="reports-th-img">
                                         <img src="https://img.icons8.com/material-rounded/26/null/heart-monitor.png"/>
                                     </div>
                                     <div class="reports-th-title">Status</div>
-                                </th>
+                                </th> */}
                             </tr>
                             {
                                 reports.map(item => (
@@ -224,7 +219,7 @@ const UserReports = () => {
                                         <td>{`${item.user.firstname} ${item.user.middlename.charAt(0).toUpperCase()} ${item.user.lastname}`}</td>
                                         <td>{item.user.role}</td>
                                         <td>{item.title}</td>
-                                        <td>{item.deleteflag.toString()}</td>
+                                        {/* <td>{item.deleteflag.toString()}</td> */}
                                     </tr>
                                 ))
                             }

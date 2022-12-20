@@ -97,16 +97,18 @@ const AddEventCalendar = ({route}) => {
         let timeString = dayjs(time).format("YYYY-MM-DD hh:mm:ss")
         let timetime = dayjs(time).format("HH:mm")
 
+        let dd_js = dayjs(time)
+
         if(startTimePicker){
-            setFormatedStartTime(time)
+            setFormatedStartTime(dd_js)
             setStartTimePicker(false)
             setStartTimeSelected(true)
         } else if(endTimePicker){
-            if(time < formatedStartTime){
+            if(dd_js < formatedStartTime){
                 console.log("end time lesser")
                 setEndTimeLesser(true)
             }
-            setFormatedEndTime(time)
+            setFormatedEndTime(dd_js)
             setEndTimePicker(false)
             setEndTimeSelected(true)
         }
@@ -115,15 +117,21 @@ const AddEventCalendar = ({route}) => {
     const handleDateConfirm = (date) => {
 
         let nn = dayjs(date).format("YYYY-MM-DD")
+
+        let dd_js = dayjs(date)
         setDateSelected(true)
         
-        if(nn < new Date(selectedDate)){
+        if(dd_js < new Date(selectedDate)){
             setDatePickerVisibility(false)
             setEndTimeLesser(true)
         } else {
             let da = new Date(date).toISOString()
+
+            let fTime = dayjs(formatedEndTime).format("HH:mm")
+            let fdate = dayjs(dd_js).format("YYYY-MM-DD")
+            let combine = dayjs(fdate.toString() + "" + fTime.toString())
             
-            setFormatedDate(dayjs(date).format("YYYY-MM-DD"));
+            setFormatedDate(combine);
             
             setDisplayDate(dayjs(date).format("MMM D, YYYY"));
             setDatePickerVisibility(false);
@@ -145,6 +153,18 @@ const AddEventCalendar = ({route}) => {
             :
             `https://hanaplingkod.onrender.com/add-schedule/${global.userData._id}`
 
+        let sd = dayjs(selectedDate)
+        let startD = dayjs(selectedDate).format("YYYY-MM-DD")
+        let startT = dayjs(formatedStartTime).format("HH:mm")
+
+        let start_T = dayjs(startD.toString() + "" + startT.toString())
+
+        let ed = dayjs(formatedDate)
+        let endD = dayjs(formatedDate).format("YYYY-MM-DD")
+        let endT = dayjs(formatedEndTime).format("HH:mm")
+
+        let end_T = dayjs(endD.toString() + "" + endT.toString())
+
         if(radioBtn){
             fetch(URL, {
                 method: eventItem ? "PUT" : "POST",
@@ -155,10 +175,10 @@ const AddEventCalendar = ({route}) => {
                 body: JSON.stringify({
                     inputDate: dayjs(selectedDate).format("YYYY-MM-DD"),
                     title: eventTitle ? eventTitle : 'untitled event',
-                    startDate: dayjs(selectedDate).format("YYYY-MM-DD"),
-                    endDate: dayjs(formatedDate).format("YYYY-MM-DD"),
-                    startTime: dayjs(new Date()).format("HH:mm"),
-                    endTime: dayjs(new Date()).format("HH:mm"),
+                    startDate: sd,
+                    endDate: ed,
+                    startTime: start_T,
+                    endTime: end_T,
                     wholeday: "1" // radioBtn
                 })
             }).then(res => {
@@ -176,10 +196,10 @@ const AddEventCalendar = ({route}) => {
                 body: JSON.stringify({
                     inputDate: dayjs(selectedDate).format("YYYY-MM-DD"),
                     title: eventTitle ? eventTitle : 'untitled event',
-                    startDate: dayjs(new Date(selectedDate)).format("YYYY-MM-DD"),
-                    endDate: dayjs(new Date(selectedDate)).format("YYYY-MM-DD"),
-                    startTime: dayjs(formatedStartTime).format("HH:mm"),
-                    endTime: dayjs(formatedEndTime).format("HH:mm"),
+                    startDate: sd,
+                    endDate: ed,
+                    startTime: start_T,
+                    endTime: end_T,
                     wholeday: isChecked ? "1" : "0",
                 })
             }).then(res => {

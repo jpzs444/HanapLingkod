@@ -69,6 +69,7 @@ const VIewServiceRequest = ({route}) => {
     const [messageFromWorker, setMessageFromWorker] = useState('')
 
     const [canceledMessage, setCanceledMessage] = useState("")
+    const [workerDeclineReason, setWorkerDeclineReason] = useState(false)
     const [hasSentCancelMessage, setHasSentCancelMessage] = useState(false)
 
     const [loading, setLoading] = useState(false)
@@ -219,6 +220,7 @@ const VIewServiceRequest = ({route}) => {
             setDeclineRequestModal(false)
 
             // setHasAcceptedRequest(true)
+            handleSendReasonDeclination(serviceRequestID)
 
         }).catch((err) => console.log("Error cancelling request: ", err))
     }
@@ -278,7 +280,7 @@ const VIewServiceRequest = ({route}) => {
                     comment: canceledMessage
                 })
             }).then(() => {
-                setCanceledMessage("")
+                // setCanceledMessage("")
                 setViewCancelModal(false)
                 setHasCancelledRequest(false)
                 setHasSentCancelMessage(false)
@@ -385,14 +387,18 @@ const VIewServiceRequest = ({route}) => {
                     <View style={styles.dialogueContainer}>
                         {/* Modal Message/Notice */}
                         <View style={styles.dialogueMessage}>
-                            <TText style={[styles.dialogueMessageText]}>Are you sure you want to cancel the service request? </TText>
+                            <TText style={[styles.dialogueMessageText]}>Are you sure you want to {workerDeclineReason ? "decline" : "cancel"} the service request? </TText>
                         </View>
                         {/* Modal Buttons */}
                         <View style={styles.modalDialogueBtnCont}>
                             <TouchableOpacity
                                 style={[styles.dialogueBtn, {borderRightWidth: 1.2, borderColor: ThemeDefaults.themeLighterBlue}]}
                                 onPress={() => {
-                                    cancelRequest(requestItem._id)
+                                    if(workerDeclineReason){
+                                        handleDeclineRequest(requestItem._id)
+                                    } else {
+                                        cancelRequest(requestItem._id)
+                                    }
                                     setViewCancelModal(false)
                                 }}
                             >
@@ -537,7 +543,7 @@ const VIewServiceRequest = ({route}) => {
                 animationType='fade'
                 visible={hasSentCancelMessage}
                 onRequestClose={() => setHasSentCancelMessage(false)}
-            >
+            >didCancelRequest
                 {/* Modal View */}
                 <View style={styles.modalDialogue}>
                     {/* Modal Container */}
@@ -825,56 +831,13 @@ const VIewServiceRequest = ({route}) => {
                     : null
                 }
 
-                {
-                hasCancelledRequest ? 
-                <>
-
-                    <TText style={{fontFamily: "LexendDeca_SemiBold", fontSize: 18, marginLeft: 30, marginBottom: 15, marginTop: 40}}>Confirm Cancelation</TText>
-                    <View style={styles.messagingContainer}>
-                        <TText style={styles.messageHeader}>State the reason of cancellation</TText>
-                        <View style={styles.inputContainer}>
-                            <View style={styles.messagingTextInputContainer}>
-                                <TextInput
-                                    numberOfLines={1}
-                                    placeholder='Write a message'
-                                    autoCorrect={false}
-                                    cursorColor={ThemeDefaults.themeDarkBlue}
-                                    style={styles.messagingTextInput}
-                                    onChangeText={(val) =>  setCanceledMessage(val)}
-                                />
-                            </View>
-                        </View>
-                    </View>
-
-                    <TouchableOpacity style={styles.confirmCancelationBtn}
-                        activeOpacity={0.5}
-                        onPress={() => {
-                            // setHasSentCancelMessage(true)
-                            setViewCancelModal(true)
-                        }}
-                    >
-                        <TText style={styles.confirmCancelationText}>Confirm Cancelation</TText>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.continueBookingBtn}
-                        activeOpacity={0.5}
-                        onPress={() => {
-                            // setBookingCanceled(false)
-                            setHasCancelledRequest(false)
-                            setHasSentCancelMessage(false)
-                            setViewCancelModal(false)
-                        }}
-                    >
-                        <TText style={styles.continueBookingText}>Continue Request</TText>
-                    </TouchableOpacity>
-                </>
-                : null
-            }
+                
 
                 {/* Display sent message by worker */}
                 {
-                    hasSentMessage || requestItem.comment ? 
+                    (hasSentMessage && canceledMessage) || requestItem.comment ? 
                     <View style={{marginHorizontal: 28, marginTop: 40,}}>
-                        <TText style={{fontSize: 14}}>Message to Recruiter</TText>
+                        <TText style={{fontSize: 14}}>{requestItem.requestStatus === '4' ? "Message for Cancelation" : "Message for Declination"}</TText>
                         <View style={{flexDirection: 'row', alignItems: "center", marginTop: 15, maxWidth: '90%'}}>
                         <Image source={requestItem.workerId.profilePic === 'pic' ? require('../assets/images/default-profile.png') : {uri: requestItem.workerId.profilePic }} style={{width: 40, height: 40, borderRadius: 20, elevation: 3}} />
                             <View style={{backgroundColor: '#eee', justifyContent: 'flex-start', marginLeft: 15, alignItems: 'center', paddingHorizontal: 30,paddingVertical: 7, borderRadius: 8}}>
@@ -979,9 +942,55 @@ const VIewServiceRequest = ({route}) => {
                 }
 
             {/* </View> */}
+            {
+                            hasCancelledRequest ? 
+                            <>
+
+                                <TText style={{fontFamily: "LexendDeca_SemiBold", fontSize: 18, marginLeft: 30, marginBottom: 15, marginTop: 40}}>Confirm {workerDeclineReason ? "Declination" : "Cancelation"}</TText>
+                                <View style={styles.messagingContainer}>
+                                    <TText style={styles.messageHeader}>State the reason of {workerDeclineReason ? "declination" : "cancellation"}</TText>
+                                    <View style={styles.inputContainer}>
+                                        <View style={styles.messagingTextInputContainer}>
+                                            <TextInput
+                                                numberOfLines={1}
+                                                placeholder='Write a message'
+                                                autoCorrect={false}
+                                                cursorColor={ThemeDefaults.themeDarkBlue}
+                                                style={styles.messagingTextInput}
+                                                onChangeText={(val) =>  setCanceledMessage(val)}
+                                            />
+                                        </View>
+                                    </View>
+                                </View>
+
+                                <TouchableOpacity style={styles.confirmCancelationBtn}
+                                    activeOpacity={0.5}
+                                    onPress={() => {
+                                        // setHasSentCancelMessage(true)
+                                        setViewCancelModal(true)
+                                    }}
+                                >
+                                    <TText style={styles.confirmCancelationText}>Confirm {workerDeclineReason ? "Declination" : "Cancelation"}</TText>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.continueBookingBtn}
+                                    activeOpacity={0.5}
+                                    onPress={() => {
+                                        // setBookingCanceled(false)
+                                        setHasCancelledRequest(false)
+                                        setHasSentCancelMessage(false)
+                                        setViewCancelModal(false)
+
+                                        setWorkerDeclineReason(false)
+                                    }}
+                                >
+                                    <TText style={styles.continueBookingText}>Continue Request</TText>
+                                </TouchableOpacity>
+                            </>
+                            : null
+                        }
 
             {
-                global.userData.role === "worker" && requestItem.requestStatus == '1' && !viewDeclineInput ?
+                global.userData.role === "worker" && requestItem.requestStatus == '1' && !viewDeclineInput && !hasCancelledRequest ?
                     <>
                         <View style={styles.workerAvailabilityPropmt}>
                             <View style={styles.prompTextCont}>
@@ -1027,12 +1036,16 @@ const VIewServiceRequest = ({route}) => {
                                 activeOpacity={0.5}
                                 disabled={radioBtn === null}
                                 onPress={() => {
-                                    setDeclineRequestModal(true)
+                                    setWorkerDeclineReason(true)
+                                    setHasCancelledRequest(true)
                                 }}
                             >
                                 <TText style={styles.declineBtnTxt}>Decline Request</TText>
                             </TouchableOpacity>
                         </View>
+
+
+                        
 
                         {/* Bookings Scheduled on the same date */}
                         <View>
@@ -1076,65 +1089,9 @@ const VIewServiceRequest = ({route}) => {
                 : null
             }
 
-            {/* Chat / Message textInput */}
-            {
-                global.userData.role === "worker" && viewDeclineInput && !hasSentMessage ?
-                    <View style={styles.bottomContainer}>
-                        <View style={{alignItems: 'center', marginBottom: 40, paddingHorizontal: 30,}}>
-                            <TText style={{marginBottom: 20, textAlign: 'center', color: '#c2c2c2'}}>Please provide your reason(s) for declining the request</TText>
-                            <TText style={{textAlign: 'center', color: '#c2c2c2'}}>You may select a message from the suggestions below and/or write your own message</TText>
-                        </View>
+            
 
-                        {/* Message suggestions */}
-                        <ScrollView contentContainerStyle={styles.suggestedMsgsCont}
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                        >
-                            {
-                                declinedMessageSuggestions.map(function(item, index){
-                                    return(
-                                        <TouchableOpacity key={index} style={styles.msgTextContainer}
-                                            activeOpacity={0.4}
-                                            onPress={() => {
-                                                // console.log(item)
-                                                setDeclinationMessage(item)
-                                            }}
-                                        >
-                                            <TText style={styles.msgText}>{item}</TText>
-                                        </TouchableOpacity>
-                                    )
-                                })
-                            }
-                        </ScrollView>
-
-                        {/* Message box input */}
-                        <View style={styles.messagingContainer}>
-                            <View style={styles.messagingTextInputContainer}>
-                                <TextInput 
-                                    value={declinationMessage ? declinationMessage : ""}
-                                    numberOfLines={1}
-                                    placeholder='Write a message'
-                                    autoCorrect={false}
-                                    cursorColor={ThemeDefaults.themeDarkBlue}
-                                    style={styles.messagingTextInput}
-                                    onChangeText={(val) => {setDeclinationMessage(val)}}
-                                />
-                            </View>
-                            <TouchableOpacity style={styles.sendBtnContainer}
-                                activeOpacity={0.4}
-                                onPress={() => {
-                                    // setViewDeclineInput(false)
-                                    setHasSentMessage(true)
-                                    handleSendReasonDeclination()
-                                }}
-                            >
-                                <Icon name="send" size={22} color={ThemeDefaults.themeOrange} style={styles.sendIcon} />
-                                <TText style={styles.sendBtnTxt}>Send</TText>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                : null
-            }
+            
         </ScrollView>
     </SafeAreaView>
   )

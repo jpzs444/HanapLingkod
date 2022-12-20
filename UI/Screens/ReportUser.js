@@ -142,6 +142,7 @@ const ReportUser = ({route}) => {
           numBtn={2}
           onAccept={handleSubmitReport}
           onDecline={setViewSubmitModal}
+          confirmButtonText={"Yes"}
         />
 
         <DialogueModal 

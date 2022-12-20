@@ -2,9 +2,9 @@
   "expo": {
     "name": "HanapLingkod",
     "slug": "hanaplingkod",
-    "version": "1.0.5",
+    "version": "1.0.9",
     "orientation": "portrait",
-    "icon": "./assets/logo/hanaplingkod_icon_2.png",
+    "icon": "./assets/logo/hanaplingkod_icon_5.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/logo/hanaplingkod_iconfull.png",
@@ -22,7 +22,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo/hanaplingkod_icon_2.png",
+        "foregroundImage": "./assets/logo/hanaplingkod_icon_5.png",
         "backgroundColor": "#FFFFFF"
       },
       "useNextNotificationsApi": true,
@@ -33,7 +33,7 @@
       "googleServicesFile": "./google-services.json"
     },
     "web": {
-      "favicon": "./assets/logo/hanaplingkod_icon_2.png"
+      "favicon": "./assets/logo/hanaplingkod_icon_5.png"
     },
     "plugins": [
       [
@@ -46,7 +46,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/logo/hanaplingkod_icon_2.png",
+          "icon": "./assets/logo/hanaplingkod_icon_5.png",
           "color": "#2080ff",
           "sounds": []
         }
