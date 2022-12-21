@@ -1558,13 +1558,13 @@ export default function Registration({route}) {
             {/* Next page button */}
             <View style={styles.btnContainer}>
               <TouchableOpacity
-                // disabled={
-                //   (!user.username ||
-                //   !(user.password || user.password.length < 8) ||
-                //   !user.firstname || !user.lastname || !user.age || 
-                //   !user.gender || !user.birthday || !confirmPW || 
-                //   !pwMatch || (user.age < 18 || !ageChecker()))
-                // }
+                disabled={
+                  (!user.username ||
+                  !(user.password || user.password.length < 8) ||
+                  !user.firstname || !user.lastname || !user.age || 
+                  !user.gender || !user.birthday || !confirmPW || 
+                  !pwMatch || (user.age < 18 || !ageChecker()))
+                }
                 style={[styles.nextBtn, 
                    {backgroundColor: (!user.username ||
                   !(user.password || user.password.length < 8) ||
