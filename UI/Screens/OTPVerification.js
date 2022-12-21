@@ -25,7 +25,8 @@ export default function OTPVerification(props) {
 
     const {phoneNum, role, user, singleImage, image, token,
         isLogin, work, imagelicense, fromWelcome, forgotPassword,
-        fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, workList
+        fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, 
+        workList, video
     } = route.params;
 
     // Firebase OTP Verification Code
@@ -172,7 +173,8 @@ export default function OTPVerification(props) {
                     formDataUserInfo: formDataUserInfo, 
                     formDataPastWorks: formDataPastWorks, 
                     formDataSetOfWorks: formDataSetOfWorks, 
-                    workList: workList
+                    workList: workList,
+                    video: video
                 })
                 
             })

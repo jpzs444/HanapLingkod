@@ -12,7 +12,8 @@ const CreateAccountLoading = ({route}) => {
     const {
         phoneNum, role, user, singleImage, image, token,
         isLogin, work, imagelicense, fromWelcome, forgotPassword,
-        fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, workList
+        fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, 
+        workList, video
     } = route.params;
 
 
@@ -71,6 +72,17 @@ const CreateAccountLoading = ({route}) => {
           name: filename,
           type,
         });
+
+        localUri = video
+        filename = localUri.split("/").pop()
+        match = /\.(\w+)$/.exec(filename);
+        type = match ? `video/${match[1]}` : `video`;
+
+        formData.append("Liveness", {
+            uri: localUri,
+            name: filename,
+            type
+        })
   
         formData.append("username", user.username);
         formData.append("password", user.password);
@@ -144,6 +156,17 @@ const CreateAccountLoading = ({route}) => {
                 type,
             });
         }
+
+        localUri = video
+        filename = localUri.split("/").pop()
+        match = /\.(\w+)$/.exec(filename);
+        type = match ? `video/${match[1]}` : `video`;
+
+        formData.append("Liveness", {
+            uri: localUri,
+            name: filename,
+            type
+        })
   
         formData.append("username", user.username);
         formData.append("password", user.password);

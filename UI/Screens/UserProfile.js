@@ -74,7 +74,7 @@ const UserProfile = ({route}) => {
             global.userData = user
 
             // let imageList = []
-            for(let i = 0; i < user.prevWorks.length; i++){
+            for(let i = 0; i < user.prevWorks?.length; i++){
                 imageList.push("http://" + IPAddress + ":3000/images/" + user.prevWorks[i])
             }
             // console.log("imagelist: ", imageList)

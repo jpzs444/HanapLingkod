@@ -59,9 +59,9 @@ const ViewComments = ({route}) => {
                 setIsLoading(false)
                 // console.log('posts: ', data.post[0].maxPrice)
                 setCommentList(prev => [...data.comment])
-                setPostInformation([...data.post])
+                setPostInformation({...data.post[0]})
                 // let dd = dayjs(data.post.startTime).format("hh:mm A")
-                // console.log("data post: ", dd)
+                console.log("data post: ", data.post[0])
                 
                 // let io = setTimeout(setIsLoading(false), 1000)
                 // clearTimeout(io)
@@ -323,16 +323,18 @@ const ViewComments = ({route}) => {
                                     <TouchableOpacity style={styles.requestBtn}
                                         activeOpacity={0.4}
                                         onPress={()=> {
+                                            let obj = {...item}
+                                            console.log("objk : ", obj)
                                             // console.log("postInformation: ", postInformation.maxPrice)
                                             navigation.navigate("RequestFormDrawer", {
                                                 'workerID': item.workerId._id, 
                                                 'workID': item._id, 
                                                 'workerInformation': item.workerId, 
-                                                'selectedJob': item.postDescription, 
-                                                'minPrice': postInformation[0].minPrice, 
-                                                'maxPrice': postInformation[0].maxPrice, 
-                                                'dateService': postInformation[0].serviceDate, 
-                                                'timeService': postInformation[0].startTime, 
+                                                'selectedJob': postInformation.postDescription, 
+                                                'minPrice': postInformation.minPrice, 
+                                                'maxPrice': postInformation.maxPrice, 
+                                                'dateService': postInformation.serviceDate, 
+                                                'timeService': postInformation.startTime, 
                                                 'showMultiWorks': false,
                                                 'fromPostReq': true
                                             })

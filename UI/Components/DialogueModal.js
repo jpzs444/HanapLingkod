@@ -3,7 +3,7 @@ import TText from './TText'
 import React from 'react'
 import ThemeDefaults from './ThemeDefaults'
 
-const DialogueModal = ({firstMessage, secondMessage, thirdMessage, visible, onAccept, onDecline, numBtn, warning, declineButtonText, confirmButtonText}) => {
+const DialogueModal = ({firstMessage, secondMessage, thirdMessage, visible, onAccept, onDecline, numBtn, warning, declineButtonText, confirmButtonText, showVideoTutorial}) => {
   return (
     <Modal
         transparent={true}
