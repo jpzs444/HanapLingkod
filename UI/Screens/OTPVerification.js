@@ -25,7 +25,8 @@ export default function OTPVerification(props) {
 
     const {phoneNum, role, user, singleImage, image, token,
         isLogin, work, imagelicense, fromWelcome, forgotPassword,
-        fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, workList
+        fromEditUserInfo, formDataUserInfo, formDataPastWorks, formDataSetOfWorks, 
+        workList, video
     } = route.params;
 
     // Firebase OTP Verification Code
@@ -65,8 +66,29 @@ export default function OTPVerification(props) {
     useEffect(() => {
         setotpNum({n1: "", n2: "", n3: "", n4: "", n5: "", n6: "",})
         setStartTimer(true)
-        sendVerification();
-    },[isFocused])
+
+        // sendVerification();
+
+        navigation.navigate("CreateAccountLoading", {
+            phoneNum: phoneNum, 
+            role: role, 
+            user: user, 
+            singleImage: singleImage, 
+            image: image, 
+            token: token,
+            isLogin: isLogin, 
+            work: work, 
+            imagelicense: imagelicense, 
+            fromWelcome: fromWelcome, 
+            forgotPassword: forgotPassword,
+            fromEditUserInfo: fromEditUserInfo, 
+            formDataUserInfo: formDataUserInfo, 
+            formDataPastWorks: formDataPastWorks, 
+            formDataSetOfWorks: formDataSetOfWorks, 
+            workList: workList,
+            video: video
+        })
+    },[route.phoneNum])
 
     // update resend otp code countdown timer
     useEffect(() => {
@@ -172,7 +194,8 @@ export default function OTPVerification(props) {
                     formDataUserInfo: formDataUserInfo, 
                     formDataPastWorks: formDataPastWorks, 
                     formDataSetOfWorks: formDataSetOfWorks, 
-                    workList: workList
+                    workList: workList,
+                    video: video
                 })
                 
             })

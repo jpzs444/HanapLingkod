@@ -28,6 +28,9 @@ import { IPAddress } from '../global/global';
 import OTPVerification from './OTPVerification';
 import DialogueModal from '../Components/DialogueModal';
 
+import { Camera, CameraType } from 'expo-camera'
+import { Video } from 'expo-av'
+
 const WIDTH = Dimensions.get('window').width
 const HEIGHT = Dimensions.get('window').height
 
@@ -43,7 +46,7 @@ export default function Registration({route}) {
     const [placeholderPhoneNum, setPlaceholderPhoneNum] = useState("Phone Number")
     const [user, setUser] = useState({
       username: "", password: "", firstname: "", email: "",
-      lastname: "", birthday: "", age: "", gender: "", street: "",
+      lastname: "", age: "", gender: "", street: "",
       purok: "", barangay: "", city: "Daet", province: "Camarines Norte", phonenumber: "",
       role: userType,
     })
@@ -51,6 +54,7 @@ export default function Registration({route}) {
     const [confirmPW, setConfirmPW] = useState("")
     const [pwMatch, setPWMatch] = useState(true);
 
+    
     const [next, setNext] = useState(1)
     const [nextNum, setNextNum] = useState(1)
 
@@ -62,46 +66,71 @@ export default function Registration({route}) {
         service:"",
       },
     ])
-
+    
     const [isModalVisible, setModalVisible] = useState(false)
-
+    
     const [hidePW, sethidePW] = useState(true)
-
+    
     const [isSexModalVisible, setSexModalVisible] = useState(false)
     const [isBarangayModalVisible, setBarangayModalVisible] = useState(false)
     const [isSubCatModalVisible, setSubCatModalVisible] = useState(false)
-
+    
     const [viewSubmitModal, setViewSubmitModal] = useState(false)
-
+    
     const [isUnlistedModalVisible, setUnlistedModalVisible] = useState(false)
     const [showAddUnlistedServiceModal, setshowAddUnlistedServiceModal] = useState(true)
     const [hasBlanks, sethasBlanks] = useState(false)
     
     const [showDialog, setShowDialog] = useState(false)
     const [isConfirmed, setisConfirmed] = useState(false)
-
+    
     const [formatedDate, setFormatedDate] = useState(new Date())
     const [displayDate, setDisplayDate] = useState(new Date())
     const [dateSelected, setSelected] = useState(false)
-
+    
     const [datePickerVisible, setDatePickerVisibility] = useState(false);
     
     const [isUsernameAvailable, setUsernameAvailable] = useState(false)
     const [isUsernameUnique, setIsUsernameUnique] = useState(true)
-
+    
     const [gobtnNext, setgobtnNext] = useState(true)
-
+    
     const [isPriceValid, setIsPriceValid] = useState(true)
-
+    
     const [didClickCreatAccountButton, setDidClickCreateAccountButton] = useState(false)
+    
+    
+    // video
+    const [isRecording, setIsRecording] = useState(false)
+    const [video, setVideo] = useState()
+    const [cameraPersmission, setCameraPermission] = useState()
+    const [microphonePersmission, setMicrophonePermission] = useState()
+    const [medialibraryPersmission, setMedialibraryPermission] = useState()
+    const [videoCountdown, setVideoCountdown] = useState(10)
+
+    const [showRecordVideo, setShowRecordVideo] = useState(false)
+    const [showRecordVideoModal, setShowRecordVideoModal] = useState(false)
+
+    const cameraRef = useRef()
+
+    useEffect(() => {
+      (async () => {
+        const cameraPersmission = await Camera.requestCameraPermissionsAsync()
+        const mircrophonePermission = await Camera.requestMicrophonePermissionsAsync()
+
+        setCameraPermission(cameraPersmission.status === 'granted')
+        setMicrophonePermission(mircrophonePermission.status === 'granted')
+      })()
+    }, []);
+
 
     useEffect(() => {
       setisConfirmed(false)
+      setShowRecordVideo(false)
+      setVideoCountdown(10)
+
     }, [isFocused]);
 
-    useEffect(() => {
-      ageChecker()
-    }, [user.birthday])
 
     useEffect(() => {
       user.password === confirmPW ? setPWMatch(true) : setPWMatch(false)
@@ -142,14 +171,64 @@ export default function Registration({route}) {
       }
     }, [next]);
 
+
+    const startRecording = () => {
+      setIsRecording(true)
+      console.log("recording...")
+      let options = {
+        quality: "480p",
+        maxDuration: 10,
+        mute: true,
+      }
+
+      
+      const tim = setInterval(() => setVideoCountdown(prev => prev - 1), 1000)
+      
+      if(Number(videoCountdown) === 0){
+          clearInterval(tim)
+          setIsRecording(false)
+          setShowRecordVideo(false)
+          setVideoCountdown(10)
+          cameraRef.current.stopRecording()
+      }
+
+      cameraRef.current.recordAsync(options)
+        .then((recordedVideo) => {
+          console.log("recorded video")
+          clearInterval(tim)
+          setVideo(recordedVideo)
+          setIsRecording(false)
+          setShowRecordVideo(false)
+          setVideoCountdown(10)
+        })
+      
+    }
+
+    const stopRecording = () => {
+      setIsRecording(false)
+      cameraRef.current.stopRecording()
+    }
+
     
     const ageChecker = () => {
       const yearNow = new Date().getFullYear()
       let userAge = new Date(user.birthday).getFullYear()
 
-      // console.log("age > 18: ", (yearNow - userAge) > 18)
 
-      return (yearNow - userAge) > 18
+      let age = yearNow - userAge
+
+      let today = new Date()
+      let bday = new Date(user.birthday)
+      if(today.getMonth() < bday.getMonth() || (today.getMonth() === bday.getMonth() && today.getDate() < bday.getDate())){
+        age = age - 1
+      }
+      // console.log("age: ", age)
+      // handleSetAge(age)
+
+      // console.log("age > 18: ", (yearNow - userAge) > 18)
+      // setUser((prev) => ({...prev, age: age}))
+
+      return age > 17
     }
 
 
@@ -162,7 +241,6 @@ export default function Registration({route}) {
         return true;
       }
     }
-
 
     const handleServiceAdd = () => {
       setServices([...services, {service: "", lowestPrice: "", highestPrice: ""}])
@@ -356,8 +434,22 @@ export default function Registration({route}) {
       setDisplayDate(dayjs(date).format("MMM D, YYYY"));
       setDatePickerVisibility(false);
       setSelected(true)
-
       setUser((prev) => ({...prev, birthday: dateString}))
+
+      const yearNow = new Date().getFullYear()
+      let userAge = new Date(date).getFullYear()
+
+      let age = yearNow - userAge
+
+      let today = new Date()
+      let bday = new Date(date)
+      if(today.getMonth() < bday.getMonth() || (today.getMonth() === bday.getMonth() && today.getDate() < bday.getDate())){
+        age = age - 1
+      }
+      console.log("age: ", age)
+      setUser((prev) => ({...prev, age: age}))
+
+      ageChecker()
 
       haveBlanks()
       // console.log(dateString)
@@ -519,6 +611,15 @@ export default function Registration({route}) {
                 : <TText style={styles.headerDesc}>Please fill in your personal information carefully. The details will be needed for verification.</TText>
               }
           </View>
+
+          <DialogueModal 
+            firstMessage={"Record Liveness Video"}
+            secondMessage={"This video will help administrators to verify that you are a physically present human"}
+            visible={showRecordVideoModal}
+            numBtn={1}
+            onDecline={setShowRecordVideoModal}
+            showVideoTutorial
+          />
 
           {/* Modal to confirm the creation of account */}
           {isConfirm ?
@@ -766,7 +867,7 @@ export default function Registration({route}) {
                 } */}
 
                 {
-                  isConfirmed ? navigation.navigate("OTPVerification", {phoneNum: user.phonenumber, role: user.role, user: user, work: services, singleImage: singleImage, imagelicense: imageSingleLicense}) : null
+                  isConfirmed ? navigation.navigate("OTPVerification", {phoneNum: user.phonenumber, role: user.role, user: user, work: services, singleImage: singleImage, imagelicense: imageSingleLicense, video: video.uri}) : null
                 }
 
               </View>
@@ -1022,7 +1123,7 @@ export default function Registration({route}) {
                     <TText>Attach photo(s) here</TText>
                   </TouchableOpacity>
 
-                  <TText style={{marginTop: 30, textAlign: 'center', color: 'gray', fontSize: 14}}>The uploaded government ID will only be used to validate your personal information.</TText>
+                  {/* <TText style={{marginTop: 30, textAlign: 'center', color: 'gray', fontSize: 14}}>The uploaded government ID will only be used to validate your personal information.</TText> */}
               
                 </View>
 
@@ -1061,6 +1162,55 @@ export default function Registration({route}) {
                   {image && <Image source={{uri: image}} style={{marginTop: 30, width: imageW / 4, height: imageH / 4}} />}
                 </View> */}
 
+                {/* Capture Video */}
+                {/* <View>
+                  <TText>Record a video of your face</TText>
+                </View> */}
+                <View style={{width: '100%', marginTop: 10}}>
+                  <TText style={{fontSize: 18}}>Record a video of your face:</TText>
+                  <TouchableOpacity 
+                    onPress={() => {
+                      setShowRecordVideoModal(true)
+                      setShowRecordVideo(!showRecordVideo)
+                    }}
+                    style={{alignItems: 'center', marginTop: 20, marginHorizontal: 20, backgroundColor: '#FAFAFA', paddingVertical: 30, borderRadius: 15, elevation: 2}}
+                    >
+                    <Icon name="video-plus" size={40} color={"#E7745D"} style={{marginBottom: 10}} />
+                    <TText>Record Video</TText>
+                  </TouchableOpacity>
+
+                  {
+                    showRecordVideo &&
+                      <Camera style={{backgroundColor: 'gray', width: '100%', height: 550, marginTop: 50}} ref={cameraRef} type={CameraType.front}>
+
+                        <View style={{alignItems:'center', flexDirection:"row", alignItems: 'center', justifyContent:"center", position: 'absolute', bottom: 20, width: '100%'}}>
+                          <TouchableOpacity style={{backgroundColor:'white', paddingVertical: 5, paddingHorizontal: 15, flexDirection: 'row', alignItems: 'center', borderRadius: 15}}
+                            onPress={()=> isRecording ? null : startRecording()}
+                          >
+                            <Icon name="video-box" size={17} color={isRecording ? "$434343" : ThemeDefaults.themeRed} />
+                            <TText style={{fontSize: 14, marginLeft: 5, color: '#434343'}}>{isRecording ? videoCountdown : "Start Record"}</TText>
+                          </TouchableOpacity>
+                        </View>
+                      </Camera>
+                  }
+
+                  {
+                    !showRecordVideo && video &&
+                      <View style={{width: '100%', height: 500, marginTop: 50}}>
+                        <Video 
+                          style={{width: '100%', height: 500,}}
+                          source={{uri: video.uri}}
+                          useNativeControls
+                          resizeMode='contain'
+                          isLooping
+                        />
+                      </View>
+                  }
+
+                  <TText style={{marginTop: 30, textAlign: 'center', color: 'gray', fontSize: 14}}>The uploaded government ID and the recorded video will only be used to validate your personal information.</TText>
+              
+                </View>
+
               </View>
 
               {
@@ -1072,13 +1222,13 @@ export default function Registration({route}) {
                         (!user.street ||
                         !user.purok || !user.barangay ||
                         !user.city || !user.province || !user.phonenumber
-                        || (!image || !singleImage))
+                        || (!image || !singleImage) || !video)
                       }
                       style={[styles.nextBtn, 
                         {
                           backgroundColor: (!user.street ||
                         !user.purok || !user.barangay ||
-                        !user.city || !user.province || !user.phonenumber || (!image || !singleImage)) ? "#ccc" : ThemeDefaults.themeOrange
+                        !user.city || !user.province || !user.phonenumber || (!image || !singleImage) || !video) ? "#ccc" : ThemeDefaults.themeOrange
                         }
                       ]}
                       onPress={() => { 
@@ -1135,7 +1285,7 @@ export default function Registration({route}) {
               
               {/* Checks if the user confirms the creation of his/her account  */}
               {
-                isConfirmed ? navigation.navigate("OTPVerification", {user: user, phoneNum: user.phonenumber, singleImage: singleImage, image: image, role: user.role}) : null
+                isConfirmed ? navigation.navigate("OTPVerification", {user: user, phoneNum: user.phonenumber, singleImage: singleImage, image: image, role: user.role, video: video.uri}) : null
               }
 
               {/* show confirm create account dialog */}
@@ -1344,7 +1494,7 @@ export default function Registration({route}) {
                 </View>
 
                 {/* age input */}
-                <View style={styles.ageView}>
+                {/* <View style={styles.ageView}>
                   <Icon name='counter' size={15} color={"#D0CCCB"} />
                   <TextInput style={styles.input} 
                     placeholder={"Age"}
@@ -1358,7 +1508,7 @@ export default function Registration({route}) {
                       haveBlanks()
                     } }
                     ref={ref_age} />
-                </View>
+                </View> */}
                 
                 {/* Sex Select */}
                 <TouchableOpacity style={styles.sexView} onPress={() => changeSexModalVisibility(true)}>
@@ -1398,7 +1548,7 @@ export default function Registration({route}) {
                 </TouchableOpacity>
               </View>
             {
-              ((user.age < 18 && user.age) || !ageChecker()) &&
+              ((user?.age < 18 && user.birthday) && !ageChecker()) &&
               <View style={{alignSelf: 'flex-start', marginTop: 10, }}>
                 <TText style={{fontSize: 14, color: ThemeDefaults.appIcon}}>* Users need to be at least 18 years old to use HanapLingkod</TText>
               </View>
@@ -1504,7 +1654,7 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderBottomWidth: 1,
       padding: 10,
-      width: '45%',
+      width: '57%',
     },
     bdayBtn: {
       width: '90%', 
@@ -1535,7 +1685,7 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       borderBottomWidth: 1,
-      width: '28%',
+      width: '40%',
     },
     ddText: {
       marginLeft: 15,

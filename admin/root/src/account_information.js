@@ -43,7 +43,7 @@ const AccountInformation = () => {
                 }
             }).then(res => res.json())
             .then(data => {
-                console.log(data)
+                // console.log(data)
                 setUser({...data})
                 setUserBirthday(getBirthday(data.birthday))
             })
@@ -231,6 +231,14 @@ const AccountInformation = () => {
 
                         <div class="account-main-info">
                             <img className={"govId-image"} src={user.GovId === 'pic' ? "./assets/icons/account.png" : user.GovId} />
+                        </div>
+
+                        <h3>Liveness Verification</h3>
+
+                        <div class={"account-main-info videoContainer"}>
+                            {/* <img className={"govId-image"} src={user.GovId === 'pic' ? "./assets/icons/account.png" : user.GovId} /> */}
+                            <video controls width="320" height="400" src={user.liveness} >
+                            </video>
                         </div>
 
                         {
